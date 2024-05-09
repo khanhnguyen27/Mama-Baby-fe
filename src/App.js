@@ -1,11 +1,10 @@
-import './App.css';
-import Footer from './components/Footer';
-import Header from './components/Header';
+import Navigation from './components/Navigation/Navigation';
+import Footer from './components/Footer/Footer';
 
 function App() {
   return (
     <div className="App">
-      <Header/>
+      <Navigation/>
       <div>Welcome To New Project</div>
       <Footer/>
     </div>
