@@ -206,7 +206,6 @@ const Navigation = () => {
             padding: "10px 80px",
             boxShadow: "none",
             position: "fixed",
-            // borderBottom: "1px solid #ff469e"
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -225,16 +224,6 @@ const Navigation = () => {
                 alt="logo"
               />
             </Link>
-            {/* <Typography
-              style={{
-                paddingLeft: "20px",
-                fontFamily: "Poetsen One",
-                opacity: 0.8,
-                fontSize: 35,
-              }}
-            >
-              SIGN UP
-            </Typography> */}
           </Toolbar>
         </AppBar>
       </Box>
