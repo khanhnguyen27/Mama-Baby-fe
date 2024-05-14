@@ -12,10 +12,10 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Menu, MenuItem } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import Logo from "../../assets/logo192.png";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import Logo from "../../assets/logo.png";
 import ProductSearch from "./ProductSearch";
-
+import "../../App.css";
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("accessToken") !== null
@@ -151,14 +151,103 @@ const Navigation = () => {
   //     fetchRoomData();
   //   }, []);
 
+  const { pathname } = useLocation();
+  if (pathname.includes("signin")) {
+    return (
+      <Box sx={{ flexGrow: 1, mb: 2 }}>
+        <AppBar
+          sx={{
+            backgroundColor: "white",
+            color: "black",
+            padding: "10px 80px",
+            boxShadow: "none",
+            position: "fixed",
+            // borderBottom: "1px solid #ff469e"
+          }}
+        >
+          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+            <Link
+              to="/"
+              style={{
+                display: { xs: "none", sm: "block" },
+                textDecoration: "none",
+                fontSize: "24px",
+                color: "black",
+              }}
+            >
+              <img
+                src={Logo}
+                style={{ width: "80px", height: "80px" }}
+                alt="logo"
+              />
+            </Link>
+            {/* <Typography
+              style={{
+                paddingLeft: "20px",
+                fontFamily: "Poetsen One",
+                opacity: 0.8,
+                fontSize: 35,
+              }}
+            >
+              SIGN IN
+            </Typography> */}
+          </Toolbar>
+        </AppBar>
+      </Box>
+    );
+  }
+  if (pathname.includes("signup")) {
+    return (
+      <Box sx={{ flexGrow: 1, mb: 2 }}>
+        <AppBar
+          sx={{
+            backgroundColor: "white",
+            color: "black",
+            padding: "10px 80px",
+            boxShadow: "none",
+            position: "fixed",
+            // borderBottom: "1px solid #ff469e"
+          }}
+        >
+          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+            <Link
+              to="/"
+              style={{
+                display: { xs: "none", sm: "block" },
+                textDecoration: "none",
+                fontSize: "24px",
+                color: "black",
+              }}
+            >
+              <img
+                src={Logo}
+                style={{ width: "80px", height: "80px" }}
+                alt="logo"
+              />
+            </Link>
+            {/* <Typography
+              style={{
+                paddingLeft: "20px",
+                fontFamily: "Poetsen One",
+                opacity: 0.8,
+                fontSize: 35,
+              }}
+            >
+              SIGN UP
+            </Typography> */}
+          </Toolbar>
+        </AppBar>
+      </Box>
+    );
+  }
   return (
     <>
       <Box sx={{ flexGrow: 1, margin: "0", height: "60px" }}>
         <AppBar
           position="static"
           sx={{
-            backgroundColor: "#fff4fc",
-            color: "black",
+            backgroundColor: "#ff469e",
+            color: "white",
             padding: "4px 20px",
             boxShadow: "none",
           }}
@@ -173,36 +262,58 @@ const Navigation = () => {
                 display: { xs: "none", md: "flex" },
               }}
             >
-              <Link
-                to="/introduction"
-                style={{
-                  color: "black",
-                  textDecoration: "none",
-                  transition: "color 0.2s ease-in-out",
-                }}
-              >
-                Introduction
+              <Link to="/introduction" style={{ textDecoration: "none" }}>
+                <Typography
+                  sx={{
+                    color: "white",
+                    transition: "color 0.2s ease-in-out",
+                    fontSize: 20,
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Introduction
+                </Typography>
               </Link>
               <Link
                 to="/promotion"
                 style={{
-                  color: "black",
                   textDecoration: "none",
-                  transition: "color 0.2s ease-in-out",
                 }}
               >
-                Promotion
+                <Typography
+                  sx={{
+                    color: "white",
+                    transition: "color 0.2s ease-in-out",
+                    fontSize: 20,
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Promotion
+                </Typography>
               </Link>
               <Link
                 to="/policy"
                 style={{
-                  color: "black",
-                  fontWeight: "500",
                   textDecoration: "none",
-                  transition: "color 0.2s ease-in-out",
+                  fontWeight: "500",
                 }}
               >
-                Warranty Policy
+                <Typography
+                  sx={{
+                    color: "white",
+                    transition: "color 0.2s ease-in-out",
+                    fontSize: 20,
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Warranty Policy
+                </Typography>
               </Link>
             </Box>
             <Box
@@ -247,7 +358,11 @@ const Navigation = () => {
                         to="signin"
                       >
                         <AccountCircle />
-                        <Typography style={{color: "inherit", paddingLeft: 10}}>Login</Typography>
+                        <Typography
+                          style={{ color: "inherit", paddingLeft: 10 }}
+                        >
+                          Login
+                        </Typography>
                       </IconButton>
                     )}
                   </div>
@@ -264,7 +379,7 @@ const Navigation = () => {
             backgroundColor: "white",
             color: "black",
             padding: "10px 50px",
-            boxShadow: "none"
+            boxShadow: "none",
           }}
         >
           <Toolbar>
@@ -281,7 +396,7 @@ const Navigation = () => {
               >
                 <img
                   src={Logo}
-                  style={{ width: "98px", height: "64px" }}
+                  style={{ width: "80px", height: "80px" }}
                   alt="logo"
                 />
               </Link>
@@ -303,7 +418,7 @@ const Navigation = () => {
               }}
             >
               <IconButton size="large" color="inherit">
-                <MailIcon style={{fontSize: 40}} />
+                <MailIcon style={{ fontSize: 40 }} />
               </IconButton>
               <IconButton
                 size="large"
@@ -312,7 +427,7 @@ const Navigation = () => {
                 style={{ position: "relative" }}
                 onClick={toggleCart("right", true)}
               >
-                <Cart style={{fontSize: 40}} />
+                <Cart style={{ fontSize: 40 }} />
               </IconButton>
             </Box>
           </Toolbar>
