@@ -69,7 +69,7 @@ const Navigation = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
-      setVisible(scrollY > 120);
+      setVisible(scrollY > 64);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -242,7 +242,7 @@ const Navigation = () => {
   }
   return (
     <>
-      <Box sx={{ flexGrow: 1, margin: "0", height: "60px" }}>
+      <Box sx={{ flexGrow: 1, margin: "0", height: "60px", marginBottom: "8px" }}>
         <AppBar
           position="static"
           sx={{
@@ -266,10 +266,13 @@ const Navigation = () => {
                 <Typography
                   sx={{
                     color: "white",
-                    transition: "color 0.2s ease-in-out",
+                    transition:
+                      "color 0.2s ease-in-out, scale 0.3s ease-in-out",
                     fontSize: 20,
                     "&:hover": {
                       textDecoration: "underline",
+                      scale: "1.1",
+                      fontWeight: "500",
                     },
                   }}
                 >
@@ -285,10 +288,13 @@ const Navigation = () => {
                 <Typography
                   sx={{
                     color: "white",
-                    transition: "color 0.2s ease-in-out",
+                    transition:
+                      "color 0.2s ease-in-out, scale 0.3s ease-in-out",
                     fontSize: 20,
                     "&:hover": {
                       textDecoration: "underline",
+                      scale: "1.1",
+                      fontWeight: "500",
                     },
                   }}
                 >
@@ -305,10 +311,13 @@ const Navigation = () => {
                 <Typography
                   sx={{
                     color: "white",
-                    transition: "color 0.2s ease-in-out",
+                    transition:
+                      "color 0.2s ease-in-out, scale 0.3s ease-in-out",
                     fontSize: 20,
                     "&:hover": {
                       textDecoration: "underline",
+                      scale: "1.1",
+                      fontWeight: "500",
                     },
                   }}
                 >
@@ -325,8 +334,8 @@ const Navigation = () => {
               }}
             >
               <PhoneInTalk />
-              <Typography sx={{ padding: "0 10px" }}>
-                Call us: 1900 0019
+              <Typography sx={{ padding: "5px 10px" }}>
+                Customer care: 1900 0019
               </Typography>
             </Box>
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
@@ -359,7 +368,7 @@ const Navigation = () => {
                       >
                         <AccountCircle />
                         <Typography
-                          style={{ color: "inherit", paddingLeft: 10 }}
+                          style={{ color: "inherit", paddingLeft: 10, fontWeight: "bold" }}
                         >
                           Login
                         </Typography>
@@ -418,7 +427,7 @@ const Navigation = () => {
               }}
             >
               <IconButton size="large" color="inherit">
-                <MailIcon style={{ fontSize: 40 }} />
+                <MailIcon style={{ fontSize: 30 }} />
               </IconButton>
               <IconButton
                 size="large"
@@ -427,7 +436,7 @@ const Navigation = () => {
                 style={{ position: "relative" }}
                 onClick={toggleCart("right", true)}
               >
-                <Cart style={{ fontSize: 40 }} />
+                <Cart style={{ fontSize: 30 }} />
               </IconButton>
             </Box>
           </Toolbar>
