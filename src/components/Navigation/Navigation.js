@@ -69,7 +69,7 @@ const Navigation = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
-      setVisible(scrollY > 64);
+      setVisible(scrollY > 70);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -400,7 +400,6 @@ const Navigation = () => {
                   textDecoration: "none",
                   fontSize: "24px",
                   color: "black",
-                  padding: visible ? "8px 0px" : "",
                 }}
               >
                 <img
