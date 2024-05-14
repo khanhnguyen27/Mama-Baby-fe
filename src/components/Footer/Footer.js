@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
-import Logo from "../../assets/logo192.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -26,19 +25,6 @@ const Footer = () => {
       }}
     >
       <div style={{ maxWidth: "1200px", width: "100%", textAlign: "center" }}>
-        <div style={{ marginBottom: "2rem" }}>
-          <Typography variant="h4" style={{ marginBottom: "1rem" }}>
-            FOLLOW US
-          </Typography>
-          <img
-            src={Logo}
-            alt="logo"
-            width={128}
-            height={108}
-            style={{ objectFit: "cover" }}
-          />
-        </div>
-
         <div
           style={{
             display: "grid",
@@ -49,36 +35,73 @@ const Footer = () => {
           }}
         >
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "left",
+              gap: "0.5rem",
+            }}
           >
             <Typography variant="h5" style={{ marginBottom: "0.5rem" }}>
               ABOUT US
             </Typography>
             <Link
-              to="/"
-              style={{ textDecoration: "none", color: "#F8F8F8" }}
+              to="/introduction"
+              style={{ textDecoration: "none" }}
               onClick={() => window.scrollTo(0, 0)}
             >
-              Introduction
+              <Typography
+                sx={{
+                  color: "#F8F8F8",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Introduction
+              </Typography>
+            </Link>
+            <Link
+              to="/promotion"
+              style={{ textDecoration: "none" }}
+              onClick={() => window.scrollTo(0, 0)}
+            >
+              <Typography
+                sx={{
+                  color: "#F8F8F8",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Promotion
+              </Typography>
             </Link>
             <Link
               to="/"
-              style={{ textDecoration: "none", color: "#F8F8F8" }}
+              style={{ textDecoration: "none" }}
               onClick={() => window.scrollTo(0, 0)}
             >
-              Promotion
-            </Link>
-            <Link
-              to="/"
-              style={{ textDecoration: "none", color: "#F8F8F8" }}
-              onClick={() => window.scrollTo(0, 0)}
-            >
-              Warranty Policy
+              <Typography
+                sx={{
+                  color: "#F8F8F8",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Warranty Policy
+              </Typography>
             </Link>
           </div>
 
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "left",
+              gap: "0.5rem",
+            }}
           >
             <Typography variant="h5" style={{ marginBottom: "0.5rem" }}>
               OUR OFFICE
@@ -89,8 +112,6 @@ const Footer = () => {
                 textDecoration: "none",
                 color: "#F8F8F8",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
               }}
               onClick={() => window.scrollTo(0, 0)}
             >
@@ -103,8 +124,6 @@ const Footer = () => {
                 textDecoration: "none",
                 color: "#F8F8F8",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
                 marginTop: "0.5rem",
               }}
               onClick={() => window.scrollTo(0, 0)}
@@ -115,7 +134,12 @@ const Footer = () => {
           </div>
 
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "left",
+              gap: "0.5rem",
+            }}
           >
             <Typography variant="h5" style={{ marginBottom: "0.5rem" }}>
               NEWSLETTER
