@@ -231,7 +231,9 @@ const Navigation = () => {
   }
   return (
     <>
-      <Box sx={{ flexGrow: 1, margin: "0", height: "60px", marginBottom: "8px" }}>
+      <Box
+        sx={{ flexGrow: 1, margin: "0", height: "60px", marginBottom: "8px" }}
+      >
         <AppBar
           position="static"
           sx={{
@@ -354,10 +356,24 @@ const Navigation = () => {
                         color="inherit"
                         component={Link}
                         to="signin"
+                        sx={{
+                          borderRadius: 2,
+                          height: 40,
+                          transition:
+                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                          "&:hover": {
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                          },
+                        }}
                       >
                         <AccountCircle />
                         <Typography
-                          style={{ color: "inherit", paddingLeft: 10, fontWeight: "bold" }}
+                          style={{
+                            color: "inherit",
+                            paddingLeft: 10,
+                            fontWeight: "bold",
+                          }}
                         >
                           Login
                         </Typography>
@@ -415,7 +431,21 @@ const Navigation = () => {
               }}
             >
               <IconButton size="large" color="inherit">
-                <MailIcon style={{ fontSize: 30 }} />
+                <span
+                  style={{
+                    position: "absolute",
+                    width: "2px",
+                    height: "2px",
+                    fontSize: "22px",
+                    color: "#fbafcb",
+                    top: "0",
+                    right: 10,
+                    fontWeight: 700,
+                  }}
+                >
+                  9
+                </span>
+                <MailIcon style={{ fontSize: 30, color: "#ff469e" }} />
               </IconButton>
               <IconButton
                 size="large"
@@ -423,8 +453,23 @@ const Navigation = () => {
                 aria-label="open cart"
                 style={{ position: "relative" }}
                 onClick={toggleCart("right", true)}
+                sx={{marginLeft: "8px"}}
               >
-                <Cart style={{ fontSize: 30 }} />
+                <span
+                  style={{
+                    position: "absolute",
+                    width: "2px",
+                    height: "2px",
+                    fontSize: "22px",
+                    color: "#fbafcb",
+                    top: "0",
+                    right: 10,
+                    fontWeight: 700,
+                  }}
+                >
+                  3
+                </span>
+                <Cart style={{ fontSize: 30, color: "#ff469e" }} />
               </IconButton>
             </Box>
           </Toolbar>

@@ -36,7 +36,7 @@ export default function HomePage() {
     },
     {
       name: "Random Name #3",
-      description: "Buy World!",
+      description: "Bye World!",
       image: "https://cdn1.concung.com/img/adds/2024/05/1715592332-HOME.png",
     },
   ];
@@ -118,6 +118,12 @@ export default function HomePage() {
               height="240px"
               animation="slide"
               duration={500}
+              navButtonsProps={{
+                style: {
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                },
+              }}
               sx={{
                 border: "1px solid black",
                 borderRadius: "16px",
