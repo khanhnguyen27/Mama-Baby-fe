@@ -25,15 +25,24 @@ const ProductSearch = () => {
                 <Button
                   sx={{
                     backgroundColor: "#ff469e",
+                    color: "white",
                     height: "40px",
-                    borderRadius: "7px",
+                    marginRight: "0.6px",
+                    borderRadius: "5px",
+                    boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
                     "&:hover": {
-                      backgroundColor: "#fbafcb",
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      boxShadow: "inset 1px 1px 3px rgba(255, 70, 158, 0.8)"
                     },
                   }}
                 >
                   <SearchIcon
-                    sx={{ color: "white", cursor: "pointer", fontSize: "35px" }}
+                    sx={{
+                      color: "inherit",
+                      cursor: "pointer",
+                      fontSize: "35px",
+                    }}
                   />
                 </Button>
               )}
@@ -43,14 +52,14 @@ const ProductSearch = () => {
             width: { md: "650px" },
             padding: 0,
             border: "2px solid #ff469e",
-            borderRadius: "10px",
+            borderRadius: "7px",
             backgroundColor: "white",
             "&:hover": {
               border: "2px solid #ff469e",
             },
             "&:focus": {
               boxShadow: 2,
-              backgroundColor: "#F8F8F8"
+              backgroundColor: "#F8F8F8",
             },
             "&.Mui-focused": {
               border: "2px solid #ff469e",

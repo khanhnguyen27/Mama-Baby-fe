@@ -11,7 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Typography } from "@mui/material";
 
 const SignIn = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -22,9 +22,9 @@ const SignIn = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!handleValidationEmail()) {
-      return;
-    }
+    // if (!handleValidationEmail()) {
+    //   return;
+    // }
     if (!password) {
       toast.error("The password is required");
       return;
@@ -32,18 +32,18 @@ const SignIn = () => {
     // Implement your login logic here
   };
 
-  const handleValidationEmail = () => {
-    const emailPattern = /^[\w-]+(\.[\w-]+)*@(gmail\.com)$/;
+  // const handleValidationEmail = () => {
+  //   const emailPattern = /^[\w-]+(\.[\w-]+)*@(gmail\.com)$/;
 
-    if (!email) {
-      toast.error("An email is required!");
-      return false;
-    } else if (!emailPattern.test(email)) {
-      toast.error("An invalid email format! (must be @gmail.com)");
-      return false;
-    }
-    return true;
-  };
+  //   if (!email) {
+  //     toast.error("An email is required!");
+  //     return false;
+  //   } else if (!emailPattern.test(email)) {
+  //     toast.error("An invalid email format! (must be @gmail.com)");
+  //     return false;
+  //   }
+  //   return true;
+  // };
 
   return (
     <div style={{ marginTop: "7rem" }}>
@@ -87,28 +87,46 @@ const SignIn = () => {
                     fontWeight: "700",
                   }}
                 >
-                  Email
+                  Username
                 </Typography>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="username"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   disableUnderline
                   sx={{
                     border: "1px solid #ff469e",
                     borderRadius: "30px",
                     padding: "8px 14px",
-                    fontSize: "16px",
+                    fontSize: "18px",
                     width: "100%",
                     boxSizing: "border-box",
                     backgroundColor: "#fff",
                     boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
                     transition: "box-shadow 0.3s ease",
-                    "&:focus": {
+                    "&:hover": {
+                      backgroundColor: "#F8F8F8",
+                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.24)",
+                      animation: `glow 1.5s infinite`,
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "#F8F8F8",
+                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.32)",
+                      animation: `glow 1.5s infinite`,
                       outline: "none",
-                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.3)",
+                    },
+                    "@keyframes glow": {
+                      "0%": {
+                        boxShadow: "0 0 3px #ff469e",
+                      },
+                      "50%": {
+                        boxShadow: "0 0 5px #ff469e",
+                      },
+                      "100%": {
+                        boxShadow: "0 0 3px #ff469e",
+                      },
                     },
                   }}
                 />
@@ -136,20 +154,38 @@ const SignIn = () => {
                     border: "1px solid #ff469e",
                     borderRadius: "30px",
                     padding: "5px 14px",
-                    fontSize: "16px",
+                    fontSize: "18px",
                     width: "100%",
                     boxSizing: "border-box",
                     backgroundColor: "#fff",
                     boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
                     transition: "box-shadow 0.3s ease",
-                    "&:focus": {
+                    "&:hover": {
+                      backgroundColor: "#F8F8F8",
+                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.24)",
+                      animation: `glow 1.5s infinite`,
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "#F8F8F8",
+                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.32)",
+                      animation: `glow 1.5s infinite`,
                       outline: "none",
-                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.3)",
+                    },
+                    "@keyframes glow": {
+                      "0%": {
+                        boxShadow: "0 0 3px #ff469e",
+                      },
+                      "50%": {
+                        boxShadow: "0 0 5px #ff469e",
+                      },
+                      "100%": {
+                        boxShadow: "0 0 3px #ff469e",
+                      },
                     },
                   }}
                   endAdornment={
                     <IconButton
-                      sx={{ color: "black" }}
+                      sx={{ color: "#ff469e" }}
                       onClick={togglePasswordVisibility}
                       edge="end"
                     >
@@ -158,6 +194,8 @@ const SignIn = () => {
                   }
                 />
               </FormControl>
+
+              {/* <Typography sx={{textAlign: "left", "&:hover":{color: "#ff469e", cursor: "pointer"}}}>Forgot Password?</Typography> */}
 
               <div style={{ textAlign: "center", marginTop: "1rem" }}>
                 <Button
@@ -168,8 +206,9 @@ const SignIn = () => {
                     color: "#ff469e",
                     borderRadius: "30px",
                     fontSize: 16,
+                    fontWeight: "bold",
                     width: "10vw",
-                    transition: "background-color 0.3s ease",
+                    transition: "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                     border: "1px solid #ff469e",
                     "&:hover": {
                       backgroundColor: "#ff469e",
