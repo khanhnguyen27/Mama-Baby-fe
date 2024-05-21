@@ -24,7 +24,7 @@ const Footer = () => {
         paddingBottom: "1rem",
       }}
     >
-      <div style={{ maxWidth: "1200px", width: "100%", textAlign: "center" }}>
+      <div style={{ maxWidth: "1000px", width: "100%", textAlign: "center" }}>
         <div
           style={{
             display: "grid",

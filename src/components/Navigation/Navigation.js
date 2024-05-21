@@ -5,6 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import Edit from "@mui/icons-material/Edit";
 import MailIcon from "@mui/icons-material/MailOutline";
 import PhoneInTalk from "@mui/icons-material/PhoneInTalk";
 import Cart from "@mui/icons-material/ShoppingCartOutlined";
@@ -20,6 +21,7 @@ const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("accessToken") !== null
   );
+  const username = localStorage.getItem("username");
   const [anchorElLogout, setAnchorElLogout] = useState(null);
   const [openLogoutMenu, setOpenLogoutMenu] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -49,11 +51,57 @@ const Navigation = () => {
       open={openLogoutMenu}
       onClose={handleLogoutMenuClose}
     >
-      <MenuItem onClick={handleLogout}>
-        <ListItemIcon>
+      <MenuItem
+        onClick={handleLogout}
+        sx={{
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        <ListItemIcon sx={{ color: "inherit" }}>
+          <Edit fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>
+          <Typography
+            style={{
+              color: "inherit",
+              paddingLeft: 10,
+              fontWeight: "bold",
+            }}
+          >
+            Profile
+          </Typography>
+        </ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={handleLogout}
+        sx={{
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        <ListItemIcon sx={{ color: "inherit" }}>
           <LogoutIcon fontSize="small" />
         </ListItemIcon>
-        <ListItemText primary="Logout" />
+        <ListItemText>
+          <Typography
+            style={{
+              color: "inherit",
+              paddingLeft: 10,
+              fontWeight: "bold",
+            }}
+          >
+            Logout
+          </Typography>
+        </ListItemText>
       </MenuItem>
     </Menu>
   );
@@ -157,12 +205,12 @@ const Navigation = () => {
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "#fffbfd",
             color: "black",
             padding: "10px 80px",
             boxShadow: "none",
             position: "fixed",
-            // borderBottom: "1px solid #ff469e"
+            borderBottom: "1px solid #ff469e"
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -201,11 +249,12 @@ const Navigation = () => {
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "#fffbfd",
             color: "black",
             padding: "10px 80px",
             boxShadow: "none",
             position: "fixed",
+            borderBottom: "1px solid #ff469e"
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -338,10 +387,33 @@ const Navigation = () => {
                       <>
                         <IconButton
                           size="large"
-                          onClick={handleLogoutMenuOpen}
+                          edge="end"
+                          aria-label="account of current user"
+                          aria-haspopup="true"
                           color="inherit"
+                          onClick={handleLogoutMenuOpen}
+                          sx={{
+                            borderRadius: 2,
+                            height: 40,
+                            marginRight: "1rem",
+                            transition:
+                              "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                            "&:hover": {
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                            },
+                          }}
                         >
                           <AccountCircle />
+                          <Typography
+                            style={{
+                              color: "inherit",
+                              paddingLeft: 10,
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {username}
+                          </Typography>
                         </IconButton>
                         {/* Render menu Logout */}
                         {renderLogoutMenu}
@@ -359,6 +431,7 @@ const Navigation = () => {
                         sx={{
                           borderRadius: 2,
                           height: 40,
+                          marginRight: "1rem",
                           transition:
                             "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
                           "&:hover": {
@@ -390,9 +463,9 @@ const Navigation = () => {
         <AppBar
           position={visible ? "fixed" : "static"}
           sx={{
-            backgroundColor: "white",
+            backgroundColor: "#fffbfd",
             color: "black",
-            padding: "10px 50px",
+            padding: "10px 40px",
             boxShadow: "none",
           }}
         >
@@ -453,7 +526,7 @@ const Navigation = () => {
                 aria-label="open cart"
                 style={{ position: "relative" }}
                 onClick={toggleCart("right", true)}
-                sx={{marginLeft: "8px"}}
+                sx={{ marginLeft: "8px" }}
               >
                 <span
                   style={{
