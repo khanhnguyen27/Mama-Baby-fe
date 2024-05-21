@@ -30,7 +30,14 @@ const ProductSearch = () => {
                     marginRight: "0.6px",
                     borderRadius: "5px",
                     boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                    transition: "0.2s ease-in-out",
                     "&:hover": {
+                      backgroundColor: "#ff469e",
+                      opacity: 0.8,
+                      color: "white",
+                      boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)"
+                    },
+                    "&:active": {
                       backgroundColor: "white",
                       color: "#ff469e",
                       boxShadow: "inset 1px 1px 3px rgba(255, 70, 158, 0.8)"

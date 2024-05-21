@@ -8,11 +8,14 @@ import EyeSlash from "@mui/icons-material/VisibilityOff";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { loginApi } from "../../api/UserAPI";
+import { jwtDecode } from "jwt-decode";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -25,12 +28,55 @@ const SignIn = () => {
     // if (!handleValidationEmail()) {
     //   return;
     // }
+    if (!username) {
+      toast.error("The username is required");
+      return;
+    }
     if (!password) {
       toast.error("The password is required");
       return;
     }
-    // Implement your login logic here
+    loginApi(username, password)
+      .then((response) => {
+        const accessToken = response.data;
+        const decodedAccessToken = jwtDecode(accessToken);
+        const username = decodedAccessToken.username;
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("username", username);
+        toast.success(`Login Successfully: Welcome ${username}`);
+        setTimeout(() => {
+          setLoading(true);
+        }, 2000);
+        setTimeout(() => {
+          console.log("Decoded AccessToken:", decodedAccessToken);
+          console.log("Login successful", response);
+          navigate("/");
+        }, 5000);
+      })
+      .catch((error) => {
+        console.error("Login failed", error);
+        toast.error(
+          "Login failed: Please check your username, password and try again."
+        );
+      });
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          maxWidth: "100vw",
+          backgroundColor: "#f5f5f5",
+        }}
+      >
+        <CircularProgress sx={{ color: "#ff469e" }} size={90} />
+      </Box>
+    );
+  }
 
   // const handleValidationEmail = () => {
   //   const emailPattern = /^[\w-]+(\.[\w-]+)*@(gmail\.com)$/;
@@ -53,14 +99,14 @@ const SignIn = () => {
             "url('https://png.pngtree.com/thumb_back/fh260/background/20190221/ourmid/pngtree-simple-cartoon-childlike-mother-and-baby-image_11542.jpg')",
           height: "77vh",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "contain",
+          backgroundSize: "cover",
           backgroundPosition: "center",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <div style={{ width: "40%" }}>
+        <div style={{ width: "50%" }}>
           <div
             style={{
               backgroundColor: "#fce3ef",
@@ -208,7 +254,8 @@ const SignIn = () => {
                     fontSize: 16,
                     fontWeight: "bold",
                     width: "10vw",
-                    transition: "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                    transition:
+                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                     border: "1px solid #ff469e",
                     "&:hover": {
                       backgroundColor: "#ff469e",
@@ -219,18 +266,27 @@ const SignIn = () => {
                 >
                   Login
                 </Button>
-                <div style={{ marginTop: "1rem", color: "black" }}>
-                  Don't have an account?{" "}
+                <div style={{ marginTop: "1rem", color: "black", display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                  Don't have an account?
                   <Link
                     to="/signup"
-                    style={{
-                      textDecoration: "none",
-                      color: "#ff469e",
-                      fontWeight: "bold",
-                      transition: "color 0.3s",
-                    }}
+                    onClick={() => window.scrollTo(0.0)}
+                    style={{ textDecoration: "none" }}
                   >
-                    Sign up now
+                    <Typography
+                      sx={{
+                        color: "black",
+                        fontWeight: "bold",
+                        transition: "color 0.3s ease-in-out, scale 0.3s ease-in-out",
+                        paddingLeft: "10px",
+                        "&:hover": {
+                          color: "#ff469e",
+                          scale: "1.08"
+                        },
+                      }}
+                    >
+                      Sign up now
+                    </Typography>
                   </Link>
                 </div>
               </div>
