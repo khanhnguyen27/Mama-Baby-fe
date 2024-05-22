@@ -68,10 +68,16 @@ const Promotion = () => {
               variant="contained"
               size="large"
               sx={{
-                mt: 2,
-                mb: 8,
                 backgroundColor: "white",
                 color: "#ff469e",
+                borderRadius: "10px",
+                fontSize: 16,
+                fontWeight: "bold",
+                width: "24vw",
+                mt: 8,
+                mb: 4,
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",
                 "&:hover": {
                   backgroundColor: "#ff469e",

@@ -61,16 +61,17 @@ const ProductSearch = () => {
             border: "2px solid #ff469e",
             borderRadius: "7px",
             backgroundColor: "white",
+            transition: "0.2s ease-in-out",
             "&:hover": {
               border: "2px solid #ff469e",
             },
             "&:focus": {
-              boxShadow: 2,
               backgroundColor: "#F8F8F8",
             },
             "&.Mui-focused": {
-              border: "2px solid #ff469e",
+              border: "1px solid #ff469e",
               backgroundColor: "#F8F8F8",
+              boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
               outline: "none",
             },
             "& .MuiOutlinedInput-notchedOutline": {

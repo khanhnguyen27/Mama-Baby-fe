@@ -205,12 +205,14 @@ const Navigation = () => {
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar
           sx={{
-            backgroundColor: "#fffbfd",
+            // backgroundColor: "#fffbfd",
+            backgroundColor: "white",
             color: "black",
             padding: "10px 80px",
+            height: "90px",
             boxShadow: "none",
             position: "fixed",
-            borderBottom: "1px solid #ff469e"
+            borderBottom: "1px solid #fffbfd"
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -220,12 +222,11 @@ const Navigation = () => {
                 display: { xs: "none", sm: "block" },
                 textDecoration: "none",
                 fontSize: "24px",
-                color: "black",
               }}
             >
               <img
                 src={Logo}
-                style={{ width: "80px", height: "80px" }}
+                style={{ width: "80px", height: "80px", marginTop: "8px" }}
                 alt="logo"
               />
             </Link>
@@ -249,12 +250,14 @@ const Navigation = () => {
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar
           sx={{
-            backgroundColor: "#fffbfd",
+            // backgroundColor: "#fffbfd",
+            backgroundColor: "white",
             color: "black",
             padding: "10px 80px",
             boxShadow: "none",
             position: "fixed",
-            borderBottom: "1px solid #ff469e"
+            height: "90px",
+            borderBottom: "1px solid #fffbfd"
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -264,12 +267,11 @@ const Navigation = () => {
                 display: { xs: "none", sm: "block" },
                 textDecoration: "none",
                 fontSize: "24px",
-                color: "black",
               }}
             >
               <img
                 src={Logo}
-                style={{ width: "80px", height: "80px" }}
+                style={{ width: "80px", height: "80px", marginTop: "8px" }}
                 alt="logo"
               />
             </Link>
@@ -374,7 +376,7 @@ const Navigation = () => {
               }}
             >
               <PhoneInTalk />
-              <Typography sx={{ padding: "5px 10px" }}>
+              <Typography sx={{ padding: "5px 10px", fontWeight: "600" }}>
                 Customer care: 1900 0019
               </Typography>
             </Box>
@@ -463,7 +465,7 @@ const Navigation = () => {
         <AppBar
           position={visible ? "fixed" : "static"}
           sx={{
-            backgroundColor: "#fffbfd",
+            backgroundColor: "white",
             color: "black",
             padding: "10px 40px",
             boxShadow: "none",

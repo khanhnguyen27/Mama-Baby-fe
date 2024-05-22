@@ -251,12 +251,12 @@ const SignUp = () => {
                     fontWeight: "700",
                   }}
                 >
-                  Retype Password <span style={{ color: "red" }}>*</span>
+                  Confirm Password <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <Input
                   id="retype"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Retype Password"
+                  placeholder="Confirm Password"
                   value={retype}
                   onChange={(e) => setRetype(e.target.value)}
                   disableUnderline
@@ -318,7 +318,7 @@ const SignUp = () => {
                 <Input
                   id="fullname"
                   type="fullname"
-                  placeholder="Fullname"
+                  placeholder="Full Name"
                   value={fullname}
                   onChange={(e) => setFullname(e.target.value)}
                   disableUnderline
