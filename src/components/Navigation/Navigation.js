@@ -17,6 +17,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import ProductSearch from "./ProductSearch";
 import "../../App.css";
+import { toast } from "react-toastify";
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("accessToken") !== null
@@ -28,11 +29,17 @@ const Navigation = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // localStorage.removeItem('accessToken');
-    // localStorage.removeItem('userInfo');
-    // setIsLoggedIn(false);
-    // setOpenLogoutMenu(false);
-    // navigate('/signin')
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("username");
+    toast.success("Logout Successfully");
+    setIsLoggedIn(false);
+    setOpenLogoutMenu(false);
+    setTimeout(() => {
+      location.reload(() => {
+        navigate("/");
+        console.log("Logout successfully");
+      });
+    }, 1000);
   };
 
   const handleLogoutMenuOpen = (event) => {
@@ -212,7 +219,7 @@ const Navigation = () => {
             height: "90px",
             boxShadow: "none",
             position: "fixed",
-            borderBottom: "1px solid #fffbfd"
+            borderBottom: "1px solid #fffbfd",
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -257,7 +264,7 @@ const Navigation = () => {
             boxShadow: "none",
             position: "fixed",
             height: "90px",
-            borderBottom: "1px solid #fffbfd"
+            borderBottom: "1px solid #fffbfd",
           }}
         >
           <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
