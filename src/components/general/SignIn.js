@@ -37,8 +37,8 @@ const SignIn = () => {
       return;
     }
     loginApi(username, password)
-      .then((response) => {
-        const accessToken = response.data;
+      .then((res) => {
+        const accessToken = res?.data?.data;
         const decodedAccessToken = jwtDecode(accessToken);
         const username = decodedAccessToken.username;
         localStorage.setItem("accessToken", accessToken);
@@ -49,7 +49,7 @@ const SignIn = () => {
         }, 2000);
         setTimeout(() => {
           console.log("Decoded AccessToken:", decodedAccessToken);
-          console.log("Login successful", response);
+          console.log("Login successful", res);
           navigate("/");
         }, 5000);
       })
