@@ -35,7 +35,7 @@ export default function HomePage() {
         "https://cdn1.concung.com/img/adds/2024/04/1713941097-HOME-KIDESSENTIALS.png",
     },
     {
-      name: "Random Name #3",
+      name: "Tam Name #3",
       description: "Bye World!",
       image: "https://cdn1.concung.com/img/adds/2024/05/1715592332-HOME.png",
     },
