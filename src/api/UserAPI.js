@@ -2,8 +2,8 @@ import axiosJWT from "./ConfigAxiosInterceptor";
 
 const URL_LOGIN = `http://localhost:8080/mamababy/users/login`;
 const URL_SIGNUP = `http://localhost:8080/mamababy/users/register`;
-const URL_LOGOUT = `http://localhost:8080/mamababy/users/logout`;
-
+const URL_USERDETAIL = `http://localhost:8080/mamababy/users/details`;
+// const URL_LOGOUT = `http://localhost:8080/mamababy/users/logout`;
 
 export const loginApi = (username, password) => {
   return axiosJWT.post(URL_LOGIN, {
@@ -30,10 +30,14 @@ export const signupApi = (
   });
 };
 
-export const logoutApi = (token) => {
-  return axiosJWT.post(URL_LOGOUT, null, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const profileUserApi = () => {
+  return axiosJWT.get(URL_USERDETAIL);
 };
+
+// export const logoutApi = (token) => {
+//   return axiosJWT.post(URL_LOGOUT, null, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+// };
