@@ -1,30 +1,43 @@
-import Navigation from './components/Navigation/Navigation';
-import Footer from './components/Footer/Footer';
-import { Route, Routes } from 'react-router-dom';
+import Navigation from "./components/Navigation/Navigation";
+import Footer from "./components/Footer/Footer";
+import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import SignIn from './components/general/SignIn';
-import Introduction from './components/general/Introduction';
-import Promotion from './components/general/Promotion';
-import SignUp from './components/general/SignUp';
-import HomePage from './components/general/HomePage';
-import Cart from './components/general/Cart';
-import Profile from './components/general/Profile';
+import SignIn from "./components/general/SignIn";
+import Introduction from "./components/general/Introduction";
+import Promotion from "./components/general/Promotion";
+import SignUp from "./components/general/SignUp";
+import HomePage from "./components/general/HomePage";
+import Cart from "./components/general/Cart";
+import Profile from "./components/general/Profile";
+import Products from "./components/general/Products";
+import ProtectedRoute from "./components/gateway/ProtectedRoute";
+import StaffHome from "./components/staff/StaffHome";
+import AdminHome from "./components/admin/AdminHome";
 
 function App() {
   return (
     <div className="App">
-      <Navigation/>
+      <Navigation />
       <Routes>
-        <Route path='/' element={<HomePage />} />
-        <Route path='/signin' element={<SignIn />} />
-        <Route path='/signup' element={<SignUp />} />
-        <Route path='/introduction' element={<Introduction />} />
-        <Route path='/promotion' element={<Promotion />} />
-        <Route path='/cart' element={<Cart />} />
-        <Route path='/profile' element={<Profile />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/introduction" element={<Introduction />} />
+        <Route path="/promotion" element={<Promotion />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/staff">
+            <Route index element={<StaffHome />} />
+          </Route>
+          <Route path="/admin">
+            <Route index element={<AdminHome />} />
+          </Route>
+        </Route>
       </Routes>
       <ToastContainer />
-      <Footer/>
+      <Footer />
     </div>
   );
 }
