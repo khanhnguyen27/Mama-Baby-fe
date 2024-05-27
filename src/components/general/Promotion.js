@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Breadcrumbs,
   Button,
   Container,
   Grid,
+  IconButton,
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { KeyboardCapslock } from "@mui/icons-material";
 
 const Promotion = () => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   return (
     <>
       <Container>
@@ -124,6 +135,33 @@ const Promotion = () => {
             </Typography>
           </Grid>
         </Grid>
+        {visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 25,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
+        )}
       </Container>
     </>
   );
