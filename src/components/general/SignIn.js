@@ -50,7 +50,15 @@ const SignIn = () => {
         setTimeout(() => {
           console.log("Decoded AccessToken:", decodedAccessToken);
           console.log("Login successful", res);
-          navigate("/");
+          if (decodedAccessToken?.RoleID === "STAFF") {
+            navigate("/staff");
+          } else if (decodedAccessToken?.RoleID === "ADMIN") {
+            navigate("/admin");
+          } else if (decodedAccessToken?.RoleID === "MEMBER") {
+            navigate("/");
+          } else {
+            navigate("/signin");
+          }
         }, 5000);
       })
       .catch((error) => {
@@ -266,7 +274,15 @@ const SignIn = () => {
                 >
                   Login
                 </Button>
-                <div style={{ marginTop: "1rem", color: "black", display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    color: "black",
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                  }}
+                >
                   Don't have an account?
                   <Link
                     to="/signup"
@@ -277,11 +293,12 @@ const SignIn = () => {
                       sx={{
                         color: "black",
                         fontWeight: "bold",
-                        transition: "color 0.3s ease-in-out, scale 0.3s ease-in-out",
+                        transition:
+                          "color 0.3s ease-in-out, scale 0.3s ease-in-out",
                         paddingLeft: "10px",
                         "&:hover": {
                           color: "#ff469e",
-                          scale: "1.08"
+                          scale: "1.08",
                         },
                       }}
                     >

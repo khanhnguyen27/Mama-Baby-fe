@@ -30,9 +30,11 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/staff">
             <Route index element={<StaffHome />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="/admin">
             <Route index element={<AdminHome />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
       </Routes>
