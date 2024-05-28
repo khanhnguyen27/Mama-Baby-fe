@@ -13,6 +13,7 @@ import Products from "./components/general/Products";
 import ProtectedRoute from "./components/gateway/ProtectedRoute";
 import StaffHome from "./components/staff/StaffHome";
 import AdminHome from "./components/admin/AdminHome";
+import Stores from "./components/general/Stores";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/introduction" element={<Introduction />} />
         <Route path="/promotion" element={<Promotion />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/stores" element={<Stores />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
         <Route element={<ProtectedRoute />}>
