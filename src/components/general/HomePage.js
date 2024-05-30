@@ -143,7 +143,7 @@ export default function HomePage() {
   useEffect(() => {
     fetchData();
   }, []);
-  
+
   useEffect(() => {
     allStoreApi()
       .then((res) => setStore(res?.data?.data))
@@ -444,7 +444,7 @@ export default function HomePage() {
                         },
                       }}
                     >
-                      <ListItemText>• {item.nameStore}</ListItemText>
+                      <ListItemText>• {item.name_store}</ListItemText>
                     </ListItem>
                   ))}
                 </AccordionDetails>
@@ -629,6 +629,18 @@ export default function HomePage() {
                     >
                       <Box
                         key={index}
+                        onClick={() => (
+                          navigate(
+                            `/products/${item.name
+                              .toLowerCase()
+                              .replace(/\s/g, "-")}`,
+                            { state: { productId: item.id } }
+                          ),
+                          window.scrollTo({
+                            top: 0,
+                            behavior: "smooth",
+                          })
+                        )}
                         sx={{
                           minWidth: 180,
                           padding: 2,
@@ -832,7 +844,7 @@ export default function HomePage() {
                         variant="subtitle1"
                         sx={{ fontWeight: "bold", marginTop: "0.5rem" }}
                       >
-                        {item.nameStore}
+                        {item.name_store}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "gray" }}>
                         {item.address}

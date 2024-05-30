@@ -6,23 +6,59 @@ import {
   Button,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ProductSearch = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleSearch = (e) => {
+    if (e.type === 'keydown' && e.key !== 'Enter') {
+      return;
+    }
+    setLoading(true);
+    if (searchTerm.length < 2){
+      setLoading(false);
+      return;
+    }
+    if (searchTerm === "") {
+      setTimeout(() => {
+        setLoading(false);
+        navigate("/products");
+      }, 2000);
+      return;
+    }
+    setTimeout(() => {
+      setLoading(false);
+      navigate(
+        {
+          pathname: "/products",
+          search: `?keyword=${searchTerm}`,
+        },
+        { state: { keyword: searchTerm } }
+      );
+    }, 2000);
+    setSearchTerm(null);
+  };
+
   return (
     <div style={{ position: "relative", zIndex: "99" }}>
       <TextField
         placeholder="What do you want to buy?"
         size="small"
         variant="outlined"
-        // value={searchTerm}
+        value={searchTerm}
+        onKeyDown={handleSearch}
+        onChange={(e) => setSearchTerm(e.target.value)}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               {loading ? (
-                <CircularProgress color="inherit" size={24} />
+                <CircularProgress sx={{ color: "#ff469e", mx: 2 }} size={24} />
               ) : (
                 <Button
+                  onClick={handleSearch}
                   sx={{
                     backgroundColor: "#ff469e",
                     color: "white",
@@ -35,12 +71,12 @@ const ProductSearch = () => {
                       backgroundColor: "#ff469e",
                       opacity: 0.8,
                       color: "white",
-                      boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)"
+                      boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
                     },
                     "&:active": {
                       backgroundColor: "white",
                       color: "#ff469e",
-                      boxShadow: "inset 1px 1px 3px rgba(255, 70, 158, 0.8)"
+                      boxShadow: "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
                     },
                   }}
                 >
@@ -77,15 +113,6 @@ const ProductSearch = () => {
             "& .MuiOutlinedInput-notchedOutline": {
               border: "none",
             },
-            // "& .MuiOutlinedInput-input": {
-            //   "&:hover": {
-            //     outline: "none",
-            //   },
-            //   "&:focus": {
-            //     outline: "none",
-            //     boxShadow: "none",
-            //   },
-            // },
           },
         }}
       />

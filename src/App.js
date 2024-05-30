@@ -15,6 +15,7 @@ import StaffHome from "./components/staff/StaffHome";
 import AdminHome from "./components/admin/AdminHome";
 import Stores from "./components/general/Stores";
 import StoreDetail from "./components/general/StoreDetail";
+import ProductDetails from "./components/general/ProductDetails";
 function App() {
   return (
     <div className="App">
@@ -26,10 +27,10 @@ function App() {
         <Route path="/introduction" element={<Introduction />} />
         <Route path="/promotion" element={<Promotion />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/:productId" element={<ProductDetails />} />
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail/>} />
         <Route path={'${match.url}/stores'} Component={<StoreDetail/>} />
-        <Route path="/cart" element={<Cart />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
         <Route element={<ProtectedRoute />}>
