@@ -18,7 +18,7 @@ const ProductSearch = () => {
       return;
     }
     setLoading(true);
-    if (searchTerm.length < 2){
+    if (searchTerm.length > 0 && searchTerm.length < 2){
       setLoading(false);
       return;
     }

@@ -21,6 +21,9 @@ import {
 } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
 import { KeyboardCapslock } from "@mui/icons-material";
+import { addToCart } from "../../redux/CartSlice";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function ProductDetails() {
   const { state } = useLocation();
@@ -33,6 +36,8 @@ export default function ProductDetails() {
   const [categoryMap, setCategoryMap] = useState({});
   const [product, setProduct] = useState(null);
   const productId = state?.productId;
+  const [quantity, setQuantity] = useState(1);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,6 +112,26 @@ export default function ProductDetails() {
       </Box>
     );
   }
+
+  const handleAddToCart = () => {
+    if(quantity == 0){
+      toast.warn(`No item's quantity selected`);
+      return;
+    }
+    toast.info(`${product.name} x ${quantity} was added to cart`, {
+      position: "top-right",
+    });
+    dispatch(
+      addToCart({
+        product: {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+        },
+        quantity: quantity,
+      })
+    );
+  };
 
   return (
     <div
@@ -296,10 +321,10 @@ export default function ProductDetails() {
                     <Typography>{product.description}</Typography>
                   </div>
                   <Box
-                    style={{
+                    sx={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "16px",
+                      justifyContent: "space-between",
                     }}
                   >
                     <ButtonGroup
@@ -309,10 +334,37 @@ export default function ProductDetails() {
                     >
                       <Button
                         variant="contained"
+                        disabled={quantity < 1}
+                        onClick={() =>
+                          setQuantity((prevQuantity) =>
+                            Math.max(0, prevQuantity - 10)
+                          )
+                        }
                         sx={{
                           backgroundColor: "white",
                           color: "#ff469e",
                           borderRadius: "20px",
+                          fontSize: "1.25rem",
+                          fontWeight: "bold",
+                          boxShadow: "none",
+                          transition:
+                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                          },
+                        }}
+                      >
+                        --
+                      </Button>
+                      <Button
+                        variant="contained"
+                        disabled={quantity < 1}
+                        onClick={() => setQuantity(quantity - 1)}
+                        sx={{
+                          backgroundColor: "white",
+                          color: "#ff469e",
                           fontSize: "1.25rem",
                           fontWeight: "bold",
                           boxShadow: "none",
@@ -338,10 +390,37 @@ export default function ProductDetails() {
                           color: "black",
                         }}
                       >
-                        1
+                        {quantity}
                       </Button>
                       <Button
                         variant="contained"
+                        disabled={quantity > 99}
+                        onClick={() => setQuantity(quantity + 1)}
+                        sx={{
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          fontSize: "1.25rem",
+                          fontWeight: "bold",
+                          boxShadow: "none",
+                          transition:
+                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                          },
+                        }}
+                      >
+                        +
+                      </Button>
+                      <Button
+                        variant="contained"
+                        disabled={quantity > 99}
+                        onClick={() =>
+                          setQuantity((prevQuantity) =>
+                            Math.min(100, prevQuantity + 10)
+                          )
+                        }
                         sx={{
                           backgroundColor: "white",
                           color: "#ff469e",
@@ -358,10 +437,12 @@ export default function ProductDetails() {
                           },
                         }}
                       >
-                        +
+                        ++
                       </Button>
                     </ButtonGroup>
                     <Button
+                      variant="contained"
+                      onClick={handleAddToCart}
                       sx={{
                         backgroundColor: "white",
                         color: "#ff469e",
@@ -377,7 +458,6 @@ export default function ProductDetails() {
                           color: "white",
                         },
                       }}
-                      variant="contained"
                     >
                       <Cart sx={{ mr: 1 }} />
                       ADD TO CART
