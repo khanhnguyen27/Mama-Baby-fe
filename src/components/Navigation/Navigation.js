@@ -16,8 +16,10 @@ import { Menu, MenuItem } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import ProductSearch from "./ProductSearch";
-import "../../App.css";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { selectCartAmount } from "../../redux/CartSlice";
+
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("accessToken") !== null
@@ -27,6 +29,8 @@ const Navigation = () => {
   const [openLogoutMenu, setOpenLogoutMenu] = useState(false);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  const cartAmount = useSelector(selectCartAmount)
+
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -769,7 +773,7 @@ const Navigation = () => {
                     fontWeight: 700,
                   }}
                 >
-                  3
+                  {cartAmount}
                 </span>
                 <Cart style={{ fontSize: 30, color: "#ff469e" }} />
               </IconButton>

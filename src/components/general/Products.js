@@ -7,6 +7,7 @@ import { allProductApi } from "../../api/ProductAPI";
 import {
   Box,
   Breadcrumbs,
+  Button,
   Card,
   CardActions,
   CardContent,
@@ -22,7 +23,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { KeyboardCapslock } from "@mui/icons-material";
+import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
 
 export default function Products() {
@@ -119,6 +120,13 @@ export default function Products() {
     setLoading(true);
   };
 
+  const handleClearFilters = () => {
+    setAgeFilter(null);
+    setBrandFilter(null);
+    setCategoryFilter(null);
+    setLoading(true);
+  };
+
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
     return (
@@ -172,12 +180,53 @@ export default function Products() {
               }}
             >
               <Box sx={{ marginBottom: "2rem" }}>
-                <Typography
-                  variant="h6"
-                  sx={{ marginBottom: "1rem", fontWeight: "bold" }}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "2rem",
+                  }}
                 >
-                  Filters
-                </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: "bold",
+                      flexGrow: 1,
+                      textAlign: "center",
+                    }}
+                  >
+                    Filters
+                  </Typography>
+                  {(ageFilter || brandFilter || categoryFilter) && (
+                    <Button
+                      variant="contained"
+                      onClick={handleClearFilters}
+                      sx={{
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        padding: "0.25rem 0.5rem",
+                        minWidth: "auto",
+                        borderRadius: "0.5rem",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                        boxShadow: "none",
+                        mr: 2,
+                        transition:
+                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                        border: "1px solid white",
+                        "&:hover": {
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          border: "1px solid #ff469e",
+                          boxShadow: "none",
+                        },
+                      }}
+                    >
+                      <ClearAll />
+                    </Button>
+                  )}
+                </div>
                 <Grid container spacing={2}>
                   {/* Age Filter */}
                   <Grid item xs={12}>
@@ -383,12 +432,53 @@ export default function Products() {
             }}
           >
             <Box sx={{ marginBottom: "2rem" }}>
-              <Typography
-                variant="h6"
-                sx={{ marginBottom: "1rem", fontWeight: "bold" }}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "2rem",
+                }}
               >
-                Filters
-              </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "bold",
+                    flexGrow: 1,
+                    textAlign: "center",
+                  }}
+                >
+                  Filters
+                </Typography>
+                {(ageFilter || brandFilter || categoryFilter) && (
+                  <Button
+                    variant="contained"
+                    onClick={handleClearFilters}
+                    sx={{
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                      padding: "0.25rem 0.5rem",
+                      minWidth: "auto",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.75rem",
+                      fontWeight: "bold",
+                      boxShadow: "none",
+                      mr: 2,
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid white",
+                      "&:hover": {
+                        backgroundColor: "white",
+                        color: "#ff469e",
+                        border: "1px solid #ff469e",
+                        boxShadow: "none",
+                      },
+                    }}
+                  >
+                    <ClearAll />
+                  </Button>
+                )}
+              </div>
               <Grid container spacing={2}>
                 {/* Age Filter */}
                 <Grid item xs={12}>

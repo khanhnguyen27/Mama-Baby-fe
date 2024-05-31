@@ -656,10 +656,18 @@ export default function HomePage() {
                           },
                         }}
                       >
-                        <img
-                          src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                          style={{ width: "64px", height: "64px" }}
-                        />
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <img
+                            src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                            style={{ width: "64px", height: "64px" }}
+                          />
+                        </div>
                         <Typography
                           variant="subtitle1"
                           sx={{
