@@ -16,6 +16,7 @@ import AdminHome from "./components/admin/AdminHome";
 import Stores from "./components/general/Stores";
 import StoreDetail from "./components/general/StoreDetail";
 import ProductDetails from "./components/general/ProductDetails";
+import Article from "./components/general/Article";
 function App() {
   return (
     <div className="App">
@@ -30,9 +31,11 @@ function App() {
         <Route path="/products/:productId" element={<ProductDetails />} />
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail/>} />
-        <Route path={'${match.url}/stores'} Component={<StoreDetail/>} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/article" element={<Article />} />
+        <Route path="/stores/:article_id" element={<Article/>} />
+        
         <Route element={<ProtectedRoute />}>
           <Route path="/staff">
             <Route index element={<StaffHome />} />

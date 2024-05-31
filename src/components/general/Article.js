@@ -4,13 +4,13 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { allProductApi } from "../../api/ProductAPI";
-import { allVoucherApi } from "../../api/VoucherAPI";
 import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import { allStoreApi } from "../../api/StoreAPI";
+import { allArticleApi } from "../../api/ArticleAPI";
 import {
-  Breadcrumbs,
+  Box,
   Card,
   CardContent,
   CardMedia,
@@ -25,27 +25,23 @@ import {
   Typography,
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
-import { allArticleApi } from "../../api/ArticleAPI";
 export default function HomePage() {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [age, setAge] = useState([]);
+  const [ageMap, setAgeMap] = useState({});
   const [brand, setBrand] = useState([]);
+  const [brandMap, setBrandMap] = useState({});
   const [category, setCategory] = useState([]);
+  const [categoryMap, setCategoryMap] = useState({});
   const [product, setProduct] = useState([]);
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [store, setStore] = useState([]);
-  const [voucher, setVoucher] = useState([]);
-  const { state } = useLocation();
-  
-
-  const handleChange = (panel) => (e, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
-
+  const [storeMap, setStoreMap] = useState([]);
+  const [article, setArticle] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,17 +54,16 @@ export default function HomePage() {
 
   var items = [
     {
-
-      image: "https://cdn1.concung.com/img/adds/2024/04/1714120748-HOME.png",
-    },
-    {
-
       image:
-        "https://cdn1.concung.com/img/adds/2024/04/1713941097-HOME-KIDESSENTIALS.png",
+        "https://cdn1.concung.com/storage/data/2021/thong-tin-bo-ich/2024/04/Vitamin-D3K2-the-he-moi---chia-khoa-giup-tre-tang-chieu-cao-toi-da-anh-1-1678954379-524-width1082height443.webp",
     },
     {
-
-      image: "https://cdn1.concung.com/img/adds/2024/05/1715592332-HOME.png",
+      image:
+        "https://cdn1.concung.com/storage/data/2021/thong-tin-bo-ich/2021/11/moony-natural-gia-bao-nhieu.webp",
+    },
+    {
+      image:
+        "https://cdn1.concung.com/storage/data/2021/thong-tin-bo-ich/2024/03/friso%20pro.webp",
     },
   ];
 
@@ -87,174 +82,144 @@ export default function HomePage() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, storeRes, voucherRes] = await Promise.all([
-        allAgeApi(),
-        allBrandApi(),
-        allCategorytApi(),
-    
-        allProductApi({
-          age_id: ageFilter,
-          brand_id: brandFilter,
-          category_id: categoryFilter,
-        }),
-        allStoreApi(),
-        allArticleApi(),
-        allVoucherApi(),
-      ]);
+      const [ageRes, brandRes, categoryRes, productRes, storeRes, articleRes] =
+        await Promise.all([
+          allAgeApi(),
+          allBrandApi(),
+          allCategorytApi(),
+          allProductApi({
+            age_id: ageFilter,
+            brand_id: brandFilter,
+            category_id: categoryFilter,
+          }),
+          allStoreApi(),
+          allArticleApi(),
+        ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
       const storeData = storeRes?.data?.data || [];
-      const voucherData = voucherRes?.data?.data || [];
+      const articleData = articleRes?.data?.data || [];
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
       setProduct(productData);
       setStore(storeData);
-      setVoucher(voucherData);
-      console.log();
+      setArticle(articleData);
+      console.log(store);
 
+      const ageMap = ageData.reduce((x, item) => {
+        x[item.id] = item.rangeAge;
+        return x;
+      }, {});
+      setAgeMap(ageMap);
+
+      const brandMap = brandData.reduce((x, item) => {
+        x[item.id] = item.name;
+        return x;
+      }, {});
+      setBrandMap(brandMap);
+
+      const categoryMap = categoryData.reduce((x, item) => {
+        x[item.id] = item.name;
+        return x;
+      }, {});
+      setCategoryMap(categoryMap);
     } catch (err) {
       console.log(err);
     }
   };
-
   useEffect(() => {
-    setTimeout(() => {
-
-    }, 1000);
-    
+    setTimeout(() => {}, 1000);
+    console.log(fetchData());
     fetchData();
   }, [ageFilter, brandFilter, categoryFilter]);
-  
+
   return (
     <Container>
-      
-
       {/* Banner */}
       <Grid item xs={9}>
-      <Carousel
-      
-              PrevIcon={<ArrowLeft />}
-              NextIcon={<ArrowRight />}
-              height="240px"
-              animation="slide"
-              duration={500}
-              navButtonsProps={{
-                style: {
-                  backgroundColor: "white",
-                  color: "#ff469e",
-                },
-              }}
-              sx={{
-                border: "1px solid black",
-                borderRadius: "16px",
-                position: "relative",
-                marginBottom: "2rem",
-              }}
-              indicatorContainerProps={{
-                style: {
-                  position: "absolute",
-                  bottom: "10px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  zIndex: 99,
-                },
-              }}
-              indicatorIconButtonProps={{
-                style: {
-                  color: "whitesmoke",
-                  backgroundColor: "black",
-                  borderRadius: "50%",
-                  width: "12px",
-                  height: "12px",
-                  margin: "0 4px",
-                },
-              }}
-              activeIndicatorIconButtonProps={{
-                style: {
-                  color: "#ff469e",
-                  backgroundColor: "#ff469e",
-                  border: "1px solid white",
-                  borderRadius: "8px",
-                  width: "28px",
-                  height: "12px",
-                },
-              }}
-            >
-              {items.map((item, i) => (
-                
-                <div
-                onClick={() => navigate("/article")}
-                  key={i}
-                  style={{
-                    padding: 20,
-                    textAlign: "center",
-                    backgroundImage: `url(${item.image})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    height: "200px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    color: "white",
-                    borderRadius: "16px",
-                  }}
-                >
-
-                </div>
-              ))}
-              
-              
-            </Carousel>
-            
-            </Grid>
-            <Container sx={{ my: 4 }}>
-          <Breadcrumbs separator=">" sx={{ color: "black" }}>
-            <Link
-              to="/"
+        <Carousel
+          PrevIcon={<ArrowLeft />}
+          NextIcon={<ArrowRight />}
+          height="240px"
+          animation="slide"
+          duration={500}
+          navButtonsProps={{
+            style: {
+              backgroundColor: "white",
+              color: "#ff469e",
+            },
+          }}
+          sx={{
+            border: "1px solid black",
+            borderRadius: "16px",
+            position: "relative",
+            marginBottom: "2rem",
+          }}
+          indicatorContainerProps={{
+            style: {
+              position: "absolute",
+              bottom: "10px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 99,
+            },
+          }}
+          indicatorIconButtonProps={{
+            style: {
+              color: "whitesmoke",
+              backgroundColor: "black",
+              borderRadius: "50%",
+              width: "12px",
+              height: "12px",
+              margin: "0 4px",
+            },
+          }}
+          activeIndicatorIconButtonProps={{
+            style: {
+              color: "#ff469e",
+              backgroundColor: "#ff469e",
+              border: "1px solid white",
+              borderRadius: "8px",
+              width: "28px",
+              height: "12px",
+            },
+          }}
+        >
+          {items?.map((item, i) => (
+            <div
+              key={i}
               style={{
-                textDecoration: "none",
+                padding: 20,
+                textAlign: "center",
+                backgroundImage: `url(${item.image})`,
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                height: "200px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                color: "white",
+                borderRadius: "16px",
               }}
-            >
-              <Typography
-                sx={{
-                  color: "black",
-                  transition: "color 0.2s ease-in-out",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-              >
-                Home
-              </Typography>
-            </Link>
-            <Typography
-              sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
-            >
-              Store List
-            </Typography>
-          </Breadcrumbs>
-        </Container>
-            
-      <Grid container spacing={3}>
-        {/* Filters */}
-              
+            ></div>
+          ))}
+        </Carousel>
+      </Grid>
 
+      <Grid container spacing={3}>
         {/* List Store */}
-        
         <Grid item xs={12} md={15}>
           <Grid container spacing={3}>
-            {store?.stores?.map((item, index) => (
+            {article?.map((item, index) => (
               <Grid item xs={40} sm={5} md={4} key={index}>
                 <Tooltip
-                  title={item.name_store}
+                  title={item.content}
                   enterDelay={500}
                   leaveDelay={50}
                   placement="right-start"
@@ -273,14 +238,8 @@ export default function HomePage() {
                     },
                   }}
                 >
-                  
                   <Card
-                  onClick={() => 
-                    navigate(`/stores/${item.id
-
-                    }`,
-                    {state: { storeId: item.id } }
-            )}
+                    //   onClick={() => navigate(`/stores/${item.id}`)}
                     sx={{
                       minWidth: 180,
                       padding: 2,
@@ -298,12 +257,11 @@ export default function HomePage() {
                     <CardMedia
                       component="img"
                       image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                      alt={item.name_store}
+                      alt={item.content}
                       sx={{ width: "64px", height: "64px", margin: "auto" }}
                     />
                     <CardContent>
                       <Typography
-                      
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
@@ -320,21 +278,18 @@ export default function HomePage() {
                           maxHeight: "2.4rem",
                         }}
                       >
-                        {item.name_store.length > 40
-                          ? `${item.name_store.substring(0, 40)}...`
-                          : item.name_store}
-                           
+                        {item.content.length > 40
+                          ? `${item.content.substring(0, 40)}...`
+                          : item.content}
                       </Typography>
                       <Typography
                         variant="body2"
                         sx={{ color: "gray", textAlign: "left" }}
                       >
-                        ${item.address}
+                        ${item.header}
                       </Typography>
-
                     </CardContent>
                   </Card>
-                  
                 </Tooltip>
               </Grid>
             ))}
@@ -370,5 +325,4 @@ export default function HomePage() {
       )}
     </Container>
   );
-
 }

@@ -21,7 +21,7 @@ import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import KeyboardCapslock from "@mui/icons-material/KeyboardCapslock";
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
@@ -820,6 +820,17 @@ export default function HomePage() {
                   {store?.stores?.map((item, index) => (
                     <Box
                       key={index}
+                      onClick={() => (
+                        navigate(`/stores/${item.id }`,
+                        
+                        {state: { storeId: item.id } }
+                        
+                ),
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                })
+              )}
                       sx={{
                         minWidth: 120,
                         padding: 2,

@@ -7,3 +7,6 @@ export const allStoreApi = (params) => {
     params: params,
   });
 };
+export const storeByIdApi = (storeId) => {
+  return axiosJWT.get(`http://localhost:8080/mamababy/stores/${storeId}`);
+};
