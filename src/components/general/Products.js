@@ -12,9 +12,9 @@ import {
   CardActions,
   CardContent,
   CardMedia,
-  Checkbox,
   CircularProgress,
   Container,
+  Divider,
   Fade,
   FormControlLabel,
   Grid,
@@ -25,6 +25,9 @@ import {
 } from "@mui/material";
 import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
+import { addToCart } from "../../redux/CartSlice";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function Products() {
   const navigate = useNavigate();
@@ -41,6 +44,8 @@ export default function Products() {
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const dispatch = useDispatch();
   const keyword = state?.keyword;
 
   useEffect(() => {
@@ -125,6 +130,23 @@ export default function Products() {
     setBrandFilter(null);
     setCategoryFilter(null);
     setLoading(true);
+  };
+
+  const handleAddToCart = (index) => {
+    toast.info(`${product.products[index].name} x 1 was added to cart`, {
+      position: "top-right",
+    });
+    dispatch(
+      addToCart({
+        product: {
+          id: product.products[index].id,
+          name: product.products[index].name,
+          price: product.products[index].price,
+          store_id: product.products[index].store_id
+        },
+        quantity: 1,
+      })
+    );
   };
 
   if (loading) {
@@ -668,26 +690,39 @@ export default function Products() {
                             boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                           },
                         }}
-                        onClick={() =>
-                          navigate(
-                            `/products/${item.name
-                              .toLowerCase()
-                              .replace(/\s/g, "-")}`,
-                            { state: { productId: item.id } },
-                            window.scrollTo({
-                              top: 0,
-                              behavior: "smooth",
-                            })
-                          )
-                        }
                       >
                         <CardMedia
                           component="img"
                           image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
+                          onClick={() =>
+                            navigate(
+                              `/products/${item.name
+                                .toLowerCase()
+                                .replace(/\s/g, "-")}`,
+                              { state: { productId: item.id } },
+                              window.scrollTo({
+                                top: 0,
+                                behavior: "smooth",
+                              })
+                            )
+                          }
                         />
-                        <CardContent>
+                        <CardContent
+                          onClick={() =>
+                            navigate(
+                              `/products/${item.name
+                                .toLowerCase()
+                                .replace(/\s/g, "-")}`,
+                              { state: { productId: item.id } },
+                              window.scrollTo({
+                                top: 0,
+                                behavior: "smooth",
+                              })
+                            )
+                          }
+                        >
                           <Typography
                             variant="subtitle1"
                             sx={{
@@ -722,8 +757,9 @@ export default function Products() {
                             {brandMap[item.brand_id]}
                           </Typography>
                         </CardContent>
+                        <Divider />
                         <CardActions sx={{ justifyContent: "right" }}>
-                          <IconButton>
+                          <IconButton onClick={() => handleAddToCart(index)}>
                             <Cart />
                           </IconButton>
                         </CardActions>

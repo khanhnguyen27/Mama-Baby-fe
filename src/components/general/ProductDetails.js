@@ -114,10 +114,10 @@ export default function ProductDetails() {
   }
 
   const handleAddToCart = () => {
-    if(quantity == 0){
-      toast.warn(`No item's quantity selected`);
-      return;
-    }
+    // if(quantity == 0){
+    //   toast.warn(`No item's quantity selected`);
+    //   return;
+    // }
     toast.info(`${product.name} x ${quantity} was added to cart`, {
       position: "top-right",
     });
@@ -127,6 +127,7 @@ export default function ProductDetails() {
           id: product.id,
           name: product.name,
           price: product.price,
+          store_id: product.store_id
         },
         quantity: quantity,
       })
@@ -334,10 +335,10 @@ export default function ProductDetails() {
                     >
                       <Button
                         variant="contained"
-                        disabled={quantity < 1}
+                        disabled={quantity <= 1}
                         onClick={() =>
                           setQuantity((prevQuantity) =>
-                            Math.max(0, prevQuantity - 10)
+                            Math.max(1, prevQuantity - 10)
                           )
                         }
                         sx={{
@@ -360,7 +361,7 @@ export default function ProductDetails() {
                       </Button>
                       <Button
                         variant="contained"
-                        disabled={quantity < 1}
+                        disabled={quantity <= 1}
                         onClick={() => setQuantity(quantity - 1)}
                         sx={{
                           backgroundColor: "white",
@@ -394,7 +395,7 @@ export default function ProductDetails() {
                       </Button>
                       <Button
                         variant="contained"
-                        disabled={quantity > 99}
+                        disabled={quantity >= 99}
                         onClick={() => setQuantity(quantity + 1)}
                         sx={{
                           backgroundColor: "white",
@@ -415,10 +416,10 @@ export default function ProductDetails() {
                       </Button>
                       <Button
                         variant="contained"
-                        disabled={quantity > 99}
+                        disabled={quantity >= 99}
                         onClick={() =>
                           setQuantity((prevQuantity) =>
-                            Math.min(100, prevQuantity + 10)
+                            Math.min(99, prevQuantity + 10)
                           )
                         }
                         sx={{

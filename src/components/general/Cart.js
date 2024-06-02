@@ -3,16 +3,12 @@ import {
   Box,
   Typography,
   Button,
-  List,
-  ListItem,
-  ListItemText,
   IconButton,
   Grid,
   Card,
   CardHeader,
   CardContent,
   Divider,
-  TextField,
   Container,
   CardMedia,
   ButtonGroup,
@@ -58,20 +54,28 @@ export default function Cart() {
       }}
     >
       <Container sx={{ my: 4 }}>
-        <Card>
+        <Card sx={{ backgroundColor: "#fff4fc" }}>
           <CardHeader title="Your Cart" />
           <CardContent>
             <Grid container spacing={2}>
               <Grid item xs={12} md={8}>
                 {!isEmptyCart ? (
                   cartItems.products.map((item) => (
-                    <Card sx={{ display: "flex" }}>
+                    <Card
+                      sx={{
+                        display: "flex",
+                        px: 1,
+                        border: "1px solid #ff469e",
+                        borderRadius: "20px",
+                        my: 2,
+                      }}
+                    >
                       <CardMedia
-                        sx={{ width: "128px", height: "128px" }}
+                        sx={{ width: "120px", height: "120px", pt: 1.5 }}
                         image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                         title="Product Image"
                       />
-                      <CardContent sx={{ flex: "1 0 auto" }}>
+                      <CardContent sx={{ flex: "1 0 auto", ml: 2 }}>
                         <Box
                           sx={{
                             display: "flex",
@@ -85,7 +89,7 @@ export default function Cart() {
                             sx={{
                               "&:hover": {
                                 cursor: "pointer",
-                                color: "darkblue",
+                                color: "#ff469e",
                               },
                             }}
                             onClick={() =>
@@ -111,7 +115,20 @@ export default function Cart() {
                               )
                             )}
                           >
-                            <Close fontSize="large" sx={{ color: "#ff469e" }} />
+                            <Close
+                              fontSize="large"
+                              sx={{
+                                color: "#ff469e",
+                                borderRadius: "30px",
+                                boxShadow: "none",
+                                transition: "0.3s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  transform: "scale(1.1)",
+                                },
+                              }}
+                            />
                           </IconButton>
                         </Box>
                         <Box
@@ -277,7 +294,15 @@ export default function Cart() {
                     </Card>
                   ))
                 ) : (
-                  <Typography variant="body2" sx={{ color: "#ff469e", fontSize: "1.25rem", textAlign: "center", my: 3}}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#ff469e",
+                      fontSize: "1.25rem",
+                      textAlign: "center",
+                      my: 3,
+                    }}
+                  >
                     Your cart is currently empty.
                   </Typography>
                 )}
@@ -289,11 +314,18 @@ export default function Cart() {
                     justifyContent: "space-between",
                     alignItems: "center",
                     px: 2,
-                    py: 3
+                    py: 3,
                   }}
                 >
                   <Typography variant="h6">Total:</Typography>
-                  <Typography variant="h6" sx={{ color: "black", fontSize: "1.25rem", fontWeight: "bold"}}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: "black",
+                      fontSize: "1.25rem",
+                      fontWeight: "bold",
+                    }}
+                  >
                     ${totalCost}
                   </Typography>
                 </Box>
@@ -317,7 +349,6 @@ export default function Cart() {
                       border: "1px solid white",
                     },
                   }}
-                
                 >
                   Checkout
                 </Button>
@@ -345,32 +376,31 @@ export default function Cart() {
                   Continue shopping
                 </Button>
                 {!isEmptyCart && (
-                <Button
-                  onClick={() => (
-                    dispatch(clearCart()), toast.info("Removed all items")
-                  )}
-                  variant="contained"
-                  fullWidth
-                  sx={{
-                    backgroundColor: "white",
-                    color: "#ff469e",
-                    borderRadius: "10px",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    my: 1,
-                    transition:
-                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                    border: "1px solid #ff469e",
-                    "&:hover": {
-                      backgroundColor: "#ff469e",
-                      color: "white",
-                      border: "1px solid white",
-                    },
-                  }}
-                
-                >
-                  Clear All
-                </Button>
+                  <Button
+                    onClick={() => (
+                      dispatch(clearCart()), toast.info("Removed all items")
+                    )}
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "10px",
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      my: 1,
+                      transition:
+                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        border: "1px solid white",
+                      },
+                    }}
+                  >
+                    Clear All
+                  </Button>
                 )}
               </Grid>
             </Grid>
