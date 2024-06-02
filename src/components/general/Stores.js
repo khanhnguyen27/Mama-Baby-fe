@@ -131,9 +131,10 @@ export default function HomePage() {
   }, [ageFilter, brandFilter, categoryFilter]);
   
   return (
+    <div
+    style={{backgroundColor:"#f5f7fd"}}
+    >
     <Container>
-      
-
       {/* Banner */}
       <Grid item xs={9}>
       <Carousel
@@ -369,6 +370,7 @@ export default function HomePage() {
         </IconButton>
       )}
     </Container>
+    </div>
   );
 
 }

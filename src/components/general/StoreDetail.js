@@ -8,7 +8,7 @@ import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import { allVoucherApi } from "../../api/VoucherAPI";
-import {storeByIdApi,allStoreApi } from "../../api/StoreAPI";
+import {storeByIdApi, productByStoreIdApi } from "../../api/StoreAPI";
 import {
   Box,
   Breadcrumbs,
@@ -76,7 +76,7 @@ export default function Products() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, voucherRes,storeRes] = await Promise.all([
+      const [ageRes, brandRes, categoryRes, productRes, voucherRes, storeRes, productByStoreIdRes] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
@@ -85,9 +85,11 @@ export default function Products() {
           age_id: ageFilter,
           brand_id: brandFilter,
           category_id: categoryFilter,
+          store_id: storeId,
         }),
         allVoucherApi(),
         storeByIdApi(storeId),
+
 
       ]);
 
@@ -164,6 +166,7 @@ export default function Products() {
   const scrollRight2 = () => {
     listRef2.current.scrollBy({ left: 340, behavior: "smooth" });
   };
+  console.log(product);
 
   return (
     <div
@@ -664,6 +667,7 @@ export default function Products() {
                       }}
                     >
                       <Card
+                      
                         sx={{
                           minWidth: 180,
                           padding: 2,
