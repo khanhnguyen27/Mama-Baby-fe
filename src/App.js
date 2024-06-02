@@ -30,17 +30,18 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
         <Route path="/stores" element={<Stores />} />
-        <Route path="/stores/:store_id" element={<StoreDetail/>} />
+        <Route path="/stores/:store_id" element={<StoreDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/article" element={<Article />} />
-        <Route path="/stores/:article_id" element={<Article/>} />
-        
-        <Route element={<ProtectedRoute />}>
+        <Route path="/stores/:article_id" element={<Article />} />
+        <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
           <Route path="/staff">
             <Route index element={<StaffHome />} />
             <Route path="profile" element={<Profile />} />
           </Route>
+        </Route>
+        <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
           <Route path="/admin">
             <Route index element={<AdminHome />} />
             <Route path="profile" element={<Profile />} />
