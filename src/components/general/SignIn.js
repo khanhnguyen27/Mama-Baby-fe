@@ -29,11 +29,11 @@ const SignIn = () => {
     //   return;
     // }
     if (!username) {
-      toast.error("The username is required");
+      toast.error("The username is required", { autoClose: 2500 });
       return;
     }
     if (!password) {
-      toast.error("The password is required");
+      toast.error("The password is required", { autoClose: 2500 });
       return;
     }
     loginApi(username, password)
@@ -43,7 +43,7 @@ const SignIn = () => {
         const username = decodedAccessToken.username;
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("username", username);
-        toast.success(`Login Successfully: Welcome ${username}`);
+        toast.success(`Login Successfully: Welcome ${username}`, { autoClose: 2500 });
         setTimeout(() => {
           setLoading(true);
         }, 2000);
@@ -64,7 +64,7 @@ const SignIn = () => {
       .catch((error) => {
         console.error("Login failed", error);
         toast.error(
-          "Login failed: Please check your username, password and try again."
+          "Login failed: Please check your username, password and try again." , { autoClose: 2500 }
         );
       });
   };

@@ -97,6 +97,10 @@ export default function ProductDetails() {
     }, 1000);
   }, [productId]);
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+  };
+
   if (!product) {
     return (
       <Box
@@ -120,6 +124,7 @@ export default function ProductDetails() {
     // }
     toast.info(`${product.name} x ${quantity} was added to cart`, {
       position: "top-right",
+      autoClose: 2500 
     });
     dispatch(
       addToCart({
@@ -287,7 +292,7 @@ export default function ProductDetails() {
                       {product.name}
                     </Typography>
                     <Typography variant="h6" style={{ textAlign: "left" }}>
-                      ${product.price}
+                      {formatCurrency(product.price)}
                     </Typography>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem" }}>

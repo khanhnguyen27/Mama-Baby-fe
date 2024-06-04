@@ -92,16 +92,23 @@ export default function HomePage() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, storeRes, articleRes, voucherRes] =
-        await Promise.all([
-          allAgeApi(),
-          allBrandApi(),
-          allCategorytApi(),
-          allProductApi(),
-          allStoreApi(),
-          allArticleApi(),
-          allVoucherApi(),
-        ]);
+      const [
+        ageRes,
+        brandRes,
+        categoryRes,
+        productRes,
+        storeRes,
+        articleRes,
+        voucherRes,
+      ] = await Promise.all([
+        allAgeApi(),
+        allBrandApi(),
+        allCategorytApi(),
+        allProductApi(),
+        allStoreApi(),
+        allArticleApi(),
+        allVoucherApi(),
+      ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
@@ -154,11 +161,9 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    allStoreApi()
-      .then((res) => setStore(res?.data?.data))
-      .catch((err) => console.log(err));
-  }, []);
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
 
   const listRef = useRef(null);
   const listRef2 = useRef(null);
@@ -561,7 +566,6 @@ export default function HomePage() {
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   Voucher
                 </Typography>
-
               </Box>
               {/* List */}
               <Box
@@ -605,13 +609,11 @@ export default function HomePage() {
                     scrollBehavior: "smooth",
                     width: "100%",
                     padding: "0px 8px",
-                    
                   }}
                 >
                   {voucher?.map((item, index) => (
                     <Box
                       key={index}
-
                       sx={{
                         minWidth: 120,
                         padding: 2,
@@ -625,7 +627,6 @@ export default function HomePage() {
                         "&:hover": {
                           border: "1px solid #ff496e",
                           boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                          
                         },
                       }}
                     >
@@ -682,7 +683,7 @@ export default function HomePage() {
                 borderRadius: "16px",
                 background: "white",
                 padding: "1rem",
-                marginTop:"3rem",
+                marginTop: "3rem",
               }}
             >
               {/* Header */}
@@ -692,7 +693,6 @@ export default function HomePage() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   marginBottom: "1rem",
-                  
                 }}
               >
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
@@ -705,7 +705,13 @@ export default function HomePage() {
                     cursor: "pointer",
                     fontWeight: "bold",
                   }}
-                  onClick={() => navigate("/products")}
+                  onClick={() => {
+                    navigate("/products"),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                  }}
                 >
                   See more products
                 </Typography>
@@ -844,7 +850,7 @@ export default function HomePage() {
                             textAlign: "left",
                           }}
                         >
-                          ${item.price}
+                          {formatCurrency(item.price)}
                         </Typography>
                         <Typography
                           variant="body2"
@@ -853,7 +859,8 @@ export default function HomePage() {
                             textAlign: "left",
                           }}
                         >
-                          {brandMap[item.brand_id]}
+                          {brandMap[item.brand_id]} |{" "}
+                          {categoryMap[item.category_id]}
                         </Typography>
                       </Box>
                     </Tooltip>
@@ -977,16 +984,16 @@ export default function HomePage() {
                     <Box
                       key={index}
                       onClick={() => (
-                        navigate(`/stores/${item.id }`,
-                        
-                        {state: { storeId: item.id } }
-                        
-                ),
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                })
-              )}
+                        navigate(
+                          `/stores/${item.id}`,
+
+                          { state: { storeId: item.id } }
+                        ),
+                        window.scrollTo({
+                          top: 0,
+                          behavior: "smooth",
+                        })
+                      )}
                       sx={{
                         minWidth: 120,
                         padding: 2,
@@ -1048,7 +1055,6 @@ export default function HomePage() {
                 </IconButton>
               </Box>
             </Box>
-            
           </Grid>
         </Grid>
         {visible && (
