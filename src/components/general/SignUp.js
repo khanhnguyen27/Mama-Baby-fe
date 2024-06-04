@@ -32,7 +32,7 @@ const SignUp = () => {
     //   return;
     // }
     if (retype !== password) {
-      toast.error("Retype password must be the same as password");
+      toast.error("Retype password must be the same as password", { autoClose: 2500 });
       return;
     }
     if (
@@ -43,13 +43,13 @@ const SignUp = () => {
       address == "" ||
       phone == ""
     ) {
-      toast.error("Please input all fields");
+      toast.error("Please input all fields", { autoClose: 2500 });
       return;
     }
     signupApi(username, password, retype, fullname, address, phone)
       .then((response) => {
-        console.log("Day la khi sign up", response);
-        toast.success(`Sign Up Successfully`);
+        console.log("Sign Up Successfully", response);
+        toast.success(`Sign Up Successfully`, { autoClose: 2500 });
         setTimeout(() => {
           setLoading(true);
         }, 2000);
@@ -58,8 +58,8 @@ const SignUp = () => {
         }, 5000);
       })
       .catch((error) => {
-        console.error("Sign Up failed", error);
-        toast.error("Sign Up Failed.");
+        console.error("Sign Up Failed", error);
+        toast.error("Sign Up Failed.", { autoClose: 2500 });
       });
   };
 

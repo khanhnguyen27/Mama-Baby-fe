@@ -110,6 +110,10 @@ export default function Products() {
     fetchData();
   }, [keyword, ageFilter, brandFilter, categoryFilter]);
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
+
   const handleAgeChange = (id) => {
     setAgeFilter((prev) => (prev === id ? null : id));
     setLoading(true);
@@ -135,6 +139,7 @@ export default function Products() {
   const handleAddToCart = (index) => {
     toast.info(`${product.products[index].name} x 1 was added to cart`, {
       position: "top-right",
+      autoClose: 2500
     });
     dispatch(
       addToCart({
@@ -142,7 +147,7 @@ export default function Products() {
           id: product.products[index].id,
           name: product.products[index].name,
           price: product.products[index].price,
-          store_id: product.products[index].store_id
+          store_id: product.products[index].store_id,
         },
         quantity: 1,
       })
@@ -207,7 +212,7 @@ export default function Products() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    marginBottom: "2rem",
+                    marginBottom: "0.5rem",
                   }}
                 >
                   <Typography
@@ -225,23 +230,21 @@ export default function Products() {
                       variant="contained"
                       onClick={handleClearFilters}
                       sx={{
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                        padding: "0.25rem 0.5rem",
-                        minWidth: "auto",
-                        borderRadius: "0.5rem",
-                        fontSize: "0.75rem",
+                        backgroundColor: "white",
+                        color: "#ff469e",
+                        borderRadius: "10px",
+                        fontSize: 16,
                         fontWeight: "bold",
-                        boxShadow: "none",
                         mr: 2,
+                        padding: "0.25rem 0.5rem",
+                        boxShadow: "none",
                         transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid white",
+                          "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                        border: "1px solid #ff469e",
                         "&:hover": {
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          border: "1px solid #ff469e",
-                          boxShadow: "none",
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                          border: "1px solid white",
                         },
                       }}
                     >
@@ -459,7 +462,7 @@ export default function Products() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  marginBottom: "2rem",
+                  marginBottom: "0.5rem",
                 }}
               >
                 <Typography
@@ -477,23 +480,21 @@ export default function Products() {
                     variant="contained"
                     onClick={handleClearFilters}
                     sx={{
-                      backgroundColor: "#ff469e",
-                      color: "white",
-                      padding: "0.25rem 0.5rem",
-                      minWidth: "auto",
-                      borderRadius: "0.5rem",
-                      fontSize: "0.75rem",
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "10px",
+                      fontSize: 16,
                       fontWeight: "bold",
-                      boxShadow: "none",
                       mr: 2,
+                      padding: "0.25rem 0.5rem",
+                      boxShadow: "none",
                       transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                      border: "1px solid white",
+                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
                       "&:hover": {
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        border: "1px solid #ff469e",
-                        boxShadow: "none",
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        border: "1px solid white",
                       },
                     }}
                   >
@@ -748,18 +749,30 @@ export default function Products() {
                             variant="body2"
                             sx={{ color: "gray", textAlign: "left" }}
                           >
-                            ${item.price}
+                            {formatCurrency(item.price)}
                           </Typography>
                           <Typography
                             variant="body2"
                             sx={{ color: "gray", textAlign: "left" }}
                           >
-                            {brandMap[item.brand_id]}
+                            {brandMap[item.brand_id]} |{" "}
+                            {categoryMap[item.category_id]}
                           </Typography>
                         </CardContent>
                         <Divider />
                         <CardActions sx={{ justifyContent: "right" }}>
-                          <IconButton onClick={() => handleAddToCart(index)}>
+                          <IconButton
+                            size="large"
+                            sx={{
+                              transition:
+                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                              "&:hover": {
+                                backgroundColor: "#fff4fc",
+                                color: "#ff469e",
+                              },
+                            }}
+                            onClick={() => handleAddToCart(index)}
+                          >
                             <Cart />
                           </IconButton>
                         </CardActions>
