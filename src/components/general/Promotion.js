@@ -7,11 +7,13 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { KeyboardCapslock } from "@mui/icons-material";
 
 const Promotion = () => {
+  window.document.title = "Promotion";
   const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -77,6 +79,13 @@ const Promotion = () => {
             />
             <Button
               variant="contained"
+              onClick={() => {
+                navigate("/signin"),
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "instant",
+                  });
+              }}
               size="large"
               sx={{
                 backgroundColor: "white",
@@ -97,13 +106,7 @@ const Promotion = () => {
                 },
               }}
             >
-              <Link
-                to="/signin"
-                style={{ color: "inherit", textDecoration: "none" }}
-                onClick={() => window.scrollTo(0, 0)}
-              >
-                Join to get these valuable deals
-              </Link>
+              Join to get these valuable deals
             </Button>
           </Grid>
           <Grid item xs={6} sx={{ textAlign: "left" }}>

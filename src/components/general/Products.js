@@ -31,6 +31,7 @@ import { toast } from "react-toastify";
 
 export default function Products() {
   const navigate = useNavigate();
+  window.document.title = "Products";
   const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);

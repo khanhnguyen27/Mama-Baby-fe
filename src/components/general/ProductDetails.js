@@ -26,8 +26,8 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 export default function ProductDetails() {
-  const { state } = useLocation();
   const [visible, setVisible] = useState(false);
+  const { state } = useLocation();
   const [age, setAge] = useState([]);
   const [ageMap, setAgeMap] = useState({});
   const [brand, setBrand] = useState([]);
@@ -97,11 +97,14 @@ export default function ProductDetails() {
     }, 1000);
   }, [productId]);
 
+  window.document.title = `${product?.name}`;
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
   };
 
   if (!product) {
+    window.document.title = "Loading...";
     return (
       <Box
         sx={{

@@ -5,7 +5,7 @@ import Input from "@mui/material/Input";
 import IconButton from "@mui/material/IconButton";
 import Eye from "@mui/icons-material/Visibility";
 import EyeSlash from "@mui/icons-material/VisibilityOff";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Box, CircularProgress, Typography } from "@mui/material";
@@ -13,6 +13,7 @@ import { loginApi } from "../../api/UserAPI";
 import { jwtDecode } from "jwt-decode";
 
 const SignIn = () => {
+  window.document.title = "Sign In";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,9 @@ const SignIn = () => {
         const username = decodedAccessToken.username;
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("username", username);
-        toast.success(`Login Successfully: Welcome ${username}`, { autoClose: 2500 });
+        toast.success(`Login Successfully: Welcome ${username}`, {
+          autoClose: 2500,
+        });
         setTimeout(() => {
           setLoading(true);
         }, 2000);
@@ -64,7 +67,8 @@ const SignIn = () => {
       .catch((error) => {
         console.error("Login failed", error);
         toast.error(
-          "Login failed: Please check your username, password and try again." , { autoClose: 2500 }
+          "Login failed: Please check your username, password and try again.",
+          { autoClose: 2500 }
         );
       });
   };
@@ -284,27 +288,29 @@ const SignIn = () => {
                   }}
                 >
                   Don't have an account?
-                  <Link
-                    to="/signup"
-                    onClick={() => window.scrollTo(0.0)}
-                    style={{ textDecoration: "none" }}
+                  <Typography
+                    onClick={() => (
+                      navigate("/signup"),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                    sx={{
+                      color: "black",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition:
+                        "color 0.3s ease-in-out, scale 0.3s ease-in-out",
+                      paddingLeft: "10px",
+                      "&:hover": {
+                        color: "#ff469e",
+                        scale: "1.08",
+                      },
+                    }}
                   >
-                    <Typography
-                      sx={{
-                        color: "black",
-                        fontWeight: "bold",
-                        transition:
-                          "color 0.3s ease-in-out, scale 0.3s ease-in-out",
-                        paddingLeft: "10px",
-                        "&:hover": {
-                          color: "#ff469e",
-                          scale: "1.08",
-                        },
-                      }}
-                    >
-                      Sign up now
-                    </Typography>
-                  </Link>
+                    Sign up now
+                  </Typography>
                 </div>
               </div>
             </form>

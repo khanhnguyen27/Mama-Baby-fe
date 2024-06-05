@@ -11,7 +11,7 @@ export default function Profile() {
       .then((res) => setUser(res?.data?.data))
       .catch((err) => console.log(err));
   }, []);
-
+  window.document.title = `${user?.username}`;
   const { pathname } = useLocation();
   if (pathname.includes("staff") || pathname.includes("admin")) {
     return (
@@ -27,10 +27,11 @@ export default function Profile() {
         }}
       >
         <Card
-          style={{
+          sx={{
             backgroundColor: "#fff4fc",
-            boxShadow: "2px 2px 4px rgba(0, 0, 0.24)",
+            boxShadow: "1px 1px 4px rgba(0, 0, 0.32)",
             border: "3px solid #ff469e",
+            borderRadius: "20px",
             color: "black",
             padding: "20px",
             maxWidth: "900px",
@@ -40,22 +41,25 @@ export default function Profile() {
           <CardContent>
             <Typography
               variant="h4"
-              style={{
+              sx={{
                 color: "#ff469e",
                 marginBottom: "2rem",
                 textAlign: "center",
+                fontWeight: "bold",
               }}
             >
               YOUR PROFILE
             </Typography>
             {user && (
-              <Grid container spacing={2}>
+              <Grid container spacing={6}>
                 <Grid item xs={12} md={4}>
                   <Paper
-                    style={{
+                    sx={{
                       padding: "10px",
                       backgroundColor: "#ffe6f0",
                       textAlign: "center",
+                      boxShadow: "2px 2px 4px rgba(0, 0, 0.16)",
+                      borderRadius: "15px",
                     }}
                   >
                     <img
@@ -69,7 +73,7 @@ export default function Profile() {
                       alt="Profile"
                     />
                     <Typography
-                      style={{
+                      sx={{
                         fontWeight: "bold",
                         color: "black",
                         marginBottom: "10px",
@@ -85,14 +89,14 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                       <div>
                         <Typography
-                          style={{
+                          sx={{
                             fontWeight: "bold",
                             color: "black",
                           }}
                         >
                           Full Name
                         </Typography>
-                        <Typography style={{ color: "black" }}>
+                        <Typography sx={{ color: "black" }}>
                           {user.full_name}
                         </Typography>
                       </div>
@@ -100,14 +104,14 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                       <div>
                         <Typography
-                          style={{
+                          sx={{
                             fontWeight: "bold",
                             color: "black",
                           }}
                         >
                           Address
                         </Typography>
-                        <Typography style={{ color: "black" }}>
+                        <Typography sx={{ color: "black" }}>
                           {user.address}
                         </Typography>
                       </div>
@@ -115,14 +119,14 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                       <div>
                         <Typography
-                          style={{
+                          sx={{
                             fontWeight: "bold",
                             color: "black",
                           }}
                         >
                           Phone Number
                         </Typography>
-                        <Typography style={{ color: "black" }}>
+                        <Typography sx={{ color: "black" }}>
                           {user.phone_number}
                         </Typography>
                       </div>
@@ -130,14 +134,14 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                       <div>
                         <Typography
-                          style={{
+                          sx={{
                             fontWeight: "bold",
                             color: "black",
                           }}
                         >
                           Role
                         </Typography>
-                        <Typography style={{ color: "black" }}>
+                        <Typography sx={{ color: "black" }}>
                           {user.role_id.name}
                         </Typography>
                       </div>
@@ -164,10 +168,11 @@ export default function Profile() {
       }}
     >
       <Card
-        style={{
+        sx={{
           backgroundColor: "#fff4fc",
-          boxShadow: "2px 2px 4px rgba(0, 0, 0.24)",
+          boxShadow: "1px 1px 4px rgba(0, 0, 0.32)",
           border: "3px solid #ff469e",
+          borderRadius: "20px",
           color: "black",
           padding: "20px",
           maxWidth: "900px",
@@ -177,22 +182,25 @@ export default function Profile() {
         <CardContent>
           <Typography
             variant="h4"
-            style={{
+            sx={{
               color: "#ff469e",
               marginBottom: "2rem",
               textAlign: "center",
+              fontWeight: "bold",
             }}
           >
             YOUR PROFILE
           </Typography>
           {user && (
-            <Grid container spacing={2}>
+            <Grid container spacing={6}>
               <Grid item xs={12} md={4}>
                 <Paper
-                  style={{
+                  sx={{
                     padding: "10px",
                     backgroundColor: "#ffe6f0",
                     textAlign: "center",
+                    boxShadow: "2px 2px 4px rgba(0, 0, 0.16)",
+                    borderRadius: "15px",
                   }}
                 >
                   <img
@@ -225,11 +233,14 @@ export default function Profile() {
                         style={{
                           fontWeight: "bold",
                           color: "black",
+                          fontSize: "1.25rem",
                         }}
                       >
                         Full Name
                       </Typography>
-                      <Typography style={{ color: "black" }}>
+                      <Typography
+                        style={{ color: "black", fontSize: "1.3rem" }}
+                      >
                         {user.full_name}
                       </Typography>
                     </div>
@@ -240,11 +251,14 @@ export default function Profile() {
                         style={{
                           fontWeight: "bold",
                           color: "black",
+                          fontSize: "1.25rem",
                         }}
                       >
                         Address
                       </Typography>
-                      <Typography style={{ color: "black" }}>
+                      <Typography
+                        style={{ color: "black", fontSize: "1.3rem" }}
+                      >
                         {user.address}
                       </Typography>
                     </div>
@@ -255,11 +269,14 @@ export default function Profile() {
                         style={{
                           fontWeight: "bold",
                           color: "black",
+                          fontSize: "1.25rem",
                         }}
                       >
                         Phone Number
                       </Typography>
-                      <Typography style={{ color: "black" }}>
+                      <Typography
+                        style={{ color: "black", fontSize: "1.3rem" }}
+                      >
                         {user.phone_number}
                       </Typography>
                     </div>
@@ -270,11 +287,14 @@ export default function Profile() {
                         style={{
                           fontWeight: "bold",
                           color: "black",
+                          fontSize: "1.25rem",
                         }}
                       >
                         Accumulated Points
                       </Typography>
-                      <Typography style={{ color: "black" }}>
+                      <Typography
+                        style={{ color: "black", fontSize: "1.3rem" }}
+                      >
                         {user.accumulated_points}
                       </Typography>
                     </div>
@@ -285,11 +305,14 @@ export default function Profile() {
                         style={{
                           fontWeight: "bold",
                           color: "black",
+                          fontSize: "1.25rem",
                         }}
                       >
                         Role
                       </Typography>
-                      <Typography style={{ color: "black" }}>
+                      <Typography
+                        style={{ color: "black", fontSize: "1.3rem" }}
+                      >
                         {user.role_id.name}
                       </Typography>
                     </div>
