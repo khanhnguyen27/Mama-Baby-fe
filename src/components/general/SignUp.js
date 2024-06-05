@@ -5,13 +5,14 @@ import Input from "@mui/material/Input";
 import IconButton from "@mui/material/IconButton";
 import Eye from "@mui/icons-material/Visibility";
 import EyeSlash from "@mui/icons-material/VisibilityOff";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { signupApi } from "../../api/UserAPI";
 
 const SignUp = () => {
+  window.document.title = "Sign Up";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [retype, setRetype] = useState("");
@@ -32,7 +33,9 @@ const SignUp = () => {
     //   return;
     // }
     if (retype !== password) {
-      toast.error("Retype password must be the same as password", { autoClose: 2500 });
+      toast.error("Retype password must be the same as password", {
+        autoClose: 2500,
+      });
       return;
     }
     if (
@@ -99,7 +102,7 @@ const SignUp = () => {
         style={{
           backgroundImage:
             "url('https://png.pngtree.com/thumb_back/fh260/background/20190221/ourmid/pngtree-simple-cartoon-childlike-mother-and-baby-image_11542.jpg')",
-          minHeight: "100vh", // Set minimum height to cover the entire viewport
+          minHeight: "100vh",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           display: "flex",
@@ -496,27 +499,29 @@ const SignUp = () => {
                   }}
                 >
                   Already have an account?{" "}
-                  <Link
-                    to="/signin"
-                    onClick={() => window.scrollTo(0.0)}
-                    style={{ textDecoration: "none" }}
+                  <Typography
+                    onClick={() => (
+                      navigate("/signin"),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                    sx={{
+                      color: "black",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition:
+                        "color 0.3s ease-in-out, scale 0.3s ease-in-out",
+                      paddingLeft: "10px",
+                      "&:hover": {
+                        color: "#ff469e",
+                        scale: "1.08",
+                      },
+                    }}
                   >
-                    <Typography
-                      sx={{
-                        color: "black",
-                        fontWeight: "bold",
-                        transition:
-                          "color 0.3s ease-in-out, scale 0.3s ease-in-out",
-                        paddingLeft: "10px",
-                        "&:hover": {
-                          color: "#ff469e",
-                          scale: "1.08",
-                        },
-                      }}
-                    >
-                      Sign in now
-                    </Typography>
-                  </Link>
+                    Sign in now
+                  </Typography>
                 </div>
               </div>
             </form>

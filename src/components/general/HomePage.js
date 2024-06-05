@@ -3,14 +3,11 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Button,
   Container,
   Fade,
   Grid,
   IconButton,
-  List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Tooltip,
   Typography,
@@ -21,7 +18,7 @@ import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import KeyboardCapslock from "@mui/icons-material/KeyboardCapslock";
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
@@ -31,6 +28,7 @@ import { allArticleApi } from "../../api/ArticleAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
 export default function HomePage() {
   const navigate = useNavigate();
+  window.document.title = "Mama-Baby";
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [age, setAge] = useState([]);

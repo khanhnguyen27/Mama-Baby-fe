@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Breadcrumbs, Button, Container, IconButton, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import {
+  Breadcrumbs,
+  Button,
+  Container,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 import { KeyboardCapslock } from "@mui/icons-material";
 
 const Introduction = () => {
+  window.document.title = "Introduction";
   const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -13,7 +22,7 @@ const Introduction = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
+
   return (
     <>
       <div style={{ marginLeft: "1rem" }}>
@@ -26,20 +35,22 @@ const Introduction = () => {
               }}
             >
               <Typography
-                  sx={{
-                    color: "black",
-                    transition: "color 0.2s ease-in-out",
-                    fontSize: 20,
-                    fontWeight: "bold",
-                    "&:hover": {
-                      textDecoration: "underline",
-                    },
-                  }}
-                >
-                  Home
-                </Typography>
+                sx={{
+                  color: "black",
+                  transition: "color 0.2s ease-in-out",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Home
+              </Typography>
             </Link>
-            <Typography sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}>
+            <Typography
+              sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+            >
               {" "}
               Introduction
             </Typography>
@@ -115,8 +126,8 @@ const Introduction = () => {
           Our target market includes pregnant mothers, new mothers, and families
           seeking high-quality milk products for their babies. With a growing
           awareness of the importance of nutrition during pregnancy and infancy,
-          Mama-Baby aims to meet the increasing demand for premium milk
-          products in the market.
+          Mama-Baby aims to meet the increasing demand for premium milk products
+          in the market.
         </Typography>
         <br />
         <Typography
@@ -133,36 +144,39 @@ const Introduction = () => {
           our milk products from trusted suppliers, ensuring they meet the
           highest standards of safety and quality.
         </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          sx={{
-            backgroundColor: "white",
-            color: "#ff469e",
-            borderRadius: "10px",
-            fontSize: 16,
-            fontWeight: "bold",
-            width: "20vw",
-            mt: 8,
-            mb: 4,
-            transition:
-              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-            border: "1px solid #ff469e",
-            "&:hover": {
-              backgroundColor: "#ff469e",
-              color: "white",
-              border: "1px solid white",
-            },
-          }}
-        >
-          <Link
-            to="/"
-            style={{ color: "inherit", textDecoration: "none" }}
-            onClick={() => window.scrollTo(0, 0)}
+        <div style={{ textAlign: "center" }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              navigate("/"),
+                window.scrollTo({
+                  top: 0,
+                  behavior: "instant",
+                });
+            }}
+            size="large"
+            sx={{
+              backgroundColor: "white",
+              color: "#ff469e",
+              borderRadius: "10px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "20vw",
+              mt: 8,
+              mb: 4,
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #ff469e",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
           >
             Explore more
-          </Link>
-        </Button>
+          </Button>
+        </div>
         {visible && (
           <IconButton
             size="large"
