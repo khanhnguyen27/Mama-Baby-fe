@@ -1,6 +1,7 @@
 import Navigation from "./components/Navigation/Navigation";
 import Footer from "./components/Footer/Footer";
 import { Route, Routes } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import SignIn from "./components/general/SignIn";
 import Introduction from "./components/general/Introduction";
@@ -17,6 +18,9 @@ import Stores from "./components/general/Stores";
 import StoreDetail from "./components/general/StoreDetail";
 import ProductDetails from "./components/general/ProductDetails";
 import Article from "./components/general/Article";
+import StaffLayout from "./components/staff/StaffLayout";
+import AdminLayout from "./components/admin/AdminLayout";
+
 function App() {
   return (
     <div className="App">
@@ -36,13 +40,13 @@ function App() {
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
-          <Route path="/staff">
+          <Route path="/staff" element={<StaffLayout />} >
             <Route index element={<StaffHome />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
-          <Route path="/admin">
+        <Route path="/admin" element={<AdminLayout />} >
             <Route index element={<AdminHome />} />
             <Route path="profile" element={<Profile />} />
           </Route>
