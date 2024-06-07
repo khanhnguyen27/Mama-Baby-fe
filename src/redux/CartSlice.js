@@ -16,7 +16,8 @@ export const cartSlice = createSlice({
         (item) => item.product.id == addedProductId
       );
       if (existingProduct) {
-        existingProduct.quantity += quantity;
+        const updatedQuantity = Math.min(existingProduct.quantity + quantity, 99);
+    existingProduct.quantity = Math.max(updatedQuantity, 1);
       } else {
         state.data.products.push(action.payload);
       }

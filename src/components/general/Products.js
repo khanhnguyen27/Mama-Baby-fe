@@ -140,7 +140,7 @@ export default function Products() {
   const handleAddToCart = (index) => {
     toast.info(`${product.products[index].name} x 1 was added to cart`, {
       position: "top-right",
-      autoClose: 2500
+      autoClose: 2500,
     });
     dispatch(
       addToCart({
@@ -774,6 +774,19 @@ export default function Products() {
                             }}
                             onClick={() => handleAddToCart(index)}
                           >
+                            <span
+                              style={{
+                                position: "absolute",
+                                width: "2px",
+                                height: "2px",
+                                fontSize: "22px",
+                                color: "inherit",
+                                top: "0",
+                                right: 10,
+                                fontWeight: 700,
+                              }}
+                            > +
+                            </span>
                             <Cart />
                           </IconButton>
                         </CardActions>

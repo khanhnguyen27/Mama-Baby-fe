@@ -245,16 +245,6 @@ const Navigation = () => {
                 alt="logo"
               />
             </Link>
-            {/* <Typography
-              style={{
-                paddingLeft: "20px",
-                fontFamily: "Poetsen One",
-                opacity: 0.8,
-                fontSize: 35,
-              }}
-            >
-              SIGN IN
-            </Typography> */}
           </Toolbar>
         </AppBar>
       </Box>
@@ -297,218 +287,220 @@ const Navigation = () => {
   }
   if (pathname.includes("staff")) {
     return (
-      <Box sx={{ flexGrow: 1, mb: 2 }}>
-        <AppBar
-          sx={{
-            backgroundColor: "white",
-            color: "black",
-            padding: "10px 80px",
-            boxShadow: "none",
-            position: "fixed",
-            height: "90px",
-            borderBottom: "1px solid #fffbfd",
-          }}
-        >
-          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
-            <Link
-              to="/staff"
-              style={{
-                display: { xs: "none", sm: "block" },
-                textDecoration: "none",
-                fontSize: "24px",
-              }}
-            >
-              <img
-                src={Logo}
-                style={{ width: "80px", height: "80px", marginTop: "8px" }}
-                alt="logo"
-              />
-            </Link>
-            {isLoggedIn && (
-              <>
-                <div>
-                  <IconButton
-                    size="large"
-                    edge="end"
-                    aria-label="account of current user"
-                    aria-haspopup="true"
-                    color="inherit"
-                    onClick={handleLogoutMenuOpen}
-                    sx={{
-                      borderRadius: 2,
-                      height: 40,
-                      marginRight: "1rem",
-                      backgroundColor: "white",
-                      color: "#ff469e",
-                      border: "1px solid #ff469e",
-                      transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                      "&:hover": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                        border: "1px solid #ff469e",
-                      },
-                    }}
-                  >
-                    <AccountCircle />
-                    <Typography
-                      style={{
-                        color: "inherit",
-                        paddingLeft: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {username}
-                    </Typography>
-                  </IconButton>
-                  {renderLogoutMenu}
-                </div>
-              </>
-            )}
-            {!isLoggedIn && (
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-haspopup="true"
-                color="inherit"
-                component={Link}
-                to="signin"
-                sx={{
-                  borderRadius: 2,
-                  height: 40,
-                  marginRight: "1rem",
-                  transition:
-                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                  "&:hover": {
-                    backgroundColor: "white",
-                    color: "#ff469e",
-                  },
-                }}
-              >
-                <AccountCircle />
-                <Typography
-                  style={{
-                    color: "inherit",
-                    paddingLeft: 10,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Login
-                </Typography>
-              </IconButton>
-            )}
-          </Toolbar>
-        </AppBar>
-      </Box>
+      // <Box sx={{ flexGrow: 1, mb: 2 }}>
+      //   <AppBar
+      //     sx={{
+      //       backgroundColor: "white",
+      //       color: "black",
+      //       padding: "10px 80px",
+      //       boxShadow: "none",
+      //       position: "fixed",
+      //       height: "90px",
+      //       borderBottom: "1px solid #fffbfd",
+      //     }}
+      //   >
+      //     <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+      //       <Link
+      //         to="/staff"
+      //         style={{
+      //           display: { xs: "none", sm: "block" },
+      //           textDecoration: "none",
+      //           fontSize: "24px",
+      //         }}
+      //       >
+      //         <img
+      //           src={Logo}
+      //           style={{ width: "80px", height: "80px", marginTop: "8px" }}
+      //           alt="logo"
+      //         />
+      //       </Link>
+      //       {isLoggedIn && (
+      //         <>
+      //           <div>
+      //             <IconButton
+      //               size="large"
+      //               edge="end"
+      //               aria-label="account of current user"
+      //               aria-haspopup="true"
+      //               color="inherit"
+      //               onClick={handleLogoutMenuOpen}
+      //               sx={{
+      //                 borderRadius: 2,
+      //                 height: 40,
+      //                 marginRight: "1rem",
+      //                 backgroundColor: "white",
+      //                 color: "#ff469e",
+      //                 border: "1px solid #ff469e",
+      //                 transition:
+      //                   "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+      //                 "&:hover": {
+      //                   backgroundColor: "#ff469e",
+      //                   color: "white",
+      //                   border: "1px solid #ff469e",
+      //                 },
+      //               }}
+      //             >
+      //               <AccountCircle />
+      //               <Typography
+      //                 style={{
+      //                   color: "inherit",
+      //                   paddingLeft: 10,
+      //                   fontWeight: "bold",
+      //                 }}
+      //               >
+      //                 {username}
+      //               </Typography>
+      //             </IconButton>
+      //             {renderLogoutMenu}
+      //           </div>
+      //         </>
+      //       )}
+      //       {!isLoggedIn && (
+      //         <IconButton
+      //           size="large"
+      //           edge="end"
+      //           aria-label="account of current user"
+      //           aria-haspopup="true"
+      //           color="inherit"
+      //           component={Link}
+      //           to="signin"
+      //           sx={{
+      //             borderRadius: 2,
+      //             height: 40,
+      //             marginRight: "1rem",
+      //             transition:
+      //               "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+      //             "&:hover": {
+      //               backgroundColor: "white",
+      //               color: "#ff469e",
+      //             },
+      //           }}
+      //         >
+      //           <AccountCircle />
+      //           <Typography
+      //             style={{
+      //               color: "inherit",
+      //               paddingLeft: 10,
+      //               fontWeight: "bold",
+      //             }}
+      //           >
+      //             Login
+      //           </Typography>
+      //         </IconButton>
+      //       )}
+      //     </Toolbar>
+      //   </AppBar>
+      // </Box>
+      <></>
     );
   }
   if (pathname.includes("admin")) {
     return (
-      <Box sx={{ flexGrow: 1, mb: 2 }}>
-        <AppBar
-          sx={{
-            backgroundColor: "white",
-            color: "black",
-            padding: "10px 80px",
-            boxShadow: "none",
-            position: "fixed",
-            height: "90px",
-            borderBottom: "1px solid #fffbfd",
-          }}
-        >
-          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
-            <Link
-              to="/admin"
-              style={{
-                display: { xs: "none", sm: "block" },
-                textDecoration: "none",
-                fontSize: "24px",
-              }}
-            >
-              <img
-                src={Logo}
-                style={{ width: "80px", height: "80px", marginTop: "8px" }}
-                alt="logo"
-              />
-            </Link>
-            {isLoggedIn && (
-              <>
-                <div>
-                  <IconButton
-                    size="large"
-                    edge="end"
-                    aria-label="account of current user"
-                    aria-haspopup="true"
-                    color="inherit"
-                    onClick={handleLogoutMenuOpen}
-                    sx={{
-                      borderRadius: 2,
-                      height: 40,
-                      marginRight: "1rem",
-                      backgroundColor: "white",
-                      color: "#ff469e",
-                      border: "1px solid #ff469e",
-                      transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                      "&:hover": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                        border: "1px solid #ff469e",
-                      },
-                    }}
-                  >
-                    <AccountCircle />
-                    <Typography
-                      style={{
-                        color: "inherit",
-                        paddingLeft: 10,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {username}
-                    </Typography>
-                  </IconButton>
-                  {renderLogoutMenu}
-                </div>
-              </>
-            )}
-            {!isLoggedIn && (
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-haspopup="true"
-                color="inherit"
-                component={Link}
-                to="signin"
-                sx={{
-                  borderRadius: 2,
-                  height: 40,
-                  marginRight: "1rem",
-                  transition:
-                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                  "&:hover": {
-                    backgroundColor: "white",
-                    color: "#ff469e",
-                  },
-                }}
-              >
-                <AccountCircle />
-                <Typography
-                  style={{
-                    color: "inherit",
-                    paddingLeft: 10,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Login
-                </Typography>
-              </IconButton>
-            )}
-          </Toolbar>
-        </AppBar>
-      </Box>
+      // <Box sx={{ flexGrow: 1, mb: 2 }}>
+      //   <AppBar
+      //     sx={{
+      //       backgroundColor: "white",
+      //       color: "black",
+      //       padding: "10px 80px",
+      //       boxShadow: "none",
+      //       position: "fixed",
+      //       height: "90px",
+      //       borderBottom: "1px solid #fffbfd",
+      //     }}
+      //   >
+      //     <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+      //       <Link
+      //         to="/admin"
+      //         style={{
+      //           display: { xs: "none", sm: "block" },
+      //           textDecoration: "none",
+      //           fontSize: "24px",
+      //         }}
+      //       >
+      //         <img
+      //           src={Logo}
+      //           style={{ width: "80px", height: "80px", marginTop: "8px" }}
+      //           alt="logo"
+      //         />
+      //       </Link>
+      //       {isLoggedIn && (
+      //         <>
+      //           <div>
+      //             <IconButton
+      //               size="large"
+      //               edge="end"
+      //               aria-label="account of current user"
+      //               aria-haspopup="true"
+      //               color="inherit"
+      //               onClick={handleLogoutMenuOpen}
+      //               sx={{
+      //                 borderRadius: 2,
+      //                 height: 40,
+      //                 marginRight: "1rem",
+      //                 backgroundColor: "white",
+      //                 color: "#ff469e",
+      //                 border: "1px solid #ff469e",
+      //                 transition:
+      //                   "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+      //                 "&:hover": {
+      //                   backgroundColor: "#ff469e",
+      //                   color: "white",
+      //                   border: "1px solid #ff469e",
+      //                 },
+      //               }}
+      //             >
+      //               <AccountCircle />
+      //               <Typography
+      //                 style={{
+      //                   color: "inherit",
+      //                   paddingLeft: 10,
+      //                   fontWeight: "bold",
+      //                 }}
+      //               >
+      //                 {username}
+      //               </Typography>
+      //             </IconButton>
+      //             {renderLogoutMenu}
+      //           </div>
+      //         </>
+      //       )}
+      //       {!isLoggedIn && (
+      //         <IconButton
+      //           size="large"
+      //           edge="end"
+      //           aria-label="account of current user"
+      //           aria-haspopup="true"
+      //           color="inherit"
+      //           component={Link}
+      //           to="signin"
+      //           sx={{
+      //             borderRadius: 2,
+      //             height: 40,
+      //             marginRight: "1rem",
+      //             transition:
+      //               "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+      //             "&:hover": {
+      //               backgroundColor: "white",
+      //               color: "#ff469e",
+      //             },
+      //           }}
+      //         >
+      //           <AccountCircle />
+      //           <Typography
+      //             style={{
+      //               color: "inherit",
+      //               paddingLeft: 10,
+      //               fontWeight: "bold",
+      //             }}
+      //           >
+      //             Login
+      //           </Typography>
+      //         </IconButton>
+      //       )}
+      //     </Toolbar>
+      //   </AppBar>
+      // </Box>
+      <></>
     );
   }
   return (

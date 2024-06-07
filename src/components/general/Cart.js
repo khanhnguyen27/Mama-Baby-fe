@@ -36,9 +36,10 @@ import { toast } from "react-toastify";
 import { allStoreApi } from "../../api/StoreAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { makePaymentApi } from "../../api/VNPayAPI";
-import axiosJWT from "../../api/ConfigAxiosInterceptor";
+import { createOrderApi } from "../../api/OrderAPI";
 import { jwtDecode } from "jwt-decode";
 export default function Cart() {
+  window.document.title = "Cart";
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [store, setStore] = useState([]);
@@ -120,22 +121,24 @@ export default function Cart() {
 
   const handleAdressChange = (e) => {
     setAddress(e.target.value);
-  }
+  };
 
   const handleCheckout = () => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken === null) {
-      toast.warn('Please login to continue your paycheck', { autoClose: 2500 });
+      toast.warn("Please login to continue your paycheck", { autoClose: 2500 });
       setTimeout(() => {
         navigate("/signin");
       }, 3000);
       return;
     }
     const decodedAccessToken = jwtDecode(accessToken);
-    const userId = decodedAccessToken.UserId;
-
-    const selectedVoucherObj = voucher.find(item => item.discountValue === selectedVoucher);
-    const voucherId = selectedVoucherObj ? selectedVoucherObj.id : null
+    const userId = decodedAccessToken.UserID;
+    console.log(userId);
+    const selectedVoucherObj = voucher.find(
+      (item) => item.discountValue === selectedVoucher
+    );
+    const voucherId = selectedVoucherObj ? selectedVoucherObj.id : null;
 
     const totalPoint = 0;
 
@@ -147,42 +150,99 @@ export default function Cart() {
 
     const shippingAddress = address;
 
-    const bankCode = paymentMethod;
+    const bankCode = "VNBANK";
 
     const type = "ORDER";
 
-    const cartItems2 = cartItems.products.map(item => ({
-        productId: item.product.id,
-        storeId: item.product.store_id,
-        quantity: item.quantity
-      }));
+    const cartItems2 = cartItems.products.map((item) => ({
+      product_id: item.product.id,
+      store_id: item.product.store_id,
+      quantity: item.quantity,
+    }));
 
     const language = "vn";
+    // createOrderApi(
+    //   userId,
+    //   voucherId,
+    //   totalPoint,
+    //   amount,
+    //   totalDiscount,
+    //   finalAmount,
+    //   shippingAddress,
+    //   paymentMethod,
+    //   type,
+    //   cartItems2,
+    // )
+    //   .then((res) => {
+    //     console.log(res.data);
+    //     toast.warn("Checkout sucessfully. New order created", {
+    //       autoClose: 1500,
+    //     });
+    //     setTimeout(() => {
+    //       navigate("/");
+    //     }, 2000);
+    //   })
+    //   .catch((error) => console.log(error));
+    //   makePaymentApi(
 
-    // axiosJWT.post(`http://localhost:8080/mamababy/payment/vn-pay?finalAmount=${getDiscountedTotal()}&bankCode=${paymentMethod}&language=${language}`, {
-    // products: cartItems.products.map(item => ({
-    //   productId: item.product.id,
-    //   quantity: item.quantity,
-    //   storeId: item.product.store_id
-    // })),
-    // amount: totalCost,
-    // totalDiscount: selectedVoucher,
-    // finalAmount: getDiscountedTotal(),
-    // bankCode: paymentMethod,
-    // language: "vn"
-    // })
-    makePaymentApi(userId, voucherId, totalPoint, amount, totalDiscount, shippingAddress, finalAmount, bankCode, type, cartItems2, language)
+    //     finalAmount,
+    //     bankCode,
+
+    //   )
+    //     .then((res) => {
+    //       console.log(res.data);
+    //       toast.warn("Checkout sucessfully, moving to payment page!", {
+    //         autoClose: 1500,
+    //       });
+    //       setTimeout(() => {
+    //         window.location.replace(res.data?.data?.payment_url);
+    //       }, 2000);
+    //     })
+    //     .catch((error) => console.log(error));
+    createOrderApi(
+      userId,
+      voucherId,
+      totalPoint,
+      amount,
+      totalDiscount,
+      finalAmount,
+      shippingAddress,
+      paymentMethod,
+      type,
+      cartItems2
+    )
       .then((res) => {
         console.log(res.data);
-        toast.warn("Checkout sucessfully, moving to payment page!", {
-          autoClose: 1500,
-        });
+        // const orderId = res?.data?.data.map((item) => (item.id))
+        // console.log(orderId);
         setTimeout(() => {
-          window.location.replace(res.data?.data?.payment_url);
-        }, 15000);
+          makePaymentApi(finalAmount, bankCode)
+            .then((res) => {
+              console.log(res.data);
+              toast.success("Now moving to payment page!", {
+                autoClose: 1500,
+              });
+              setTimeout(() => {
+                window.location.replace(res.data?.data?.payment_url);
+              }, 1500);
+            })
+            .catch((error) => console.log(error));
+        }, 1000);
       })
       .catch((error) => console.log(error));
   };
+  // axiosJWT.post(`http://localhost:8080/mamababy/payment/vn-pay?finalAmount=${getDiscountedTotal()}&bankCode=${paymentMethod}&language=${language}`, {
+  // products: cartItems.products.map(item => ({
+  //   productId: item.product.id,
+  //   quantity: item.quantity,
+  //   storeId: item.product.store_id
+  // })),
+  // amount: totalCost,
+  // totalDiscount: selectedVoucher,
+  // finalAmount: getDiscountedTotal(),
+  // bankCode: paymentMethod,
+  // language: "vn"
+  // })
 
   return (
     <div
@@ -231,50 +291,27 @@ export default function Cart() {
                         <Card
                           sx={{
                             display: "flex",
-                            px: 1,
+                            px: 2,
                             border: "1px solid #ff469e",
                             borderRadius: "20px",
                             my: 2,
+                            minHeight: "180px",
                           }}
                         >
                           <CardMedia
-                            sx={{ width: "120px", height: "120px", pt: 1.5 }}
+                            sx={{
+                              width: "100px",
+                              height: "100px",
+                              justifyContent: "center",
+                              alignSelf: "center",
+                            }}
                             image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                            title="Product Image"
+                            title={item.product.name}
                           />
                           <CardContent sx={{ flex: "1 0 auto", ml: 2 }}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Typography
-                                gutterBottom
-                                noWrap
-                                variant="h5"
-                                sx={{
-                                  "&:hover": {
-                                    cursor: "pointer",
-                                    color: "#ff469e",
-                                  },
-                                }}
-                                onClick={() =>
-                                  navigate(
-                                    `/products/${item.product.name
-                                      .toLowerCase()
-                                      .replace(/\s/g, "-")}`,
-                                    { state: { productId: item.product.id } },
-                                    window.scrollTo({
-                                      top: 0,
-                                      behavior: "smooth",
-                                    })
-                                  )
-                                }
-                              >
-                                {item.product.name}
-                              </Typography>
+                            <Box sx={{ textAlign: "right", height: "30px" }}>
                               <IconButton
+                                size="small"
                                 onClick={() => (
                                   dispatch(removeFromCart(item.product)),
                                   toast.info(
@@ -301,33 +338,242 @@ export default function Cart() {
                             </Box>
                             <Box
                               sx={{
-                                pt: 2,
                                 display: "flex",
-                                alignItems: "center",
                                 justifyContent: "space-between",
                               }}
                             >
-                              <Box
+                              <Typography
+                                gutterBottom
+                                noWrap
                                 sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "2rem",
+                                  fontSize: "22px",
+                                  fontWeight: "bold",
+                                  "&:hover": {
+                                    cursor: "pointer",
+                                    color: "#ff469e",
+                                  },
                                 }}
+                                onClick={() =>
+                                  navigate(
+                                    `/products/${item.product.name
+                                      .toLowerCase()
+                                      .replace(/\s/g, "-")}`,
+                                    { state: { productId: item.product.id } },
+                                    window.scrollTo({
+                                      top: 0,
+                                      behavior: "smooth",
+                                    })
+                                  )
+                                }
                               >
+                                {item.product.name}
+                              </Typography>
+                            </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                my: 1,
+                              }}
+                            >
+                              <Grid xs={3}>
                                 <Typography
-                                  variant="h4"
-                                  sx={{ fontWeight: 600 }}
+                                  sx={{ fontSize: "20px", fontWeight: "600" }}
                                 >
-                                  {formatCurrency(
-                                    Math.round(
-                                      item.product.price * item.quantity
-                                    )
-                                  )}
+                                  Unit Price
                                 </Typography>
-                              </Box>
+                              </Grid>
+                              <Grid xs={6}>
+                                <Typography
+                                  sx={{
+                                    fontSize: "20px",
+                                    textAlign: "center",
+                                    fontWeight: "600",
+                                    mr: 1.5                                    
+                                  }}
+                                >
+                                  Quantity
+                                </Typography>
+                              </Grid>
+                              <Grid xs={3}>
+                                <Typography
+                                  sx={{
+                                    fontSize: "20px",
+                                    textAlign: "right",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  Total Amount
+                                </Typography>
+                              </Grid>
+                            </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                mt: 1.5,
+                              }}
+                            >
+                              <Typography sx={{ fontSize: "20px" }}>
+                                {formatCurrency(item.product.price)}
+                              </Typography>
+                              <ButtonGroup
+                                variant="outlined"
+                                aria-label="outlined button group"
+                                style={{ height: "2rem" }}
+                              >
+                                <Button
+                                  variant="contained"
+                                  disabled={item.quantity <= 1}
+                                  onClick={() => {
+                                    const newQuantity =
+                                      item.quantity >= 11
+                                        ? -10
+                                        : -(item.quantity - 1);
+                                    dispatch(
+                                      addToCart({
+                                        product: item.product,
+                                        quantity: newQuantity,
+                                      })
+                                    );
+                                  }}
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "20px",
+                                    fontSize: "1rem",
+                                    width: "2.9rem",
+
+                                    fontWeight: "bold",
+                                    boxShadow: "none",
+                                    transition:
+                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                  }}
+                                >
+                                  --
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  disabled={item.quantity <= 1}
+                                  onClick={() => {
+                                    dispatch(
+                                      addToCart({
+                                        product: item.product,
+                                        quantity: -1,
+                                      })
+                                    );
+                                  }}
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    fontSize: "1rem",
+                                    width: "2.9rem",
+                                    fontWeight: "bold",
+                                    boxShadow: "none",
+                                    transition:
+                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                  }}
+                                >
+                                  -
+                                </Button>
+                                <Button
+                                  disableRipple
+                                  style={{
+                                    backgroundColor: "white",
+                                    fontSize: "1rem",
+                                    width: "2.9rem",
+
+                                    width: "3rem",
+                                    cursor: "default",
+                                    border: "1px solid #ff469e",
+                                    color: "black",
+                                  }}
+                                >
+                                  {item.quantity}
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  disabled={item.quantity >= 99}
+                                  onClick={() => {
+                                    dispatch(
+                                      addToCart({
+                                        product: item.product,
+                                        quantity: 1,
+                                      })
+                                    );
+                                  }}
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    fontSize: "1rem",
+                                    width: "2.9rem",
+                                    fontWeight: "bold",
+                                    boxShadow: "none",
+                                    transition:
+                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                  }}
+                                >
+                                  +
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  disabled={item.quantity >= 99}
+                                  onClick={() => {
+                                    const newQuantity =
+                                      item.quantity <= 89
+                                        ? 10
+                                        : 99 - item.quantity;
+                                    dispatch(
+                                      addToCart({
+                                        product: item.product,
+                                        quantity: newQuantity,
+                                      })
+                                    );
+                                  }}
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "20px",
+                                    fontSize: "1rem",
+                                    width: "2.9rem",
+                                    fontWeight: "bold",
+                                    boxShadow: "none",
+                                    transition:
+                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                  }}
+                                >
+                                  ++
+                                </Button>
+                              </ButtonGroup>
+                              <Typography sx={{ fontSize: "20px" }}>
+                                {formatCurrency(
+                                  Math.round(item.product.price * item.quantity)
+                                )}
+                              </Typography>
                             </Box>
                             <Box sx={{ textAlign: "right", mt: 2 }}>
-                              <ButtonGroup
+                              {/* <ButtonGroup
                                 variant="outlined"
                                 aria-label="outlined button group"
                                 style={{ height: "2.5rem" }}
@@ -467,7 +713,7 @@ export default function Cart() {
                                 >
                                   ++
                                 </Button>
-                              </ButtonGroup>
+                              </ButtonGroup> */}
                             </Box>
                           </CardContent>
                         </Card>

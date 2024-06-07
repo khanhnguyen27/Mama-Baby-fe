@@ -10,3 +10,8 @@ export const allStoreApi = (params) => {
 export const storeByIdApi = (storeId) => {
   return axiosJWT.get(`http://localhost:8080/mamababy/stores/${storeId}`);
 };
+export const storeByUserIdApi = (userId) => {
+  return axiosJWT.get(`http://localhost:8080/mamababy/stores/user/${userId}`);
+};
+
+
