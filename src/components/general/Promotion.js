@@ -80,11 +80,11 @@ const Promotion = () => {
             <Button
               variant="contained"
               onClick={() => {
-                navigate("/signin"),
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "instant",
-                  });
+                navigate("/signin");
+                window.scrollTo({
+                  top: 0,
+                  behavior: "instant",
+                });
               }}
               size="large"
               sx={{

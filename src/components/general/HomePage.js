@@ -704,11 +704,11 @@ export default function HomePage() {
                     fontWeight: "bold",
                   }}
                   onClick={() => {
-                    navigate("/products"),
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      });
+                    navigate("/products");
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
                   }}
                 >
                   See more products
