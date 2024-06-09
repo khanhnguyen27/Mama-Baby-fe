@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { profileUserApi } from "../../api/UserAPI";
 import { Card, CardContent, Typography, Grid, Paper } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -147,6 +149,7 @@ export default function Profile() {
                       </div>
                     </Grid>
                   </Grid>
+                  
                 </Grid>
               </Grid>
             )}
@@ -315,6 +318,40 @@ export default function Profile() {
                       >
                         {user.role_id.name}
                       </Typography>
+                    </div>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <div>
+                    <IconButton
+                        size="large"
+                        edge="end"
+                        aria-label="account of current user"
+                        aria-haspopup="true"
+                        color="inherit"
+                        to="signin"
+                        sx={{
+                          borderRadius: 2,
+                          height: 40,
+                          marginRight: "1rem",
+                          transition:
+                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                          "&:hover": {
+                            backgroundColor: "pink",
+                            color: "#ff469e",
+                          },
+                        }}
+                      >
+                      <Typography
+                        style={{
+                          fontWeight: "bold",
+                          color: "black",
+                          fontSize: "1.25rem",
+                        }}
+                        onClick={() => navigate("/regisstore")}
+                      >
+                        Regis Store
+                      </Typography>
+                      </IconButton>
                     </div>
                   </Grid>
                 </Grid>
