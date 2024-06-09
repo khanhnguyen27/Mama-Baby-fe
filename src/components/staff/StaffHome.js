@@ -361,6 +361,7 @@ export default function StaffHome() {
   };
 
   const handleAddProduct = () => {
+    console.log(image.file);
     if (!name || !price || !point || !description || !image.file) {
       // Nếu có ít nhất một trường dữ liệu bị thiếu
       // Hiển thị thông báo lỗi cho người dùng
