@@ -1,6 +1,18 @@
 import axiosJWT from "./ConfigAxiosInterceptor";
 
-const URL_CREATEORDER = `http://localhost:8080/mamababy/orders`;
+const URL_ORDER = `http://localhost:8080/mamababy/orders`;
+
+export const allOrderApi = (params) => {
+  return axiosJWT.get(URL_ORDER, {
+    params: params,
+  });
+};
+
+export const orderByUserIdApi = (userId) => {
+  return axiosJWT.get(`${URL_ORDER}/users/${userId}`, {
+    userId: userId,
+  });
+};
 
 export const createOrderApi = (
   userId,
@@ -14,7 +26,7 @@ export const createOrderApi = (
   type,
   cartItems
 ) => {
-  return axiosJWT.post(URL_CREATEORDER, {
+  return axiosJWT.post(URL_ORDER, {
     user_id: userId,
     voucher_id: voucherId,
     total_point: totalPoint,
