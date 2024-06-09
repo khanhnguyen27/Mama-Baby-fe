@@ -1,9 +1,9 @@
 import axiosJWT from "./ConfigAxiosInterceptor";
 
-const URL_ALLBRAND = `http://localhost:8080/mamababy/brands`;
+const URL_BRAND = `http://localhost:8080/mamababy/brands`;
 
 export const allBrandApi = (params) => {
-  return axiosJWT.get(URL_ALLBRAND, {
+  return axiosJWT.get(URL_BRAND, {
     params: params,
   });
 };

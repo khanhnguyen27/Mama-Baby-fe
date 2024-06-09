@@ -1,9 +1,9 @@
 import axiosJWT from "./ConfigAxiosInterceptor";
 
-const URL_ALLARTICLE = `http://localhost:8080/mamababy/article`;
+const URL_ARTICLE = `http://localhost:8080/mamababy/article`;
 
 export const allArticleApi = (params) => {
-  return axiosJWT.get(URL_ALLARTICLE, {
+  return axiosJWT.get(URL_ARTICLE, {
     params: params,
   });
 };
