@@ -220,10 +220,10 @@ export default function StaffHome() {
     ) {
       // Nếu có ít nhất một trường dữ liệu bị thiếu
       // Hiển thị thông báo lỗi cho người dùng
-      alert("Please fill in all required fields.");
+      toast.warn("Please fill in all required fields.");
       return;
     } else if (selectedProduct.price <= 0 || selectedProduct.point <= 0) {
-      alert("Price or Point cannot be less than or equal to 0.");
+      toast.error("Price or Point cannot be less than or equal to 0.");
       return;
     }
     debugger;
@@ -248,7 +248,7 @@ export default function StaffHome() {
         // Đóng dialog cập nhật sản phẩm
 
         handleClose();
-        alert("Product updated successfully!");
+        toast.success("Product updated successfully!");
       })
       .catch((error) => {
         if (error.response) {
@@ -263,7 +263,7 @@ export default function StaffHome() {
           // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
           console.error("Error message:", error.message);
         }
-        alert("Failed to update product. Please try again later.");
+        toast.error("Failed to update product. Please try again later.");
       });
 
     //debug
@@ -922,9 +922,8 @@ export default function StaffHome() {
                       >
                         <CardMedia
                           component="img"
-                          //image={item.image_url}
-
-                          image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          image={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
+                          //image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
                           // onClick={() =>
