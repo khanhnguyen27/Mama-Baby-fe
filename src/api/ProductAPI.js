@@ -2,7 +2,8 @@ import axiosJWT from "./ConfigAxiosInterceptor";
 
 const URL_ALLPRODUCT = `http://localhost:8080/mamababy/products`;
 // const URL_PRODUCTBYID = `http://localhost:8080/mamababy/products/${productId}`;
-
+const URL_ADD_PRODUCT = `http://localhost:8080/mamababy/products`;
+const URL_UPDATE_PRODUCT = `http://localhost:8080/mamababy/products`;
 
 export const allProductApi = (params) => {
   return axiosJWT.get(URL_ALLPRODUCT, {
@@ -12,4 +13,83 @@ export const allProductApi = (params) => {
 
 export const productByIdApi = (productId) => {
   return axiosJWT.get(`http://localhost:8080/mamababy/products/${productId}`);
+};
+
+export const addProductApi = (
+  image,
+  name,
+  price,
+  point,
+  status,
+  description,
+  type,
+  brandId,
+  categoryId,
+  ageId,
+  storeId,
+  isActive
+) => {
+  debugger;
+  const formData = new FormData();
+  formData.append("image", image);
+  formData.append("name", name);
+  formData.append("price", price);
+  formData.append("point", point);
+  formData.append("status", status);
+  formData.append("description", description);
+  formData.append("imageUrl", "");
+  formData.append("type", type);
+  formData.append("brandId", brandId);
+  formData.append("categoryId", categoryId);
+  formData.append("rangeAge", ageId);
+  formData.append("storeId", storeId);
+  formData.append("isActive", isActive);
+
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  return axiosJWT.post(URL_ADD_PRODUCT, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const updateProductApi = (
+  image,
+  productId,
+  name,
+  price,
+  point,
+  status,
+  description,
+  type,
+  brandId,
+  categoryId,
+  ageId,
+  storeId,
+  isActive
+) => {
+  debugger;
+  const formData = new FormData();
+  formData.append("image", image);
+  formData.append("name", name);
+  formData.append("price", price);
+  formData.append("point", point);
+  formData.append("status", status);
+  formData.append("description", description);
+  formData.append("imageUrl", "");
+  formData.append("type", type);
+  formData.append("brandId", brandId);
+  formData.append("categoryId", categoryId);
+  formData.append("rangeAge", ageId);
+  formData.append("storeId", storeId);
+  formData.append("isActive", isActive);
+
+  return axiosJWT.put(`${URL_UPDATE_PRODUCT}/${productId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

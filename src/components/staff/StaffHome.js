@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { environment } from "../../environments/environment";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
-import { allProductApi } from "../../api/ProductAPI";
+import {
+  allProductApi,
+  addProductApi,
+  updateProductApi,
+} from "../../api/ProductAPI";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
@@ -41,6 +46,7 @@ import Cart from "@mui/icons-material/ShoppingCart";
 import { useDispatch } from "react-redux";
 import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 
 export default function StaffHome() {
   const navigate = useNavigate();
@@ -83,8 +89,8 @@ export default function StaffHome() {
   }, []);
 
   const storeId = store.id;
-  console.log(userId);
-  console.log(storeId);
+  // console.log(userId);
+  // console.log(storeId);
   const fetchData = async () => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
@@ -93,9 +99,9 @@ export default function StaffHome() {
         allCategorytApi(),
         allProductApi({
           keyword: keyword,
-          age_id: ageFilter,
-          brand_id: brandFilter,
           category_id: categoryFilter,
+          brand_id: brandFilter,
+          age_id: ageFilter,
           store_id: storeId,
         }),
       ]);
@@ -167,30 +173,25 @@ export default function StaffHome() {
 
   //Add Product
   const [openAddProduct, setOpenAddProduct] = useState(false);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [point, setPoint] = useState("");
+  const [status, setStatus] = useState("IN STOCK");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState("WHOLESALE");
+  const [brandId, setBrandId] = useState(1);
+  const [categoryId, setCategoryId] = useState(1);
+  const [ageId, setAgeId] = useState(1);
+  const [isActive, setIsActive] = useState(true);
+  const [image, setImage] = useState({
+    file: null,
+    url: "",
+  });
+
   //Update product
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedImage, setSelectedImage] = useState("");
-  const [errors, setErrors] = useState({
-    name: "",
-    price: "",
-    point: "",
-    description: "",
-    image_url: "",
-  });
-
-  const validateFields = () => {
-    const newErrors = {};
-    if (!selectedProduct?.name) newErrors.name = "Name is required";
-    if (!selectedProduct?.price) newErrors.price = "Price is required";
-    if (!selectedProduct?.point) newErrors.point = "Point is required";
-    if (!selectedProduct?.description)
-      newErrors.description = "Description is required";
-    if (!selectedProduct?.image_url)
-      newErrors.image_url = "Image URL is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  //const [selectedImage, setSelectedImage] = useState("");
 
   const handleOpen = (item) => {
     setSelectedProduct(item);
@@ -203,58 +204,152 @@ export default function StaffHome() {
   };
 
   const handleChange = (field, value) => {
-    if (field === "price" || field === "point") {
-      const numberValue = Number(value);
-      if (numberValue < 0) {
-        setErrors({
-          ...errors,
-          [field]: `${
-            field.charAt(0).toUpperCase() + field.slice(1)
-          } cannot be negative`,
-        });
-        return;
-      }
-    }
     setSelectedProduct((prevProduct) => ({
       ...prevProduct,
       [field]: value,
     }));
-    setErrors({ ...errors, [field]: "" });
   };
 
   const handleUpdate = () => {
+    if (
+      !selectedProduct.name ||
+      !selectedProduct.price ||
+      !selectedProduct.point ||
+      !selectedProduct.description ||
+      !image.url
+    ) {
+      // Nếu có ít nhất một trường dữ liệu bị thiếu
+      // Hiển thị thông báo lỗi cho người dùng
+      alert("Please fill in all required fields.");
+      return;
+    } else if (selectedProduct.price <= 0 || selectedProduct.point <= 0) {
+      alert("Price or Point cannot be less than or equal to 0.");
+      return;
+    }
+    debugger;
     // Xử lý cập nhật sản phẩm
+    updateProductApi(
+      image.file || "",
+      selectedProduct.id,
+      selectedProduct.name,
+      selectedProduct.price,
+      selectedProduct.point,
+      selectedProduct.status,
+      selectedProduct.description,
+      selectedProduct.type,
+      selectedProduct.brand_id,
+      selectedProduct.category_id,
+      selectedProduct.age_id,
+      selectedProduct.store_id,
+      selectedProduct.is_active
+    )
+      .then((response) => {
+        // Xử lý kết quả trả về từ API
+        // Đóng dialog cập nhật sản phẩm
+
+        handleClose();
+        alert("Product updated successfully!");
+      })
+      .catch((error) => {
+        if (error.response) {
+          // Server trả về một mã trạng thái không nằm trong phạm vi 2xx
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          console.error("Error response headers:", error.response.headers);
+        } else if (error.request) {
+          // Yêu cầu đã được thực hiện nhưng không nhận được phản hồi
+          console.error("Error request:", error.request);
+        } else {
+          // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
+          console.error("Error message:", error.message);
+        }
+        alert("Failed to update product. Please try again later.");
+      });
+
+    //debug
+    // if (!selectedProduct) return;
+    // console.log("Product details:", {
+    //   image: image.file,
+    //   imageUrl: image.url,
+    //   id: selectedProduct.id,
+    //   name: selectedProduct.name,
+    //   price: selectedProduct.price,
+    //   point: selectedProduct.point,
+    //   description: selectedProduct.description,
+    //   status: selectedProduct.status,
+    //   type: selectedProduct.type,
+    //   category_id: selectedProduct.category_id,
+    //   brand_id: selectedProduct.brand_id,
+    //   age_id: selectedProduct.age_id,
+    //   is_active: selectedProduct.is_active,
+    // });
   };
 
-  const handleUpdateClick = () => {
-    if (validateFields()) {
-      handleUpdate();
+  const handleImage = (e) => {
+    if (e.target.files[0]) {
+      const file = e.target.files[0];
+      const url = URL.createObjectURL(file);
+      setImage({
+        file: file,
+        url: url,
+      });
     }
   };
 
   useEffect(() => {
+    const setImageFromUrl = async (url) => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const file = new File([blob], selectedProduct.image_url, {
+          type: blob.type,
+        });
+
+        setImage((prevImage) => ({
+          ...prevImage,
+          url,
+          file,
+        }));
+      } catch (error) {
+        console.error("Error fetching image:", error);
+      }
+    };
+
     if (selectedProduct?.image_url) {
-      setSelectedImage(selectedProduct.image_url);
+      const imageUrl = `${environment.apiBaseUrl}/products/images/${selectedProduct.image_url}`;
+      setImageFromUrl(imageUrl);
     } else {
-      setSelectedImage("");
+      setImage((prevImage) => ({
+        ...prevImage,
+        url: "",
+        file: null,
+      }));
     }
   }, [selectedProduct]);
 
-  const handleChangeImage = (file) => {
-    // Kiểm tra xem có file nào được chọn không
-    if (file) {
-      // Đọc dữ liệu của file ảnh
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      // Khi đọc dữ liệu thành công
-      reader.onload = () => {
-        // Lưu đường dẫn của file ảnh vào trạng thái của ứng dụng
-        setSelectedImage(reader.result);
-        // Gọi hàm handleChange để cập nhật giá trị của trường 'image_url'
-        handleChange("image_url", reader.result);
-      };
-    }
-  };
+  // useEffect(() => {
+  //   if (selectedProduct?.image_url) {
+  //     setSelectedImage(selectedProduct.image_url);
+  //   } else {
+  //     setSelectedImage("");
+  //   }
+  // }, [selectedProduct]);
+
+  // const handleChangeImage = (file) => {
+  //   // Kiểm tra xem có file nào được chọn không
+  //   if (file) {
+  //     // Đọc dữ liệu của file ảnh
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+  //     // Khi đọc dữ liệu thành công
+  //     reader.onload = () => {
+  //       // Lưu đường dẫn của file ảnh vào trạng thái của ứng dụng
+  //       setSelectedImage(reader.result);
+  //       // Gọi hàm handleChange để cập nhật giá trị của trường 'image_url'
+  //       handleChange("image_url", reader.result);
+  //     };
+  //   }
+  // };
 
   //Add product
   const handleOpenAddProduct = () => {
@@ -266,10 +361,43 @@ export default function StaffHome() {
   };
 
   const handleAddProduct = () => {
-    // Thực hiện xử lý thêm sản phẩm ở đây
-    // Cần truyền các giá trị từ các trường vào hàm xử lý thêm sản phẩm
-    // Đóng bảng sau khi thêm thành công
-    handleCloseAddProduct();
+    if (!name || !price || !point || !description || !image.file) {
+      // Nếu có ít nhất một trường dữ liệu bị thiếu
+      // Hiển thị thông báo lỗi cho người dùng
+
+      toast.warn("Please fill in all required fields.");
+      return;
+    } else if (price <= 0 || point <= 0) {
+      toast.error("Price or Point cannot be less than or equal to 0.");
+      return;
+    }
+    debugger;
+    addProductApi(
+      image.file,
+      name,
+      price,
+      point,
+      status,
+      description,
+      type,
+      brandId,
+      categoryId,
+      ageId,
+      storeId,
+      isActive
+    )
+      .then((response) => {
+        // Xử lý kết quả trả về từ API
+        // Đóng dialog thêm sản phẩm
+        handleCloseAddProduct();
+        toast.success("Product added successfully!");
+      })
+      .catch((error) => {
+        // Xử lý lỗi từ API
+        console.error("Error adding product:", error);
+        // Hiển thị thông báo lỗi cho người dùng
+        toast.error("Failed to add product. Please try again later.");
+      });
   };
 
   if (loading) {
@@ -794,6 +922,8 @@ export default function StaffHome() {
                       >
                         <CardMedia
                           component="img"
+                          //image={item.image_url}
+
                           image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
@@ -913,8 +1043,6 @@ export default function StaffHome() {
               onChange={(e) => handleChange("name", e.target.value)}
               fullWidth
               margin="normal"
-              error={!!errors.name}
-              helperText={errors.name}
             />
             <TextField
               label="Price"
@@ -923,8 +1051,6 @@ export default function StaffHome() {
               type="number"
               fullWidth
               margin="normal"
-              error={!!errors.price}
-              helperText={errors.price}
             />
             <TextField
               label="Point"
@@ -933,8 +1059,6 @@ export default function StaffHome() {
               type="number"
               fullWidth
               margin="normal"
-              error={!!errors.point}
-              helperText={errors.point}
             />
             <FormControl fullWidth margin="normal">
               <InputLabel>Status</InputLabel>
@@ -965,8 +1089,6 @@ export default function StaffHome() {
               rows={4}
               fullWidth
               margin="normal"
-              error={!!errors.description}
-              helperText={errors.description}
             />
             <TextField
               label="Created At"
@@ -992,16 +1114,11 @@ export default function StaffHome() {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => handleChangeImage(e.target.files[0])}
+              onChange={handleImage}
               style={{ marginTop: "16px", marginBottom: "16px" }}
             />
-            {errors.image_url && (
-              <p style={{ color: "red", marginTop: "8px" }}>
-                {errors.image_url}
-              </p>
-            )}
 
-            {selectedImage && (
+            {image.url && (
               <FormControl fullWidth margin="normal">
                 <InputLabel shrink>Image</InputLabel>
                 <div
@@ -1012,7 +1129,7 @@ export default function StaffHome() {
                   }}
                 >
                   <img
-                    src={selectedImage}
+                    src={image.url}
                     alt="Selected"
                     style={{ width: "100%", marginTop: "16px" }}
                   />
@@ -1103,7 +1220,7 @@ export default function StaffHome() {
             </Button>
             <Button
               variant="contained"
-              onClick={handleUpdateClick}
+              onClick={handleUpdate}
               sx={{
                 backgroundColor: "#F0F8FF",
                 color: "#008080",
@@ -1132,39 +1249,30 @@ export default function StaffHome() {
         <DialogContent>
           <TextField
             label="Name"
-            value=""
-            onChange={(e) => handleChange("name", e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             fullWidth
             margin="normal"
-            error={!!errors.name}
-            helperText={errors.name}
           />
           <TextField
             label="Price"
-            value="0"
-            onChange={(e) => handleChange("price", e.target.value)}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             type="number"
             fullWidth
             margin="normal"
-            error={!!errors.price}
-            helperText={errors.price}
           />
           <TextField
             label="Point"
-            value="0"
-            onChange={(e) => handleChange("point", e.target.value)}
+            value={point}
+            onChange={(e) => setPoint(e.target.value)}
             type="number"
             fullWidth
             margin="normal"
-            error={!!errors.point}
-            helperText={errors.point}
           />
           <FormControl fullWidth margin="normal">
             <InputLabel>Status</InputLabel>
-            <Select
-              value={"IN STOCK"}
-              onChange={(e) => handleChange("status", e.target.value)}
-            >
+            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
               <MenuItem value="IN STOCK">IN STOCK</MenuItem>
               <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
               <MenuItem value="COMING SOON">COMING SOON</MenuItem>
@@ -1172,36 +1280,29 @@ export default function StaffHome() {
           </FormControl>
           <FormControl fullWidth margin="normal">
             <InputLabel>Type</InputLabel>
-            <Select
-              value="WHOLESALE"
-              onChange={(e) => handleChange("type", e.target.value)}
-            >
+            <Select value={type} onChange={(e) => setType(e.target.value)}>
               <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
               <MenuItem value="GIFT">GIFT</MenuItem>
             </Select>
           </FormControl>
           <TextField
             label="Description"
-            value=""
-            onChange={(e) => handleChange("description", e.target.value)}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             multiline
             rows={4}
             fullWidth
             margin="normal"
-            error={!!errors.description}
-            helperText={errors.description}
           />
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => handleChangeImage(e.target.files[0])}
+            //onChange={(e) => handleChangeImage(e.target.files[0])}
+            onChange={handleImage}
             style={{ marginTop: "16px", marginBottom: "16px" }}
           />
-          {errors.image_url && (
-            <p style={{ color: "red", marginTop: "8px" }}>{errors.image_url}</p>
-          )}
 
-          {selectedImage && (
+          {image && (
             <FormControl fullWidth margin="normal">
               <InputLabel shrink>Image</InputLabel>
               <div
@@ -1212,7 +1313,7 @@ export default function StaffHome() {
                 }}
               >
                 <img
-                  src={selectedImage}
+                  src={image.url}
                   alt="Selected"
                   style={{ width: "100%", marginTop: "16px" }}
                 />
@@ -1222,8 +1323,8 @@ export default function StaffHome() {
           <FormControl fullWidth margin="normal">
             <InputLabel>Category</InputLabel>
             <Select
-              defaultValue="1"
-              onChange={(e) => handleChange("category_id", e.target.value)}
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
             >
               {Object.keys(categoryMap).map((key) => (
                 <MenuItem key={key} value={key}>
@@ -1235,8 +1336,8 @@ export default function StaffHome() {
           <FormControl fullWidth margin="normal">
             <InputLabel>Brand</InputLabel>
             <Select
-              defaultValue="1"
-              onChange={(e) => handleChange("brand_id", e.target.value)}
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
             >
               {Object.keys(brandMap).map((key) => (
                 <MenuItem key={key} value={key}>
@@ -1248,8 +1349,8 @@ export default function StaffHome() {
           <TextField
             label="Age"
             select
-            defaultValue="1"
-            onChange={(e) => handleChange("age_id", e.target.value)}
+            value={ageId}
+            onChange={(e) => setAgeId(e.target.value)}
             fullWidth
             margin="normal"
           >
@@ -1262,8 +1363,8 @@ export default function StaffHome() {
           <FormControl fullWidth margin="normal">
             <InputLabel>Active</InputLabel>
             <Select
-              defaultValue="true"
-              onChange={(e) => handleChange("is_active", e.target.value)}
+              value={isActive}
+              onChange={(e) => setIsActive(e.target.value)}
             >
               <MenuItem value={true}>Yes</MenuItem>
               <MenuItem value={false}>No</MenuItem>
