@@ -148,11 +148,11 @@ const Introduction = () => {
           <Button
             variant="contained"
             onClick={() => {
-              navigate("/"),
-                window.scrollTo({
-                  top: 0,
-                  behavior: "instant",
-                });
+              navigate("/");
+              window.scrollTo({
+                top: 0,
+                behavior: "instant",
+              });
             }}
             size="large"
             sx={{

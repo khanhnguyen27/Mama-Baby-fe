@@ -4,10 +4,23 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { allProductApi } from "../../api/ProductAPI";
+import FormControl from "@mui/material/FormControl";
+import Input from "@mui/material/Input";
+import Button from "@mui/material/Button";
+import ProductSearch from "../Navigation/ProductSearch";
+import {
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import {
   Box,
   Breadcrumbs,
-  Button,
   Card,
   CardActions,
   CardContent,
@@ -70,6 +83,7 @@ export default function StaffHome() {
   }, []);
 
   const storeId = store.id;
+  console.log(userId);
   console.log(storeId);
   const fetchData = async () => {
     try {
@@ -151,6 +165,112 @@ export default function StaffHome() {
     setLoading(true);
   };
 
+  //Add Product
+  const [openAddProduct, setOpenAddProduct] = useState(false);
+  //Update product
+  const [open, setOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [errors, setErrors] = useState({
+    name: "",
+    price: "",
+    point: "",
+    description: "",
+    image_url: "",
+  });
+
+  const validateFields = () => {
+    const newErrors = {};
+    if (!selectedProduct?.name) newErrors.name = "Name is required";
+    if (!selectedProduct?.price) newErrors.price = "Price is required";
+    if (!selectedProduct?.point) newErrors.point = "Point is required";
+    if (!selectedProduct?.description)
+      newErrors.description = "Description is required";
+    if (!selectedProduct?.image_url)
+      newErrors.image_url = "Image URL is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleOpen = (item) => {
+    setSelectedProduct(item);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleChange = (field, value) => {
+    if (field === "price" || field === "point") {
+      const numberValue = Number(value);
+      if (numberValue < 0) {
+        setErrors({
+          ...errors,
+          [field]: `${
+            field.charAt(0).toUpperCase() + field.slice(1)
+          } cannot be negative`,
+        });
+        return;
+      }
+    }
+    setSelectedProduct((prevProduct) => ({
+      ...prevProduct,
+      [field]: value,
+    }));
+    setErrors({ ...errors, [field]: "" });
+  };
+
+  const handleUpdate = () => {
+    // Xử lý cập nhật sản phẩm
+  };
+
+  const handleUpdateClick = () => {
+    if (validateFields()) {
+      handleUpdate();
+    }
+  };
+
+  useEffect(() => {
+    if (selectedProduct?.image_url) {
+      setSelectedImage(selectedProduct.image_url);
+    } else {
+      setSelectedImage("");
+    }
+  }, [selectedProduct]);
+
+  const handleChangeImage = (file) => {
+    // Kiểm tra xem có file nào được chọn không
+    if (file) {
+      // Đọc dữ liệu của file ảnh
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      // Khi đọc dữ liệu thành công
+      reader.onload = () => {
+        // Lưu đường dẫn của file ảnh vào trạng thái của ứng dụng
+        setSelectedImage(reader.result);
+        // Gọi hàm handleChange để cập nhật giá trị của trường 'image_url'
+        handleChange("image_url", reader.result);
+      };
+    }
+  };
+
+  //Add product
+  const handleOpenAddProduct = () => {
+    setOpenAddProduct(true);
+  };
+
+  const handleCloseAddProduct = () => {
+    setOpenAddProduct(false);
+  };
+
+  const handleAddProduct = () => {
+    // Thực hiện xử lý thêm sản phẩm ở đây
+    // Cần truyền các giá trị từ các trường vào hàm xử lý thêm sản phẩm
+    // Đóng bảng sau khi thêm thành công
+    handleCloseAddProduct();
+  };
 
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -161,8 +281,7 @@ export default function StaffHome() {
           padding: "20px",
         }}
       >
-        <Container sx={{ my: 4 }}>
-        </Container>
+        <Container sx={{ my: 4 }}></Container>
         <Container>
           <Grid container spacing={3}>
             {/* Filters */}
@@ -384,6 +503,45 @@ export default function StaffHome() {
         padding: "20px",
       }}
     >
+      <Container sx={{ my: 4 }}>
+        <Grid container justifyContent="center" spacing={2}>
+          {/* Grid item for ProductSearch and Add Product button */}
+          <Grid
+            item
+            xs={12}
+            md={8}
+            sx={{ textAlign: "center", display: "flex", alignItems: "center" }}
+          >
+            {/* ProductSearch */}
+            <ProductSearch />
+            {/* Add Product button */}
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "30px",
+                fontWeight: "bold",
+                fontSize: 10,
+                width: "15vw",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid white",
+                },
+                ml: 2,
+              }}
+              onClick={handleOpenAddProduct}
+            >
+              Add Product
+            </Button>
+          </Grid>
+        </Grid>
+      </Container>
       <Container>
         <Grid container spacing={3}>
           {/* Filters */}
@@ -639,32 +797,34 @@ export default function StaffHome() {
                           image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
-                          onClick={() =>
-                            navigate(
-                              `/products/${item.name
-                                .toLowerCase()
-                                .replace(/\s/g, "-")}`,
-                              { state: { productId: item.id } },
-                              window.scrollTo({
-                                top: 0,
-                                behavior: "smooth",
-                              })
-                            )
-                          }
+                          // onClick={() =>
+                          //   navigate(
+                          //     `/products/${item.name
+                          //       .toLowerCase()
+                          //       .replace(/\s/g, "-")}`,
+                          //     { state: { productId: item.id } },
+                          //     window.scrollTo({
+                          //       top: 0,
+                          //       behavior: "smooth",
+                          //     })
+                          //   )
+                          // }
+                          onClick={() => handleOpen(item)}
                         />
                         <CardContent
-                          onClick={() =>
-                            navigate(
-                              `/products/${item.name
-                                .toLowerCase()
-                                .replace(/\s/g, "-")}`,
-                              { state: { productId: item.id } },
-                              window.scrollTo({
-                                top: 0,
-                                behavior: "smooth",
-                              })
-                            )
-                          }
+                          // onClick={() =>
+                          //   navigate(
+                          //     `/products/${item.name
+                          //       .toLowerCase()
+                          //       .replace(/\s/g, "-")}`,
+                          //     { state: { productId: item.id } },
+                          //     window.scrollTo({
+                          //       top: 0,
+                          //       behavior: "smooth",
+                          //     })
+                          //   )
+                          // }
+                          onClick={() => handleOpen(item)}
                         >
                           <Typography
                             variant="subtitle1"
@@ -700,7 +860,7 @@ export default function StaffHome() {
                             {brandMap[item.brand_id]} |{" "}
                             {categoryMap[item.category_id]}
                           </Typography>
-                        </CardContent>            
+                        </CardContent>
                       </Card>
                     </Tooltip>
                   </Grid>
@@ -737,6 +897,424 @@ export default function StaffHome() {
           </IconButton>
         )}
       </Container>
+      {selectedProduct && (
+        <Dialog open={open} onClose={handleClose}>
+          <DialogContent>
+            <TextField
+              label="ID"
+              value={selectedProduct?.id}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Name"
+              value={selectedProduct?.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              fullWidth
+              margin="normal"
+              error={!!errors.name}
+              helperText={errors.name}
+            />
+            <TextField
+              label="Price"
+              value={selectedProduct?.price}
+              onChange={(e) => handleChange("price", e.target.value)}
+              type="number"
+              fullWidth
+              margin="normal"
+              error={!!errors.price}
+              helperText={errors.price}
+            />
+            <TextField
+              label="Point"
+              value={selectedProduct?.point}
+              onChange={(e) => handleChange("point", e.target.value)}
+              type="number"
+              fullWidth
+              margin="normal"
+              error={!!errors.point}
+              helperText={errors.point}
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={selectedProduct?.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+              >
+                <MenuItem value="IN STOCK">IN STOCK</MenuItem>
+                <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
+                <MenuItem value="COMING SOON">COMING SOON</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Type</InputLabel>
+              <Select
+                value={selectedProduct?.type}
+                onChange={(e) => handleChange("type", e.target.value)}
+              >
+                <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
+                <MenuItem value="GIFT">GIFT</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Description"
+              value={selectedProduct?.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              multiline
+              rows={4}
+              fullWidth
+              margin="normal"
+              error={!!errors.description}
+              helperText={errors.description}
+            />
+            <TextField
+              label="Created At"
+              value={new Date(selectedProduct?.created_at).toLocaleDateString()}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Updated At"
+              value={new Date(selectedProduct?.updated_at).toLocaleDateString()}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+            {/* <TextField
+              label="Image URL"
+              value={selectedProduct?.image_url}
+              onChange={(e) => handleChange("image_url", e.target.value)}
+              fullWidth
+              margin="normal"
+            /> */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleChangeImage(e.target.files[0])}
+              style={{ marginTop: "16px", marginBottom: "16px" }}
+            />
+            {errors.image_url && (
+              <p style={{ color: "red", marginTop: "8px" }}>
+                {errors.image_url}
+              </p>
+            )}
+
+            {selectedImage && (
+              <FormControl fullWidth margin="normal">
+                <InputLabel shrink>Image</InputLabel>
+                <div
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "10px",
+                    textAlign: "center",
+                  }}
+                >
+                  <img
+                    src={selectedImage}
+                    alt="Selected"
+                    style={{ width: "100%", marginTop: "16px" }}
+                  />
+                </div>
+              </FormControl>
+            )}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={selectedProduct?.category_id}
+                onChange={(e) => handleChange("category_id", e.target.value)}
+              >
+                {Object.keys(categoryMap).map((key) => (
+                  <MenuItem key={key} value={key}>
+                    {categoryMap[key]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Brand</InputLabel>
+              <Select
+                value={selectedProduct?.brand_id}
+                onChange={(e) => handleChange("brand_id", e.target.value)}
+              >
+                {Object.keys(brandMap).map((key) => (
+                  <MenuItem key={key} value={key}>
+                    {brandMap[key]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Age"
+              select
+              value={selectedProduct?.age_id}
+              onChange={(e) => handleChange("age_id", e.target.value)}
+              fullWidth
+              margin="normal"
+            >
+              {age.map((ageItem) => (
+                <MenuItem key={ageItem.id} value={ageItem.id}>
+                  {ageItem.rangeAge}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Store ID"
+              value={selectedProduct?.store_id}
+              InputProps={{ readOnly: true }}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Active</InputLabel>
+              <Select
+                value={selectedProduct?.is_active}
+                onChange={(e) => handleChange("is_active", e.target.value)}
+              >
+                <MenuItem value={true}>Yes</MenuItem>
+                <MenuItem value={false}>No</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="contained"
+              onClick={handleClose}
+              sx={{
+                backgroundColor: "#E0E0E0",
+                color: "#757575",
+                borderRadius: "30px",
+                fontSize: 16,
+                fontWeight: "bold",
+                width: "10vw",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #757575",
+                "&:hover": {
+                  backgroundColor: "#757575",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+            >
+              Close
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleUpdateClick}
+              sx={{
+                backgroundColor: "#F0F8FF",
+                color: "#008080",
+                borderRadius: "30px",
+                fontSize: 16,
+                fontWeight: "bold",
+                width: "10vw",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #008080",
+                "&:hover": {
+                  backgroundColor: "#008080",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+            >
+              Update
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      <Dialog open={openAddProduct} onClose={handleCloseAddProduct}>
+        <DialogTitle>Add Product</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            value=""
+            onChange={(e) => handleChange("name", e.target.value)}
+            fullWidth
+            margin="normal"
+            error={!!errors.name}
+            helperText={errors.name}
+          />
+          <TextField
+            label="Price"
+            value="0"
+            onChange={(e) => handleChange("price", e.target.value)}
+            type="number"
+            fullWidth
+            margin="normal"
+            error={!!errors.price}
+            helperText={errors.price}
+          />
+          <TextField
+            label="Point"
+            value="0"
+            onChange={(e) => handleChange("point", e.target.value)}
+            type="number"
+            fullWidth
+            margin="normal"
+            error={!!errors.point}
+            helperText={errors.point}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={"IN STOCK"}
+              onChange={(e) => handleChange("status", e.target.value)}
+            >
+              <MenuItem value="IN STOCK">IN STOCK</MenuItem>
+              <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
+              <MenuItem value="COMING SOON">COMING SOON</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Type</InputLabel>
+            <Select
+              value="WHOLESALE"
+              onChange={(e) => handleChange("type", e.target.value)}
+            >
+              <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
+              <MenuItem value="GIFT">GIFT</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Description"
+            value=""
+            onChange={(e) => handleChange("description", e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+            margin="normal"
+            error={!!errors.description}
+            helperText={errors.description}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleChangeImage(e.target.files[0])}
+            style={{ marginTop: "16px", marginBottom: "16px" }}
+          />
+          {errors.image_url && (
+            <p style={{ color: "red", marginTop: "8px" }}>{errors.image_url}</p>
+          )}
+
+          {selectedImage && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel shrink>Image</InputLabel>
+              <div
+                style={{
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  textAlign: "center",
+                }}
+              >
+                <img
+                  src={selectedImage}
+                  alt="Selected"
+                  style={{ width: "100%", marginTop: "16px" }}
+                />
+              </div>
+            </FormControl>
+          )}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Category</InputLabel>
+            <Select
+              defaultValue="1"
+              onChange={(e) => handleChange("category_id", e.target.value)}
+            >
+              {Object.keys(categoryMap).map((key) => (
+                <MenuItem key={key} value={key}>
+                  {categoryMap[key]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Brand</InputLabel>
+            <Select
+              defaultValue="1"
+              onChange={(e) => handleChange("brand_id", e.target.value)}
+            >
+              {Object.keys(brandMap).map((key) => (
+                <MenuItem key={key} value={key}>
+                  {brandMap[key]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Age"
+            select
+            defaultValue="1"
+            onChange={(e) => handleChange("age_id", e.target.value)}
+            fullWidth
+            margin="normal"
+          >
+            {age.map((ageItem) => (
+              <MenuItem key={ageItem.id} value={ageItem.id}>
+                {ageItem.rangeAge}
+              </MenuItem>
+            ))}
+          </TextField>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Active</InputLabel>
+            <Select
+              defaultValue="true"
+              onChange={(e) => handleChange("is_active", e.target.value)}
+            >
+              <MenuItem value={true}>Yes</MenuItem>
+              <MenuItem value={false}>No</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseAddProduct}
+            sx={{
+              backgroundColor: "#E0E0E0",
+              color: "#757575",
+              borderRadius: "30px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleAddProduct}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#008080",
+              borderRadius: "30px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #008080",
+              "&:hover": {
+                backgroundColor: "#008080",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
