@@ -19,6 +19,7 @@ import ProductSearch from "./ProductSearch";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectCartAmount } from "../../redux/CartSlice";
+import { ListAlt } from "@mui/icons-material";
 
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -29,8 +30,7 @@ const Navigation = () => {
   const [openLogoutMenu, setOpenLogoutMenu] = useState(false);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
-  const cartAmount = useSelector(selectCartAmount)
-
+  const cartAmount = useSelector(selectCartAmount);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -93,6 +93,34 @@ const Navigation = () => {
         </ListItemText>
       </MenuItem>
       <MenuItem
+        onClick={() => (
+          navigate("/orders"), window.scrollTo({ top: 0, behavior: "instant" })
+        )}
+        sx={{
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        <ListItemIcon sx={{ color: "inherit" }}>
+          <ListAlt fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>
+          <Typography
+            style={{
+              color: "inherit",
+              paddingLeft: 10,
+              fontWeight: "bold",
+            }}
+          >
+            Orders
+          </Typography>
+        </ListItemText>
+      </MenuItem>
+      <MenuItem
         onClick={handleLogout}
         sx={{
           transition:
@@ -120,10 +148,10 @@ const Navigation = () => {
       </MenuItem>
     </Menu>
   );
-  const toggleCart = (anchor, open) => (event) => {
-    navigate("/cart");
-    return;
-  };
+  // const toggleCart = (anchor, open) => (event) => {
+  //   navigate("/cart");
+  //   return;
+  // };
 
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("accessToken") !== null);
@@ -750,7 +778,11 @@ const Navigation = () => {
                 color="inherit"
                 aria-label="open cart"
                 style={{ position: "relative" }}
-                onClick={toggleCart("right", true)}
+                // onClick={toggleCart("right", true)}
+                onClick={() => (
+                  navigate("/cart"),
+                  window.scrollTo({ top: 0, behavior: "instant" })
+                )}
                 sx={{ marginLeft: "8px" }}
               >
                 <span

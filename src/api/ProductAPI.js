@@ -1,12 +1,12 @@
 import axiosJWT from "./ConfigAxiosInterceptor";
 
-const URL_ALLPRODUCT = `http://localhost:8080/mamababy/products`;
+const URL_PRODUCT = `http://localhost:8080/mamababy/products`;
 // const URL_PRODUCTBYID = `http://localhost:8080/mamababy/products/${productId}`;
 const URL_ADD_PRODUCT = `http://localhost:8080/mamababy/products`;
 const URL_UPDATE_PRODUCT = `http://localhost:8080/mamababy/products`;
 
 export const allProductApi = (params) => {
-  return axiosJWT.get(URL_ALLPRODUCT, {
+  return axiosJWT.get(URL_PRODUCT, {
     params: params,
   });
 };

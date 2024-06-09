@@ -199,37 +199,65 @@ export default function Cart() {
     //       }, 2000);
     //     })
     //     .catch((error) => console.log(error));
-    createOrderApi(
-      userId,
-      voucherId,
-      totalPoint,
-      amount,
-      totalDiscount,
-      finalAmount,
-      shippingAddress,
-      paymentMethod,
-      type,
-      cartItems2
-    )
-      .then((res) => {
-        console.log(res.data);
-        // const orderId = res?.data?.data.map((item) => (item.id))
-        // console.log(orderId);
-        setTimeout(() => {
-          makePaymentApi(finalAmount, bankCode)
-            .then((res) => {
-              console.log(res.data);
-              toast.success("Now moving to payment page!", {
-                autoClose: 1500,
-              });
-              setTimeout(() => {
-                window.location.replace(res.data?.data?.payment_url);
-              }, 1500);
-            })
-            .catch((error) => console.log(error));
-        }, 1000);
-      })
-      .catch((error) => console.log(error));
+    if (paymentMethod === "COD") {
+      createOrderApi(
+        userId,
+        voucherId,
+        totalPoint,
+        amount,
+        totalDiscount,
+        finalAmount,
+        shippingAddress,
+        paymentMethod,
+        type,
+        cartItems2
+      )
+        .then((res) => {
+          console.log(res.data);
+          toast.success("Create new order successfully", {
+            autoClose: 1500,
+          });
+        })
+        .catch((error) => console.log(error));
+    } else if (paymentMethod === "VNPAY") {
+      createOrderApi(
+        userId,
+        voucherId,
+        totalPoint,
+        amount,
+        totalDiscount,
+        finalAmount,
+        shippingAddress,
+        paymentMethod,
+        type,
+        cartItems2
+      )
+        .then((res) => {
+          console.log(res.data);
+          // const orderId = res?.data?.data.map((item) => (item.id))
+          // console.log(orderId);
+          setTimeout(() => {
+            makePaymentApi(finalAmount, bankCode)
+              .then((res) => {
+                console.log(res.data);
+                toast.success("Now moving to payment page!", {
+                  autoClose: 1500,
+                });
+                setTimeout(() => {
+                  window.location.replace(res.data?.data?.payment_url);
+                }, 1500);
+              })
+              .catch((error) => console.log(error));
+          }, 1000);
+        })
+        .catch((error) => console.log(error));
+    }
+    else if(paymentMethod === ""){
+      toast.error("You haven't choose a valid payment method");
+    }
+    else {
+      toast.error("Unable to checkout");
+    }
   };
   // axiosJWT.post(`http://localhost:8080/mamababy/payment/vn-pay?finalAmount=${getDiscountedTotal()}&bankCode=${paymentMethod}&language=${language}`, {
   // products: cartItems.products.map(item => ({
@@ -254,7 +282,7 @@ export default function Cart() {
       }}
     >
       <Container sx={{ my: 4 }}>
-        <Card sx={{ backgroundColor: "#fff4fc", border: "3px solid #ff469e" }}>
+        <Card sx={{ backgroundColor: "#fff4fc", border: "3px solid #ff469e", borderRadius: "20px" }}>
           <Typography
             sx={{
               fontSize: "2.5rem",
@@ -389,7 +417,7 @@ export default function Cart() {
                                     fontSize: "20px",
                                     textAlign: "center",
                                     fontWeight: "600",
-                                    mr: 1.5                                    
+                                    mr: 1.5,
                                   }}
                                 >
                                   Quantity
@@ -1152,7 +1180,7 @@ export default function Cart() {
                               COD
                             </MenuItem>
                             <MenuItem
-                              value={"VNBANK"}
+                              value={"VNPAY"}
                               sx={{
                                 color: "black",
                                 fontSize: "18px",
@@ -1176,7 +1204,8 @@ export default function Cart() {
                             </MenuItem>
                             {/* <MenuItem value={'NCB'}>Internal Payment</MenuItem> */}
                             <MenuItem
-                              value={"INTCARD"}
+                              // value={"INTCARD"}
+                              value={"VNPAY"}
                               sx={{
                                 color: "black",
                                 fontSize: "18px",
@@ -1255,7 +1284,8 @@ export default function Cart() {
                   <Button
                     onClick={() => (
                       dispatch(clearCart()),
-                      toast.info("Removed all items", { autoClose: 2500 })
+                      toast.info("Removed all items", { autoClose: 2500 }),
+                      window.scrollTo({top: 0, behavior: "smooth"})
                     )}
                     variant="contained"
                     fullWidth
