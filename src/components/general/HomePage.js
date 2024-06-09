@@ -402,66 +402,6 @@ export default function HomePage() {
                   ))}
                 </AccordionDetails>
               </Accordion>
-              <Accordion
-                disableGutters
-                expanded={expanded === "panel4"}
-                onChange={handleChange("panel4")}
-              >
-                <AccordionSummary
-                  sx={{
-                    padding: "2px 1rem",
-                    background:
-                      expanded === "panel4"
-                        ? "#ff469e"
-                        : "linear-gradient(to top, white 50%, #fff4fc 50%) bottom",
-                    color: expanded === "panel4" ? "white" : "black",
-                    backgroundSize: "100% 200%",
-                    border: "2px solid #fff4fc",
-                    transition:
-                      "background 0.4s ease-in-out, color 0.4s ease-in-out",
-                    "& .MuiSvgIcon-root": {
-                      color: expanded === "panel4" ? "white" : "black",
-                    },
-                    "&:hover": {
-                      backgroundPosition: "top",
-                      backgroundColor: "#fff4fc",
-                      color: "#ff469e",
-                      "& .MuiSvgIcon-root": {
-                        color: "#ff469e",
-                      },
-                    },
-                  }}
-                  expandIcon={<ArrowDropDown />}
-                >
-                  <Typography sx={{ fontWeight: "bold", fontSize: "18px" }}>
-                    Store
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  {store?.stores?.map((item) => (
-                    <ListItem
-                      key={item.id}
-                      sx={{
-                        padding: "0.5rem 1rem",
-                        borderRadius: "30px",
-                        background:
-                          "linear-gradient(to left, white 50%, #fff4fc 50%) right",
-                        backgroundSize: "200% 100%",
-                        cursor: "pointer",
-                        transition:
-                          "background 0.5s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        "&:hover": {
-                          backgroundPosition: "left",
-                          color: "#ff469e",
-                          border: "1px solid #ff496e",
-                        },
-                      }}
-                    >
-                      <ListItemText>• {item.name_store}</ListItemText>
-                    </ListItem>
-                  ))}
-                </AccordionDetails>
-              </Accordion>
             </div>
           </Grid>
           {/* Right Section */}

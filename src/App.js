@@ -20,6 +20,7 @@ import ProductDetails from "./components/general/ProductDetails";
 import Article from "./components/general/Article";
 import StaffLayout from "./components/staff/StaffLayout";
 import AdminLayout from "./components/admin/AdminLayout";
+import RegisStores from "./components/general/RegisStores";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/stores/:store_id" element={<StoreDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/regisstore" element={<RegisStores />} />
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
