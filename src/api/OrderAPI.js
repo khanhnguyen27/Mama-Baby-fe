@@ -9,13 +9,15 @@ export const allOrderApi = (params) => {
 };
 
 export const orderByUserIdApi = (userId) => {
-  return axiosJWT.get(`${URL_ORDER}/users/${userId}`, {
+  return axiosJWT.get(`${URL_ORDER}/user/${userId}`, {
     userId: userId,
   });
 };
 
 export const createOrderApi = (
   userId,
+  fullName,
+  phone,
   voucherId,
   totalPoint,
   amount,
@@ -28,6 +30,8 @@ export const createOrderApi = (
 ) => {
   return axiosJWT.post(URL_ORDER, {
     user_id: userId,
+    full_name: fullName,
+    phone_number: phone,
     voucher_id: voucherId,
     total_point: totalPoint,
     amount: amount,
