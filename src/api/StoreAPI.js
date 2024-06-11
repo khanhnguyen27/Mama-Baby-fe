@@ -21,7 +21,7 @@ export const regisStoreApi = (
   user_id,
 
 ) => {
-  return axiosJWT.post(URL_ALLSTORE, {
+  return axiosJWT.post(URL_STORE, {
     name_store: storename,
     address: address,
     description: description,
