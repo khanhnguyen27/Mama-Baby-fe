@@ -211,6 +211,8 @@ export default function StaffHome() {
   };
 
   const handleUpdate = () => {
+    console.log(image.file);
+    console.log(image.url);
     if (
       !selectedProduct.name ||
       !selectedProduct.price ||
@@ -362,6 +364,7 @@ export default function StaffHome() {
 
   const handleAddProduct = () => {
     console.log(image.file);
+    console.log(image.url);
     if (!name || !price || !point || !description || !image.file) {
       // Nếu có ít nhất một trường dữ liệu bị thiếu
       // Hiển thị thông báo lỗi cho người dùng

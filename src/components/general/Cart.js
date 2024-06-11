@@ -38,14 +38,18 @@ import { allVoucherApi } from "../../api/VoucherAPI";
 import { makePaymentApi } from "../../api/VNPayAPI";
 import { createOrderApi } from "../../api/OrderAPI";
 import { jwtDecode } from "jwt-decode";
+import { profileUserApi } from "../../api/UserAPI";
 export default function Cart() {
   window.document.title = "Cart";
   const [visible, setVisible] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState([]);
   const [store, setStore] = useState([]);
   const [storeMap, setStoreMap] = useState({});
   const [voucher, setVoucher] = useState([]);
   const [selectedVoucher, setSelectedVoucher] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const dispatch = useDispatch();
@@ -66,14 +70,17 @@ export default function Cart() {
 
   const fetchData = async () => {
     try {
-      const [storeRes, voucherRes] = await Promise.all([
+      const [userRes, storeRes, voucherRes] = await Promise.all([
+        profileUserApi(),
         allStoreApi(),
         allVoucherApi(),
       ]);
 
+      const userData = userRes?.data?.data || [];
       const storeData = storeRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
 
+      setUserInfo(userData);
       setStore(storeData);
       setVoucher(voucherData);
 
@@ -114,10 +121,21 @@ export default function Cart() {
 
   const handleOpen = () => {
     !isEmptyCart
-      ? setOpen(true)
+      ? (setOpen(true),
+        setFullName(userInfo.full_name),
+        setPhone(userInfo.phone_number),
+        setAddress(userInfo.address))
       : toast.warn("There's no item in your cart", { autoClose: 2500 });
   };
   const handleClose = () => setOpen(false);
+
+  console.log(fullName);
+  const handleFullNameChange = (e) => {
+    setFullName(e.target.value);
+  };
+  const handlePhoneChange = (e) => {
+    setPhone(e.target.value);
+  };
 
   const handleAdressChange = (e) => {
     setAddress(e.target.value);
@@ -135,6 +153,8 @@ export default function Cart() {
     const decodedAccessToken = jwtDecode(accessToken);
     const userId = decodedAccessToken.UserID;
     console.log(userId);
+
+    // Add phone and fullname of the user, also add these 2 column in the order database
     const selectedVoucherObj = voucher.find(
       (item) => item.discountValue === selectedVoucher
     );
@@ -160,48 +180,13 @@ export default function Cart() {
       quantity: item.quantity,
     }));
 
-    const language = "vn";
-    // createOrderApi(
-    //   userId,
-    //   voucherId,
-    //   totalPoint,
-    //   amount,
-    //   totalDiscount,
-    //   finalAmount,
-    //   shippingAddress,
-    //   paymentMethod,
-    //   type,
-    //   cartItems2,
-    // )
-    //   .then((res) => {
-    //     console.log(res.data);
-    //     toast.warn("Checkout sucessfully. New order created", {
-    //       autoClose: 1500,
-    //     });
-    //     setTimeout(() => {
-    //       navigate("/");
-    //     }, 2000);
-    //   })
-    //   .catch((error) => console.log(error));
-    //   makePaymentApi(
+    // const language = "vn";
 
-    //     finalAmount,
-    //     bankCode,
-
-    //   )
-    //     .then((res) => {
-    //       console.log(res.data);
-    //       toast.warn("Checkout sucessfully, moving to payment page!", {
-    //         autoClose: 1500,
-    //       });
-    //       setTimeout(() => {
-    //         window.location.replace(res.data?.data?.payment_url);
-    //       }, 2000);
-    //     })
-    //     .catch((error) => console.log(error));
     if (paymentMethod === "COD") {
       createOrderApi(
         userId,
+        fullName,
+        phone,
         voucherId,
         totalPoint,
         amount,
@@ -222,6 +207,8 @@ export default function Cart() {
     } else if (paymentMethod === "VNPAY") {
       createOrderApi(
         userId,
+        fullName,
+        phone,
         voucherId,
         totalPoint,
         amount,
@@ -234,10 +221,12 @@ export default function Cart() {
       )
         .then((res) => {
           console.log(res.data);
-          // const orderId = res?.data?.data.map((item) => (item.id))
-          // console.log(orderId);
+          const orders = res?.data?.data.map((item) => ({
+            id: item.id,
+          }));
+          console.log(orders);
           setTimeout(() => {
-            makePaymentApi(finalAmount, bankCode)
+            makePaymentApi(finalAmount, bankCode, orders)
               .then((res) => {
                 console.log(res.data);
                 toast.success("Now moving to payment page!", {
@@ -251,11 +240,9 @@ export default function Cart() {
           }, 1000);
         })
         .catch((error) => console.log(error));
-    }
-    else if(paymentMethod === ""){
+    } else if (paymentMethod === "") {
       toast.error("You haven't choose a valid payment method");
-    }
-    else {
+    } else {
       toast.error("Unable to checkout");
     }
   };
@@ -282,7 +269,13 @@ export default function Cart() {
       }}
     >
       <Container sx={{ my: 4 }}>
-        <Card sx={{ backgroundColor: "#fff4fc", border: "3px solid #ff469e", borderRadius: "20px" }}>
+        <Card
+          sx={{
+            backgroundColor: "#fff4fc",
+            border: "3px solid #ff469e",
+            borderRadius: "20px",
+          }}
+        >
           <Typography
             sx={{
               fontSize: "2.5rem",
@@ -908,7 +901,15 @@ export default function Cart() {
                     </Typography>
                   </Box>
                 )}
-                <Divider />
+                <Divider
+                  sx={{
+                    borderStyle: "dashed",
+                    borderColor: "rgba(0, 0, 0, 0.7)",
+                    borderWidth: "1px",
+                    my: 1.5,
+                    width: "100%",
+                  }}
+                />
                 <Box
                   sx={{
                     display: "flex",
@@ -990,41 +991,120 @@ export default function Cart() {
                           }}
                         />
                       </IconButton>
-                      <div style={{ margin: "1rem 0.25rem" }}>
-                        <TextField
-                          fullWidth
-                          onChange={handleAdressChange}
-                          value={address}
-                          placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
-                          size="small"
-                          variant="outlined"
-                          InputProps={{
-                            sx: {
-                              padding: 0,
+                    </div>
+                    <Grid container spacing={2}>
+                      <Grid item md={6}>
+                        <div style={{ margin: "1rem 0.25rem" }}>
+                          <lable>Full Name</lable>
+                          <TextField
+                            fullWidth
+                            onChange={handleFullNameChange}
+                            value={fullName}
+                            placeholder="Enter your full name"
+                            size="small"
+                            variant="outlined"
+                            InputProps={{
+                              sx: {
+                                padding: 0,
+                                border: "1px solid #ff469e",
+                                borderRadius: "7px",
+                                backgroundColor: "white",
+                                transition: "0.2s ease-in-out",
+                                "&:hover": {
+                                  border: "1px solid #ff469e",
+                                },
+                                "&:focus": {
+                                  backgroundColor: "#F8F8F8",
+                                },
+                                "&.Mui-focused": {
+                                  border: "1px solid #ff469e",
+                                  backgroundColor: "#F8F8F8",
+                                  boxShadow:
+                                    "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                  outline: "none",
+                                },
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                  border: "none",
+                                },
+                              },
+                            }}
+                          />
+                        </div>
+                      </Grid>
+                      <Grid item md={6}>
+                        <div style={{ margin: "1rem 0.25rem" }}>
+                          <lable>Phone</lable>
+                          <TextField
+                            fullWidth
+                            onChange={handlePhoneChange}
+                            value={phone}
+                            placeholder="Enter your phone"
+                            size="small"
+                            variant="outlined"
+                            InputProps={{
+                              sx: {
+                                padding: 0,
+                                border: "1px solid #ff469e",
+                                borderRadius: "7px",
+                                backgroundColor: "white",
+                                transition: "0.2s ease-in-out",
+                                "&:hover": {
+                                  border: "1px solid #ff469e",
+                                },
+                                "&:focus": {
+                                  backgroundColor: "#F8F8F8",
+                                },
+                                "&.Mui-focused": {
+                                  border: "1px solid #ff469e",
+                                  backgroundColor: "#F8F8F8",
+                                  boxShadow:
+                                    "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                  outline: "none",
+                                },
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                  border: "none",
+                                },
+                              },
+                            }}
+                          />
+                        </div>
+                      </Grid>
+                    </Grid>
+                    <div style={{ margin: "1rem 0.25rem" }}>
+                      <label>Address</label>
+                      <TextField
+                        fullWidth
+                        onChange={handleAdressChange}
+                        value={address}
+                        placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
+                        size="small"
+                        variant="outlined"
+                        InputProps={{
+                          sx: {
+                            padding: 0,
+                            border: "1px solid #ff469e",
+                            borderRadius: "7px",
+                            backgroundColor: "white",
+                            transition: "0.2s ease-in-out",
+                            "&:hover": {
                               border: "1px solid #ff469e",
-                              borderRadius: "7px",
-                              backgroundColor: "white",
-                              transition: "0.2s ease-in-out",
-                              "&:hover": {
-                                border: "1px solid #ff469e",
-                              },
-                              "&:focus": {
-                                backgroundColor: "#F8F8F8",
-                              },
-                              "&.Mui-focused": {
-                                border: "1px solid #ff469e",
-                                backgroundColor: "#F8F8F8",
-                                boxShadow:
-                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                outline: "none",
-                              },
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                border: "none",
-                              },
                             },
-                          }}
-                        />
-                      </div>
+                            "&:focus": {
+                              backgroundColor: "#F8F8F8",
+                            },
+                            "&.Mui-focused": {
+                              border: "1px solid #ff469e",
+                              backgroundColor: "#F8F8F8",
+                              boxShadow:
+                                "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                              outline: "none",
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              border: "none",
+                            },
+                          },
+                        }}
+                      />
                     </div>
                     <Typography variant="h6" component="h2">
                       Your cart
@@ -1203,9 +1283,8 @@ export default function Cart() {
                               Internal Payment
                             </MenuItem>
                             {/* <MenuItem value={'NCB'}>Internal Payment</MenuItem> */}
-                            <MenuItem
-                              // value={"INTCARD"}
-                              value={"VNPAY"}
+                            {/* <MenuItem
+                              value={"INTCARD"}
                               sx={{
                                 color: "black",
                                 fontSize: "18px",
@@ -1226,7 +1305,7 @@ export default function Cart() {
                               }}
                             >
                               International Payment
-                            </MenuItem>
+                            </MenuItem> */}
                           </Select>
                         </FormControl>
 
@@ -1285,7 +1364,7 @@ export default function Cart() {
                     onClick={() => (
                       dispatch(clearCart()),
                       toast.info("Removed all items", { autoClose: 2500 }),
-                      window.scrollTo({top: 0, behavior: "smooth"})
+                      window.scrollTo({ top: 0, behavior: "smooth" })
                     )}
                     variant="contained"
                     fullWidth

@@ -4,6 +4,7 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { productByIdApi } from "../../api/ProductAPI";
+import { commentByProductIdApi } from "../../api/CommentAPI";
 import {
   Box,
   CircularProgress,
@@ -18,6 +19,7 @@ import {
   Container,
   Badge,
   IconButton,
+  colors,
 } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
 import { KeyboardCapslock } from "@mui/icons-material";
@@ -35,8 +37,11 @@ export default function ProductDetails() {
   const [category, setCategory] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
   const [product, setProduct] = useState(null);
+  const [comment, setComment] = useState([]);
+  const [visibleComments, setVisibleComments] = useState(5);
   const productId = state?.productId;
   const [quantity, setQuantity] = useState(1);
+  const isComment = comment?.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -50,22 +55,25 @@ export default function ProductDetails() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
+      const [ageRes, brandRes, categoryRes, productRes, commentRes] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
         productByIdApi(productId),
+        commentByProductIdApi(productId),
       ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || {};
+      const commentData = commentRes?.data?.data || null;
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
       setProduct(productData);
+      setComment(commentData);
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -142,6 +150,33 @@ export default function ProductDetails() {
     );
   };
 
+  const Rating = ({ value }) => {
+    if (value < 1 || value > 5) {
+      return <div>Invalid rating value</div>;
+    }
+  
+    const filledStars = Math.floor(value);
+    const emptyStars = 5 - filledStars;
+  
+    return (
+      <div className="rating">
+        {[...Array(filledStars)].map((_, index) => (
+          <span key={index} className="star" style={{ color: '#FFD700', fontSize: '24px', marginRight: '5px' }}>
+          ★
+          </span>
+        ))}
+        {[...Array(emptyStars)].map((_, index) => (
+          <span key={index} className="star" style={{ color: 'lightgray', fontSize: '24px', marginRight: '5px' }}>
+          ★
+          </span>
+        ))}
+      </div>
+    );
+  };
+  const handleShowMore = () => {
+    setVisibleComments(prevVisibleComments => prevVisibleComments + 5);
+  };
+  
   return (
     <div
       style={{
@@ -259,7 +294,7 @@ export default function ProductDetails() {
                         borderRadius: "10px",
                         marginBottom: "10px",
                       }}
-                      src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      src={`http://localhost:8080/mamababy/products/images/${product.image_url}`}
                       alt={product.name}
                     />
                   </Paper>
@@ -505,6 +540,66 @@ export default function ProductDetails() {
           </IconButton>
         )}
       </Container>
+      <Container sx={{ my: 4 }}>
+        <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', color: '#ff469e' }}>
+          Comments
+        </Typography>
+        {isComment ? ( comment.slice(0, visibleComments).map((item, index) => (
+          <Card
+            key={item.id}
+            sx={{
+              backgroundColor: "#f9f9f9",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
+              border: "1px solid #e0e0e0",
+              color: "#333",
+              padding: "5px",
+            }}
+          >
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={2}>
+                  <Paper
+                    sx={{
+                      padding: "10px",
+                      backgroundColor: "#fafafa",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography variant="h6">{item.user_id}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {new Date(item.date).toLocaleDateString()}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={10}>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <Rating value={item.rating} readOnly />
+                  </Box>
+                  <Typography variant="body1">{item.comment}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'center' }}>
+          No comments available.
+        </Typography>
+      )}
+      {visibleComments < comment.length && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ backgroundColor: "#ff469e", "&:hover": { backgroundColor: "#e6338f" },
+                  marginTop : "20px"}}
+              onClick={handleShowMore}
+            >
+              Show more
+            </Button>
+          </Box>
+        )}
+    </Container>
     </div>
   );
 }
