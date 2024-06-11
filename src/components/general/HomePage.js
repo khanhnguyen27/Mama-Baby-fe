@@ -756,7 +756,7 @@ export default function HomePage() {
                           }}
                         >
                           <img
-                            src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                            src={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
                             style={{ width: "64px", height: "64px" }}
                           />
                         </div>
