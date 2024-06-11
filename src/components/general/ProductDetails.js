@@ -294,7 +294,7 @@ export default function ProductDetails() {
                         borderRadius: "10px",
                         marginBottom: "10px",
                       }}
-                      src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      src={`http://localhost:8080/mamababy/products/images/${product.image_url}`}
                       alt={product.name}
                     />
                   </Paper>

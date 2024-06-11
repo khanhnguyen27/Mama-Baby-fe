@@ -695,7 +695,7 @@ export default function Products() {
                       >
                         <CardMedia
                           component="img"
-                          image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          image={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
                           onClick={() =>
