@@ -1,6 +1,7 @@
 import axiosJWT from "./ConfigAxiosInterceptor";
 
 const URL_ARTICLE = `http://localhost:8080/mamababy/article`;
+const URL_ARTICLE_BY_STORE = `http://localhost:8080/mamababy/article/store`;
 
 export const allArticleApi = (params) => {
   return axiosJWT.get(URL_ARTICLE, {
@@ -8,5 +9,50 @@ export const allArticleApi = (params) => {
   });
 };
 
+export const getArticlesByStoreIdApi = (storeId) => {
+  return axiosJWT.get(`${URL_ARTICLE_BY_STORE}/${storeId}`);
+};
+
 // import {allArticleApi } from "../../api/ArticleAPI";
 // const [article, setArticle] = useState([]);
+
+export const addArticleApi = (
+  file,
+  header,
+  content,
+  link_product,
+  store_id,
+  status
+) => {
+  const formData = new FormData();
+  formData.append("files", file);
+  formData.append("header", header);
+  formData.append("content", content);
+  formData.append("link_product", link_product);
+  formData.append("link_image", "");
+  formData.append("store_id", store_id);
+  formData.append("status", status);
+
+  return axiosJWT.post(URL_ARTICLE, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const updateArticleApi = (id, articleData, file) => {
+  const formData = new FormData();
+  formData.append("files", file);
+  formData.append("header", articleData.header);
+  formData.append("content", articleData.content);
+  formData.append("link_product", articleData.link_product);
+  formData.append("link_image", articleData.link_image);
+  formData.append("store_id", articleData.store_id);
+  formData.append("status", articleData.status);
+
+  return axiosJWT.put(`${URL_ARTICLE}/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};

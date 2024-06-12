@@ -4,7 +4,8 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { productByIdApi } from "../../api/ProductAPI";
-import { commentByProductIdApi } from "../../api/CommentAPI";
+import { allCommentApi, commentByProductIdApi } from "../../api/CommentAPI";
+import { allUserApi } from "../../api/UserAPI";
 import {
   Box,
   CircularProgress,
@@ -42,6 +43,8 @@ export default function ProductDetails() {
   const productId = state?.productId;
   const [quantity, setQuantity] = useState(1);
   const isComment = comment?.length;
+  const [userMap, setUserMap] = useState({});
+  const [user, setUser] = useState({});
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -55,10 +58,11 @@ export default function ProductDetails() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, commentRes] = await Promise.all([
+      const [ageRes, brandRes, categoryRes, userRes, productRes, commentRes] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
+        allUserApi(),
         productByIdApi(productId),
         commentByProductIdApi(productId),
       ]);
@@ -66,12 +70,15 @@ export default function ProductDetails() {
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
+      const userData = userRes?.data?.data || [];
       const productData = productRes?.data?.data || {};
       const commentData = commentRes?.data?.data || null;
+
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
+      setUser(userData);
       setProduct(productData);
       setComment(commentData);
 
@@ -92,6 +99,13 @@ export default function ProductDetails() {
         return x;
       }, {});
       setCategoryMap(categoryMap);
+
+      const userMap = userData.reduce((x, item) => {
+        x[item.id] = item.full_name;
+        return x;
+      }, {});
+      setUserMap(userMap);
+
     } catch (err) {
       console.log(err);
     }
@@ -565,7 +579,7 @@ export default function ProductDetails() {
                       textAlign: "center",
                     }}
                   >
-                    <Typography variant="h6">{item.user_id}</Typography>
+                    <Typography variant="h6">{userMap[item.user_id]}</Typography>
                     <Typography variant="body2" color="textSecondary">
                       {new Date(item.date).toLocaleDateString()}
                     </Typography>

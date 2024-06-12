@@ -5,10 +5,10 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import {
-  allProductApi,
-  addProductApi,
-  updateProductApi,
-} from "../../api/ProductAPI";
+  addArticleApi,
+  updateArticleApi,
+  getArticlesByStoreIdApi,
+} from "../../api/ArticleAPI";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
@@ -47,6 +47,7 @@ import { useDispatch } from "react-redux";
 import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function Articles() {
   const navigate = useNavigate();
@@ -60,13 +61,12 @@ export default function Articles() {
   const [brandMap, setBrandMap] = useState({});
   const [category, setCategory] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
-  const [product, setProduct] = useState([]);
+  const [article, setArticle] = useState([]);
   const [store, setStore] = useState([]);
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const keyword = state?.keyword;
-  const [storeName, setStoreName] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,49 +91,16 @@ export default function Articles() {
 
   const storeId = store.id;
   // console.log(userId);
-  // console.log(storeId);
+  console.log(storeId);
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
-        allAgeApi(),
-        allBrandApi(),
-        allCategorytApi(),
-        allProductApi({
-          keyword: keyword,
-          category_id: categoryFilter,
-          brand_id: brandFilter,
-          age_id: ageFilter,
-          store_id: storeId,
-        }),
+      const [articleRes] = await Promise.all([
+        getArticlesByStoreIdApi(storeId),
       ]);
 
-      const ageData = ageRes?.data?.data || [];
-      const brandData = brandRes?.data?.data || [];
-      const categoryData = categoryRes?.data?.data || [];
-      const productData = productRes?.data?.data || [];
+      const articleData = articleRes?.data?.data || [];
 
-      setAge(ageData);
-      setBrand(brandData);
-      setCategory(categoryData);
-      setProduct(productData);
-
-      const ageMap = ageData.reduce((x, item) => {
-        x[item.id] = item.rangeAge;
-        return x;
-      }, {});
-      setAgeMap(ageMap);
-
-      const brandMap = brandData.reduce((x, item) => {
-        x[item.id] = item.name;
-        return x;
-      }, {});
-      setBrandMap(brandMap);
-
-      const categoryMap = categoryData.reduce((x, item) => {
-        x[item.id] = item.name;
-        return x;
-      }, {});
-      setCategoryMap(categoryMap);
+      setArticle(articleData);
     } catch (err) {
       console.log(err);
     }
@@ -144,7 +111,7 @@ export default function Articles() {
       setLoading(false);
     }, 1000);
     fetchData();
-  }, [keyword, ageFilter, brandFilter, categoryFilter, storeId]);
+  }, [keyword, storeId]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
@@ -172,84 +139,88 @@ export default function Articles() {
     setLoading(true);
   };
 
-  //Add Product
-  const [openAddProduct, setOpenAddProduct] = useState(false);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [point, setPoint] = useState("");
-  const [status, setStatus] = useState("IN STOCK");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("WHOLESALE");
-  const [brandId, setBrandId] = useState(1);
-  const [categoryId, setCategoryId] = useState(1);
-  const [ageId, setAgeId] = useState(1);
+  //Add Article
+  const [openAddArticle, setOpenAddArticle] = useState(false);
+  const [header, setHeader] = useState("");
+  const [content, setContent] = useState("");
+  const [linkProduct, setLinkProduct] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [image, setImage] = useState({
     file: null,
     url: "",
   });
 
-  //Update product
+  const handleOpenAddArticle = () => {
+    setOpenAddArticle(true);
+  };
+
+  const handleCloseAddArticle = () => {
+    setOpenAddArticle(false);
+  };
+
+  const handleAddArticle = () => {
+    // Kiểm tra các trường không được rỗng
+    if (!header || !content || !linkProduct || !image.file) {
+      toast.warn("Please fill in all fields and select a file.");
+      return;
+    }
+
+    addArticleApi(image.file, header, content, linkProduct, storeId, isActive)
+      .then((response) => {
+        handleCloseAddArticle();
+        toast.success("Article added successfully!");
+      })
+      .catch((error) => {
+        console.error("Error adding article:", error);
+        toast.error("Failed to add article. Please try again later.");
+      });
+  };
+
+  //Update Article
   const [open, setOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  //const [selectedImage, setSelectedImage] = useState("");
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   const handleOpen = (item) => {
-    setSelectedProduct(item);
+    setSelectedArticle(item);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedProduct(null);
+    setSelectedArticle(null);
   };
 
   const handleChange = (field, value) => {
-    setSelectedProduct((prevProduct) => ({
+    setSelectedArticle((prevProduct) => ({
       ...prevProduct,
       [field]: value,
     }));
   };
 
   const handleUpdate = () => {
+    // Kiểm tra các trường không được rỗng
     if (
-      !selectedProduct.name ||
-      !selectedProduct.price ||
-      !selectedProduct.point ||
-      !selectedProduct.description ||
-      !image.url
+      !selectedArticle.header ||
+      !selectedArticle.content ||
+      !selectedArticle.link_product
     ) {
-      // Nếu có ít nhất một trường dữ liệu bị thiếu
-      // Hiển thị thông báo lỗi cho người dùng
-      toast.warn("Please fill in all required fields.");
-      return;
-    } else if (selectedProduct.price <= 0 || selectedProduct.point <= 0) {
-      toast.error("Price or Point cannot be less than or equal to 0.");
+      toast.warn("Please fill in all fields and select a file.");
       return;
     }
-    debugger;
-    // Xử lý cập nhật sản phẩm
-    updateProductApi(
-      image.file || "",
-      selectedProduct.id,
-      selectedProduct.name,
-      selectedProduct.price,
-      selectedProduct.point,
-      selectedProduct.status,
-      selectedProduct.description,
-      selectedProduct.type,
-      selectedProduct.brand_id,
-      selectedProduct.category_id,
-      selectedProduct.age_id,
-      selectedProduct.store_id,
-      selectedProduct.is_active
-    )
-      .then((response) => {
-        // Xử lý kết quả trả về từ API
-        // Đóng dialog cập nhật sản phẩm
 
+    const articleData = {
+      header: selectedArticle.header,
+      content: selectedArticle.content,
+      link_product: selectedArticle.link_product,
+      link_image: selectedArticle.link_image,
+      store_id: selectedArticle.store_id,
+      status: selectedArticle.status,
+    };
+
+    updateArticleApi(selectedArticle.id, articleData, image.file)
+      .then((response) => {
         handleClose();
-        toast.success("Product updated successfully!");
+        toast.success("Article updated successfully:", response.data);
       })
       .catch((error) => {
         if (error.response) {
@@ -264,26 +235,8 @@ export default function Articles() {
           // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
           console.error("Error message:", error.message);
         }
-        toast.error("Failed to update product. Please try again later.");
+        toast.error("Failed to update article. Please try again later.");
       });
-
-    //debug
-    // if (!selectedProduct) return;
-    // console.log("Product details:", {
-    //   image: image.file,
-    //   imageUrl: image.url,
-    //   id: selectedProduct.id,
-    //   name: selectedProduct.name,
-    //   price: selectedProduct.price,
-    //   point: selectedProduct.point,
-    //   description: selectedProduct.description,
-    //   status: selectedProduct.status,
-    //   type: selectedProduct.type,
-    //   category_id: selectedProduct.category_id,
-    //   brand_id: selectedProduct.brand_id,
-    //   age_id: selectedProduct.age_id,
-    //   is_active: selectedProduct.is_active,
-    // });
   };
 
   const handleImage = (e) => {
@@ -302,7 +255,7 @@ export default function Articles() {
       try {
         const response = await fetch(url);
         const blob = await response.blob();
-        const file = new File([blob], selectedProduct.image_url, {
+        const file = new File([blob], selectedArticle.link_image, {
           type: blob.type,
         });
 
@@ -316,8 +269,8 @@ export default function Articles() {
       }
     };
 
-    if (selectedProduct?.image_url) {
-      const imageUrl = `${environment.apiBaseUrl}/products/images/${selectedProduct.image_url}`;
+    if (selectedArticle?.link_image) {
+      const imageUrl = `${environment.apiBaseUrl}/article/images/${selectedArticle.link_image}`;
       setImageFromUrl(imageUrl);
     } else {
       setImage((prevImage) => ({
@@ -326,304 +279,7 @@ export default function Articles() {
         file: null,
       }));
     }
-  }, [selectedProduct]);
-
-  // useEffect(() => {
-  //   if (selectedProduct?.image_url) {
-  //     setSelectedImage(selectedProduct.image_url);
-  //   } else {
-  //     setSelectedImage("");
-  //   }
-  // }, [selectedProduct]);
-
-  // const handleChangeImage = (file) => {
-  //   // Kiểm tra xem có file nào được chọn không
-  //   if (file) {
-  //     // Đọc dữ liệu của file ảnh
-  //     const reader = new FileReader();
-  //     reader.readAsDataURL(file);
-  //     // Khi đọc dữ liệu thành công
-  //     reader.onload = () => {
-  //       // Lưu đường dẫn của file ảnh vào trạng thái của ứng dụng
-  //       setSelectedImage(reader.result);
-  //       // Gọi hàm handleChange để cập nhật giá trị của trường 'image_url'
-  //       handleChange("image_url", reader.result);
-  //     };
-  //   }
-  // };
-
-  //Add product
-  const handleOpenAddProduct = () => {
-    setOpenAddProduct(true);
-  };
-
-  const handleCloseAddProduct = () => {
-    setOpenAddProduct(false);
-  };
-
-  const handleAddProduct = () => {
-    if (!name || !price || !point || !description || !image.file) {
-      // Nếu có ít nhất một trường dữ liệu bị thiếu
-      // Hiển thị thông báo lỗi cho người dùng
-
-      toast.warn("Please fill in all required fields.");
-      return;
-    } else if (price <= 0 || point <= 0) {
-      toast.error("Price or Point cannot be less than or equal to 0.");
-      return;
-    }
-    debugger;
-    addProductApi(
-      image.file,
-      name,
-      price,
-      point,
-      status,
-      description,
-      type,
-      brandId,
-      categoryId,
-      ageId,
-      storeId,
-      isActive
-    )
-      .then((response) => {
-        // Xử lý kết quả trả về từ API
-        // Đóng dialog thêm sản phẩm
-        handleCloseAddProduct();
-        toast.success("Product added successfully!");
-      })
-      .catch((error) => {
-        // Xử lý lỗi từ API
-        console.error("Error adding product:", error);
-        // Hiển thị thông báo lỗi cho người dùng
-        toast.error("Failed to add product. Please try again later.");
-      });
-  };
-
-  if (loading) {
-    window.scrollTo({ top: 0, behavior: "instant" });
-    return (
-      <div
-        style={{
-          backgroundColor: "#f5f7fd",
-          padding: "20px",
-        }}
-      >
-        <Container sx={{ my: 4 }}></Container>
-        <Container>
-          <Grid container spacing={3}>
-            {/* Filters */}
-            <Grid
-              item
-              sm={12}
-              md={3}
-              sx={{
-                border: "2px solid #ff469e",
-                borderRadius: "20px",
-                backgroundColor: "white",
-                my: 3,
-              }}
-            >
-              <Box sx={{ marginBottom: "2rem" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: "bold",
-                      flexGrow: 1,
-                      textAlign: "center",
-                    }}
-                  >
-                    Filters
-                  </Typography>
-                  {(ageFilter || brandFilter || categoryFilter) && (
-                    <Button
-                      variant="contained"
-                      onClick={handleClearFilters}
-                      sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderRadius: "10px",
-                        fontSize: 16,
-                        fontWeight: "bold",
-                        mr: 2,
-                        padding: "0.25rem 0.5rem",
-                        boxShadow: "none",
-                        transition:
-                          "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          border: "1px solid white",
-                        },
-                      }}
-                    >
-                      <ClearAll />
-                    </Button>
-                  )}
-                </div>
-                <Grid container spacing={2}>
-                  {/* Age Filter */}
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: "bold",
-                        marginBottom: "0.5rem",
-                        textAlign: "left",
-                      }}
-                    >
-                      Age
-                    </Typography>
-                    <Grid container spacing={1}>
-                      {age.map((item) => (
-                        <Grid
-                          xs={6}
-                          item
-                          key={item.id}
-                          sx={{ textAlign: "left" }}
-                        >
-                          <FormControlLabel
-                            control={
-                              <Radio
-                                checked={ageFilter === item.id}
-                                onChange={() => handleAgeChange(item.id)}
-                                sx={{
-                                  "&.Mui-checked": {
-                                    color: "#ff469e",
-                                  },
-                                }}
-                              />
-                            }
-                            sx={{
-                              "&:hover": {
-                                color: "#ff469e",
-                              },
-                            }}
-                            label={item.rangeAge}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Grid>
-                  {/* Brand Filter */}
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: "bold",
-                        marginBottom: "0.5rem",
-                        textAlign: "left",
-                      }}
-                    >
-                      Brand
-                    </Typography>
-                    <Grid container spacing={1}>
-                      {brand.map((item) => (
-                        <Grid
-                          xs={6}
-                          item
-                          key={item.id}
-                          sx={{ textAlign: "left" }}
-                        >
-                          <FormControlLabel
-                            control={
-                              <Radio
-                                checked={brandFilter === item.id}
-                                onChange={() => handleBrandChange(item.id)}
-                                sx={{
-                                  "&.Mui-checked": {
-                                    color: "#ff469e",
-                                  },
-                                }}
-                              />
-                            }
-                            sx={{
-                              "&:hover": {
-                                color: "#ff469e",
-                              },
-                            }}
-                            label={item.name}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Grid>
-                  {/* Category Filter */}
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: "bold",
-                        marginBottom: "0.5rem",
-                        textAlign: "left",
-                      }}
-                    >
-                      Category
-                    </Typography>
-                    <Grid container spacing={1}>
-                      {category.map((item) => (
-                        <Grid
-                          item
-                          xs={12}
-                          key={item.id}
-                          sx={{ textAlign: "left" }}
-                        >
-                          <FormControlLabel
-                            control={
-                              <Radio
-                                checked={categoryFilter === item.id}
-                                onChange={() => handleCategoryChange(item.id)}
-                                sx={{
-                                  "&.Mui-checked": {
-                                    color: "#ff469e",
-                                  },
-                                }}
-                              />
-                            }
-                            sx={{
-                              "&:hover": {
-                                color: "#ff469e",
-                              },
-                            }}
-                            label={item.name}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Grid>
-
-            {/* Loading Spinner */}
-            <Grid item sm={12} md={9}>
-              <Box
-                sx={{
-                  backgroundColor: "#f5f7fd",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                }}
-              >
-                <CircularProgress sx={{ color: "#ff469e" }} size={90} />
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
-      </div>
-    );
-  }
+  }, [selectedArticle]);
 
   return (
     <div
@@ -634,26 +290,30 @@ export default function Articles() {
     >
       <Container sx={{ my: 4 }}>
         <Grid container justifyContent="center" spacing={2}>
-          {/* Grid item for ProductSearch and Add Product button */}
+          {/* Grid item for ArticleSearch and Add Article button */}
           <Grid
             item
             xs={12}
             md={8}
             sx={{ textAlign: "center", display: "flex", alignItems: "center" }}
           >
-            {/* ProductSearch */}
+            {/* ArticleSearch */}
             <ProductSearch />
-            {/* Add Product button */}
+            {/* Add Article button */}
             <Button
               variant="contained"
               color="primary"
               sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
                 backgroundColor: "white",
                 color: "#ff469e",
                 borderRadius: "30px",
                 fontWeight: "bold",
                 fontSize: 10,
                 width: "15vw",
+                height: "3vw", // Adjust as necessary to ensure it's a square
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",
@@ -664,218 +324,20 @@ export default function Articles() {
                 },
                 ml: 2,
               }}
-              onClick={handleOpenAddProduct}
+              onClick={handleOpenAddArticle}
             >
-              +
+              <AddIcon style={{ fontSize: "2rem" }} />
             </Button>
           </Grid>
         </Grid>
       </Container>
       <Container>
-        <Grid container spacing={3}>
-          {/* Filters */}
-          <Grid
-            item
-            sm={12}
-            md={3}
-            sx={{
-              border: "2px solid #ff469e",
-              borderRadius: "20px",
-              backgroundColor: "white",
-              my: 3,
-            }}
-          >
-            <Box sx={{ marginBottom: "2rem" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: "bold",
-                    flexGrow: 1,
-                    textAlign: "center",
-                  }}
-                >
-                  Filters
-                </Typography>
-                {(ageFilter || brandFilter || categoryFilter) && (
-                  <Button
-                    variant="contained"
-                    onClick={handleClearFilters}
-                    sx={{
-                      backgroundColor: "white",
-                      color: "#ff469e",
-                      borderRadius: "10px",
-                      fontSize: 16,
-                      fontWeight: "bold",
-                      mr: 2,
-                      padding: "0.25rem 0.5rem",
-                      boxShadow: "none",
-                      transition:
-                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                      border: "1px solid #ff469e",
-                      "&:hover": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                        border: "1px solid white",
-                      },
-                    }}
-                  >
-                    <ClearAll />
-                  </Button>
-                )}
-              </div>
-              <Grid container spacing={2}>
-                {/* Age Filter */}
-                <Grid item xs={12}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: "bold",
-                      marginBottom: "0.5rem",
-                      textAlign: "left",
-                    }}
-                  >
-                    Age
-                  </Typography>
-                  <Grid container spacing={1}>
-                    {age.map((item) => (
-                      <Grid
-                        xs={12}
-                        sm={6}
-                        md={12}
-                        lg={6}
-                        item
-                        key={item.id}
-                        sx={{ textAlign: "left" }}
-                      >
-                        <FormControlLabel
-                          control={
-                            <Radio
-                              checked={ageFilter === item.id}
-                              onChange={() => handleAgeChange(item.id)}
-                              sx={{
-                                "&.Mui-checked": {
-                                  color: "#ff469e",
-                                },
-                              }}
-                            />
-                          }
-                          sx={{
-                            "&:hover": {
-                              color: "#ff469e",
-                            },
-                          }}
-                          label={item.rangeAge}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Grid>
-                {/* Brand Filter */}
-                <Grid item xs={12}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: "bold",
-                      marginBottom: "0.5rem",
-                      textAlign: "left",
-                    }}
-                  >
-                    Brand
-                  </Typography>
-                  <Grid container spacing={1}>
-                    {brand.map((item) => (
-                      <Grid
-                        xs={12}
-                        sm={6}
-                        md={12}
-                        lg={6}
-                        item
-                        key={item.id}
-                        sx={{ textAlign: "left" }}
-                      >
-                        <FormControlLabel
-                          control={
-                            <Radio
-                              checked={brandFilter === item.id}
-                              onChange={() => handleBrandChange(item.id)}
-                              sx={{
-                                "&.Mui-checked": {
-                                  color: "#ff469e",
-                                },
-                              }}
-                            />
-                          }
-                          sx={{
-                            "&:hover": {
-                              color: "#ff469e",
-                            },
-                          }}
-                          label={item.name}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Grid>
-                {/* Category Filter */}
-                <Grid item xs={12}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: "bold",
-                      marginBottom: "0.5rem",
-                      textAlign: "left",
-                    }}
-                  >
-                    Category
-                  </Typography>
-                  <Grid container spacing={1}>
-                    {category.map((item) => (
-                      <Grid
-                        item
-                        xs={12}
-                        key={item.id}
-                        sx={{ textAlign: "left" }}
-                      >
-                        <FormControlLabel
-                          control={
-                            <Radio
-                              checked={categoryFilter === item.id}
-                              onChange={() => handleCategoryChange(item.id)}
-                              sx={{
-                                "&.Mui-checked": {
-                                  color: "#ff469e",
-                                },
-                              }}
-                            />
-                          }
-                          sx={{
-                            "&:hover": {
-                              color: "#ff469e",
-                            },
-                          }}
-                          label={item.name}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Box>
-          </Grid>
-
-          {/* List Products */}
+        <Grid container justifyContent="center" spacing={3}>
+          {/* List Articles */}
           <Grid item sm={12} md={9}>
             <Grid container spacing={3}>
-              {product?.products?.length === 0 ? (
-                <Grid item xs={12}>
+              {article?.length === 0 ? (
+                <Grid item xs={12} sm={12}>
                   <Typography
                     variant="h5"
                     sx={{ textAlign: "center", marginTop: 8, color: "#ff469e" }}
@@ -884,10 +346,10 @@ export default function Articles() {
                   </Typography>
                 </Grid>
               ) : (
-                product?.products?.map((item, index) => (
-                  <Grid item xs={12} sm={6} lg={4} key={index}>
+                article.map((item) => (
+                  <Grid item xs={12} sm={6} md={4} key={item.id}>
                     <Tooltip
-                      title={item.name}
+                      title={item.header}
                       enterDelay={500}
                       leaveDelay={50}
                       placement="right-start"
@@ -923,39 +385,12 @@ export default function Articles() {
                       >
                         <CardMedia
                           component="img"
-                          image={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
-                          //image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                          alt={item.name}
-                          sx={{ width: "64px", height: "64px", margin: "auto" }}
-                          // onClick={() =>
-                          //   navigate(
-                          //     `/products/${item.name
-                          //       .toLowerCase()
-                          //       .replace(/\s/g, "-")}`,
-                          //     { state: { productId: item.id } },
-                          //     window.scrollTo({
-                          //       top: 0,
-                          //       behavior: "smooth",
-                          //     })
-                          //   )
-                          // }
+                          height="140"
+                          image={`http://localhost:8080/mamababy/article/images/${item.link_image}`}
+                          alt={item.header}
                           onClick={() => handleOpen(item)}
                         />
-                        <CardContent
-                          // onClick={() =>
-                          //   navigate(
-                          //     `/products/${item.name
-                          //       .toLowerCase()
-                          //       .replace(/\s/g, "-")}`,
-                          //     { state: { productId: item.id } },
-                          //     window.scrollTo({
-                          //       top: 0,
-                          //       behavior: "smooth",
-                          //     })
-                          //   )
-                          // }
-                          onClick={() => handleOpen(item)}
-                        >
+                        <CardContent onClick={() => handleOpen(item)}>
                           <Typography
                             variant="subtitle1"
                             sx={{
@@ -973,23 +408,22 @@ export default function Articles() {
                               maxHeight: "2.4rem",
                             }}
                           >
-                            {item.name.length > 40
-                              ? `${item.name.substring(0, 40)}...`
-                              : item.name}
+                            {item.header.length > 40
+                              ? `${item.header.substring(0, 40)}...`
+                              : item.header}
                           </Typography>
                           <Typography
-                            variant="body2"
-                            sx={{ color: "gray", textAlign: "left" }}
+                            variant="caption"
+                            display="block"
+                            gutterBottom
                           >
-                            {formatCurrency(item.price)}
+                            {item.created_at}
                           </Typography>
                           <Typography
-                            variant="body2"
-                            sx={{ color: "gray", textAlign: "left" }}
-                          >
-                            {brandMap[item.brand_id]} |{" "}
-                            {categoryMap[item.category_id]}
-                          </Typography>
+                            variant="caption"
+                            display="block"
+                            gutterBottom
+                          ></Typography>
                         </CardContent>
                       </Card>
                     </Tooltip>
@@ -1027,90 +461,155 @@ export default function Articles() {
           </IconButton>
         )}
       </Container>
-      {selectedProduct && (
+      <Dialog open={openAddArticle} onClose={handleCloseAddArticle}>
+        <DialogTitle>Add Article</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Header"
+            value={header}
+            onChange={(e) => setHeader(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+
+          <TextField
+            label="Content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Link Product"
+            value={linkProduct}
+            onChange={(e) => setLinkProduct(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImage}
+            style={{ marginTop: "16px", marginBottom: "16px" }}
+          />
+
+          {image && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel shrink>Image</InputLabel>
+              <div
+                style={{
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  textAlign: "center",
+                }}
+              >
+                <img
+                  src={image.url}
+                  alt="Selected"
+                  style={{ width: "100%", marginTop: "16px" }}
+                />
+              </div>
+            </FormControl>
+          )}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Active</InputLabel>
+            <Select
+              value={isActive}
+              onChange={(e) => setIsActive(e.target.value)}
+            >
+              <MenuItem value={true}>Yes</MenuItem>
+              <MenuItem value={false}>No</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseAddArticle}
+            sx={{
+              backgroundColor: "#E0E0E0",
+              color: "#757575",
+              borderRadius: "30px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleAddArticle}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#008080",
+              borderRadius: "30px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #008080",
+              "&:hover": {
+                backgroundColor: "#008080",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {selectedArticle && (
         <Dialog open={open} onClose={handleClose}>
           <DialogContent>
-            {/* <TextField
-              label="ID"
-              value={selectedProduct?.id}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="normal"
-            /> */}
             <TextField
-              label="Name"
-              value={selectedProduct?.name}
-              onChange={(e) => handleChange("name", e.target.value)}
+              label="Header"
+              value={selectedArticle?.header}
+              onChange={(e) => handleChange("header", e.target.value)}
               fullWidth
               margin="normal"
             />
             <TextField
-              label="Price"
-              value={selectedProduct?.price}
-              onChange={(e) => handleChange("price", e.target.value)}
-              type="number"
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Point"
-              value={selectedProduct?.point}
-              onChange={(e) => handleChange("point", e.target.value)}
-              type="number"
-              fullWidth
-              margin="normal"
-            />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={selectedProduct?.status}
-                onChange={(e) => handleChange("status", e.target.value)}
-              >
-                <MenuItem value="IN STOCK">IN STOCK</MenuItem>
-                <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
-                <MenuItem value="COMING SOON">COMING SOON</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Type</InputLabel>
-              <Select
-                value={selectedProduct?.type}
-                onChange={(e) => handleChange("type", e.target.value)}
-              >
-                <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
-                <MenuItem value="GIFT">GIFT</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              label="Description"
-              value={selectedProduct?.description}
-              onChange={(e) => handleChange("description", e.target.value)}
+              label="Content"
+              value={selectedArticle?.content}
+              onChange={(e) => handleChange("content", e.target.value)}
               multiline
               rows={4}
               fullWidth
               margin="normal"
             />
             <TextField
+              label="Link Product"
+              value={selectedArticle?.link_product}
+              onChange={(e) => handleChange("link_product", e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
               label="Created At"
-              value={new Date(selectedProduct?.created_at).toLocaleDateString()}
+              value={new Date(selectedArticle?.created_at).toLocaleDateString()}
               InputProps={{ readOnly: true }}
               fullWidth
               margin="normal"
             />
             <TextField
-              label="Updated At"
-              value={new Date(selectedProduct?.updated_at).toLocaleDateString()}
+              label="Update At"
+              value={new Date(selectedArticle?.updated_at).toLocaleDateString()}
               InputProps={{ readOnly: true }}
               fullWidth
               margin="normal"
             />
-            {/* <TextField
-              label="Image URL"
-              value={selectedProduct?.image_url}
-              onChange={(e) => handleChange("image_url", e.target.value)}
-              fullWidth
-              margin="normal"
-            /> */}
             <input
               type="file"
               accept="image/*"
@@ -1136,46 +635,6 @@ export default function Articles() {
                 </div>
               </FormControl>
             )}
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={selectedProduct?.category_id}
-                onChange={(e) => handleChange("category_id", e.target.value)}
-              >
-                {Object.keys(categoryMap).map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {categoryMap[key]}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Brand</InputLabel>
-              <Select
-                value={selectedProduct?.brand_id}
-                onChange={(e) => handleChange("brand_id", e.target.value)}
-              >
-                {Object.keys(brandMap).map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {brandMap[key]}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Age"
-              select
-              value={selectedProduct?.age_id}
-              onChange={(e) => handleChange("age_id", e.target.value)}
-              fullWidth
-              margin="normal"
-            >
-              {age.map((ageItem) => (
-                <MenuItem key={ageItem.id} value={ageItem.id}>
-                  {ageItem.rangeAge}
-                </MenuItem>
-              ))}
-            </TextField>
             <TextField
               label="Store"
               value={store.name_store}
@@ -1186,7 +645,7 @@ export default function Articles() {
             <FormControl fullWidth margin="normal">
               <InputLabel>Active</InputLabel>
               <Select
-                value={selectedProduct?.is_active}
+                value={selectedArticle?.status}
                 onChange={(e) => handleChange("is_active", e.target.value)}
               >
                 <MenuItem value={true}>Yes</MenuItem>
@@ -1242,179 +701,6 @@ export default function Articles() {
           </DialogActions>
         </Dialog>
       )}
-
-      <Dialog open={openAddProduct} onClose={handleCloseAddProduct}>
-        <DialogTitle>Add Product</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            type="number"
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Point"
-            value={point}
-            onChange={(e) => setPoint(e.target.value)}
-            type="number"
-            fullWidth
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <MenuItem value="IN STOCK">IN STOCK</MenuItem>
-              <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
-              <MenuItem value="COMING SOON">COMING SOON</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Type</InputLabel>
-            <Select value={type} onChange={(e) => setType(e.target.value)}>
-              <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
-              <MenuItem value="GIFT">GIFT</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            multiline
-            rows={4}
-            fullWidth
-            margin="normal"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            //onChange={(e) => handleChangeImage(e.target.files[0])}
-            onChange={handleImage}
-            style={{ marginTop: "16px", marginBottom: "16px" }}
-          />
-
-          {image && (
-            <FormControl fullWidth margin="normal">
-              <InputLabel shrink>Image</InputLabel>
-              <div
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "10px",
-                  textAlign: "center",
-                }}
-              >
-                <img
-                  src={image.url}
-                  alt="Selected"
-                  style={{ width: "100%", marginTop: "16px" }}
-                />
-              </div>
-            </FormControl>
-          )}
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            >
-              {Object.keys(categoryMap).map((key) => (
-                <MenuItem key={key} value={key}>
-                  {categoryMap[key]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Brand</InputLabel>
-            <Select
-              value={brandId}
-              onChange={(e) => setBrandId(e.target.value)}
-            >
-              {Object.keys(brandMap).map((key) => (
-                <MenuItem key={key} value={key}>
-                  {brandMap[key]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Age"
-            select
-            value={ageId}
-            onChange={(e) => setAgeId(e.target.value)}
-            fullWidth
-            margin="normal"
-          >
-            {age.map((ageItem) => (
-              <MenuItem key={ageItem.id} value={ageItem.id}>
-                {ageItem.rangeAge}
-              </MenuItem>
-            ))}
-          </TextField>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Active</InputLabel>
-            <Select
-              value={isActive}
-              onChange={(e) => setIsActive(e.target.value)}
-            >
-              <MenuItem value={true}>Yes</MenuItem>
-              <MenuItem value={false}>No</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseAddProduct}
-            sx={{
-              backgroundColor: "#E0E0E0",
-              color: "#757575",
-              borderRadius: "30px",
-              fontSize: 16,
-              fontWeight: "bold",
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #757575",
-              "&:hover": {
-                backgroundColor: "#757575",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-          >
-            Close
-          </Button>
-          <Button
-            onClick={handleAddProduct}
-            sx={{
-              backgroundColor: "#F0F8FF",
-              color: "#008080",
-              borderRadius: "30px",
-              fontSize: 16,
-              fontWeight: "bold",
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #008080",
-              "&:hover": {
-                backgroundColor: "#008080",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-          >
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }

@@ -190,6 +190,54 @@ export default function StaffHome() {
     url: "",
   });
 
+  const handleOpenAddProduct = () => {
+    setOpenAddProduct(true);
+  };
+
+  const handleCloseAddProduct = () => {
+    setOpenAddProduct(false);
+  };
+
+  const handleAddProduct = () => {
+    if (!name || !price || !point || !description || !image.file) {
+      // Nếu có ít nhất một trường dữ liệu bị thiếu
+      // Hiển thị thông báo lỗi cho người dùng
+
+      toast.warn("Please fill in all required fields.");
+      return;
+    } else if (price <= 0 || point <= 0) {
+      toast.error("Price or Point cannot be less than or equal to 0.");
+      return;
+    }
+    debugger;
+    addProductApi(
+      image.file,
+      name,
+      price,
+      point,
+      status,
+      description,
+      type,
+      brandId,
+      categoryId,
+      ageId,
+      storeId,
+      isActive
+    )
+      .then((response) => {
+        // Xử lý kết quả trả về từ API
+        // Đóng dialog thêm sản phẩm
+        handleCloseAddProduct();
+        toast.success("Product added successfully!");
+      })
+      .catch((error) => {
+        // Xử lý lỗi từ API
+        console.error("Error adding product:", error);
+        // Hiển thị thông báo lỗi cho người dùng
+        toast.error("Failed to add product. Please try again later.");
+      });
+  };
+
   //Update product
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -352,55 +400,6 @@ export default function StaffHome() {
   //     };
   //   }
   // };
-
-  //Add product
-  const handleOpenAddProduct = () => {
-    setOpenAddProduct(true);
-  };
-
-  const handleCloseAddProduct = () => {
-    setOpenAddProduct(false);
-  };
-
-  const handleAddProduct = () => {
-    if (!name || !price || !point || !description || !image.file) {
-      // Nếu có ít nhất một trường dữ liệu bị thiếu
-      // Hiển thị thông báo lỗi cho người dùng
-
-      toast.warn("Please fill in all required fields.");
-      return;
-    } else if (price <= 0 || point <= 0) {
-      toast.error("Price or Point cannot be less than or equal to 0.");
-      return;
-    }
-    debugger;
-    addProductApi(
-      image.file,
-      name,
-      price,
-      point,
-      status,
-      description,
-      type,
-      brandId,
-      categoryId,
-      ageId,
-      storeId,
-      isActive
-    )
-      .then((response) => {
-        // Xử lý kết quả trả về từ API
-        // Đóng dialog thêm sản phẩm
-        handleCloseAddProduct();
-        toast.success("Product added successfully!");
-      })
-      .catch((error) => {
-        // Xử lý lỗi từ API
-        console.error("Error adding product:", error);
-        // Hiển thị thông báo lỗi cho người dùng
-        toast.error("Failed to add product. Please try again later.");
-      });
-  };
 
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -1032,6 +1031,180 @@ export default function StaffHome() {
           </IconButton>
         )}
       </Container>
+
+      <Dialog open={openAddProduct} onClose={handleCloseAddProduct}>
+        <DialogTitle>Add Product</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            type="number"
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Point"
+            value={point}
+            onChange={(e) => setPoint(e.target.value)}
+            type="number"
+            fullWidth
+            margin="normal"
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <MenuItem value="IN STOCK">IN STOCK</MenuItem>
+              <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
+              <MenuItem value="COMING SOON">COMING SOON</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Type</InputLabel>
+            <Select value={type} onChange={(e) => setType(e.target.value)}>
+              <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
+              <MenuItem value="GIFT">GIFT</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+            margin="normal"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            //onChange={(e) => handleChangeImage(e.target.files[0])}
+            onChange={handleImage}
+            style={{ marginTop: "16px", marginBottom: "16px" }}
+          />
+
+          {image && (
+            <FormControl fullWidth margin="normal">
+              <InputLabel shrink>Image</InputLabel>
+              <div
+                style={{
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  textAlign: "center",
+                }}
+              >
+                <img
+                  src={image.url}
+                  alt="Selected"
+                  style={{ width: "100%", marginTop: "16px" }}
+                />
+              </div>
+            </FormControl>
+          )}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              {Object.keys(categoryMap).map((key) => (
+                <MenuItem key={key} value={key}>
+                  {categoryMap[key]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Brand</InputLabel>
+            <Select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+            >
+              {Object.keys(brandMap).map((key) => (
+                <MenuItem key={key} value={key}>
+                  {brandMap[key]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Age"
+            select
+            value={ageId}
+            onChange={(e) => setAgeId(e.target.value)}
+            fullWidth
+            margin="normal"
+          >
+            {age.map((ageItem) => (
+              <MenuItem key={ageItem.id} value={ageItem.id}>
+                {ageItem.rangeAge}
+              </MenuItem>
+            ))}
+          </TextField>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Active</InputLabel>
+            <Select
+              value={isActive}
+              onChange={(e) => setIsActive(e.target.value)}
+            >
+              <MenuItem value={true}>Yes</MenuItem>
+              <MenuItem value={false}>No</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseAddProduct}
+            sx={{
+              backgroundColor: "#E0E0E0",
+              color: "#757575",
+              borderRadius: "30px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleAddProduct}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#008080",
+              borderRadius: "30px",
+              fontSize: 16,
+              fontWeight: "bold",
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #008080",
+              "&:hover": {
+                backgroundColor: "#008080",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {selectedProduct && (
         <Dialog open={open} onClose={handleClose}>
           <DialogContent>
@@ -1247,179 +1420,6 @@ export default function StaffHome() {
           </DialogActions>
         </Dialog>
       )}
-
-      <Dialog open={openAddProduct} onClose={handleCloseAddProduct}>
-        <DialogTitle>Add Product</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            type="number"
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Point"
-            value={point}
-            onChange={(e) => setPoint(e.target.value)}
-            type="number"
-            fullWidth
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <MenuItem value="IN STOCK">IN STOCK</MenuItem>
-              <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
-              <MenuItem value="COMING SOON">COMING SOON</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Type</InputLabel>
-            <Select value={type} onChange={(e) => setType(e.target.value)}>
-              <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
-              <MenuItem value="GIFT">GIFT</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            multiline
-            rows={4}
-            fullWidth
-            margin="normal"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            //onChange={(e) => handleChangeImage(e.target.files[0])}
-            onChange={handleImage}
-            style={{ marginTop: "16px", marginBottom: "16px" }}
-          />
-
-          {image && (
-            <FormControl fullWidth margin="normal">
-              <InputLabel shrink>Image</InputLabel>
-              <div
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "10px",
-                  textAlign: "center",
-                }}
-              >
-                <img
-                  src={image.url}
-                  alt="Selected"
-                  style={{ width: "100%", marginTop: "16px" }}
-                />
-              </div>
-            </FormControl>
-          )}
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            >
-              {Object.keys(categoryMap).map((key) => (
-                <MenuItem key={key} value={key}>
-                  {categoryMap[key]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Brand</InputLabel>
-            <Select
-              value={brandId}
-              onChange={(e) => setBrandId(e.target.value)}
-            >
-              {Object.keys(brandMap).map((key) => (
-                <MenuItem key={key} value={key}>
-                  {brandMap[key]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Age"
-            select
-            value={ageId}
-            onChange={(e) => setAgeId(e.target.value)}
-            fullWidth
-            margin="normal"
-          >
-            {age.map((ageItem) => (
-              <MenuItem key={ageItem.id} value={ageItem.id}>
-                {ageItem.rangeAge}
-              </MenuItem>
-            ))}
-          </TextField>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Active</InputLabel>
-            <Select
-              value={isActive}
-              onChange={(e) => setIsActive(e.target.value)}
-            >
-              <MenuItem value={true}>Yes</MenuItem>
-              <MenuItem value={false}>No</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseAddProduct}
-            sx={{
-              backgroundColor: "#E0E0E0",
-              color: "#757575",
-              borderRadius: "30px",
-              fontSize: 16,
-              fontWeight: "bold",
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #757575",
-              "&:hover": {
-                backgroundColor: "#757575",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-          >
-            Close
-          </Button>
-          <Button
-            onClick={handleAddProduct}
-            sx={{
-              backgroundColor: "#F0F8FF",
-              color: "#008080",
-              borderRadius: "30px",
-              fontSize: 16,
-              fontWeight: "bold",
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #008080",
-              "&:hover": {
-                backgroundColor: "#008080",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-          >
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }
