@@ -47,11 +47,10 @@ import { useDispatch } from "react-redux";
 import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
-import AddIcon from "@mui/icons-material/Add";
 
-export default function StaffHome() {
+export default function Articles() {
   const navigate = useNavigate();
-  window.document.title = "Products";
+  window.document.title = "Articles";
   const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -649,16 +648,12 @@ export default function StaffHome() {
               variant="contained"
               color="primary"
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
                 backgroundColor: "white",
                 color: "#ff469e",
                 borderRadius: "30px",
                 fontWeight: "bold",
                 fontSize: 10,
                 width: "15vw",
-                height: "3vw", // Adjust as necessary to ensure it's a square
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",
@@ -671,7 +666,7 @@ export default function StaffHome() {
               }}
               onClick={handleOpenAddProduct}
             >
-              <AddIcon style={{ fontSize: "2rem" }} />
+              +
             </Button>
           </Grid>
         </Grid>
