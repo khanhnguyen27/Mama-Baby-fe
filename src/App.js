@@ -10,6 +10,9 @@ import SignUp from "./components/general/SignUp";
 import HomePage from "./components/general/HomePage";
 import Cart from "./components/general/Cart";
 import Profile from "./components/general/Profile";
+import CategorieManagement from "./components/admin/CategorieManagement";
+import BrandManagement from "./components/admin/BrandManagement";
+import AgeManagement from "./components/admin/AgeManagement";
 import Products from "./components/general/Products";
 import ProtectedRoute from "./components/gateway/ProtectedRoute";
 import StaffHome from "./components/staff/StaffHome";
@@ -56,6 +59,9 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="categories" element={<CategorieManagement />} />
+            <Route path="brands" element={<BrandManagement />} />
+            <Route path="age" element={<AgeManagement />} />
           </Route>
         </Route>
       </Routes>
