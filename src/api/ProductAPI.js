@@ -2,8 +2,8 @@ import axiosJWT from "./ConfigAxiosInterceptor";
 
 const URL_PRODUCT = `http://localhost:8080/mamababy/products`;
 // const URL_PRODUCTBYID = `http://localhost:8080/mamababy/products/${productId}`;
-const URL_ADD_PRODUCT = `http://localhost:8080/mamababy/products`;
-const URL_UPDATE_PRODUCT = `http://localhost:8080/mamababy/products`;
+// const URL_ADD_PRODUCT = `http://localhost:8080/mamababy/products`;
+// const URL_UPDATE_PRODUCT = `http://localhost:8080/mamababy/products`;
 
 export const allProductApi = (params) => {
   return axiosJWT.get(URL_PRODUCT, {
@@ -55,7 +55,7 @@ export const addProductApi = (
     console.log(key, value);
   }
 
-  return axiosJWT.post(URL_ADD_PRODUCT, formData, {
+  return axiosJWT.post(URL_PRODUCT, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -93,7 +93,7 @@ export const updateProductApi = (
   formData.append("storeId", storeId);
   formData.append("isActive", isActive);
 
-  return axiosJWT.put(`${URL_UPDATE_PRODUCT}/${productId}`, formData, {
+  return axiosJWT.put(`${URL_PRODUCT}/${productId}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
