@@ -11,6 +11,12 @@ export const allProductApi = (params) => {
   });
 };
 
+export const allProductByStoreApi = (params) => {
+  return axiosJWT.get(`${URL_PRODUCT}/store`, {
+    params: params,
+  });
+};
+
 export const productByIdApi = (productId) => {
   return axiosJWT.get(`http://localhost:8080/mamababy/products/${productId}`);
 };

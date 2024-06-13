@@ -8,6 +8,7 @@ import {
   allProductApi,
   addProductApi,
   updateProductApi,
+  allProductByStoreApi,
 } from "../../api/ProductAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
@@ -104,7 +105,7 @@ export default function StaffHome() {
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
-        allProductApi({
+        allProductByStoreApi({
           keyword: keyword,
           category_id: categoryFilter,
           brand_id: brandFilter,
