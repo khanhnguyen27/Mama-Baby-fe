@@ -4,6 +4,9 @@ import Logo from "../../assets/logo.png";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DesignServicesIcon from "@mui/icons-material/DesignServices";
 import Dashboard from "@mui/icons-material/Dashboard";
+import PersonIcon from '@mui/icons-material/Person';
+import BrandingWatermarkIcon from '@mui/icons-material/BrandingWatermark';
+import CategoryIcon from '@mui/icons-material/Category';
 import Shop from "@mui/icons-material/Shop";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AppBar from "@mui/material/AppBar";
@@ -31,6 +34,7 @@ const itemList = [
     Icon: AccountCircleIcon,
     href: "accounts",
   },
+  
   {
     label: "Exchanges",
     Icon: DesignServicesIcon,
@@ -41,6 +45,26 @@ const itemList = [
     Icon: Shop,
     href: "stores",
   },
+
+  {
+    label: "Categories",
+    Icon: CategoryIcon,
+    href: "categories",
+  },
+
+  {
+    label: "Brands",
+    Icon: BrandingWatermarkIcon,
+    href: "brands",
+  },
+
+  {
+    label: "Age",
+    Icon: PersonIcon,
+    href: "age",
+  },
+
+
 ];
 
 export default function AdminLayout() {

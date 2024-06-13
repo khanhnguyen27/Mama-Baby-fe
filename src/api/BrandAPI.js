@@ -8,6 +8,27 @@ export const allBrandApi = (params) => {
   });
 };
 
+export const addBrandyApi = async (brandData) => {
+  try {
+    const response = await axiosJWT.post(URL_BRAND, brandData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateBrandApi = (
+  id,
+  name,
+  isActive
+) => {
+  return axiosJWT.put(`${URL_BRAND}/${id}`, {
+    name: name,
+    is_active:isActive
+  });
+};
+
+
 {
   /*<List
               sx={{

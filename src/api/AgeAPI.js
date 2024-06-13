@@ -7,3 +7,23 @@ export const allAgeApi = (params) => {
     params: params,
   });
 };
+
+export const addAgeApi = async (ageData) => {
+  try {
+    const response = await axiosJWT.post(URL_AGE, ageData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateAgeApi = (
+  id,
+  rangeAge,
+  isActive
+) => {
+  return axiosJWT.put(`${URL_AGE}/${id}`, {
+    range_age: rangeAge,
+    is_active: isActive
+  });
+};
