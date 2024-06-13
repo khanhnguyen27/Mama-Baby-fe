@@ -48,6 +48,7 @@ import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
+import { Pagination, PaginationItem } from "@mui/material";
 
 export default function StaffHome() {
   const navigate = useNavigate();
@@ -68,6 +69,8 @@ export default function StaffHome() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const keyword = state?.keyword;
   const [storeName, setStoreName] = useState("");
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
 
   useEffect(() => {
     const handleScroll = () => {
@@ -93,7 +96,7 @@ export default function StaffHome() {
   const storeId = store.id;
   // console.log(userId);
   // console.log(storeId);
-  const fetchData = async () => {
+  const fetchData = async (page = 1) => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
         allAgeApi(),
@@ -105,6 +108,7 @@ export default function StaffHome() {
           brand_id: brandFilter,
           age_id: ageFilter,
           store_id: storeId,
+          page: page - 1, // API thường sử dụng 0-based index cho trang
         }),
       ]);
 
@@ -112,11 +116,14 @@ export default function StaffHome() {
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
+      const totalPages = productRes?.data?.totalPages || 1; // Giả sử API trả về tổng số trang
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
       setProduct(productData);
+      setTotalPages(totalPages + 1);
+      setCurrentPage(page); // Cập nhật trang hiện tại
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -144,8 +151,12 @@ export default function StaffHome() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    fetchData();
+    fetchData(currentPage);
   }, [keyword, ageFilter, brandFilter, categoryFilter, storeId]);
+
+  const onPageChange = (page) => {
+    fetchData(page);
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
@@ -227,6 +238,7 @@ export default function StaffHome() {
       .then((response) => {
         // Xử lý kết quả trả về từ API
         // Đóng dialog thêm sản phẩm
+        fetchData(currentPage);
         handleCloseAddProduct();
         toast.success("Product added successfully!");
       })
@@ -296,7 +308,7 @@ export default function StaffHome() {
       .then((response) => {
         // Xử lý kết quả trả về từ API
         // Đóng dialog cập nhật sản phẩm
-
+        fetchData(currentPage);
         handleClose();
         toast.success("Product updated successfully!");
       })
@@ -1032,6 +1044,36 @@ export default function StaffHome() {
         )}
       </Container>
 
+      <Container>
+        <Grid
+          container
+          justifyContent="center"
+          spacing={3}
+          sx={{ marginTop: 4 }}
+        >
+          <nav aria-label="Page navigation">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, page) => onPageChange(page)}
+              renderItem={(item) => (
+                <PaginationItem
+                  component="a"
+                  href="#"
+                  {...item}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPageChange(item.page);
+                  }}
+                />
+              )}
+              siblingCount={1}
+              boundaryCount={1}
+            />
+          </nav>
+        </Grid>
+      </Container>
+
       <Dialog open={openAddProduct} onClose={handleCloseAddProduct}>
         <DialogTitle>Add Product</DialogTitle>
         <DialogContent>
@@ -1207,6 +1249,7 @@ export default function StaffHome() {
 
       {selectedProduct && (
         <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Product information</DialogTitle>
           <DialogContent>
             {/* <TextField
               label="ID"

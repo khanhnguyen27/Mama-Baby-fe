@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { environment } from "../../environments/environment";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { allAgeApi } from "../../api/AgeAPI";
-import { allBrandApi } from "../../api/BrandAPI";
-import { allCategorytApi } from "../../api/CategoryAPI";
 import {
   addArticleApi,
   updateArticleApi,
   getArticlesByStoreIdApi,
+  allArticleApi,
 } from "../../api/ArticleAPI";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
@@ -48,6 +46,7 @@ import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
+import { Pagination, PaginationItem } from "@mui/material";
 
 export default function Articles() {
   const navigate = useNavigate();
@@ -55,18 +54,11 @@ export default function Articles() {
   const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [age, setAge] = useState([]);
-  const [ageMap, setAgeMap] = useState({});
-  const [brand, setBrand] = useState([]);
-  const [brandMap, setBrandMap] = useState({});
-  const [category, setCategory] = useState([]);
-  const [categoryMap, setCategoryMap] = useState({});
   const [article, setArticle] = useState([]);
   const [store, setStore] = useState([]);
-  const [ageFilter, setAgeFilter] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
   const keyword = state?.keyword;
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,16 +83,23 @@ export default function Articles() {
 
   const storeId = store.id;
   // console.log(userId);
-  console.log(storeId);
-  const fetchData = async () => {
+  //console.log(storeId);
+  const fetchData = async (page = 1) => {
     try {
       const [articleRes] = await Promise.all([
-        getArticlesByStoreIdApi(storeId),
+        allArticleApi({
+          keyword: keyword,
+          store_id: storeId,
+          page: page - 1, // API thường sử dụng 0-based index cho trang
+        }),
       ]);
 
       const articleData = articleRes?.data?.data || [];
+      const totalPages = articleRes?.data?.totalPages || 1; // Giả sử API trả về tổng số trang
 
       setArticle(articleData);
+      setTotalPages(totalPages + 1);
+      setCurrentPage(page); // Cập nhật trang hiện tại
     } catch (err) {
       console.log(err);
     }
@@ -110,33 +109,11 @@ export default function Articles() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    fetchData();
+    fetchData(currentPage);
   }, [keyword, storeId]);
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
-  };
-
-  const handleAgeChange = (id) => {
-    setAgeFilter((prev) => (prev === id ? null : id));
-    setLoading(true);
-  };
-
-  const handleBrandChange = (id) => {
-    setBrandFilter((prev) => (prev === id ? null : id));
-    setLoading(true);
-  };
-
-  const handleCategoryChange = (id) => {
-    setCategoryFilter((prev) => (prev === id ? null : id));
-    setLoading(true);
-  };
-
-  const handleClearFilters = () => {
-    setAgeFilter(null);
-    setBrandFilter(null);
-    setCategoryFilter(null);
-    setLoading(true);
+  const onPageChange = (page) => {
+    fetchData(page);
   };
 
   //Add Article
@@ -167,6 +144,7 @@ export default function Articles() {
 
     addArticleApi(image.file, header, content, linkProduct, storeId, isActive)
       .then((response) => {
+        fetchData(currentPage);
         handleCloseAddArticle();
         toast.success("Article added successfully!");
       })
@@ -219,6 +197,7 @@ export default function Articles() {
 
     updateArticleApi(selectedArticle.id, articleData, image.file)
       .then((response) => {
+        fetchData(currentPage);
         handleClose();
         toast.success("Article updated successfully:", response.data);
       })
@@ -336,7 +315,7 @@ export default function Articles() {
           {/* List Articles */}
           <Grid item sm={12} md={9}>
             <Grid container spacing={3}>
-              {article?.length === 0 ? (
+              {article?.articles?.length === 0 ? (
                 <Grid item xs={12} sm={12}>
                   <Typography
                     variant="h5"
@@ -346,8 +325,8 @@ export default function Articles() {
                   </Typography>
                 </Grid>
               ) : (
-                article.map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item.id}>
+                article?.articles?.map((item, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
                     <Tooltip
                       title={item.header}
                       enterDelay={500}
@@ -417,7 +396,7 @@ export default function Articles() {
                             display="block"
                             gutterBottom
                           >
-                            {item.created_at}
+                            Created at: {item.created_at}
                           </Typography>
                           <Typography
                             variant="caption"
@@ -461,6 +440,36 @@ export default function Articles() {
           </IconButton>
         )}
       </Container>
+      <Container>
+        <Grid
+          container
+          justifyContent="center"
+          spacing={3}
+          sx={{ marginTop: 4 }}
+        >
+          <nav aria-label="Page navigation">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, page) => onPageChange(page)}
+              renderItem={(item) => (
+                <PaginationItem
+                  component="a"
+                  href="#"
+                  {...item}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPageChange(item.page);
+                  }}
+                />
+              )}
+              siblingCount={1}
+              boundaryCount={1}
+            />
+          </nav>
+        </Grid>
+      </Container>
+
       <Dialog open={openAddArticle} onClose={handleCloseAddArticle}>
         <DialogTitle>Add Article</DialogTitle>
         <DialogContent>
@@ -572,6 +581,7 @@ export default function Articles() {
 
       {selectedArticle && (
         <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Article information</DialogTitle>
           <DialogContent>
             <TextField
               label="Header"
@@ -646,7 +656,7 @@ export default function Articles() {
               <InputLabel>Active</InputLabel>
               <Select
                 value={selectedArticle?.status}
-                onChange={(e) => handleChange("is_active", e.target.value)}
+                onChange={(e) => handleChange("status", e.target.value)}
               >
                 <MenuItem value={true}>Yes</MenuItem>
                 <MenuItem value={false}>No</MenuItem>
