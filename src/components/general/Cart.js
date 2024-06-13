@@ -70,34 +70,35 @@ export default function Cart() {
 
   const fetchData = async () => {
     try {
-      const [userRes, storeRes, voucherRes] = await Promise.all([
-        profileUserApi(),
+      const [storeRes, voucherRes] = await Promise.all([
         allStoreApi(),
         allVoucherApi(),
       ]);
-
-      const userData = userRes?.data?.data || [];
+  
       const storeData = storeRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
 
-      setUserInfo(userData);
       setStore(storeData);
       setVoucher(voucherData);
-
+  
       const storeMap = storeData.stores.reduce((x, item) => {
         x[item.id] = item.name_store;
         return x;
       }, {});
       setStoreMap(storeMap);
+  
+      const userRes = await profileUserApi();
+      const userData = userRes?.data?.data || [];
+      setUserInfo(userData);      
     } catch (err) {
       console.log(err);
     }
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);
-
+  
   const groupedCartItems = cartItems.products.reduce((acc, item) => {
     if (!acc[item.product.store_id]) {
       acc[item.product.store_id] = [];
@@ -202,6 +203,10 @@ export default function Cart() {
           toast.success("Create new order successfully", {
             autoClose: 1500,
           });
+          dispatch(clearCart());
+          setTimeout(() => {
+            navigate("/orders");
+          }, 1500);
         })
         .catch((error) => console.log(error));
     } else if (paymentMethod === "VNPAY") {
@@ -967,11 +972,28 @@ export default function Cart() {
                       top: "50%",
                       left: "50%",
                       transform: "translate(-50%, -50%)",
-                      width: 1000,
+                      width: "90%",
+                      borderRadius: "10px",
+                      maxWidth: 1000,
+                      maxHeight: "90vh",
+                      overflowY: "auto",
                       backgroundColor: "#fff4fc",
                       border: "2px solid #ff469e",
                       boxShadow: 20,
                       p: 4,
+                      "&::-webkit-scrollbar": {
+                        width: "0.6rem",
+                      },
+                      "&::-webkit-scrollbar-track": {
+                        background: "#f5f7fd",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        background: "#ff469e",
+                        borderRadius: "0.8rem",
+                      },
+                      "&::-webkit-scrollbar-thumb:hover": {
+                        background: "#ffbbd0",
+                      },
                     }}
                   >
                     <div style={{ textAlign: "right" }}>
@@ -992,10 +1014,15 @@ export default function Cart() {
                         />
                       </IconButton>
                     </div>
-                    <Grid container spacing={2}>
-                      <Grid item md={6}>
+                    <Typography sx={{ fontWeight: "bold", fontSize: "1.25rem"}}>Your Information:</Typography>
+                    <Grid container spacing={4}>
+                      <Grid item xs={12} md={4}>
                         <div style={{ margin: "1rem 0.25rem" }}>
-                          <lable>Full Name</lable>
+                          <span
+                            style={{ fontSize: "1.05rem", fontWeight: "600" }}
+                          >
+                            Full Name:
+                          </span>
                           <TextField
                             fullWidth
                             onChange={handleFullNameChange}
@@ -1031,9 +1058,13 @@ export default function Cart() {
                           />
                         </div>
                       </Grid>
-                      <Grid item md={6}>
+                      <Grid item xs={12} md={3}>
                         <div style={{ margin: "1rem 0.25rem" }}>
-                          <lable>Phone</lable>
+                          <span
+                            style={{ fontSize: "1.05rem", fontWeight: "600" }}
+                          >
+                            Phone:
+                          </span>
                           <TextField
                             fullWidth
                             onChange={handlePhoneChange}
@@ -1069,75 +1100,201 @@ export default function Cart() {
                           />
                         </div>
                       </Grid>
+                      <Grid item xs={12} md={5}>
+                        <div style={{ margin: "1rem 0.25rem" }}>
+                          <span
+                            style={{ fontSize: "1.05rem", fontWeight: "600" }}
+                          >
+                            Address:
+                          </span>
+                          <TextField
+                            fullWidth
+                            onChange={handleAdressChange}
+                            value={address}
+                            placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
+                            size="small"
+                            variant="outlined"
+                            InputProps={{
+                              sx: {
+                                padding: 0,
+                                border: "1px solid #ff469e",
+                                borderRadius: "7px",
+                                backgroundColor: "white",
+                                transition: "0.2s ease-in-out",
+                                "&:hover": {
+                                  border: "1px solid #ff469e",
+                                },
+                                "&:focus": {
+                                  backgroundColor: "#F8F8F8",
+                                },
+                                "&.Mui-focused": {
+                                  border: "1px solid #ff469e",
+                                  backgroundColor: "#F8F8F8",
+                                  boxShadow:
+                                    "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                  outline: "none",
+                                },
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                  border: "none",
+                                },
+                              },
+                            }}
+                          />
+                        </div>
+                      </Grid>
                     </Grid>
-                    <div style={{ margin: "1rem 0.25rem" }}>
-                      <label>Address</label>
-                      <TextField
-                        fullWidth
-                        onChange={handleAdressChange}
-                        value={address}
-                        placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
-                        size="small"
-                        variant="outlined"
-                        InputProps={{
-                          sx: {
-                            padding: 0,
-                            border: "1px solid #ff469e",
-                            borderRadius: "7px",
-                            backgroundColor: "white",
-                            transition: "0.2s ease-in-out",
-                            "&:hover": {
-                              border: "1px solid #ff469e",
-                            },
-                            "&:focus": {
-                              backgroundColor: "#F8F8F8",
-                            },
-                            "&.Mui-focused": {
-                              border: "1px solid #ff469e",
-                              backgroundColor: "#F8F8F8",
-                              boxShadow:
-                                "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                              outline: "none",
-                            },
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              border: "none",
-                            },
-                          },
-                        }}
-                      />
-                    </div>
-                    <Typography variant="h6" component="h2">
-                      Your cart
-                    </Typography>
+
                     <Grid container spacing={4}>
                       <Grid item xs={12} md={6} lg={8}>
-                        <List>
-                          <Grid container spacing={2}>
+                        <Typography
+                          sx={{ fontWeight: "bold", fontSize: "20px" }}
+                        >
+                          Your Order:
+                        </Typography>
+                        <Card
+                          sx={{
+                            pl: 2,
+                            pr: 0,
+                            border: "1px solid #ff469e",
+                            borderRadius: "1rem",
+                            my: 2.4,
+                            minHeight: "120px",
+                            maxHeight: "260px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              overflowY: "auto",
+                              maxHeight: "260px",
+                              pr: 0.5,
+                              // "&::-webkit-scrollbar": { // Remove scrollbar
+                              //   display: "none",
+                              // },
+                              "&::-webkit-scrollbar": {
+                                width: "0.65rem",
+                              },
+                              "&::-webkit-scrollbar-track": {
+                                background: "#f5f7fd",
+                              },
+                              "&::-webkit-scrollbar-thumb": {
+                                background: "#ff469e",
+                                borderRadius: "0.8rem",
+                              },
+                              "&::-webkit-scrollbar-thumb:hover": {
+                                background: "#ffbbd0",
+                              },
+                            }}
+                          >
                             {cartItems.products.map((item, index) => (
-                              <Grid item xs={12} md={6}>
-                                <div
-                                  key={index}
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "row",
+                              <div
+                                key={index}
+                                style={{
+                                  display: "flex",
+                                  marginBottom: "10px",
+                                }}
+                              >
+                                <CardMedia
+                                  sx={{
+                                    width: "70px",
+                                    height: "70px",
+                                    justifyContent: "center",
+                                    alignSelf: "center",
+                                    borderRadius: "10px",
+                                  }}
+                                  image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                  title={item.product.name}
+                                />
+                                <CardContent
+                                  sx={{
+                                    flex: "1 0 auto",
+                                    ml: 2,
+                                    borderBottom: "1px dashed black",
                                   }}
                                 >
-                                  <img
-                                    style={{ width: "48px", height: "56px" }}
-                                    src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                  />
-                                  <ListItem>
-                                    {item.product.name} x {item.quantity}
-                                    {/* {"="}{" "}
-                                    {formatCurrency(
-                                      item.quantity * item.product.price
-                                    )} */}
-                                  </ListItem>
-                                </div>
-                              </Grid>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      justifyContent: "space-between",
+                                      mt: 2,
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{
+                                        fontWeight: "600",
+                                        fontSize: "1.25rem",
+                                        "&:hover": {
+                                          cursor: "pointer",
+                                          color: "#ff469e",
+                                        },
+                                      }}
+                                      onClick={() =>
+                                        navigate(
+                                          `/products/${item.product.name
+                                            .toLowerCase()
+                                            .replace(/\s/g, "-")}`,
+                                          {
+                                            state: {
+                                              productId: item.product_id,
+                                            },
+                                          },
+                                          window.scrollTo({
+                                            top: 0,
+                                            behavior: "smooth",
+                                          })
+                                        )
+                                      }
+                                    >
+                                      {item.product.name}
+                                    </Typography>
+                                    <Typography
+                                      sx={{
+                                        fontWeight: "600",
+                                        fontSize: "1.15rem",
+                                      }}
+                                    >
+                                      {formatCurrency(item.product.price)}{" "}
+                                      <span
+                                        style={{
+                                          fontSize: "1.05rem",
+                                          opacity: 0.4,
+                                        }}
+                                      >
+                                        x{item.quantity}
+                                      </span>
+                                    </Typography>
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      justifyContent: "space-between",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{ opacity: 0.7 }}
+                                    ></Typography>
+                                    <Typography sx={{ opacity: 0.8 }}>
+                                      <span
+                                        style={{
+                                          fontWeight: "bold",
+                                          fontSize: "1.25rem",
+                                        }}
+                                      >
+                                        ={" "}
+                                        {formatCurrency(
+                                          item.product.price * item.quantity
+                                        )}
+                                      </span>
+                                    </Typography>
+                                  </Box>
+                                </CardContent>
+                              </div>
                             ))}
-                          </Grid>
-                        </List>
+                          </Box>
+                        </Card>
                       </Grid>
                       <Grid
                         item
@@ -1147,21 +1304,81 @@ export default function Cart() {
                         sx={{ textAlign: "right" }}
                       >
                         <Typography
-                          variant="h6"
-                          sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-                        >
-                          Final Total:
-                        </Typography>
-                        <Typography
-                          variant="h6"
                           sx={{
-                            color: "#ff469e",
-                            fontSize: "2rem",
-                            fontWeight: "bold",
+                            mb: "5px",
+                            fontWeight: "medium",
+                            textAlign: "left",
+                            fontSize: "1.25rem",
                           }}
                         >
-                          {formatCurrency(getDiscountedTotal())}
+                          <span
+                            style={{ display: "block", fontWeight: "bold" }}
+                          >
+                            Order Summary:
+                          </span>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              margin: "12px 0",
+                            }}
+                          >
+                            <span>Subtotal:</span>
+                            <span>{formatCurrency(totalCost)}</span>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              opacity: 0.7,
+                              margin: "6px 0",
+                            }}
+                          >
+                            <span>
+                              Discount:{" "}
+                              <span style={{ fontSize: "1.05rem" }}> </span>
+                            </span>
+                            <span>- {formatCurrency(selectedVoucher)}</span>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            <Divider
+                              sx={{
+                                borderStyle: "dashed",
+                                borderColor: "rgba(0, 0, 0, 0.7)",
+                                borderWidth: "1px",
+                                my: 1.5,
+                                width: "100%",
+                              }}
+                            />
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight: "bold",
+                                fontSize: "1.45rem",
+                              }}
+                            >
+                              Total:
+                            </span>
+                            <span
+                              style={{ fontWeight: "bold", fontSize: "1.5rem", color: "#ff469e" }}
+                            >
+                              {formatCurrency(getDiscountedTotal())}
+                            </span>
+                          </Box>
                         </Typography>
+
                         <FormControl fullWidth>
                           <Typography
                             variant="h6"
@@ -1169,6 +1386,7 @@ export default function Cart() {
                               fontWeight: "bold",
                               fontSize: "1.25rem",
                               mt: 2,
+                              textAlign: "left",
                             }}
                           >
                             Select Payment Method:
@@ -1183,7 +1401,8 @@ export default function Cart() {
                               backgroundColor: "#fff4fc",
                               color: "#ff469e",
                               borderRadius: "20px",
-                              my: 1,
+                              mt: 2.4,
+                              mb: 1,
                               fontSize: "16px",
                               textAlign: "left",
                               border: "1px solid #ff469e",
@@ -1280,7 +1499,7 @@ export default function Cart() {
                                 },
                               }}
                             >
-                              Internal Payment
+                              VNPAY
                             </MenuItem>
                             {/* <MenuItem value={'NCB'}>Internal Payment</MenuItem> */}
                             {/* <MenuItem
