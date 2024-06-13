@@ -113,6 +113,7 @@ export default function Articles() {
 
   const onPageChange = (page) => {
     fetchData(page);
+    window.scrollTo(0, 0);
   };
 
   //find article

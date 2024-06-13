@@ -216,7 +216,7 @@ export default function HomePage() {
         {/* List Store */}
         <Grid item xs={12} md={15}>
           <Grid container spacing={3}>
-            {article?.map((item, index) => (
+            {article?.articles?.map((item, index) => (
               <Grid item xs={40} sm={5} md={4} key={index}>
                 <Tooltip
                   title={item.content}

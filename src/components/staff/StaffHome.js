@@ -158,6 +158,7 @@ export default function StaffHome() {
 
   const onPageChange = (page) => {
     fetchData(page);
+    window.scrollTo(0, 0);
   };
 
   //find product
