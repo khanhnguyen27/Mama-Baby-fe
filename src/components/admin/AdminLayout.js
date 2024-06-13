@@ -21,6 +21,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Typography } from "@mui/material";
 import { toast } from "react-toastify";
+import Voucher from '@mui/icons-material/ConfirmationNumber';
 const drawerWidth = 240;
 const itemList = [
   {
@@ -64,7 +65,11 @@ const itemList = [
     href: "age",
   },
 
-
+  {
+    label: "Vouchers",
+    Icon: Voucher,
+    href: "vouchers",
+  },
 ];
 
 export default function AdminLayout() {
