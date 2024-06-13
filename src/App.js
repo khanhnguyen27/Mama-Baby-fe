@@ -26,7 +26,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import RegisStores from "./components/general/RegisStores";
 import Orders from "./components/general/Orders";
 import Articles from "./components/staff/Articles";
-
+import VoucherManagement from "./components/admin/VoucherManagement";
 function App() {
   return (
     <div className="App">
@@ -62,6 +62,7 @@ function App() {
             <Route path="categories" element={<CategorieManagement />} />
             <Route path="brands" element={<BrandManagement />} />
             <Route path="age" element={<AgeManagement />} />
+            <Route path="vouchers" element={<VoucherManagement />} />
           </Route>
         </Route>
       </Routes>
