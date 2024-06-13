@@ -5,6 +5,7 @@ import {
   addArticleApi,
   updateArticleApi,
   allArticleApi,
+  getArticlesByStoreIdApi,
 } from "../../api/ArticleAPI";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
@@ -87,7 +88,7 @@ export default function Articles() {
   //console.log(storeId);
   const fetchData = async (page = 1) => {
     try {
-      const articleRes = await allArticleApi({
+      const articleRes = await getArticlesByStoreIdApi({
         keyword: keyword,
         store_id: storeId,
         page: page - 1, // API thường sử dụng 0-based index cho trang

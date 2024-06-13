@@ -1,7 +1,7 @@
 import axiosJWT from "./ConfigAxiosInterceptor";
 
 const URL_ARTICLE = `http://localhost:8080/mamababy/article`;
-const URL_ARTICLE_BY_STORE = `http://localhost:8080/mamababy/article/store`;
+//const URL_ARTICLE_BY_STORE = `http://localhost:8080/mamababy/article/store`;
 
 export const allArticleApi = (params) => {
   return axiosJWT.get(URL_ARTICLE, {
@@ -9,8 +9,10 @@ export const allArticleApi = (params) => {
   });
 };
 
-export const getArticlesByStoreIdApi = (storeId) => {
-  return axiosJWT.get(`${URL_ARTICLE_BY_STORE}/${storeId}`);
+export const getArticlesByStoreIdApi = (params) => {
+  return axiosJWT.get(`${URL_ARTICLE}/store`, {
+    params: params,
+  });
 };
 
 // import {allArticleApi } from "../../api/ArticleAPI";
