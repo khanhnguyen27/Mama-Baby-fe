@@ -9,6 +9,7 @@ import {
   addProductApi,
   updateProductApi,
 } from "../../api/ProductAPI";
+import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
@@ -22,6 +23,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  InputAdornment,
 } from "@mui/material";
 import {
   Box,
@@ -67,7 +69,7 @@ export default function StaffHome() {
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const keyword = state?.keyword;
+  const [keyword, setKeyword] = useState("");
   const [storeName, setStoreName] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const [totalPages, setTotalPages] = useState(1); // Tổng số trang
@@ -116,13 +118,13 @@ export default function StaffHome() {
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
-      const totalPages = productRes?.data?.totalPages || 1; // Giả sử API trả về tổng số trang
+      const totalPages = productRes?.data?.data?.totalPages || 1; // Giả sử API trả về tổng số trang
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
       setProduct(productData);
-      setTotalPages(totalPages + 1);
+      setTotalPages(totalPages);
       setCurrentPage(page); // Cập nhật trang hiện tại
 
       const ageMap = ageData.reduce((x, item) => {
@@ -151,11 +153,16 @@ export default function StaffHome() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    fetchData(currentPage);
+    fetchData(1);
   }, [keyword, ageFilter, brandFilter, categoryFilter, storeId]);
 
   const onPageChange = (page) => {
     fetchData(page);
+  };
+
+  //find product
+  const handleSearch = () => {
+    fetchData();
   };
 
   const formatCurrency = (amount) => {
@@ -654,7 +661,80 @@ export default function StaffHome() {
             sx={{ textAlign: "center", display: "flex", alignItems: "center" }}
           >
             {/* ProductSearch */}
-            <ProductSearch />
+            <div style={{ position: "relative", zIndex: "99" }}>
+              <TextField
+                placeholder="What do you want to find?"
+                size="small"
+                variant="outlined"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        sx={{
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                          height: "40px",
+                          marginRight: "0.6px",
+                          borderRadius: "5px",
+                          boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                          transition: "0.2s ease-in-out",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            opacity: 0.8,
+                            color: "white",
+                            boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                          },
+                          "&:active": {
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            boxShadow:
+                              "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                          },
+                        }}
+                      >
+                        <SearchIcon
+                          sx={{
+                            color: "inherit",
+                            cursor: "pointer",
+                            fontSize: "35px",
+                          }}
+                        />
+                      </Button>
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    width: { md: "650px" },
+                    padding: 0,
+                    border: "2px solid #ff469e",
+                    borderRadius: "7px",
+                    backgroundColor: "white",
+                    transition: "0.2s ease-in-out",
+                    "&:hover": {
+                      border: "2px solid #ff469e",
+                    },
+                    "&:focus": {
+                      backgroundColor: "#F8F8F8",
+                    },
+                    "&.Mui-focused": {
+                      border: "1px solid #ff469e",
+                      backgroundColor: "#F8F8F8",
+                      boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                      outline: "none",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                  },
+                }}
+              />
+            </div>
             {/* Add Product button */}
             <Button
               variant="contained"
