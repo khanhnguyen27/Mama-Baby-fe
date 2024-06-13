@@ -22,6 +22,7 @@ import StaffLayout from "./components/staff/StaffLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import RegisStores from "./components/general/RegisStores";
 import Orders from "./components/general/Orders";
+import Articles from "./components/staff/Articles";
 
 function App() {
   return (
@@ -44,13 +45,15 @@ function App() {
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
-          <Route path="/staff" element={<StaffLayout />} >
+          <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<StaffHome />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="articles" element={<Articles />} />
+            <Route path="products" element={<StaffHome />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
-        <Route path="/admin" element={<AdminLayout />} >
+          <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
             <Route path="profile" element={<Profile />} />
           </Route>

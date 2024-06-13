@@ -9,6 +9,7 @@ import {
   addProductApi,
   updateProductApi,
 } from "../../api/ProductAPI";
+import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
@@ -22,6 +23,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  InputAdornment,
 } from "@mui/material";
 import {
   Box,
@@ -47,6 +49,8 @@ import { useDispatch } from "react-redux";
 import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import AddIcon from "@mui/icons-material/Add";
+import { Pagination, PaginationItem } from "@mui/material";
 
 export default function StaffHome() {
   const navigate = useNavigate();
@@ -65,7 +69,10 @@ export default function StaffHome() {
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const keyword = state?.keyword;
+  const [keyword, setKeyword] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,7 +98,7 @@ export default function StaffHome() {
   const storeId = store.id;
   // console.log(userId);
   // console.log(storeId);
-  const fetchData = async () => {
+  const fetchData = async (page = 1) => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
         allAgeApi(),
@@ -103,6 +110,7 @@ export default function StaffHome() {
           brand_id: brandFilter,
           age_id: ageFilter,
           store_id: storeId,
+          page: page - 1, // API thường sử dụng 0-based index cho trang
         }),
       ]);
 
@@ -110,11 +118,14 @@ export default function StaffHome() {
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
+      const totalPages = productRes?.data?.data?.totalPages || 1; // Giả sử API trả về tổng số trang
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
       setProduct(productData);
+      setTotalPages(totalPages);
+      setCurrentPage(page); // Cập nhật trang hiện tại
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -142,8 +153,18 @@ export default function StaffHome() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    fetchData();
+    fetchData(1);
   }, [keyword, ageFilter, brandFilter, categoryFilter, storeId]);
+
+  const onPageChange = (page) => {
+    fetchData(page);
+    window.scrollTo(0, 0);
+  };
+
+  //find product
+  const handleSearch = () => {
+    fetchData();
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
@@ -188,6 +209,55 @@ export default function StaffHome() {
     url: "",
   });
 
+  const handleOpenAddProduct = () => {
+    setOpenAddProduct(true);
+  };
+
+  const handleCloseAddProduct = () => {
+    setOpenAddProduct(false);
+  };
+
+  const handleAddProduct = () => {
+    if (!name || !price || !point || !description || !image.file) {
+      // Nếu có ít nhất một trường dữ liệu bị thiếu
+      // Hiển thị thông báo lỗi cho người dùng
+
+      toast.warn("Please fill in all required fields.");
+      return;
+    } else if (price <= 0 || point <= 0) {
+      toast.error("Price or Point cannot be less than or equal to 0.");
+      return;
+    }
+    debugger;
+    addProductApi(
+      image.file,
+      name,
+      price,
+      point,
+      status,
+      description,
+      type,
+      brandId,
+      categoryId,
+      ageId,
+      storeId,
+      isActive
+    )
+      .then((response) => {
+        // Xử lý kết quả trả về từ API
+        // Đóng dialog thêm sản phẩm
+        fetchData(currentPage);
+        handleCloseAddProduct();
+        toast.success("Product added successfully!");
+      })
+      .catch((error) => {
+        // Xử lý lỗi từ API
+        console.error("Error adding product:", error);
+        // Hiển thị thông báo lỗi cho người dùng
+        toast.error("Failed to add product. Please try again later.");
+      });
+  };
+
   //Update product
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -220,10 +290,10 @@ export default function StaffHome() {
     ) {
       // Nếu có ít nhất một trường dữ liệu bị thiếu
       // Hiển thị thông báo lỗi cho người dùng
-      alert("Please fill in all required fields.");
+      toast.warn("Please fill in all required fields.");
       return;
     } else if (selectedProduct.price <= 0 || selectedProduct.point <= 0) {
-      alert("Price or Point cannot be less than or equal to 0.");
+      toast.error("Price or Point cannot be less than or equal to 0.");
       return;
     }
     debugger;
@@ -246,9 +316,9 @@ export default function StaffHome() {
       .then((response) => {
         // Xử lý kết quả trả về từ API
         // Đóng dialog cập nhật sản phẩm
-
+        fetchData(currentPage);
         handleClose();
-        alert("Product updated successfully!");
+        toast.success("Product updated successfully!");
       })
       .catch((error) => {
         if (error.response) {
@@ -263,7 +333,7 @@ export default function StaffHome() {
           // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
           console.error("Error message:", error.message);
         }
-        alert("Failed to update product. Please try again later.");
+        toast.error("Failed to update product. Please try again later.");
       });
 
     //debug
@@ -350,55 +420,6 @@ export default function StaffHome() {
   //     };
   //   }
   // };
-
-  //Add product
-  const handleOpenAddProduct = () => {
-    setOpenAddProduct(true);
-  };
-
-  const handleCloseAddProduct = () => {
-    setOpenAddProduct(false);
-  };
-
-  const handleAddProduct = () => {
-    if (!name || !price || !point || !description || !image.file) {
-      // Nếu có ít nhất một trường dữ liệu bị thiếu
-      // Hiển thị thông báo lỗi cho người dùng
-
-      toast.warn("Please fill in all required fields.");
-      return;
-    } else if (price <= 0 || point <= 0) {
-      toast.error("Price or Point cannot be less than or equal to 0.");
-      return;
-    }
-    debugger;
-    addProductApi(
-      image.file,
-      name,
-      price,
-      point,
-      status,
-      description,
-      type,
-      brandId,
-      categoryId,
-      ageId,
-      storeId,
-      isActive
-    )
-      .then((response) => {
-        // Xử lý kết quả trả về từ API
-        // Đóng dialog thêm sản phẩm
-        handleCloseAddProduct();
-        toast.success("Product added successfully!");
-      })
-      .catch((error) => {
-        // Xử lý lỗi từ API
-        console.error("Error adding product:", error);
-        // Hiển thị thông báo lỗi cho người dùng
-        toast.error("Failed to add product. Please try again later.");
-      });
-  };
 
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -641,18 +662,95 @@ export default function StaffHome() {
             sx={{ textAlign: "center", display: "flex", alignItems: "center" }}
           >
             {/* ProductSearch */}
-            <ProductSearch />
+            <div style={{ position: "relative", zIndex: "99" }}>
+              <TextField
+                placeholder="What do you want to find?"
+                size="small"
+                variant="outlined"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        sx={{
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                          height: "40px",
+                          marginRight: "0.6px",
+                          borderRadius: "5px",
+                          boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                          transition: "0.2s ease-in-out",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            opacity: 0.8,
+                            color: "white",
+                            boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                          },
+                          "&:active": {
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            boxShadow:
+                              "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                          },
+                        }}
+                      >
+                        <SearchIcon
+                          sx={{
+                            color: "inherit",
+                            cursor: "pointer",
+                            fontSize: "35px",
+                          }}
+                        />
+                      </Button>
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    width: { md: "650px" },
+                    padding: 0,
+                    border: "2px solid #ff469e",
+                    borderRadius: "7px",
+                    backgroundColor: "white",
+                    transition: "0.2s ease-in-out",
+                    "&:hover": {
+                      border: "2px solid #ff469e",
+                    },
+                    "&:focus": {
+                      backgroundColor: "#F8F8F8",
+                    },
+                    "&.Mui-focused": {
+                      border: "1px solid #ff469e",
+                      backgroundColor: "#F8F8F8",
+                      boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                      outline: "none",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      border: "none",
+                    },
+                  },
+                }}
+              />
+            </div>
             {/* Add Product button */}
             <Button
               variant="contained"
               color="primary"
               sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
                 backgroundColor: "white",
                 color: "#ff469e",
                 borderRadius: "30px",
                 fontWeight: "bold",
                 fontSize: 10,
                 width: "15vw",
+                height: "3vw", // Adjust as necessary to ensure it's a square
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",
@@ -665,7 +763,7 @@ export default function StaffHome() {
               }}
               onClick={handleOpenAddProduct}
             >
-              Add Product
+              <AddIcon style={{ fontSize: "2rem" }} />
             </Button>
           </Grid>
         </Grid>
@@ -922,9 +1020,8 @@ export default function StaffHome() {
                       >
                         <CardMedia
                           component="img"
-                          //image={item.image_url}
-
-                          image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          image={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
+                          //image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
                           // onClick={() =>
@@ -1027,222 +1124,36 @@ export default function StaffHome() {
           </IconButton>
         )}
       </Container>
-      {selectedProduct && (
-        <Dialog open={open} onClose={handleClose}>
-          <DialogContent>
-            <TextField
-              label="ID"
-              value={selectedProduct?.id}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Name"
-              value={selectedProduct?.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Price"
-              value={selectedProduct?.price}
-              onChange={(e) => handleChange("price", e.target.value)}
-              type="number"
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Point"
-              value={selectedProduct?.point}
-              onChange={(e) => handleChange("point", e.target.value)}
-              type="number"
-              fullWidth
-              margin="normal"
-            />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={selectedProduct?.status}
-                onChange={(e) => handleChange("status", e.target.value)}
-              >
-                <MenuItem value="IN STOCK">IN STOCK</MenuItem>
-                <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
-                <MenuItem value="COMING SOON">COMING SOON</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Type</InputLabel>
-              <Select
-                value={selectedProduct?.type}
-                onChange={(e) => handleChange("type", e.target.value)}
-              >
-                <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
-                <MenuItem value="GIFT">GIFT</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              label="Description"
-              value={selectedProduct?.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              multiline
-              rows={4}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Created At"
-              value={new Date(selectedProduct?.created_at).toLocaleDateString()}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Updated At"
-              value={new Date(selectedProduct?.updated_at).toLocaleDateString()}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="normal"
-            />
-            {/* <TextField
-              label="Image URL"
-              value={selectedProduct?.image_url}
-              onChange={(e) => handleChange("image_url", e.target.value)}
-              fullWidth
-              margin="normal"
-            /> */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImage}
-              style={{ marginTop: "16px", marginBottom: "16px" }}
-            />
 
-            {image.url && (
-              <FormControl fullWidth margin="normal">
-                <InputLabel shrink>Image</InputLabel>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
+      <Container>
+        <Grid
+          container
+          justifyContent="center"
+          spacing={3}
+          sx={{ marginTop: 4 }}
+        >
+          <nav aria-label="Page navigation">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(event, page) => onPageChange(page)}
+              renderItem={(item) => (
+                <PaginationItem
+                  component="a"
+                  href="#"
+                  {...item}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPageChange(item.page);
                   }}
-                >
-                  <img
-                    src={image.url}
-                    alt="Selected"
-                    style={{ width: "100%", marginTop: "16px" }}
-                  />
-                </div>
-              </FormControl>
-            )}
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={selectedProduct?.category_id}
-                onChange={(e) => handleChange("category_id", e.target.value)}
-              >
-                {Object.keys(categoryMap).map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {categoryMap[key]}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Brand</InputLabel>
-              <Select
-                value={selectedProduct?.brand_id}
-                onChange={(e) => handleChange("brand_id", e.target.value)}
-              >
-                {Object.keys(brandMap).map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {brandMap[key]}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Age"
-              select
-              value={selectedProduct?.age_id}
-              onChange={(e) => handleChange("age_id", e.target.value)}
-              fullWidth
-              margin="normal"
-            >
-              {age.map((ageItem) => (
-                <MenuItem key={ageItem.id} value={ageItem.id}>
-                  {ageItem.rangeAge}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              label="Store ID"
-              value={selectedProduct?.store_id}
-              InputProps={{ readOnly: true }}
-              type="number"
-              fullWidth
-              margin="normal"
+                />
+              )}
+              siblingCount={1}
+              boundaryCount={1}
             />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Active</InputLabel>
-              <Select
-                value={selectedProduct?.is_active}
-                onChange={(e) => handleChange("is_active", e.target.value)}
-              >
-                <MenuItem value={true}>Yes</MenuItem>
-                <MenuItem value={false}>No</MenuItem>
-              </Select>
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              variant="contained"
-              onClick={handleClose}
-              sx={{
-                backgroundColor: "#E0E0E0",
-                color: "#757575",
-                borderRadius: "30px",
-                fontSize: 16,
-                fontWeight: "bold",
-                width: "10vw",
-                transition:
-                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                border: "1px solid #757575",
-                "&:hover": {
-                  backgroundColor: "#757575",
-                  color: "white",
-                  border: "1px solid white",
-                },
-              }}
-            >
-              Close
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleUpdate}
-              sx={{
-                backgroundColor: "#F0F8FF",
-                color: "#008080",
-                borderRadius: "30px",
-                fontSize: 16,
-                fontWeight: "bold",
-                width: "10vw",
-                transition:
-                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                border: "1px solid #008080",
-                "&:hover": {
-                  backgroundColor: "#008080",
-                  color: "white",
-                  border: "1px solid white",
-                },
-              }}
-            >
-              Update
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+          </nav>
+        </Grid>
+      </Container>
 
       <Dialog open={openAddProduct} onClose={handleCloseAddProduct}>
         <DialogTitle>Add Product</DialogTitle>
@@ -1416,6 +1327,223 @@ export default function StaffHome() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {selectedProduct && (
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Product information</DialogTitle>
+          <DialogContent>
+            {/* <TextField
+              label="ID"
+              value={selectedProduct?.id}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            /> */}
+            <TextField
+              label="Name"
+              value={selectedProduct?.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Price"
+              value={selectedProduct?.price}
+              onChange={(e) => handleChange("price", e.target.value)}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Point"
+              value={selectedProduct?.point}
+              onChange={(e) => handleChange("point", e.target.value)}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={selectedProduct?.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+              >
+                <MenuItem value="IN STOCK">IN STOCK</MenuItem>
+                <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
+                <MenuItem value="COMING SOON">COMING SOON</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Type</InputLabel>
+              <Select
+                value={selectedProduct?.type}
+                onChange={(e) => handleChange("type", e.target.value)}
+              >
+                <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
+                <MenuItem value="GIFT">GIFT</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Description"
+              value={selectedProduct?.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              multiline
+              rows={4}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Created At"
+              value={new Date(selectedProduct?.created_at).toLocaleDateString()}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Updated At"
+              value={new Date(selectedProduct?.updated_at).toLocaleDateString()}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+            {/* <TextField
+              label="Image URL"
+              value={selectedProduct?.image_url}
+              onChange={(e) => handleChange("image_url", e.target.value)}
+              fullWidth
+              margin="normal"
+            /> */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImage}
+              style={{ marginTop: "16px", marginBottom: "16px" }}
+            />
+
+            {image.url && (
+              <FormControl fullWidth margin="normal">
+                <InputLabel shrink>Image</InputLabel>
+                <div
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "10px",
+                    textAlign: "center",
+                  }}
+                >
+                  <img
+                    src={image.url}
+                    alt="Selected"
+                    style={{ width: "100%", marginTop: "16px" }}
+                  />
+                </div>
+              </FormControl>
+            )}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={selectedProduct?.category_id}
+                onChange={(e) => handleChange("category_id", e.target.value)}
+              >
+                {Object.keys(categoryMap).map((key) => (
+                  <MenuItem key={key} value={key}>
+                    {categoryMap[key]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Brand</InputLabel>
+              <Select
+                value={selectedProduct?.brand_id}
+                onChange={(e) => handleChange("brand_id", e.target.value)}
+              >
+                {Object.keys(brandMap).map((key) => (
+                  <MenuItem key={key} value={key}>
+                    {brandMap[key]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Age"
+              select
+              value={selectedProduct?.age_id}
+              onChange={(e) => handleChange("age_id", e.target.value)}
+              fullWidth
+              margin="normal"
+            >
+              {age.map((ageItem) => (
+                <MenuItem key={ageItem.id} value={ageItem.id}>
+                  {ageItem.rangeAge}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Store"
+              value={store.name_store}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              margin="normal"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Active</InputLabel>
+              <Select
+                value={selectedProduct?.is_active}
+                onChange={(e) => handleChange("is_active", e.target.value)}
+              >
+                <MenuItem value={true}>Yes</MenuItem>
+                <MenuItem value={false}>No</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="contained"
+              onClick={handleClose}
+              sx={{
+                backgroundColor: "#E0E0E0",
+                color: "#757575",
+                borderRadius: "30px",
+                fontSize: 16,
+                fontWeight: "bold",
+                width: "10vw",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #757575",
+                "&:hover": {
+                  backgroundColor: "#757575",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+            >
+              Close
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleUpdate}
+              sx={{
+                backgroundColor: "#F0F8FF",
+                color: "#008080",
+                borderRadius: "30px",
+                fontSize: 16,
+                fontWeight: "bold",
+                width: "10vw",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #008080",
+                "&:hover": {
+                  backgroundColor: "#008080",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+            >
+              Update
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 }

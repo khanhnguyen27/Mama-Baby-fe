@@ -18,6 +18,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import Edit from "@mui/icons-material/Edit";
+import ArticleIcon from "@mui/icons-material/Article";
 const drawerWidth = 240;
 const itemList = [
   {
@@ -34,6 +35,11 @@ const itemList = [
     label: "Orders",
     Icon: Edit,
     href: "orders",
+  },
+  {
+    label: "Articles",
+    Icon: ArticleIcon,
+    href: "articles",
   },
 ];
 

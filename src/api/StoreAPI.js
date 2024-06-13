@@ -18,8 +18,7 @@ export const regisStoreApi = (
   address,
   description,
   phone,
-  user_id,
-
+  user_id
 ) => {
   return axiosJWT.post(URL_STORE, {
     name_store: storename,
@@ -27,10 +26,7 @@ export const regisStoreApi = (
     description: description,
     phone: phone,
     status: 1,
-    is_active:false,
+    is_active: false,
     user_id: 12,
   });
 };
-
-
-
