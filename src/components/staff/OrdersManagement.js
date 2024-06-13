@@ -1,6 +1,10 @@
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
-import { changeStatusOrderApi, orderByUserIdApi } from "../../api/OrderAPI";
+import {
+  allOrderApi,
+  changeStatusOrderApi,
+  orderByStoreIdApi,
+} from "../../api/OrderAPI";
 import {
   Card,
   Container,
@@ -27,17 +31,17 @@ import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
+import { storeByUserIdApi } from "../../api/StoreAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
 
-export default function Orders() {
-  window.document.title = "Your Orders";
+export default function OrdersManagement() {
+  window.document.title = "Orders Management";
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
   const [ordersByStatus, setOrdersByStatus] = useState({
-    UNPAID: [],
     PENDING: [],
     PREPARING: [],
     DELIVERING: [],
@@ -49,9 +53,11 @@ export default function Orders() {
   const [brandMap, setBrandMap] = useState({});
   const [categoryMap, setCategoryMap] = useState({});
   const [voucherMap, setVoucherMap] = useState({});
+  const [store, setStore] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [open, setOpen] = useState(false);
+  const [actionType, setActionType] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,16 +68,40 @@ export default function Orders() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    storeByUserIdApi(userId)
+      .then((res) => {
+        setStore(res?.data?.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+  const storeId = store.id;
+
+  // useEffect(() => {
+  //   storeByUserIdApi(userId)
+  //     .then((res) => {
+  //       setStore(res?.data?.data);
+  //       const storeId = res?.data?.data?.id;
+  //       console.log(storeId);
+  //       return storeId;
+  //     })
+  //     .then((storeId) => {
+  //       fetchData(storeId);
+  //     })
+  //     .catch((err) => console.log(err));
+  // }, []);
+
   const fetchData = async () => {
     try {
       const [orderRes, productRes, brandRes, categoryRes, voucherRes] =
         await Promise.all([
-          orderByUserIdApi(userId),
+          orderByStoreIdApi(storeId),
           allProductApi(),
           allBrandApi(),
           allCategorytApi(),
           allVoucherApi(),
         ]);
+
       const orderData = orderRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
       const brandData = brandRes?.data?.data || [];
@@ -79,7 +109,6 @@ export default function Orders() {
       const voucherData = voucherRes?.data?.data || [];
 
       const categorizedOrders = {
-        UNPAID: [],
         PENDING: [],
         PREPARING: [],
         DELIVERING: [],
@@ -93,9 +122,6 @@ export default function Orders() {
           order.status_order_list[order.status_order_list.length - 1].status;
         categorizedOrders[latestStatus]?.push(order);
       });
-      // for (const status in categorizedOrders) {
-      //   categorizedOrders[status].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-      // }
       for (const status in categorizedOrders) {
         categorizedOrders[status].reverse();
       }
@@ -131,7 +157,7 @@ export default function Orders() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [storeId]);
 
   const handleTabChange = (e, newValue) => {
     setLoading(true);
@@ -145,32 +171,17 @@ export default function Orders() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
-  const handleCheckout = (finalAmount, bankCode, orderId) => {
-    const orders = [{ id: orderId }];
-    makePaymentApi(finalAmount, bankCode, orders)
-      .then((res) => {
-        console.log(res.data);
-        toast.success("Now moving to payment page!", {
-          autoClose: 1500,
-        });
-        setTimeout(() => {
-          window.location.replace(res.data?.data?.payment_url);
-        }, 1500);
-      })
-      .catch((error) => console.log(error));
-  };
-
-  const handleCancel = (orderId, status) => {
+  const handleAccept = (orderId, status) => {
     changeStatusOrderApi(orderId, status)
       .then((res) => {
         console.log(res.data);
-        toast.success("Order Cancelled!", {
+        toast.success("Order Accepted!", {
           autoClose: 1500,
         });
         handleClose();
         setLoading(true);
         setTimeout(() => {
-          navigate("/orders");
+          navigate("/staff/orders");
         }, 1500);
         setTimeout(() => {
           fetchData();
@@ -180,17 +191,17 @@ export default function Orders() {
       .catch((error) => console.log(error));
   };
 
-  const handleReceived = (orderId, status) => {
+  const handleReject = (orderId, status) => {
     changeStatusOrderApi(orderId, status)
       .then((res) => {
         console.log(res.data);
-        toast.success("Order Cancelled!", {
+        toast.success("Order Rejected!", {
           autoClose: 1500,
         });
         handleClose();
         setLoading(true);
         setTimeout(() => {
-          navigate("/orders");
+          navigate("/staff/orders");
         }, 1500);
         setTimeout(() => {
           fetchData();
@@ -200,7 +211,31 @@ export default function Orders() {
       .catch((error) => console.log(error));
   };
 
-  const handleOpen = () => setOpen(true);
+  const handleDeliver = (orderId, status) => {
+    changeStatusOrderApi(orderId, status)
+      .then((res) => {
+        console.log(res.data);
+        toast.success("Order Is Now Delivering!", {
+          autoClose: 1500,
+        });
+        handleClose();
+        setLoading(true);
+        setTimeout(() => {
+          navigate("/staff/orders");
+        }, 1500);
+        setTimeout(() => {
+          fetchData();
+          setLoading(false);
+        }, 2500);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const handleOpen = (type) => {
+    setActionType(type);
+    setOpen(true);
+  };
+
   const handleClose = () => setOpen(false);
 
   return (
@@ -261,7 +296,7 @@ export default function Orders() {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                minHeight: "60vh",
+                minHeight: "75vh",
                 maxWidth: "100vw",
                 backgroundColor: "#f5f7fd",
               }}
@@ -275,7 +310,10 @@ export default function Orders() {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                height: "60vh",
+                height: "75vh",
+                maxWidth: 1000,
+                maxHeight: "90vh",
+                overflowY: "auto",
               }}
             >
               <Typography
@@ -381,10 +419,16 @@ export default function Orders() {
                           {"  "}
                         </Typography>
                       </AccordionSummary>
-
                       <AccordionDetails>
                         <Grid container spacing={4}>
-                          <Grid item xs={12}>
+                          <Grid
+                            item
+                            xs={8.5}
+                            sm={9.5}
+                            md={10.5}
+                            lg={11.5}
+                            xl={12}
+                          >
                             <Card
                               sx={{
                                 pl: 2,
@@ -576,14 +620,7 @@ export default function Orders() {
                         >
                           Delivery:
                         </span>{" "}
-                        <Divider
-                          sx={{
-                            width: "70%",
-                            my: 1,
-                            borderColor: "rgba(0, 0, 0, 0.4)",
-                            borderWidth: "1px",
-                          }}
-                        />
+                        <Divider sx={{ width: "70%", my: 1 }} />
                         <Box
                           sx={{
                             display: "flex",
@@ -610,9 +647,9 @@ export default function Orders() {
                               width: "70%",
                             }}
                           >
-                            <span style={{ opacity: 0.7 }}>Contact:</span>
+                            <span style={{ opacity: 0.7 }}>Address:</span>
                             <span style={{ fontWeight: "600" }}>
-                              {item.phone_number}
+                              {item.shippingAddress}
                             </span>
                           </Box>
                           <Box
@@ -622,9 +659,9 @@ export default function Orders() {
                               width: "70%",
                             }}
                           >
-                            <span style={{ opacity: 0.7 }}>Address:</span>
+                            <span style={{ opacity: 0.7 }}>Contact:</span>
                             <span style={{ fontWeight: "600" }}>
-                              {item.shippingAddress}
+                              {item.phone_number}
                             </span>
                           </Box>
                         </Box>
@@ -715,135 +752,6 @@ export default function Orders() {
                     </Grid>
 
                     {item.status_order_list[item.status_order_list.length - 1]
-                      .status === "UNPAID" && (
-                      <Grid item xs={12} sx={{ textAlign: "right" }}>
-                        <Button
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "10px",
-                            fontSize: 16,
-                            fontWeight: "bold",
-                            my: 2,
-                            mx: 1,
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
-                          }}
-                          onClick={handleOpen}
-                        >
-                          COMPLETE PAYMENT
-                        </Button>
-                        <Modal
-                          open={open}
-                          onClose={handleClose}
-                          slotProps={{
-                            backdrop: {
-                              style: {
-                                backgroundColor: "rgba(0, 0, 0, 0.1)",
-                              },
-                            },
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              width: 400,
-                              borderRadius: "20px",
-                              backgroundColor: "#fff4fc",
-                              border: "2px solid #ff469e",
-                              boxShadow: 20,
-                              p: 4,
-                            }}
-                          >
-                            <Typography
-                              id="modal-modal-title"
-                              variant="h6"
-                              component="h2"
-                            >
-                              Confirm Payment
-                            </Typography>
-                            <Typography
-                              id="modal-modal-description"
-                              sx={{ mt: 2 }}
-                            >
-                              Are you sure you want to complete payment for this
-                              order?
-                            </Typography>
-                            <Box
-                              sx={{
-                                mt: 2,
-                                display: "flex",
-                                justifyContent: "flex-end",
-                              }}
-                            >
-                              <Button
-                                variant="contained"
-                                sx={{
-                                  backgroundColor: "white",
-                                  color: "#ff469e",
-                                  borderRadius: "20px",
-                                  fontSize: 16,
-                                  fontWeight: "bold",
-                                  my: 0.2,
-                                  mx: 1,
-                                  transition:
-                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                  border: "1px solid #ff469e",
-                                  "&:hover": {
-                                    backgroundColor: "#ff469e",
-                                    color: "white",
-                                    border: "1px solid white",
-                                  },
-                                }}
-                                onClick={() =>
-                                  handleCheckout(
-                                    item.final_amount,
-                                    "VNBANK",
-                                    item.id
-                                  )
-                                }
-                              >
-                                Yes
-                              </Button>
-                              <Button
-                                variant="contained"
-                                sx={{
-                                  backgroundColor: "white",
-                                  color: "#ff469e",
-                                  borderRadius: "20px",
-                                  fontSize: 16,
-                                  fontWeight: "bold",
-                                  my: 0.2,
-                                  mx: 1,
-                                  transition:
-                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                  border: "1px solid #ff469e",
-                                  "&:hover": {
-                                    backgroundColor: "#ff469e",
-                                    color: "white",
-                                    border: "1px solid white",
-                                  },
-                                }}
-                                onClick={handleClose}
-                              >
-                                No
-                              </Button>
-                            </Box>
-                          </Box>
-                        </Modal>
-                      </Grid>
-                    )}
-                    {item.status_order_list[item.status_order_list.length - 1]
                       .status === "PENDING" && (
                       <Grid item xs={12} sx={{ textAlign: "right" }}>
                         <Button
@@ -865,9 +773,32 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={handleOpen}
+                          onClick={() => handleOpen("Reject")}
                         >
-                          CANCEL ORDER
+                          REJECT ORDER
+                        </Button>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={() => handleOpen("Accept")}
+                        >
+                          ACCEPT ORDER
                         </Button>
                         <Modal
                           open={open}
@@ -895,10 +826,14 @@ export default function Orders() {
                             }}
                           >
                             <Typography variant="h6" component="h2">
-                              Confirm Cancellation
+                              {actionType === "Accept"
+                                ? "Accept Order"
+                                : "Reject Order"}
                             </Typography>
                             <Typography sx={{ mt: 2 }}>
-                              Are you sure you want to cancel this order?
+                              {actionType === "Accept"
+                                ? "Are you sure you want to accept this order?"
+                                : "Are you sure you want to reject this order?"}
                             </Typography>
                             <Box
                               sx={{
@@ -926,9 +861,13 @@ export default function Orders() {
                                     border: "1px solid white",
                                   },
                                 }}
-                                onClick={() =>
-                                  handleCancel(item.id, "CANCELLED")
-                                }
+                                onClick={() => {
+                                  {
+                                    actionType === "Accept"
+                                      ? handleAccept(item.id, "PREPARING")
+                                      : handleReject(item.id, "CANCELLED");
+                                  }
+                                }}
                               >
                                 Yes
                               </Button>
@@ -961,7 +900,7 @@ export default function Orders() {
                       </Grid>
                     )}
                     {item.status_order_list[item.status_order_list.length - 1]
-                      .status === "DELIVERING" && (
+                      .status === "PREPARING" && (
                       <Grid item xs={12} sx={{ textAlign: "right" }}>
                         <Button
                           variant="contained"
@@ -982,9 +921,9 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={handleOpen}
+                          onClick={() => handleOpen("Deliver")}
                         >
-                          CONFIRM ORDER RECEIVED
+                          READY TO DELIVER
                         </Button>
                         <Modal
                           open={open}
@@ -1012,10 +951,10 @@ export default function Orders() {
                             }}
                           >
                             <Typography variant="h6" component="h2">
-                              Confirm Order Received
+                              Ready to deliver
                             </Typography>
                             <Typography sx={{ mt: 2 }}>
-                              Do you confirm that you received your order?
+                              Are you sure to deliver this order?
                             </Typography>
                             <Box
                               sx={{
@@ -1043,9 +982,9 @@ export default function Orders() {
                                     border: "1px solid white",
                                   },
                                 }}
-                                onClick={() =>
-                                  handleReceived(item.id, "COMPLETED")
-                                }
+                                onClick={() => {
+                                  handleDeliver(item.id, "DELIVERING");
+                                }}
                               >
                                 Yes
                               </Button>

@@ -1,6 +1,6 @@
 import Navigation from "./components/Navigation/Navigation";
 import Footer from "./components/Footer/Footer";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import SignIn from "./components/general/SignIn";
@@ -27,6 +27,7 @@ import RegisStores from "./components/general/RegisStores";
 import Orders from "./components/general/Orders";
 import Articles from "./components/staff/Articles";
 import VoucherManagement from "./components/admin/VoucherManagement";
+import OrdersManagement from "./components/staff/OrdersManagement";
 function App() {
   return (
     <div className="App">
@@ -47,18 +48,20 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
-        <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
-          <Route path="/staff" element={<StaffLayout />}>
-            <Route index element={<StaffHome />} />
+        <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>            
+          <Route path="/staff" element={<StaffLayout />} >
+            <Route index element={<Navigate to={'/staff/products'} />} />
             <Route path="profile" element={<Profile />} />
-            <Route path="articles" element={<Articles />} />
             <Route path="products" element={<StaffHome />} />
+            <Route path="orders" element={<OrdersManagement />} />
+            <Route path="articles" element={<Articles />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminHome />} />
+        <Route path="/admin" element={<AdminLayout />} >
+            <Route index element={<Navigate to={'/admin/dashboard'} />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="dashboard" element={<AdminHome />} />
             <Route path="categories" element={<CategorieManagement />} />
             <Route path="brands" element={<BrandManagement />} />
             <Route path="age" element={<AgeManagement />} />

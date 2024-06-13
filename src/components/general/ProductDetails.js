@@ -600,7 +600,7 @@ export default function ProductDetails() {
           No comments available.
         </Typography>
       )}
-      {visibleComments < comment.length && (
+      {visibleComments < comment?.length && (
           <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
             <Button
               variant="contained"

@@ -62,11 +62,11 @@ const Navigation = () => {
     >
       <MenuItem
         onClick={() =>
-          pathname.includes("/staff")
+          (pathname.includes("/staff")
             ? navigate("/staff/profile")
             : pathname.includes("/admin")
             ? navigate("/admin/profile")
-            : navigate("/profile")
+            : navigate("/profile"), setAnchorElLogout(null), setOpenLogoutMenu(false))
         }
         sx={{
           transition:
@@ -94,7 +94,7 @@ const Navigation = () => {
       </MenuItem>
       <MenuItem
         onClick={() => (
-          navigate("/orders"), window.scrollTo({ top: 0, behavior: "instant" })
+          navigate("/orders"), window.scrollTo({ top: 0, behavior: "instant" }, setAnchorElLogout(null), setOpenLogoutMenu(false))
         )}
         sx={{
           transition:
