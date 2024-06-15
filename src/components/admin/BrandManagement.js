@@ -129,7 +129,7 @@ export default function BrandManagement() {
   const handleEdit = () => {
     const trimmedBrandName = selectedBrand.name.trim();
 
-    if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase())) {
+    if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase() && brand.id !== selectedBrand.id)){
       toast.error('Brand name already exists');
       return;
     }
