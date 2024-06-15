@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import 'react-toastify/dist/ReactToastify.css';
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -47,7 +48,6 @@ export default function AgeManagement() {
   const [newAgeName, setNewAgeName] = useState("");
   const [openUpdateAge, setOpenUpdateAge] = useState(false);
 
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -92,21 +92,29 @@ export default function AgeManagement() {
   };
 
   const handleAddAge = async () => {
+    const trimmedRangeAge = newAgeName.trim();
+    if (ages.some((age) => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase())) {
+      toast.error("RangeAge already exists");
+      return;
+    }
     try {
-      const newAge = { range_age: newAgeName }; // Adjust fields as per your API requirements
-      await addAgeApi(newAge); // Replace with your API call to add category
-      fetchData(); // Refresh category list
+      const newAge = { range_age: trimmedRangeAge };
+      await addAgeApi(newAge);
+      fetchData();
       handleCloseAddDialog();
       toast.success("RangeAge added successfully!");
     } catch (error) {
-      toast.error("Failed to added rangeAge. Please try again later.");
-      // Handle error
+      toast.error("Failed to add RangeAge. Please try again later.");
+      console.error("Error adding RangeAge:", error);
     }
   };
 
   const openUpdate = (item) => {
+    setSelectedAges({
+      ...item,
+      originalName: item.rangeAge, // Save the original name
+    });
     setOpenUpdateAge(true);
-    setSelectedAges(item);
   };
 
   const closeUpdate = () => {
@@ -120,26 +128,28 @@ export default function AgeManagement() {
     }));
   };
 
-  const handleEdit = () => {
-    if (!selectedAges) {
-      console.error("No rangeAge selected for editing.");
+  const handleEdit = async () => {
+    const trimmedRangeAge = selectedAges.rangeAge.trim();
+    const { id, originalName } = selectedAges;
+
+    // Check if the name has changed
+    const nameChanged = originalName.toLowerCase() !== trimmedRangeAge.toLowerCase();
+
+    // Check if the trimmed age range name already exists (only if the name has changed)
+    if (nameChanged && ages.some((age) => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase() && age.id !== id)) {
+      toast.error("RangeAge name already exists");
       return;
     }
 
-    updateAgeApi(
-      selectedAges.id,
-      selectedAges.rangeAge,
-      selectedAges.active,
-    )
-      .then((response) => {
-        toast.success("RangeAge updated successfully!");
-        // Reload the page to keep the current search keyword
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.error("Error updating rangeAge:", error);
-        toast.error("Failed to update rangeAge. Please try again later.");
-      });
+    try {
+      await updateAgeApi(id, trimmedRangeAge, selectedAges.active);
+      toast.success("RangeAge updated successfully!");
+      fetchData(); // Refresh data after update
+      setOpenUpdateAge(false); // Close update dialog
+    } catch (error) {
+      console.error("Error updating RangeAge:", error);
+      toast.error("Failed to update RangeAge. Please try again later.");
+    }
   };
 
   const filteredAges = ages.filter((item) =>
@@ -152,7 +162,7 @@ export default function AgeManagement() {
 
   return (
     <div>
-      <Container >
+      <Container>
         <Paper elevation={4} sx={{ position: "sticky", top: "80px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
           <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
             Manager Ages
@@ -260,7 +270,7 @@ export default function AgeManagement() {
         {/* Add Age Dialog */}
         <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
           <DialogTitle>Add New Range Age</DialogTitle>
-          <DialogContent>
+          <DialogContent  >
             <TextField
               autoFocus
               margin="dense"

@@ -8,7 +8,7 @@ export const allBrandApi = (params) => {
   });
 };
 
-export const addBrandyApi = async (brandData) => {
+export const addBrandApi = async (brandData) => {
   try {
     const response = await axiosJWT.post(URL_BRAND, brandData);
     return response.data;
