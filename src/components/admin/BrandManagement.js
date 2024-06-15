@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import 'react-toastify/dist/ReactToastify.css';
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -32,21 +33,20 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { allBrandApi, addBrandyApi, updateBrandApi } from "../../api/BrandAPI";
+import { allBrandApi, addBrandApi, updateBrandApi } from "../../api/BrandAPI"; // Updated API imports
 
 export default function BrandManagement() {
-  window.document.title = "BrandManagement";
+  window.document.title = "Brand Management";
   const { state } = useLocation();
   const [loading, setLoading] = useState(false);
   const [brands, setBrands] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selectedBrands, setSelectedBrands] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null); // Changed to singular "selectedBrand"
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newBrandName, setNewBrandName] = useState("");
   const [openUpdateBrand, setOpenUpdateBrand] = useState(false);
-
 
   useEffect(() => {
     fetchData();
@@ -92,21 +92,27 @@ export default function BrandManagement() {
   };
 
   const handleAddBrand = async () => {
+    const trimmedBrandName = newBrandName.trim();
+    if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase())) {
+      toast.error('Brand name already exists');
+      return;
+    }
+
     try {
-      const newBrand = { name: newBrandName }; // Adjust fields as per your API requirements
-      await addBrandyApi(newBrand); // Replace with your API call to add category
-      fetchData(); // Refresh category list
+      const newBrand = { name: trimmedBrandName }; // Adjust fields as per your API requirements
+      await addBrandApi(newBrand); // Replace with your API call to add brand
+      fetchData(); // Refresh brand list
       handleCloseAddDialog();
       toast.success("Brand added successfully!");
     } catch (error) {
-      toast.error("Failed to added brand. Please try again later.");
+      toast.error("Failed to add brand. Please try again later.");
       // Handle error
     }
   };
 
   const openUpdate = (item) => {
     setOpenUpdateBrand(true);
-    setSelectedBrands(item);
+    setSelectedBrand(item); // Changed to singular "selectedBrand"
   };
 
   const closeUpdate = () => {
@@ -114,22 +120,29 @@ export default function BrandManagement() {
   };
 
   const handleChange = (field, value) => {
-    setSelectedBrands((prevBrand) => ({
+    setSelectedBrand((prevBrand) => ({
       ...prevBrand,
       [field]: value,
     }));
   };
 
   const handleEdit = () => {
-    if (!selectedBrands) {
+    const trimmedBrandName = selectedBrand.name.trim();
+
+    if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase())) {
+      toast.error('Brand name already exists');
+      return;
+    }
+
+    if (!selectedBrand) {
       console.error("No brand selected for editing.");
       return;
     }
 
     updateBrandApi(
-      selectedBrands.id,
-      selectedBrands.name,
-      selectedBrands.active,
+      selectedBrand.id,
+      trimmedBrandName,
+      selectedBrand.active,
     )
       .then((response) => {
         toast.success("Brand updated successfully!");
@@ -152,10 +165,10 @@ export default function BrandManagement() {
 
   return (
     <div>
-      <Container >
+      <Container>
         <Paper elevation={4} sx={{ position: "sticky", top: "80px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
           <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-            Manager Brands
+            Manage Brands
           </Typography>
           <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
             <Grid item xs={12} md={3}>
@@ -282,13 +295,13 @@ export default function BrandManagement() {
         </Dialog>
 
         {/* Update Brand Dialog */}
-        {selectedBrands && (
+        {selectedBrand && (
           <Dialog open={openUpdateBrand} onClose={closeUpdate}>
             <DialogTitle>Edit Brand</DialogTitle>
             <DialogContent>
               <TextField
                 label="Name"
-                value={selectedBrands.name}
+                value={selectedBrand.name}
                 fullWidth
                 margin="normal"
                 onChange={(e) => handleChange("name", e.target.value)}
@@ -296,7 +309,7 @@ export default function BrandManagement() {
               <FormControl fullWidth margin="normal">
                 <InputLabel htmlFor="active-select">Active</InputLabel>
                 <Select
-                  value={selectedBrands.active}
+                  value={selectedBrand.active}
                   onChange={(e) => handleChange("active", e.target.value)}
                   label="Active"
                   inputProps={{

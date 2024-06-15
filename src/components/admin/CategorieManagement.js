@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import 'react-toastify/dist/ReactToastify.css';
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -32,7 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { allCategorytApi, addCategoryApi, updateCategoryApi } from "../../api/CategoryAPI";
+import { allCategorytApi, addCategoryApi, updateCategoryApi } from "../../api/CategoryAPI"; // Adjusted import names
 
 export default function CategoryManagement() {
   window.document.title = "Category Management";
@@ -54,7 +55,7 @@ export default function CategoryManagement() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const categoryRes = await allCategorytApi();
+      const categoryRes = await allCategorytApi(); // Adjusted function name
       setCategories(categoryRes.data.data || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -91,14 +92,20 @@ export default function CategoryManagement() {
   };
 
   const handleAddCategory = async () => {
+    const trimmedCategoryName = newCategoryName.trim();
+    if (categories.some(category => category.name.toLowerCase() === trimmedCategoryName.toLowerCase())) {
+      toast.error('Category name already exists');
+      return;
+    }
+
     try {
-      const newCategory = { name: newCategoryName }; // Adjust fields as per your API requirements
+      const newCategory = { name: trimmedCategoryName }; // Adjust fields as per your API requirements
       await addCategoryApi(newCategory); // Replace with your API call to add category
       fetchData(); // Refresh category list
       handleCloseAddDialog();
       toast.success("Category added successfully!");
     } catch (error) {
-      toast.error("Failed to added category. Please try again later.");
+      toast.error("Failed to add category. Please try again later.");
       // Handle error
     }
   };
@@ -120,6 +127,13 @@ export default function CategoryManagement() {
   };
 
   const handleEdit = () => {
+    const trimmedCategoryName = selectedCategory.name.trim();
+
+    if (categories.some(category => category.name.toLowerCase() === trimmedCategoryName.toLowerCase() && category.id !== selectedCategory.id)) {
+      toast.error('Category name already exists');
+      return;
+    }
+
     if (!selectedCategory) {
       console.error("No category selected for editing.");
       return;
@@ -127,7 +141,7 @@ export default function CategoryManagement() {
 
     updateCategoryApi(
       selectedCategory.id,
-      selectedCategory.name,
+      trimmedCategoryName,
       selectedCategory.active,
     )
       .then((response) => {
@@ -151,7 +165,7 @@ export default function CategoryManagement() {
 
   return (
     <div>
-      <Container >
+      <Container>
         <Paper elevation={4} sx={{ position: "sticky", top: "80px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
           <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
             Manager Categories
