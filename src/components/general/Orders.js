@@ -1,6 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { changeStatusOrderApi, orderByUserIdApi } from "../../api/OrderAPI";
+import { format } from "date-fns"; // Optional: for date formatting
 import {
   Card,
   Container,
@@ -19,6 +20,9 @@ import {
   IconButton,
   Modal,
   CircularProgress,
+  TextField,
+  Rating,
+  Avatar,
 } from "@mui/material";
 import { makePaymentApi } from "../../api/VNPayAPI";
 import { toast } from "react-toastify";
@@ -28,6 +32,7 @@ import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { allVoucherApi } from "../../api/VoucherAPI";
+import { createCommentApi, allCommentApi } from "../../api/CommentAPI";
 
 export default function Orders() {
   window.document.title = "Your Orders";
@@ -45,6 +50,7 @@ export default function Orders() {
     CANCELLED: [],
     RETURNED: [],
   });
+  const [commentMap, setCommentMap] = useState({});
   const [productMap, setProductMap] = useState({});
   const [brandMap, setBrandMap] = useState({});
   const [categoryMap, setCategoryMap] = useState({});
@@ -64,19 +70,27 @@ export default function Orders() {
 
   const fetchData = async () => {
     try {
-      const [orderRes, productRes, brandRes, categoryRes, voucherRes] =
-        await Promise.all([
-          orderByUserIdApi(userId),
-          allProductApi(),
-          allBrandApi(),
-          allCategorytApi(),
-          allVoucherApi(),
-        ]);
+      const [
+        orderRes,
+        productRes,
+        brandRes,
+        categoryRes,
+        voucherRes,
+        comments,
+      ] = await Promise.all([
+        orderByUserIdApi(userId),
+        allProductApi(),
+        allBrandApi(),
+        allCategorytApi(),
+        allVoucherApi(),
+        allCommentApi(),
+      ]);
       const orderData = orderRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
+      const commentData = comments?.data?.data || [];
 
       const categorizedOrders = {
         UNPAID: [],
@@ -124,6 +138,12 @@ export default function Orders() {
         return x;
       }, {});
       setVoucherMap(voucherMap);
+
+      const commentMap = commentData.reduce((x, item) => {
+        x[item.id] = item.product_id;
+        return x;
+      }, {});
+      setCommentMap(commentMap);
     } catch (err) {
       console.log(err);
     }
@@ -202,6 +222,53 @@ export default function Orders() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [openComment, setOpenComment] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [selectedComment, setSelectedComment] = useState(null);
+
+  const username = selectedComment?.full_name; // Replace with actual username
+  const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
+  const dateTime = format(new Date(), "PPPppp"); // Formatted current date and time
+
+  const handleOpenComment = (item) => {
+    setSelectedComment(item);
+    setOpenComment(true);
+  };
+
+  //console.log(commentMap);
+  //console.log(selectedComment);
+  //console.log(selectedComment?.order_detail_list);
+  const handleCloseComment = () => {
+    setOpenComment(false);
+  };
+
+  const handleComment = async () => {
+    if (rating === 0) {
+      toast.warn("Please select a rating.");
+      return;
+    }
+
+    if (comment.length < 50) {
+      toast.warn("Please enter a comment of at least 50 characters.");
+      return;
+    }
+
+    const cartItems =
+      selectedComment?.order_detail_list?.map((item) => ({
+        product_id: item.product_id,
+      })) || [];
+
+    await createCommentApi(cartItems, rating, comment, selectedComment?.user_id)
+      .then((response) => {
+        handleCloseComment();
+        toast.success("Comment added successfully!");
+      })
+      .catch((error) => {
+        toast.error("Failed to add comment. Please try again later.");
+      });
+  };
 
   return (
     <div
@@ -1077,6 +1144,56 @@ export default function Orders() {
                         </Modal>
                       </Grid>
                     )}
+                    {item.status_order_list[item.status_order_list.length - 1]
+                      .status === "COMPLETED" && (
+                      <Grid item xs={12} sx={{ textAlign: "right" }}>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                        >
+                          EXCHANGE
+                        </Button>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={() => handleOpenComment(item)}
+                        >
+                          COMMENT
+                        </Button>
+                      </Grid>
+                    )}
                   </Grid>
                 </Card>
               )
@@ -1111,6 +1228,71 @@ export default function Orders() {
           </IconButton>
         )}
       </Container>
+      <Modal open={openComment} onClose={handleCloseComment}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Grid container alignItems="center" spacing={2} mb={2}>
+            <Grid item>
+              <Avatar src={avatarUrl} alt={username} />
+            </Grid>
+            <Grid item>
+              <Typography variant="h6">{username}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                {dateTime}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Rating
+            name="star-rating"
+            value={rating}
+            onChange={(event, newValue) => setRating(newValue)}
+          />
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Comment"
+            variant="outlined"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <Button
+            variant="contained"
+            sx={{
+              marginTop: 4,
+              backgroundColor: "white",
+              color: "#ff469e",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              fontSize: 16,
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #ff469e",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+            onClick={handleComment}
+          >
+            Submit
+          </Button>
+        </Box>
+      </Modal>
     </div>
   );
 }
