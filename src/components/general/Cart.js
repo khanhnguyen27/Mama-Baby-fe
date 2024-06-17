@@ -157,7 +157,7 @@ export default function Cart() {
 
     // Add phone and fullname of the user, also add these 2 column in the order database
     const selectedVoucherObj = voucher.find(
-      (item) => item.discountValue === selectedVoucher
+      (item) => item.discount_value === selectedVoucher
     );
     const voucherId = selectedVoucherObj ? selectedVoucherObj.id : null;
 
@@ -285,7 +285,7 @@ export default function Cart() {
         >
           <Typography
             sx={{
-              fontSize: "2.5rem",
+              fontSize: "2.25rem",
               color: "#ff469e",
               fontWeight: "bold",
               marginTop: "1rem",
@@ -754,12 +754,12 @@ export default function Cart() {
                     variant="body2"
                     sx={{
                       color: "#ff469e",
-                      fontSize: "1.25rem",
+                      fontSize: "1.65rem",
                       textAlign: "center",
-                      my: 3,
+                      mt: 3,
                     }}
                   >
-                    Your cart is currently empty.
+                    Your cart is currently empty
                   </Typography>
                 )}
               </Grid>
@@ -876,7 +876,7 @@ export default function Cart() {
                     mt: 3,
                   }}
                 >
-                  <Typography variant="h6">Total:</Typography>
+                  <Typography variant="h6">Subtotal:</Typography>
                   <Typography
                     variant="h6"
                     sx={{
@@ -1566,7 +1566,7 @@ export default function Cart() {
                   </Box>
                 </Modal>
                 <Button
-                  onClick={() => navigate("/products")}
+                  onClick={() => (navigate("/products"), window.scrollTo(0, 0))}
                   variant="contained"
                   fullWidth
                   sx={{

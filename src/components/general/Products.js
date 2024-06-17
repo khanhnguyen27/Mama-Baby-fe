@@ -19,6 +19,7 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
+  Pagination,
   Radio,
   Tooltip,
   Typography,
@@ -46,6 +47,7 @@ export default function Products() {
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch();
   const keyword = state?.keyword;
 
@@ -69,6 +71,7 @@ export default function Products() {
           age_id: ageFilter,
           brand_id: brandFilter,
           category_id: categoryFilter,
+          page: currentPage - 1,
         }),
       ]);
 
@@ -105,11 +108,12 @@ export default function Products() {
   };
 
   useEffect(() => {
+    setLoading(true);
     setTimeout(() => {
       setLoading(false);
     }, 1000);
     fetchData();
-  }, [keyword, ageFilter, brandFilter, categoryFilter]);
+  }, [keyword, ageFilter, brandFilter, categoryFilter, currentPage]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
@@ -117,24 +121,28 @@ export default function Products() {
 
   const handleAgeChange = (id) => {
     setAgeFilter((prev) => (prev === id ? null : id));
-    setLoading(true);
+    // setLoading(true);
+    setCurrentPage(1);
   };
 
   const handleBrandChange = (id) => {
     setBrandFilter((prev) => (prev === id ? null : id));
-    setLoading(true);
+    setCurrentPage(1);
   };
 
   const handleCategoryChange = (id) => {
     setCategoryFilter((prev) => (prev === id ? null : id));
-    setLoading(true);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (e, page) => {
+    setCurrentPage(page);
   };
 
   const handleClearFilters = () => {
     setAgeFilter(null);
     setBrandFilter(null);
     setCategoryFilter(null);
-    setLoading(true);
   };
 
   const handleAddToCart = (index) => {
@@ -395,7 +403,7 @@ export default function Products() {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: "100%",
+                  height: "15%",
                 }}
               >
                 <CircularProgress sx={{ color: "#ff469e" }} size={90} />
@@ -695,7 +703,11 @@ export default function Products() {
                       >
                         <CardMedia
                           component="img"
-                          image={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
+                          image={
+                            item.image_url.includes("Product_")
+                              ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          }
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
                           onClick={() =>
@@ -785,7 +797,9 @@ export default function Products() {
                                 right: 10,
                                 fontWeight: 700,
                               }}
-                            > +
+                            >
+                              {" "}
+                              +
                             </span>
                             <Cart />
                           </IconButton>
@@ -798,6 +812,88 @@ export default function Products() {
             </Grid>
           </Grid>
         </Grid>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pagination
+            count={product.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            showFirstButton={product.totalPages !== 1}
+            showLastButton={product.totalPages !== 1}
+            hidePrevButton={currentPage === 1}
+            hideNextButton={currentPage === product.totalPages}
+            size="large"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "2.5rem",
+              width: "70%",
+              p: 1,
+              opacity: 0.9,
+              borderRadius: "20px",
+              "& .MuiPaginationItem-root": {
+                backgroundColor: "white",
+                borderRadius: "20px",
+                border: "1px solid black",
+                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+                mx: 1,
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  border: "1px solid #ff469e",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    border: "1px solid #ff469e",
+                  },
+                },
+                fontSize: "1.25rem",
+              },
+              "& .MuiPaginationItem-ellipsis": {
+                mt: 1.25,
+                fontSize: "1.25rem",
+              },
+            }}
+            componentsProps={{
+              previous: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+              next: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
         {visible && (
           <IconButton
             size="large"
