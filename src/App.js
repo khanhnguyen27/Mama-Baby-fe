@@ -28,6 +28,7 @@ import Orders from "./components/general/Orders";
 import Articles from "./components/staff/Articles";
 import VoucherManagement from "./components/admin/VoucherManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
+import RefundManagement from "./components/admin/RefundManagement";
 function App() {
   return (
     <div className="App">
@@ -66,6 +67,7 @@ function App() {
             <Route path="brands" element={<BrandManagement />} />
             <Route path="age" element={<AgeManagement />} />
             <Route path="vouchers" element={<VoucherManagement />} />
+            <Route path="refunds" element={<RefundManagement/>} />
           </Route>
         </Route>
       </Routes>
