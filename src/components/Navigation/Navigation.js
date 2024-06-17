@@ -20,6 +20,8 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectCartAmount } from "../../redux/CartSlice";
 import { ListAlt } from "@mui/icons-material";
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+
 
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -118,6 +120,36 @@ const Navigation = () => {
           >
             Orders
           </Typography>
+        </ListItemText>
+      </MenuItem>
+
+      <MenuItem
+        onClick={() => (
+          navigate("/regisstore"), window.scrollTo({ top: 0, behavior: "instant" }, setAnchorElLogout(null), setOpenLogoutMenu(false))
+        )}
+        sx={{
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        <ListItemIcon sx={{ color: "inherit" }}>
+          <AppRegistrationIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>
+          <Typography
+            style={{
+              color: "inherit",
+              paddingLeft: 10,
+              fontWeight: "bold",
+            }}
+          >
+            Regist Store
+          </Typography>
+          
         </ListItemText>
       </MenuItem>
       <MenuItem
