@@ -38,6 +38,12 @@ const SignUp = () => {
       });
       return;
     }
+    if (phone.length < 9 || phone.length > 11 || !/^\d+$/.test(phone)) {
+      toast.error("Phone must be digit and its length is 9 - 11 characters", {
+        autoClose: 2500,
+      });
+      return;
+    }
     if (
       username == "" ||
       password == "" ||

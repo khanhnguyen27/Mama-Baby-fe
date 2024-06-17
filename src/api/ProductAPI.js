@@ -18,7 +18,7 @@ export const allProductByStoreApi = (params) => {
 };
 
 export const productByIdApi = (productId) => {
-  return axiosJWT.get(`http://localhost:8080/mamababy/products/${productId}`);
+  return axiosJWT.get(`${URL_PRODUCT}/${productId}`);
 };
 
 export const addProductApi = (
@@ -35,7 +35,6 @@ export const addProductApi = (
   storeId,
   isActive
 ) => {
-  debugger;
   const formData = new FormData();
   formData.append("image", image);
   formData.append("name", name);

@@ -408,7 +408,11 @@ export default function ProductDetails() {
                         borderRadius: "10px",
                         marginBottom: "10px",
                       }}
-                      src={`http://localhost:8080/mamababy/products/images/${product.image_url}`}
+                      src={
+                        product.image_url.includes("Product_")
+                          ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
+                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      }
                       alt={product.name}
                     />
                   </Paper>

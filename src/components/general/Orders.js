@@ -26,17 +26,20 @@ import {
 } from "@mui/material";
 import { makePaymentApi } from "../../api/VNPayAPI";
 import { toast } from "react-toastify";
-import { allProductApi } from "../../api/ProductAPI";
+import { allProductApi, productByIdApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { createCommentApi, allCommentApi } from "../../api/CommentAPI";
+import { addToCart } from "../../redux/CartSlice";
+import { useDispatch } from "react-redux";
 
 export default function Orders() {
   window.document.title = "Your Orders";
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
@@ -58,6 +61,9 @@ export default function Orders() {
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [open, setOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [selectedFinalAmount, setSelectedFinalAmount] = useState(null);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,14 +111,14 @@ export default function Orders() {
       orderData.forEach((order) => {
         const latestStatus =
           order.status_order_list[order.status_order_list.length - 1].status;
-        categorizedOrders[latestStatus]?.push(order);
+        categorizedOrders[latestStatus]?.unshift(order);
       });
       // for (const status in categorizedOrders) {
       //   categorizedOrders[status].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
       // }
-      for (const status in categorizedOrders) {
-        categorizedOrders[status].reverse();
-      }
+      // for (const status in categorizedOrders) {
+      //   categorizedOrders[status].reverse();
+      // }
       setOrdersByStatus(categorizedOrders);
 
       const productMap = productData.reduce((x, item) => {
@@ -165,8 +171,9 @@ export default function Orders() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
-  const handleCheckout = (finalAmount, bankCode, orderId) => {
-    const orders = [{ id: orderId }];
+  const handleCheckout = (finalAmount, bankCode) => {
+    const orders = [{ id: selectedOrderId }];
+    console.log(finalAmount);
     makePaymentApi(finalAmount, bankCode, orders)
       .then((res) => {
         console.log(res.data);
@@ -180,48 +187,140 @@ export default function Orders() {
       .catch((error) => console.log(error));
   };
 
-  const handleCancel = (orderId, status) => {
-    changeStatusOrderApi(orderId, status)
+  // const handleCancel = (orderId, status) => {
+  //   changeStatusOrderApi(orderId, status)
+  //     .then((res) => {
+  //       console.log(res.data);
+  //       toast.success("Order Cancelled!", {
+  //         autoClose: 1500,
+  //       });
+  //       handleClose();
+  //       setLoading(true);
+  //       setTimeout(() => {
+  //         navigate("/orders");
+  //       }, 1500);
+  //       setTimeout(() => {
+  //         fetchData();
+  //         setLoading(false);
+  //       }, 2500);
+  //     })
+  //     .catch((error) => console.log(error));
+  // };
+
+  // const handleReceived = (orderId, status) => {
+  //   changeStatusOrderApi(orderId, status)
+  //     .then((res) => {
+  //       console.log(res.data);
+  //       toast.success("Order Cancelled!", {
+  //         autoClose: 1500,
+  //       });
+  //       handleClose();
+  //       setLoading(true);
+  //       setTimeout(() => {
+  //         navigate("/orders");
+  //       }, 1500);
+  //       setTimeout(() => {
+  //         fetchData();
+  //         setLoading(false);
+  //       }, 2500);
+  //     })
+  //     .catch((error) => console.log(error));
+  // };
+
+  const handleCancel = (orderId, newStatus) => {
+    changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
         toast.success("Order Cancelled!", {
           autoClose: 1500,
         });
-        handleClose();
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/orders");
-        }, 1500);
-        setTimeout(() => {
-          fetchData();
-          setLoading(false);
-        }, 2500);
+        updateOrderStatus(orderId, newStatus);
       })
       .catch((error) => console.log(error));
   };
 
-  const handleReceived = (orderId, status) => {
-    changeStatusOrderApi(orderId, status)
+  const handleReceived = (orderId, newStatus) => {
+    changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
         toast.success("Order Cancelled!", {
           autoClose: 1500,
         });
-        handleClose();
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/orders");
-        }, 1500);
-        setTimeout(() => {
-          fetchData();
-          setLoading(false);
-        }, 2500);
+        updateOrderStatus(orderId, newStatus);
       })
       .catch((error) => console.log(error));
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrdersByStatus((prevOrders) => {
+      const updatedOrders = { ...prevOrders };
+      let upToDateOrder;
+
+      for (const status in updatedOrders) {
+        const orderIndex = updatedOrders[status].findIndex(
+          (order) => order.id === orderId
+        );
+        if (orderIndex !== -1) {
+          [upToDateOrder] = updatedOrders[status].splice(orderIndex, 1);
+          break;
+        }
+      }
+
+      if (upToDateOrder) {
+        upToDateOrder.status_order_list.push({ status: newStatus });
+        updatedOrders[newStatus].unshift(upToDateOrder);
+      }
+
+      return updatedOrders;
+    });
+
+    handleClose();
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/orders");
+      setLoading(false);
+    }, 1500);
+  };
+
+  const handleRepurchase = async (items) => {
+    // const reversedItems = [...items].reverse();
+    // items?.forEach((index) => {
+    //   productByIdApi(index.product_id)
+    //   .then((res) => (
+    for (const item of items) {
+      const res = await productByIdApi(item.product_id);
+      console.log(res?.data?.data),
+        dispatch(
+          addToCart({
+            product: {
+              id: item.product_id,
+              name: res?.data?.data.name,
+              price: res?.data?.data.price,
+              store_id: res?.data?.data.store_id,
+            },
+            quantity: item.quantity,
+          })
+        );
+    }
+    toast.success("Your order is now added to cart", { autoClose: 1000 });
+    handleClose();
+    // setTimeout(() => {
+    //   navigate("/cart");
+    // }, 1500);
+  };
+
+  // const handleOpen = () => setOpen(true);
+  const handleOpen = (orderId, finalAmount, orderDetails) => {
+    setSelectedOrderId(orderId);
+    setSelectedFinalAmount(finalAmount);
+    setSelectedOrderDetails(orderDetails);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedOrderId(null);
+  };
 
   const [openComment, setOpenComment] = useState(false);
   const [rating, setRating] = useState(0);
@@ -353,7 +452,7 @@ export default function Orders() {
                   textAlign: "center",
                 }}
               >
-                There's no order of this status
+                There's no orders of this status
               </Typography>
             </Box>
           ) : (
@@ -369,6 +468,7 @@ export default function Orders() {
                     boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
                   }}
                 >
+                  <>{console.log(item.id)}</>
                   <Typography
                     variant="h5"
                     sx={{ mb: "10px", fontWeight: "bold" }}
@@ -803,7 +903,7 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={handleOpen}
+                          onClick={() => handleOpen(item.id, item.final_amount)}
                         >
                           COMPLETE PAYMENT
                         </Button>
@@ -828,7 +928,7 @@ export default function Orders() {
                               borderRadius: "20px",
                               backgroundColor: "#fff4fc",
                               border: "2px solid #ff469e",
-                              boxShadow: 20,
+                              boxShadow: 10,
                               p: 4,
                             }}
                           >
@@ -872,13 +972,15 @@ export default function Orders() {
                                     border: "1px solid white",
                                   },
                                 }}
-                                onClick={() =>
+                                onClick={() => (
                                   handleCheckout(
-                                    item.final_amount,
+                                    selectedFinalAmount,
                                     "VNBANK",
-                                    item.id
-                                  )
-                                }
+                                    selectedOrderId
+                                  ),
+                                  console.log(selectedFinalAmount),
+                                  console.log(selectedOrderId)
+                                )}
                               >
                                 Yes
                               </Button>
@@ -932,7 +1034,7 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={handleOpen}
+                          onClick={() => handleOpen(item.id)}
                         >
                           CANCEL ORDER
                         </Button>
@@ -957,7 +1059,7 @@ export default function Orders() {
                               borderRadius: "20px",
                               backgroundColor: "#fff4fc",
                               border: "2px solid #ff469e",
-                              boxShadow: 20,
+                              boxShadow: 10,
                               p: 4,
                             }}
                           >
@@ -994,7 +1096,7 @@ export default function Orders() {
                                   },
                                 }}
                                 onClick={() =>
-                                  handleCancel(item.id, "CANCELLED")
+                                  handleCancel(selectedOrderId, "CANCELLED")
                                 }
                               >
                                 Yes
@@ -1049,7 +1151,7 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={handleOpen}
+                          onClick={() => handleOpen(item.id)}
                         >
                           CONFIRM ORDER RECEIVED
                         </Button>
@@ -1074,7 +1176,7 @@ export default function Orders() {
                               borderRadius: "20px",
                               backgroundColor: "#fff4fc",
                               border: "2px solid #ff469e",
-                              boxShadow: 20,
+                              boxShadow: 10,
                               p: 4,
                             }}
                           >
@@ -1111,7 +1213,127 @@ export default function Orders() {
                                   },
                                 }}
                                 onClick={() =>
-                                  handleReceived(item.id, "COMPLETED")
+                                  handleReceived(selectedOrderId, "COMPLETED")
+                                }
+                              >
+                                Yes
+                              </Button>
+                              <Button
+                                variant="contained"
+                                sx={{
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  borderRadius: "20px",
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  my: 0.2,
+                                  mx: 1,
+                                  transition:
+                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                  border: "1px solid #ff469e",
+                                  "&:hover": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    border: "1px solid white",
+                                  },
+                                }}
+                                onClick={handleClose}
+                              >
+                                No
+                              </Button>
+                            </Box>
+                          </Box>
+                        </Modal>
+                      </Grid>
+                    )}
+                    {item.status_order_list[item.status_order_list.length - 1]
+                        .status === "CANCELLED" && (
+                      <Grid item xs={12} sx={{ textAlign: "right" }}>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={() => (
+                            handleOpen("", "", item.order_detail_list),
+                            console.log(item.order_detail_list)
+                          )}
+                        >
+                          REPURCHASE
+                        </Button>
+                        <Modal
+                          open={open}
+                          onClose={handleClose}
+                          slotProps={{
+                            backdrop: {
+                              style: {
+                                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                              },
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              width: 400,
+                              borderRadius: "20px",
+                              backgroundColor: "#fff4fc",
+                              border: "2px solid #ff469e",
+                              boxShadow: 10,
+                              p: 4,
+                            }}
+                          >
+                            <Typography variant="h6" component="h2">
+                              Confirm Repurchase
+                            </Typography>
+                            <Typography sx={{ mt: 2 }}>
+                              Do you want to repurchase these products?
+                            </Typography>
+                            <Box
+                              sx={{
+                                mt: 2,
+                                display: "flex",
+                                justifyContent: "flex-end",
+                              }}
+                            >
+                              <Button
+                                variant="contained"
+                                sx={{
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  borderRadius: "20px",
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  my: 0.2,
+                                  mx: 1,
+                                  transition:
+                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                  border: "1px solid #ff469e",
+                                  "&:hover": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    border: "1px solid white",
+                                  },
+                                }}
+                                onClick={() =>
+                                  handleRepurchase(selectedOrderDetails)
                                 }
                               >
                                 Yes
@@ -1192,6 +1414,203 @@ export default function Orders() {
                         >
                           COMMENT
                         </Button>
+                        <Modal open={openComment} onClose={handleCloseComment} slotProps={{
+                            backdrop: {
+                              style: {
+                                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                              },
+                            },
+                          }}>
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              width: 400,
+                              bgcolor: "background.paper",
+                              borderRadius: 2,
+                              boxShadow: 10,
+                              p: 4,
+                            }}
+                          >
+                            <Grid
+                              container
+                              alignItems="center"
+                              spacing={2}
+                              mb={2}
+                            >
+                              <Grid item>
+                                <Avatar src={avatarUrl} alt={username} />
+                              </Grid>
+                              <Grid item>
+                                <Typography variant="h6">{username}</Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  {dateTime}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                            <Rating
+                              name="star-rating"
+                              value={rating}
+                              onChange={(event, newValue) =>
+                                setRating(newValue)
+                              }
+                            />
+                            <TextField
+                              fullWidth
+                              multiline
+                              rows={4}
+                              label="Comment"
+                              variant="outlined"
+                              value={comment}
+                              onChange={(e) => setComment(e.target.value)}
+                              sx={{ mt: 2 }}
+                            />
+                            <Button
+                              variant="contained"
+                              sx={{
+                                marginTop: 4,
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "30px",
+                                fontWeight: "bold",
+                                fontSize: 16,
+                                width: "10vw",
+                                transition:
+                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  border: "1px solid white",
+                                },
+                              }}
+                              onClick={handleComment}
+                            >
+                              Submit
+                            </Button>
+                          </Box>
+                        </Modal>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={() => (
+                            handleOpen("", "", item.order_detail_list),
+                            console.log(item.order_detail_list)
+                          )}
+                        >
+                          REPURCHASE
+                        </Button>
+                        <Modal
+                          open={open}
+                          onClose={handleClose}
+                          slotProps={{
+                            backdrop: {
+                              style: {
+                                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                              },
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              width: 400,
+                              borderRadius: "20px",
+                              backgroundColor: "#fff4fc",
+                              border: "2px solid #ff469e",
+                              boxShadow: 10,
+                              p: 4,
+                            }}
+                          >
+                            <Typography variant="h6" component="h2">
+                              Confirm Repurchase
+                            </Typography>
+                            <Typography sx={{ mt: 2 }}>
+                              Do you want to repurchase these products?
+                            </Typography>
+                            <Box
+                              sx={{
+                                mt: 2,
+                                display: "flex",
+                                justifyContent: "flex-end",
+                              }}
+                            >
+                              <Button
+                                variant="contained"
+                                sx={{
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  borderRadius: "20px",
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  my: 0.2,
+                                  mx: 1,
+                                  transition:
+                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                  border: "1px solid #ff469e",
+                                  "&:hover": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    border: "1px solid white",
+                                  },
+                                }}
+                                onClick={() =>
+                                  handleRepurchase(selectedOrderDetails)
+                                }
+                              >
+                                Yes
+                              </Button>
+                              <Button
+                                variant="contained"
+                                sx={{
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  borderRadius: "20px",
+                                  fontSize: 16,
+                                  fontWeight: "bold",
+                                  my: 0.2,
+                                  mx: 1,
+                                  transition:
+                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                  border: "1px solid #ff469e",
+                                  "&:hover": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    border: "1px solid white",
+                                  },
+                                }}
+                                onClick={handleClose}
+                              >
+                                No
+                              </Button>
+                            </Box>
+                          </Box>
+                        </Modal>
+                        
                       </Grid>
                     )}
                   </Grid>
@@ -1228,71 +1647,6 @@ export default function Orders() {
           </IconButton>
         )}
       </Container>
-      <Modal open={openComment} onClose={handleCloseComment}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Grid container alignItems="center" spacing={2} mb={2}>
-            <Grid item>
-              <Avatar src={avatarUrl} alt={username} />
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">{username}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                {dateTime}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Rating
-            name="star-rating"
-            value={rating}
-            onChange={(event, newValue) => setRating(newValue)}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Comment"
-            variant="outlined"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Button
-            variant="contained"
-            sx={{
-              marginTop: 4,
-              backgroundColor: "white",
-              color: "#ff469e",
-              borderRadius: "30px",
-              fontWeight: "bold",
-              fontSize: 16,
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #ff469e",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-            onClick={handleComment}
-          >
-            Submit
-          </Button>
-        </Box>
-      </Modal>
     </div>
   );
 }
