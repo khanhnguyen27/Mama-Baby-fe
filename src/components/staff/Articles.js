@@ -208,19 +208,25 @@ export default function Articles() {
         toast.success("Article updated successfully:", response.data);
       })
       .catch((error) => {
-        if (error.response) {
-          // Server trả về một mã trạng thái không nằm trong phạm vi 2xx
-          console.error("Error response data:", error.response.data);
-          console.error("Error response status:", error.response.status);
-          console.error("Error response headers:", error.response.headers);
-        } else if (error.request) {
-          // Yêu cầu đã được thực hiện nhưng không nhận được phản hồi
-          console.error("Error request:", error.request);
+        if (error.response.headers["content-type"] === "application/json") {
+          toast.error(
+            "The product photo is currently damaged, please select a new photo."
+          );
         } else {
-          // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
-          console.error("Error message:", error.message);
+          toast.error("Failed to update article. Please try again later.");
         }
-        toast.error("Failed to update article. Please try again later.");
+        // if (error.response) {
+        //   // Server trả về một mã trạng thái không nằm trong phạm vi 2xx
+        //   console.error("Error response data:", error.response.data);
+        //   console.error("Error response status:", error.response.status);
+        //   console.error("Error response headers:", error.response.headers);
+        // } else if (error.request) {
+        //   // Yêu cầu đã được thực hiện nhưng không nhận được phản hồi
+        //   console.error("Error request:", error.request);
+        // } else {
+        //   // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
+        //   console.error("Error message:", error.message);
+        // }
       });
   };
 
@@ -237,20 +243,22 @@ export default function Articles() {
 
   useEffect(() => {
     const setImageFromUrl = async (url) => {
-      try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const file = new File([blob], selectedArticle.link_image, {
-          type: blob.type,
-        });
+      if (image.url === "") {
+        try {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          const file = new File([blob], selectedArticle.link_image, {
+            type: blob.type,
+          });
 
-        setImage((prevImage) => ({
-          ...prevImage,
-          url,
-          file,
-        }));
-      } catch (error) {
-        console.error("Error fetching image:", error);
+          setImage((prevImage) => ({
+            ...prevImage,
+            url,
+            file,
+          }));
+        } catch (error) {
+          console.error("Error fetching image:", error);
+        }
       }
     };
 
