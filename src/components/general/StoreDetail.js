@@ -8,16 +8,15 @@ import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import { allVoucherApi } from "../../api/VoucherAPI";
-import {storeByIdApi, productByStoreIdApi } from "../../api/StoreAPI";
+import { storeByIdApi, productByStoreIdApi } from "../../api/StoreAPI";
 import {
+  Paper,
   Box,
   Breadcrumbs,
   Card,
   CardActions,
   CardContent,
   CardMedia,
-  Checkbox,
-  CircularProgress,
   Container,
   Fade,
   FormControlLabel,
@@ -60,23 +59,27 @@ export default function Products() {
   }, []);
   var items = [
     {
-
       image: "https://cdn1.concung.com/img/adds/2024/04/1714120748-HOME.png",
     },
     {
-
       image:
         "https://cdn1.concung.com/img/adds/2024/04/1713941097-HOME-KIDESSENTIALS.png",
     },
     {
-
       image: "https://cdn1.concung.com/img/adds/2024/05/1715592332-HOME.png",
     },
   ];
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, voucherRes, storeRes, productByStoreIdRes] = await Promise.all([
+      const [
+        ageRes,
+        brandRes,
+        categoryRes,
+        productRes,
+        voucherRes,
+        storeRes,
+      ] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
@@ -89,8 +92,6 @@ export default function Products() {
         }),
         allVoucherApi(),
         storeByIdApi(storeId),
-
-
       ]);
 
       const ageData = ageRes?.data?.data || [];
@@ -166,7 +167,6 @@ export default function Products() {
   const scrollRight2 = () => {
     listRef2.current.scrollBy({ left: 340, behavior: "smooth" });
   };
-  console.log(product);
 
   return (
     <div
@@ -220,9 +220,137 @@ export default function Products() {
           <Typography
             sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
           >
-            {store.name_store} 
+            {store.name_store}
           </Typography>
         </Breadcrumbs>
+        <Container
+          sx={{
+            flexDirection: "column",
+            position: "relative",
+            borderRadius: "5px",
+            padding: "1rem",
+          }}
+        >
+          <Container>{/* Store Info */}</Container>
+          <Card
+            sx={{
+              backgroundColor: "#fff4fc",
+
+              border: "3px solid #ff469e",
+              borderRadius: "20px",
+              color: "black",
+              maxWidth: "1200px",
+              width: "100%",
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="h4"
+                sx={{
+                  color: "#ff469e",
+                  marginBottom: "2rem",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                {store.name_store}
+              </Typography>
+              {store && (
+                <Grid container spacing={6}>
+                  <Grid item xs={12} md={4}>
+                    <Paper
+                      sx={{
+                        padding: "10px",
+                        backgroundColor: "#ffe6f0",
+                        textAlign: "center",
+                        boxShadow: "2px 2px 4px rgba(0, 0, 0.16)",
+                        borderRadius: "15px",
+                      }}
+                    >
+                      <img
+                        style={{
+                          width: "200px",
+                          height: "200px",
+                          borderRadius: "100px",
+                          marginBottom: "10px",
+                        }}
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-5XlLXWqvo2uy4C2qB2r5M5hrpx13URBVTQ&s"
+                      />
+                      <Typography
+                        style={{
+                          fontWeight: "bold",
+                          color: "black",
+                          marginBottom: "10px",
+                          fontSize: "1.75rem",
+                        }}
+                      ></Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={8}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <div>
+                          <Typography
+                            style={{
+                              fontWeight: "bold",
+                              color: "black",
+                              fontSize: "1.25rem",
+                            }}
+                          >
+                            Description of Store
+                          </Typography>
+                          <Typography
+                            style={{ color: "black", fontSize: "1.3rem" }}
+                          >
+                            {store.description}
+                          </Typography>
+                        </div>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <div>
+                          <Typography
+                            style={{
+                              fontWeight: "bold",
+                              color: "black",
+                              fontSize: "1.25rem",
+                            }}
+                          >
+                            Address of Store
+                          </Typography>
+                          <Typography
+                            style={{ color: "black", fontSize: "1.3rem" }}
+                          >
+                            {store.address}
+                          </Typography>
+                        </div>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <div>
+                          <Typography
+                            style={{
+                              fontWeight: "bold",
+                              color: "black",
+                              fontSize: "1.25rem",
+                            }}
+                          >
+                            Phone Number
+                          </Typography>
+                          <Typography
+                            style={{ color: "black", fontSize: "1.3rem" }}
+                          >
+                            {store.phone}
+                          </Typography>
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              )}
+            </CardContent>
+          </Card>
+        </Container>
+      </Container>
+      <Container sx={{ my: 4 }}>
         <Box
           sx={{
             display: "flex",
@@ -231,8 +359,10 @@ export default function Products() {
             borderRadius: "16px",
             background: "white",
             padding: "1rem",
+            marginTop: "3rem",
           }}
         >
+          {/* Header */}
           <Box
             sx={{
               display: "flex",
@@ -242,82 +372,60 @@ export default function Products() {
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              VinhTam
+              Voucher
             </Typography>
           </Box>
-        </Box>
-      </Container>
-      <Container sx={{ my: 4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            position: "relative",
-            borderRadius: "16px",
-            background: "white",
-          }}
-        >
-          <IconButton
-            onClick={scrollLeft}
-            size="small"
-            sx={{
-              position: "absolute",
-              left: -10,
-              zIndex: 1,
-              backgroundColor: "white",
-              color: "#ff469e",
-              border: "1px solid #ff469e",
-              boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
-              transition: "0.2s ease-in-out",
-              "&:hover": {
-                transform: "scale(1.15)",
-                background: "white",
-                boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
-                "& svg": {
-                  transform: "scale(1.1)",
-                },
-              },
-            }}
-          >
-            <ArrowLeft />
-          </IconButton>
+          {/* List */}
           <Box
-            ref={listRef}
             sx={{
               display: "flex",
-              overflowX: "hidden",
-              scrollBehavior: "smooth",
-              width: "100%",
-              padding: "0px 8px",
+              alignItems: "center",
+              position: "relative",
+              borderRadius: "16px",
+              background: "white",
             }}
           >
-            {voucher?.map((item, index) => (
-              <Tooltip
-                title={item.name}
-                enterDelay={500}
-                leaveDelay={50}
-                placement="right-start"
-                TransitionComponent={Fade}
-                TransitionProps={{ timeout: 250 }}
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "white",
-                      boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                      color: "black",
-                      borderRadius: "8px",
-                      border: "1px solid black",
-                      fontSize: "12px",
-                    },
+            <IconButton
+              onClick={scrollLeft2}
+              size="small"
+              sx={{
+                position: "absolute",
+                left: -8,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
                   },
-                }}
-              >
+                },
+              }}
+            >
+              <ArrowLeft />
+            </IconButton>
+            <Box
+              ref={listRef2}
+              sx={{
+                display: "flex",
+                overflowX: "hidden",
+                scrollBehavior: "smooth",
+                width: "100%",
+                padding: "0px 8px",
+              }}
+            >
+              {voucher?.map((item, index) => (
                 <Box
                   key={index}
-
                   sx={{
-                    minWidth: 180,
+                    minWidth: 120,
                     padding: 2,
+                    textAlign: "center",
                     border: "1px solid white",
                     borderRadius: "16px",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
@@ -331,80 +439,52 @@ export default function Products() {
                   }}
                 >
                   <img
-                    src="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                    style={{ width: "64px", height: "64px" }}
-                  />
+                    style={{ width: "50px", height: "65px" }}
+                    src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/store-logo-design%2C-online-shopping-store-logo-template-f16f818774fd63dead3a940d57b6c71d_screen.jpg?ts=1658656234react"
+                  ></img>
                   <Typography
                     variant="subtitle1"
-                    sx={{
-                      fontWeight: "bold",
-                      marginTop: "0.75rem",
-                      textAlign: "left",
-                      whiteSpace: "normal",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      maxWidth: "100%",
-                      lineHeight: "1.2rem",
-                      maxHeight: "2.4rem",
-                    }}
+                    sx={{ fontWeight: "bold", marginTop: "0.5rem" }}
                   >
-                    {item.code.length > 40
-                      ? `${item.code.substring(0, 40)}...`
-                      : item.code}
+                    {item.code}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "gray",
-                      textAlign: "left",
-                    }}
-                  >
-                    {item.discountValue}VND
+                  <Typography variant="body2" sx={{ color: "gray" }}>
+                    {item.discountValue}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "gray",
-                      textAlign: "left",
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ color: "gray" }}>
                     {item.description}
                   </Typography>
                 </Box>
-              </Tooltip>
-            ))}
-          </Box>
-          <IconButton
-            onClick={scrollRight}
-            size="small"
-            sx={{
-              position: "absolute",
-              right: -10,
-              zIndex: 1,
-              backgroundColor: "white",
-              color: "#ff469e",
-              border: "1px solid #ff469e",
-              boxShadow: "1px 1px 1px rgba(0, 0, 0.16)",
-              transition: "0.2s ease-in-out",
-              "&:hover": {
-                transform: "scale(1.15)",
-                background: "white",
-                boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
-                "& svg": {
-                  transform: "scale(1.1)",
+              ))}
+            </Box>
+            <IconButton
+              onClick={scrollRight2}
+              size="small"
+              sx={{
+                position: "absolute",
+                right: -8,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 1px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
                 },
-              },
-            }}
-          >
-            <ArrowRight />
-          </IconButton>
+              }}
+            >
+              <ArrowRight />
+            </IconButton>
+          </Box>
         </Box>
       </Container>
 
-      <Container sx={{ my: -3 }}></Container>
 
       <Container sx={{ my: 4 }}>
         <Box></Box>
@@ -462,8 +542,7 @@ export default function Products() {
                   color: "white",
                   borderRadius: "16px",
                 }}
-              >
-              </div>
+              ></div>
             ))}
           </Carousel>
           {/* List */}
@@ -667,7 +746,6 @@ export default function Products() {
                       }}
                     >
                       <Card
-                      
                         sx={{
                           minWidth: 180,
                           padding: 2,

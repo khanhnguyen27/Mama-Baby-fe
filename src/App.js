@@ -27,6 +27,8 @@ import RegisStores from "./components/general/RegisStores";
 import Orders from "./components/general/Orders";
 import Articles from "./components/staff/Articles";
 import VoucherManagement from "./components/admin/VoucherManagement";
+import RequestStore from "./components/admin/RequestStore";
+import AccountManagement from "./components/admin/AccountManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
 import RefundManagement from "./components/admin/RefundManagement";
 function App() {
@@ -49,9 +51,9 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
-        <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>            
-          <Route path="/staff" element={<StaffLayout />} >
-            <Route index element={<Navigate to={'/staff/products'} />} />
+        <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
+          <Route path="/staff" element={<StaffLayout />}>
+            <Route index element={<Navigate to={"/staff/products"} />} />
             <Route path="profile" element={<Profile />} />
             <Route path="products" element={<StaffHome />} />
             <Route path="orders" element={<OrdersManagement />} />
@@ -59,15 +61,17 @@ function App() {
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
-        <Route path="/admin" element={<AdminLayout />} >
-            <Route index element={<Navigate to={'/admin/dashboard'} />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to={"/admin/dashboard"} />} />
             <Route path="profile" element={<Profile />} />
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="categories" element={<CategorieManagement />} />
             <Route path="brands" element={<BrandManagement />} />
             <Route path="age" element={<AgeManagement />} />
             <Route path="vouchers" element={<VoucherManagement />} />
-            <Route path="refunds" element={<RefundManagement/>} />
+            <Route path="refunds" element={<RefundManagement />} />
+            <Route path="requeststore" element={<RequestStore />} />
+            <Route path="accounts" element={<AccountManagement />} />
           </Route>
         </Route>
       </Routes>
