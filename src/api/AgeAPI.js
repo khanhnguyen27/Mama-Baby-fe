@@ -8,6 +8,12 @@ export const allAgeApi = (params) => {
   });
 };
 
+export const allAgeAdminApi = (params) => {
+  return axiosJWT.get((`${URL_AGE}/admin`), {
+    params: params,
+  });
+};
+
 export const addAgeApi = async (ageData) => {
   try {
     const response = await axiosJWT.post(URL_AGE, ageData);

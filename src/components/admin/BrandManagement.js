@@ -33,7 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { allBrandApi, addBrandApi, updateBrandApi } from "../../api/BrandAPI"; // Updated API imports
+import { allBrandAdminApi, addBrandApi, updateBrandApi } from "../../api/BrandAPI";
 
 export default function BrandManagement() {
   window.document.title = "Brand Management";
@@ -43,19 +43,15 @@ export default function BrandManagement() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selectedBrand, setSelectedBrand] = useState(null); // Changed to singular "selectedBrand"
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newBrandName, setNewBrandName] = useState("");
   const [openUpdateBrand, setOpenUpdateBrand] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const brandRes = await allBrandApi();
+      const brandRes = await allBrandAdminApi();
       setBrands(brandRes.data.data || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -63,6 +59,10 @@ export default function BrandManagement() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
@@ -129,7 +129,7 @@ export default function BrandManagement() {
   const handleEdit = () => {
     const trimmedBrandName = selectedBrand.name.trim();
 
-    if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase() && brand.id !== selectedBrand.id)){
+    if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase() && brand.id !== selectedBrand.id)) {
       toast.error('Brand name already exists');
       return;
     }
