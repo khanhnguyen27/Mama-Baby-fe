@@ -8,6 +8,12 @@ export const allBrandApi = (params) => {
   });
 };
 
+export const allBrandAdminApi = (params) => {
+  return axiosJWT.get((`${URL_BRAND}/admin`), {
+    params: params,
+  });
+};
+
 export const addBrandApi = async (brandData) => {
   try {
     const response = await axiosJWT.post(URL_BRAND, brandData);
@@ -24,7 +30,7 @@ export const updateBrandApi = (
 ) => {
   return axiosJWT.put(`${URL_BRAND}/${id}`, {
     name: name,
-    is_active:isActive
+    is_active: isActive
   });
 };
 

@@ -33,7 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { allAgeApi, addAgeApi, updateAgeApi } from "../../api/AgeAPI";
+import { allAgeAdminApi, addAgeApi, updateAgeApi } from "../../api/AgeAPI";
 
 export default function AgeManagement() {
   window.document.title = "AgeManagement";
@@ -48,14 +48,10 @@ export default function AgeManagement() {
   const [newAgeName, setNewAgeName] = useState("");
   const [openUpdateAge, setOpenUpdateAge] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const ageRes = await allAgeApi();
+      const ageRes = await allAgeAdminApi();
       setAges(ageRes.data.data || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -63,6 +59,10 @@ export default function AgeManagement() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
@@ -165,7 +165,7 @@ export default function AgeManagement() {
       <Container>
         <Paper elevation={4} sx={{ position: "sticky", top: "80px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
           <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-            Manager Ages
+          Manage Ages
           </Typography>
           <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
             <Grid item xs={12} md={3}>

@@ -9,11 +9,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { regisStoreApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
-const SignUp = () => {
+const RegistStore = () => {
   window.document.title = "Sign Up";
-  const[storename, setStorename] = useState("")
-  const[address, setAddress] = useState("")
-  const[description, setDescription] = useState("")
+  const [storename, setStorename] = useState("");
+  const [address, setAddress] = useState("");
+  const [description, setDescription] = useState("");
   const [phone, setPhone] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -22,60 +22,44 @@ const SignUp = () => {
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
 
+  // Hàm kiểm tra phone có phải là số không
+  const validatePhoneNumber = (phone) => {
+    const reg = /^[0-9]+$/;
+    return reg.test(phone);
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
 
-    if (
-        storename == "" ||
-        address == "" ||
-        description == "" ||
-      phone == "" 
-    ) {
+    // Kiểm tra xem các trường đã được nhập đầy đủ chưa
+    if (storename === "" || address === "" || description === "" || phone === "") {
       toast.error("Please input all fields", { autoClose: 2500 });
       return;
     }
-    console.log(userId)
-    regisStoreApi(storename, address, description, phone,userId)
-    .then((res)=>{
+
+    // Kiểm tra phone có phải là số không
+    if (!validatePhoneNumber(phone)) {
+      toast.error("Phone must be a number");
+      return;
+    }
+
+    // Nếu điều kiện hợp lệ, thực hiện gọi API
+    setLoading(true);
+    regisStoreApi(storename, address, description, phone, userId)
+      .then((res) => {
         console.log(res);
-        toast.success("Send request succcessfully!")
-    })
-    .catch((err)=>{
-        console.log(err)
-        toast.error("Send request fail")
-    })
-  };
-
-
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          maxWidth: "100vw",
-          backgroundColor: "#white",
-        }}
-      >
-        <CircularProgress sx={{ color: "#ff469e" }} size={100} />
-      </Box>
-    );
+        toast.success("Send request successfully!");
+        // Sau khi gọi API thành công, bạn có thể điều hướng người dùng đến trang khác
+        // navigate('/some-path');
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Send request failed");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
-
-  // const handleValidationEmail = () => {
-  //   const emailPattern = /^[\w-]+(\.[\w-]+)*@(gmail\.com)$/;
-
-  //   if (!email) {
-  //     toast.error("An email is required!");
-  //     return false;
-  //   } else if (!emailPattern.test(email)) {
-  //     toast.error("An invalid email format! (must be @gmail.com)");
-  //     return false;
-  //   }
-  //   return true;
-  // };
 
   return (
     <div style={{ marginTop: "3rem" }}>
@@ -364,4 +348,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default RegistStore;

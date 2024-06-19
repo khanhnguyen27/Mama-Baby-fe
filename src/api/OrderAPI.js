@@ -16,6 +16,12 @@ export const orderByUserIdApi = (userId) => {
   });
 };
 
+export const getOrderByIdApi = (orderId) => {
+  return axiosJWT.get(`${URL_ORDER}/${orderId}`, {
+    orderId: orderId,
+  });
+};
+
 export const orderByStoreIdApi = (storeId) => {
   return axiosJWT.get(`${URL_ORDER}/store/${storeId}`, {
     storeId: storeId,
@@ -52,9 +58,19 @@ export const createOrderApi = (
   });
 };
 
+// Status Order
+
+export const allStatusOrderApi = (params) => {
+  return axiosJWT.get(URL_STATUSORDER, {
+    params: params,
+  });
+};
+
 export const changeStatusOrderApi = (orderId, status) => {
   return axiosJWT.post(URL_STATUSORDER, {
     order_id: orderId,
     status: status
   })
+
+
 }

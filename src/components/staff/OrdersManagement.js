@@ -24,7 +24,6 @@ import {
   Modal,
   CircularProgress,
 } from "@mui/material";
-import { makePaymentApi } from "../../api/VNPayAPI";
 import { toast } from "react-toastify";
 import { allProductApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
@@ -57,6 +56,7 @@ export default function OrdersManagement() {
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [open, setOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [actionType, setActionType] = useState("");
 
   useEffect(() => {
@@ -76,7 +76,6 @@ export default function OrdersManagement() {
       .catch((err) => console.log(err));
   }, []);
   const storeId = store.id;
-
   // useEffect(() => {
   //   storeByUserIdApi(userId)
   //     .then((res) => {
@@ -120,11 +119,11 @@ export default function OrdersManagement() {
       orderData.forEach((order) => {
         const latestStatus =
           order.status_order_list[order.status_order_list.length - 1].status;
-        categorizedOrders[latestStatus]?.push(order);
+        categorizedOrders[latestStatus]?.unshift(order);
       });
-      for (const status in categorizedOrders) {
-        categorizedOrders[status].reverse();
-      }
+      // for (const status in categorizedOrders) {
+      //   categorizedOrders[status].reverse();
+      // }
       setOrdersByStatus(categorizedOrders);
 
       const productMap = productData.reduce((x, item) => {
@@ -171,72 +170,136 @@ export default function OrdersManagement() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
-  const handleAccept = (orderId, status) => {
-    changeStatusOrderApi(orderId, status)
+  // const handleAccept = (orderId, status) => {
+  //   changeStatusOrderApi(orderId, status)
+  //     .then((res) => {
+  //       console.log(res.data);
+  //       toast.success("Order Accepted!", {
+  //         autoClose: 1500,
+  //       });
+  //       handleClose();
+  //       setLoading(true);
+  //       setTimeout(() => {
+  //         navigate("/staff/orders");
+  //       }, 1500);
+  //       setTimeout(() => {
+  //         fetchData();
+  //         setLoading(false);
+  //       }, 2500);
+  //     })
+  //     .catch((error) => console.log(error));
+  // };
+
+  // const handleReject = (orderId, status) => {
+  //   changeStatusOrderApi(orderId, status)
+  //     .then((res) => {
+  //       console.log(res.data);
+  //       toast.success("Order Rejected!", {
+  //         autoClose: 1500,
+  //       });
+  //       handleClose();
+  //       setLoading(true);
+  //       setTimeout(() => {
+  //         navigate("/staff/orders");
+  //       }, 1500);
+  //       setTimeout(() => {
+  //         fetchData();
+  //         setLoading(false);
+  //       }, 2500);
+  //     })
+  //     .catch((error) => console.log(error));
+  // };
+
+  // const handleDeliver = (orderId, status) => {
+  //   changeStatusOrderApi(orderId, status)
+  //     .then((res) => {
+  //       console.log(res.data);
+  //       toast.success("Order Is Now Delivering!", {
+  //         autoClose: 1500,
+  //       });
+  //       handleClose();
+  //       setLoading(true);
+  //       setTimeout(() => {
+  //         navigate("/staff/orders");
+  //       }, 1500);
+  //       setTimeout(() => {
+  //         fetchData();
+  //         setLoading(false);
+  //       }, 2500);
+  //     })
+  //     .catch((error) => console.log(error));
+  // };
+
+
+  const handleAccept = (orderId, newStatus) => {
+    changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
-        toast.success("Order Accepted!", {
-          autoClose: 1500,
-        });
-        handleClose();
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/staff/orders");
-        }, 1500);
-        setTimeout(() => {
-          fetchData();
-          setLoading(false);
-        }, 2500);
+        toast.success("Order Accepted!", { autoClose: 1500 });
+        updateOrderStatus(orderId, newStatus);
       })
       .catch((error) => console.log(error));
   };
-
-  const handleReject = (orderId, status) => {
-    changeStatusOrderApi(orderId, status)
+  
+  const handleReject = (orderId, newStatus) => {
+    changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
-        toast.success("Order Rejected!", {
-          autoClose: 1500,
-        });
-        handleClose();
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/staff/orders");
-        }, 1500);
-        setTimeout(() => {
-          fetchData();
-          setLoading(false);
-        }, 2500);
+        toast.success("Order Rejected!", { autoClose: 1500 });
+        updateOrderStatus(orderId, newStatus);
       })
       .catch((error) => console.log(error));
   };
-
-  const handleDeliver = (orderId, status) => {
-    changeStatusOrderApi(orderId, status)
+  
+  const handleDeliver = (orderId, newStatus) => {
+    changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
-        toast.success("Order Is Now Delivering!", {
-          autoClose: 1500,
-        });
-        handleClose();
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/staff/orders");
-        }, 1500);
-        setTimeout(() => {
-          fetchData();
-          setLoading(false);
-        }, 2500);
+        toast.success("Order Is Now Delivering!", { autoClose: 1500 });
+        updateOrderStatus(orderId, newStatus);
       })
       .catch((error) => console.log(error));
   };
-
-  const handleOpen = (type) => {
+  
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrdersByStatus((prevOrders) => {
+      const updatedOrders = { ...prevOrders };
+      let upToDateOrder;
+  
+      for (const status in updatedOrders) {
+        const orderIndex = updatedOrders[status].findIndex(order => order.id === orderId);
+        if (orderIndex !== -1) {
+          [upToDateOrder] = updatedOrders[status].splice(orderIndex, 1);
+          break;
+        }
+      }
+  
+      if (upToDateOrder) {
+        upToDateOrder.status_order_list.push({ status: newStatus });
+        updatedOrders[newStatus].unshift(upToDateOrder);
+      }
+  
+      return updatedOrders;
+    });
+  
+    handleClose();
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/staff/orders");
+      setLoading(false);
+    }, 1500);
+  };
+  
+  const handleOpen = (type, orderId) => {
     setActionType(type);
+    setSelectedOrderId(orderId);
     setOpen(true);
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedOrderId(null);
+  };
 
   return (
     <div
@@ -324,7 +387,7 @@ export default function OrdersManagement() {
                   textAlign: "center",
                 }}
               >
-                There's no order of this status
+                There's no orders of this status
               </Typography>
             </Box>
           ) : (
@@ -773,7 +836,7 @@ export default function OrdersManagement() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={() => handleOpen("Reject")}
+                          onClick={() => handleOpen("Reject", item.id)}
                         >
                           REJECT ORDER
                         </Button>
@@ -796,7 +859,7 @@ export default function OrdersManagement() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={() => handleOpen("Accept")}
+                          onClick={() => handleOpen("Accept", item.id)}
                         >
                           ACCEPT ORDER
                         </Button>
@@ -821,7 +884,7 @@ export default function OrdersManagement() {
                               borderRadius: "20px",
                               backgroundColor: "#fff4fc",
                               border: "2px solid #ff469e",
-                              boxShadow: 20,
+                              boxShadow: 10,
                               p: 4,
                             }}
                           >
@@ -864,8 +927,8 @@ export default function OrdersManagement() {
                                 onClick={() => {
                                   {
                                     actionType === "Accept"
-                                      ? handleAccept(item.id, "PREPARING")
-                                      : handleReject(item.id, "CANCELLED");
+                                      ? handleAccept(selectedOrderId, "PREPARING")
+                                      : handleReject(selectedOrderId, "CANCELLED");
                                   }
                                 }}
                               >
@@ -921,7 +984,7 @@ export default function OrdersManagement() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={() => handleOpen("Deliver")}
+                          onClick={() => handleOpen("Deliver", item.id)}
                         >
                           READY TO DELIVER
                         </Button>
@@ -946,7 +1009,7 @@ export default function OrdersManagement() {
                               borderRadius: "20px",
                               backgroundColor: "#fff4fc",
                               border: "2px solid #ff469e",
-                              boxShadow: 20,
+                              boxShadow: 10,
                               p: 4,
                             }}
                           >
@@ -983,7 +1046,7 @@ export default function OrdersManagement() {
                                   },
                                 }}
                                 onClick={() => {
-                                  handleDeliver(item.id, "DELIVERING");
+                                  handleDeliver(selectedOrderId, "DELIVERING");
                                 }}
                               >
                                 Yes

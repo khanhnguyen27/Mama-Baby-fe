@@ -7,8 +7,16 @@ import { productByIdApi } from "../../api/ProductAPI";
 import { allCommentApi, commentByProductIdApi } from "../../api/CommentAPI";
 import { format } from "date-fns";
 import { allUserApi } from "../../api/UserAPI";
-import { updateCommentApi } from "../../api/CommentAPI";
+import { updateCommentApi, createCommentApi } from "../../api/CommentAPI";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Send from "@mui/icons-material/Send";
+import {
+  Star,
+  StarHalf,
+  StarOutline,
+  StarQuarter,
+  StarThreeQuarter,
+} from "@mui/icons-material";
 import {
   Box,
   CircularProgress,
@@ -59,7 +67,10 @@ export default function ProductDetails() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openEditComment, setOpenEditComment] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
-  const [rating, setRating] = useState(0);
+  const [emptyStars, setEmptyStars] = useState(0);
+  const [halfStar, setHalfStar] = useState(0);
+  const [fullStars, setFullStars] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
 
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
@@ -68,8 +79,8 @@ export default function ProductDetails() {
   const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
   const dateTime = format(new Date(), "PPPppp"); // Formatted current date and time
 
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenuClick = (event, item) => {
+    setAnchorEl({ element: event.currentTarget, id: item.id });
   };
 
   const handleMenuClose = () => {
@@ -119,7 +130,7 @@ export default function ProductDetails() {
       return;
     }
 
-    if (selectedComment?.comment.length < 50) {
+    if (selectedComment?.comment.length < 20) {
       toast.warn("Please enter a comment of at least 50 characters.");
       return;
     }
@@ -198,6 +209,26 @@ export default function ProductDetails() {
         return x;
       }, {});
       setUserMap(userMap);
+
+      const productComments = commentData.filter(
+        (x) => x.product_id === productData.id
+      );
+
+      const averageRating = productComments.length
+        ? (
+            productComments.reduce((acc, cmt) => acc + cmt.rating, 0) /
+            productComments.length
+          ).toFixed(1)
+        : 0;
+
+      const fullStars = Math.floor(averageRating);
+      const halfStar = averageRating - fullStars >= 0.5;
+      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+      setFullStars(fullStars);
+      setHalfStar(halfStar);
+      setEmptyStars(emptyStars);
+      setAverageRating(averageRating);
     } catch (err) {
       console.log(err);
     }
@@ -215,6 +246,34 @@ export default function ProductDetails() {
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
+
+  //Add comment
+  const username = decodedAccessToken.FullName;
+  const [rating, setRating] = useState(0);
+  const [commentInput, setCommentInput] = useState("");
+
+  const handleComment = async () => {
+    if (rating === 0) {
+      toast.warn("Please select a rating.");
+      return;
+    }
+
+    // if (comment.length < 20) {
+    //   toast.warn("Please enter a comment of at least 50 characters.");
+    //   return;
+    // }
+
+    await createCommentApi(product.id, rating, commentInput, userId)
+      .then((response) => {
+        fetchData();
+        setRating(0);
+        setCommentInput("");
+        toast.success("Comment added successfully!");
+      })
+      .catch((error) => {
+        toast.error("Failed to add comment. Please try again later.");
+      });
   };
 
   if (!product) {
@@ -408,10 +467,46 @@ export default function ProductDetails() {
                         borderRadius: "10px",
                         marginBottom: "10px",
                       }}
-                      src={`http://localhost:8080/mamababy/products/images/${product.image_url}`}
+                      src={
+                        product.image_url.includes("Product_")
+                          ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
+                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      }
                       alt={product.name}
                     />
                   </Paper>
+                  <div
+                    style={{
+                      padding: "30px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography>
+                      <span
+                        style={{
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {averageRating}/5
+                      </span>
+                    </Typography>
+                    <Typography variant="h6">
+                      {Array(fullStars).fill(
+                        <Star style={{ color: "#ff469e", fontSize: "36px" }} />
+                      )}
+                      {halfStar && (
+                        <StarHalf
+                          style={{ color: "#ff469e", fontSize: "36px" }}
+                        />
+                      )}
+                      {Array(emptyStars).fill(
+                        <StarOutline
+                          style={{ color: "#ff469e", fontSize: "36px" }}
+                        />
+                      )}
+                    </Typography>
+                  </div>
                 </Grid>
                 <Grid
                   item
@@ -661,75 +756,133 @@ export default function ProductDetails() {
         >
           Comments
         </Typography>
+        <Box
+          component="form"
+          sx={{
+            borderRadius: 2,
+            boxShadow: 10,
+            backgroundColor: "#f0f0f0",
+            padding: 2,
+            mb: 4,
+          }}
+        >
+          <Grid container alignItems="center" spacing={2} mb={2}>
+            <Grid item>
+              <Avatar src={avatarUrl} alt={username} />
+            </Grid>
+            <Grid item>
+              <Typography variant="h6">{username}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                {dateTime}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Rating
+            name="star-rating"
+            value={rating}
+            onChange={(event, newValue) => setRating(newValue)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Write a comment..."
+            variant="outlined"
+            value={commentInput}
+            onChange={(e) => setCommentInput(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <IconButton
+                  aria-label="submit comment"
+                  sx={{ p: "10px" }}
+                  onClick={handleComment}
+                >
+                  <Send />
+                </IconButton>
+              ),
+            }}
+          />
+        </Box>
         {isComment ? (
-          comment.slice(0, visibleComments).map((item, index) => (
-            <Card
-              key={item.id}
-              sx={{
-                backgroundColor: "#f9f9f9",
-                boxShadow:
-                  "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
-                border: "1px solid #e0e0e0",
-                color: "#333",
-                padding: "5px",
-                position: "relative",
-              }}
-            >
-              <CardContent>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={2}>
-                    <Paper
-                      sx={{
-                        padding: "10px",
-                        backgroundColor: "#fafafa",
-                        textAlign: "center",
-                      }}
-                    >
-                      <Typography variant="h6">
-                        {userMap[item.user_id]}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {format(new Date(item.date), "dd/MM/yyyy HH:mm")}
-                      </Typography>
-                    </Paper>
+          [...comment] // Tạo bản sao của mảng comment trước khi sắp xếp
+            .sort((a, b) =>
+              a.user_id === userId ? -1 : b.user_id === userId ? 1 : 0
+            )
+            .slice(0, visibleComments)
+            .map((item, index) => (
+              <Card
+                key={item.id}
+                sx={{
+                  backgroundColor: "#f9f9f9",
+                  boxShadow:
+                    "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
+                  border: "1px solid #e0e0e0",
+                  color: "#333",
+                  padding: "5px",
+                  position: "relative",
+                }}
+              >
+                <CardContent>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={2}>
+                      <Paper
+                        sx={{
+                          padding: "10px",
+                          backgroundColor: "#fafafa",
+                          textAlign: "center",
+                        }}
+                      >
+                        <Typography variant="h6">
+                          {userMap[item.user_id]}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          {format(new Date(item.date), "dd/MM/yyyy HH:mm")}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} md={10}>
+                      <Box display="flex" alignItems="center" mb={2}>
+                        <Rating value={item.rating} readOnly />
+                      </Box>
+                      <Typography variant="body1">{item.comment}</Typography>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} md={10}>
-                    <Box display="flex" alignItems="center" mb={2}>
-                      <Rating value={item.rating} readOnly />
-                    </Box>
-                    <Typography variant="body1">{item.comment}</Typography>
-                  </Grid>
-                </Grid>
-                {item.user_id === userId && (
-                  <>
-                    <IconButton
-                      aria-label="more"
-                      aria-controls="long-menu"
-                      aria-haspopup="true"
-                      onClick={handleMenuClick}
-                      sx={{
-                        position: "absolute",
-                        top: "10px",
-                        right: "10px",
-                      }}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      open={Boolean(anchorEl)}
-                      onClose={handleMenuClose}
-                    >
-                      <MenuItem onClick={() => handleOpenEditComment(item)}>
-                        Edit Comment
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          ))
+                  {item.user_id === userId && (
+                    <>
+                      <IconButton
+                        aria-label="more"
+                        aria-controls="long-menu"
+                        aria-haspopup="true"
+                        onClick={(event) => handleMenuClick(event, item)}
+                        sx={{
+                          position: "absolute",
+                          top: "10px",
+                          right: "10px",
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                      <Menu
+                        id={`menu-${item.id}`}
+                        anchorEl={
+                          anchorEl && anchorEl.id === item.id
+                            ? anchorEl.element
+                            : null
+                        }
+                        keepMounted
+                        open={Boolean(anchorEl && anchorEl.id === item.id)}
+                        onClose={handleMenuClose}
+                      >
+                        <MenuItem onClick={() => handleOpenEditComment(item)}>
+                          Edit Comment
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            ))
         ) : (
           <Typography
             variant="body1"

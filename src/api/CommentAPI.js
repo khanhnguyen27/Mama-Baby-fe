@@ -14,9 +14,9 @@ export const commentByProductIdApi = (productId) => {
   );
 };
 
-export const createCommentApi = (cartItems, rating, comment, user_id) => {
+export const createCommentApi = (product_id, rating, comment, user_id) => {
   return axiosJWT.post(URL_COMMENT, {
-    cart_items: cartItems,
+    product_id: product_id,
     rating: rating,
     comment: comment,
     user_id: user_id,

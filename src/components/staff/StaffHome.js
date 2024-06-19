@@ -229,7 +229,6 @@ export default function StaffHome() {
       toast.error("Price or Point cannot be less than or equal to 0.");
       return;
     }
-    debugger;
     addProductApi(
       image.file,
       name,
@@ -297,7 +296,6 @@ export default function StaffHome() {
       toast.error("Price or Point cannot be less than or equal to 0.");
       return;
     }
-    debugger;
     // Xử lý cập nhật sản phẩm
     updateProductApi(
       image.file || "",
@@ -1029,8 +1027,11 @@ export default function StaffHome() {
                       >
                         <CardMedia
                           component="img"
-                          image={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
-                          //image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          image={
+                            item.image_url.includes("Product_")
+                              ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          }
                           alt={item.name}
                           sx={{ width: "64px", height: "64px", margin: "auto" }}
                           // onClick={() =>
