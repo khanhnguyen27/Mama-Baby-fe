@@ -101,7 +101,7 @@ export default function AdminHome() {
 
     // Tính toán doanh thu từ các đơn hàng
     orders.forEach((order) => {
-      const date = new Date(order.orderDate);
+      const date = new Date(order.order_date);
       const year = date.getFullYear();
       if (year === 2024) {
         const month = date.toLocaleString("default", { month: "short" });
@@ -124,7 +124,7 @@ export default function AdminHome() {
     // Chuyển đổi dữ liệu thành mảng để đưa vào state và hiển thị
     const revenueData = Object.keys(monthlyData).map((month) => ({
       month,
-      Revenue: monthlyData[month].Revenue,
+      Revenue: monthlyData[month]?.Revenue,
       Refund: monthlyData[month].Refund
     }));
 
@@ -348,3 +348,4 @@ export default function AdminHome() {
     </Container>
   );
 }
+// export default function AdminHome() {}
