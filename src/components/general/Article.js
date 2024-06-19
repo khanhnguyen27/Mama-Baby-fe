@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { allAgeApi } from "../../api/AgeAPI";
-import { allBrandApi } from "../../api/BrandAPI";
-import { allCategorytApi } from "../../api/CategoryAPI";
-import { allProductApi } from "../../api/ProductAPI";
 import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import ArrowLeft from "@mui/icons-material/ArrowLeft";
@@ -26,21 +22,7 @@ import {
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
 export default function HomePage() {
-  const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
-  const [age, setAge] = useState([]);
-  const [ageMap, setAgeMap] = useState({});
-  const [brand, setBrand] = useState([]);
-  const [brandMap, setBrandMap] = useState({});
-  const [category, setCategory] = useState([]);
-  const [categoryMap, setCategoryMap] = useState({});
-  const [product, setProduct] = useState([]);
-  const [ageFilter, setAgeFilter] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [expanded, setExpanded] = useState(false);
-  const [store, setStore] = useState([]);
-  const [storeMap, setStoreMap] = useState([]);
   const [article, setArticle] = useState([]);
 
   useEffect(() => {
@@ -82,61 +64,15 @@ export default function HomePage() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, storeRes, articleRes] =
-        await Promise.all([
-          allAgeApi(),
-          allBrandApi(),
-          allCategorytApi(),
-          allProductApi({
-            age_id: ageFilter,
-            brand_id: brandFilter,
-            category_id: categoryFilter,
-          }),
-          allStoreApi(),
-          allArticleApi(),
-        ]);
+      const [articleRes] = await Promise.all([allStoreApi(), allArticleApi()]);
 
-      const ageData = ageRes?.data?.data || [];
-      const brandData = brandRes?.data?.data || [];
-      const categoryData = categoryRes?.data?.data || [];
-      const productData = productRes?.data?.data || [];
-      const storeData = storeRes?.data?.data || [];
       const articleData = articleRes?.data?.data || [];
 
-      setAge(ageData);
-      setBrand(brandData);
-      setCategory(categoryData);
-      setProduct(productData);
-      setStore(storeData);
       setArticle(articleData);
-      console.log(store);
-
-      const ageMap = ageData.reduce((x, item) => {
-        x[item.id] = item.rangeAge;
-        return x;
-      }, {});
-      setAgeMap(ageMap);
-
-      const brandMap = brandData.reduce((x, item) => {
-        x[item.id] = item.name;
-        return x;
-      }, {});
-      setBrandMap(brandMap);
-
-      const categoryMap = categoryData.reduce((x, item) => {
-        x[item.id] = item.name;
-        return x;
-      }, {});
-      setCategoryMap(categoryMap);
     } catch (err) {
       console.log(err);
     }
   };
-  useEffect(() => {
-    setTimeout(() => {}, 1000);
-    console.log(fetchData());
-    fetchData();
-  }, [ageFilter, brandFilter, categoryFilter]);
 
   return (
     <Container>

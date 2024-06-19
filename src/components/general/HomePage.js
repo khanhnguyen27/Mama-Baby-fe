@@ -96,7 +96,7 @@ export default function HomePage() {
         categoryRes,
         productRes,
         storeRes,
-        articleRes,
+        // articleRes,
         voucherRes,
       ] = await Promise.all([
         allAgeApi(),
@@ -104,7 +104,7 @@ export default function HomePage() {
         allCategorytApi(),
         allProductApi(),
         allStoreApi(),
-        allArticleApi(),
+        // allArticleApi(),
         allVoucherApi(),
       ]);
 
@@ -113,7 +113,7 @@ export default function HomePage() {
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
       const storeData = storeRes?.data?.data || [];
-      const articleData = articleRes?.data?.data || [];
+      // const articleData = articleRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
 
       setAge(ageData);
@@ -121,7 +121,7 @@ export default function HomePage() {
       setCategory(categoryData);
       setProduct(productData);
       setStore(storeData);
-      setArticle(articleData);
+      // setArticle(articleData);
       setVoucher(voucherData);
 
       const ageMap = ageData.reduce((x, item) => {
@@ -579,7 +579,7 @@ export default function HomePage() {
                         {item.code}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "gray" }}>
-                        {item.discountValue}
+                        {item.discount_value}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "gray" }}>
                         {item.description}
@@ -756,7 +756,11 @@ export default function HomePage() {
                           }}
                         >
                           <img
-                            src={`http://localhost:8080/mamababy/products/images/${item.image_url}`}
+                            src={
+                              item.image_url.includes("Product_")
+                                ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                            }
                             style={{ width: "64px", height: "64px" }}
                           />
                         </div>

@@ -74,31 +74,31 @@ export default function Cart() {
         allStoreApi(),
         allVoucherApi(),
       ]);
-  
+
       const storeData = storeRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
 
       setStore(storeData);
       setVoucher(voucherData);
-  
+
       const storeMap = storeData.stores.reduce((x, item) => {
         x[item.id] = item.name_store;
         return x;
       }, {});
       setStoreMap(storeMap);
-  
+
       const userRes = await profileUserApi();
       const userData = userRes?.data?.data || [];
-      setUserInfo(userData);      
+      setUserInfo(userData);
     } catch (err) {
       console.log(err);
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
-  
+
   const groupedCartItems = cartItems.products.reduce((acc, item) => {
     if (!acc[item.product.store_id]) {
       acc[item.product.store_id] = [];
@@ -157,7 +157,7 @@ export default function Cart() {
 
     // Add phone and fullname of the user, also add these 2 column in the order database
     const selectedVoucherObj = voucher.find(
-      (item) => item.discountValue === selectedVoucher
+      (item) => item.discount_value === selectedVoucher
     );
     const voucherId = selectedVoucherObj ? selectedVoucherObj.id : null;
 
@@ -264,6 +264,8 @@ export default function Cart() {
   // language: "vn"
   // })
 
+  console.log(voucher);
+  console.log(selectedVoucher);
   return (
     <div
       style={{
@@ -283,7 +285,7 @@ export default function Cart() {
         >
           <Typography
             sx={{
-              fontSize: "2.5rem",
+              fontSize: "2.25rem",
               color: "#ff469e",
               fontWeight: "bold",
               marginTop: "1rem",
@@ -752,12 +754,12 @@ export default function Cart() {
                     variant="body2"
                     sx={{
                       color: "#ff469e",
-                      fontSize: "1.25rem",
+                      fontSize: "1.65rem",
                       textAlign: "center",
-                      my: 3,
+                      mt: 3,
                     }}
                   >
-                    Your cart is currently empty.
+                    Your cart is currently empty
                   </Typography>
                 )}
               </Grid>
@@ -840,7 +842,7 @@ export default function Cart() {
                     {voucher.map((item) => (
                       <MenuItem
                         key={item.id}
-                        value={item.discountValue}
+                        value={item.discount_value}
                         sx={{
                           color: "black",
                           fontSize: "18px",
@@ -874,7 +876,7 @@ export default function Cart() {
                     mt: 3,
                   }}
                 >
-                  <Typography variant="h6">Total:</Typography>
+                  <Typography variant="h6">Subtotal:</Typography>
                   <Typography
                     variant="h6"
                     sx={{
@@ -1014,7 +1016,11 @@ export default function Cart() {
                         />
                       </IconButton>
                     </div>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "1.25rem"}}>Your Information:</Typography>
+                    <Typography
+                      sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
+                    >
+                      Your Information:
+                    </Typography>
                     <Grid container spacing={4}>
                       <Grid item xs={12} md={4}>
                         <div style={{ margin: "1rem 0.25rem" }}>
@@ -1372,7 +1378,11 @@ export default function Cart() {
                               Total:
                             </span>
                             <span
-                              style={{ fontWeight: "bold", fontSize: "1.5rem", color: "#ff469e" }}
+                              style={{
+                                fontWeight: "bold",
+                                fontSize: "1.5rem",
+                                color: "#ff469e",
+                              }}
                             >
                               {formatCurrency(getDiscountedTotal())}
                             </span>
@@ -1556,7 +1566,7 @@ export default function Cart() {
                   </Box>
                 </Modal>
                 <Button
-                  onClick={() => navigate("/products")}
+                  onClick={() => (navigate("/products"), window.scrollTo(0, 0))}
                   variant="contained"
                   fullWidth
                   sx={{

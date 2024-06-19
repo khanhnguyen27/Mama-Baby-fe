@@ -16,6 +16,12 @@ export const orderByUserIdApi = (userId) => {
   });
 };
 
+export const getOrderByIdApi = (orderId) => {
+  return axiosJWT.get(`${URL_ORDER}/${orderId}`, {
+    orderId: orderId,
+  });
+};
+
 export const orderByStoreIdApi = (storeId) => {
   return axiosJWT.get(`${URL_ORDER}/store/${storeId}`, {
     storeId: storeId,

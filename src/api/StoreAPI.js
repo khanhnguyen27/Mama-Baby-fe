@@ -18,15 +18,24 @@ export const regisStoreApi = (
   address,
   description,
   phone,
-  user_id
+  userId
 ) => {
   return axiosJWT.post(URL_STORE, {
     name_store: storename,
     address: address,
     description: description,
     phone: phone,
-    status: 1,
-    is_active: false,
-    user_id: 12,
+    user_id: userId,
+  });
+};
+export const requestStoreApi = (storeId, nameStore, address, description, phone, status, isActive, userId ) => {
+  return axiosJWT.put(`${URL_STORE}/admin/update_status/${storeId}`, {
+    name_store: nameStore,
+    address:address,
+    description:description,
+    phone:phone,
+    status: status,
+    is_active: isActive,
+    user_id: userId,
   });
 };

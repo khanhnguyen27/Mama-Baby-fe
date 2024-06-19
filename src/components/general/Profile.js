@@ -341,16 +341,7 @@ export default function Profile() {
                           },
                         }}
                       >
-                      <Typography
-                        style={{
-                          fontWeight: "bold",
-                          color: "black",
-                          fontSize: "1.25rem",
-                        }}
-                        onClick={() => navigate("/regisstore")}
-                      >
-                        Regis Store
-                      </Typography>
+
                       </IconButton>
                     </div>
                   </Grid>

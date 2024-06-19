@@ -5,7 +5,10 @@ import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { productByIdApi } from "../../api/ProductAPI";
 import { allCommentApi, commentByProductIdApi } from "../../api/CommentAPI";
+import { format } from "date-fns";
 import { allUserApi } from "../../api/UserAPI";
+import { updateCommentApi } from "../../api/CommentAPI";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Box,
   CircularProgress,
@@ -21,12 +24,19 @@ import {
   Badge,
   IconButton,
   colors,
+  Menu,
+  MenuItem,
+  TextField,
+  Avatar,
+  Modal,
 } from "@mui/material";
+import { Rating } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
 import { KeyboardCapslock } from "@mui/icons-material";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 export default function ProductDetails() {
   const [visible, setVisible] = useState(false);
@@ -46,6 +56,89 @@ export default function ProductDetails() {
   const [userMap, setUserMap] = useState({});
   const [user, setUser] = useState({});
   const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [openEditComment, setOpenEditComment] = useState(false);
+  const [selectedComment, setSelectedComment] = useState(null);
+  const [rating, setRating] = useState(0);
+
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedAccessToken = jwtDecode(accessToken);
+  const userId = decodedAccessToken.UserID;
+
+  const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
+  const dateTime = format(new Date(), "PPPppp"); // Formatted current date and time
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleOpenEditComment = (item) => {
+    handleMenuClose();
+    setSelectedComment(item);
+    setOpenEditComment(true);
+  };
+
+  const handleChange = (field, value) => {
+    if (field === "rating") {
+      // Convert value to integer and ensure it's within the valid range (0 to 5)
+      const intValue = parseInt(value);
+      if (!isNaN(intValue) && intValue >= 0 && intValue <= 5) {
+        setSelectedComment((prevComment) => ({
+          ...prevComment,
+          [field]: intValue,
+        }));
+      }
+    } else {
+      setSelectedComment((prevComment) => ({
+        ...prevComment,
+        [field]: value,
+      }));
+    }
+  };
+
+  const handleCloseEditComment = () => {
+    setOpenEditComment(false);
+    setSelectedComment(null);
+  };
+
+  const handleEditComment = async () => {
+    // Logic để sửa bình luận
+    // console.log(selectedComment?.id);
+    // console.log(selectedComment?.product_id);
+    // console.log(selectedComment?.rating);
+    // console.log(selectedComment?.comment);
+    // console.log(userId);
+    // console.log(selectedComment?.date);
+
+    if (selectedComment?.rating === 0) {
+      toast.warn("Please select a rating.");
+      return;
+    }
+
+    if (selectedComment?.comment.length < 50) {
+      toast.warn("Please enter a comment of at least 50 characters.");
+      return;
+    }
+
+    await updateCommentApi(
+      selectedComment?.id,
+      selectedComment?.rating,
+      selectedComment?.comment,
+      userId
+    )
+      .then((response) => {
+        fetchData();
+        handleCloseEditComment();
+        toast.success("Comment Edit successfully!");
+      })
+      .catch((error) => {
+        toast.error("Failed to edit comment. Please try again later.");
+      });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,14 +151,15 @@ export default function ProductDetails() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, userRes, productRes, commentRes] = await Promise.all([
-        allAgeApi(),
-        allBrandApi(),
-        allCategorytApi(),
-        allUserApi(),
-        productByIdApi(productId),
-        commentByProductIdApi(productId),
-      ]);
+      const [ageRes, brandRes, categoryRes, userRes, productRes, commentRes] =
+        await Promise.all([
+          allAgeApi(),
+          allBrandApi(),
+          allCategorytApi(),
+          allUserApi(),
+          productByIdApi(productId),
+          commentByProductIdApi(productId),
+        ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
@@ -73,7 +167,6 @@ export default function ProductDetails() {
       const userData = userRes?.data?.data || [];
       const productData = productRes?.data?.data || {};
       const commentData = commentRes?.data?.data || null;
-
 
       setAge(ageData);
       setBrand(brandData);
@@ -105,7 +198,6 @@ export default function ProductDetails() {
         return x;
       }, {});
       setUserMap(userMap);
-
     } catch (err) {
       console.log(err);
     }
@@ -122,7 +214,7 @@ export default function ProductDetails() {
   window.document.title = `${product?.name}`;
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
   if (!product) {
@@ -149,7 +241,7 @@ export default function ProductDetails() {
     // }
     toast.info(`${product.name} x ${quantity} was added to cart`, {
       position: "top-right",
-      autoClose: 2500 
+      autoClose: 2500,
     });
     dispatch(
       addToCart({
@@ -157,40 +249,48 @@ export default function ProductDetails() {
           id: product.id,
           name: product.name,
           price: product.price,
-          store_id: product.store_id
+          store_id: product.store_id,
         },
         quantity: quantity,
       })
     );
   };
 
-  const Rating = ({ value }) => {
-    if (value < 1 || value > 5) {
-      return <div>Invalid rating value</div>;
-    }
-  
-    const filledStars = Math.floor(value);
-    const emptyStars = 5 - filledStars;
-  
-    return (
-      <div className="rating">
-        {[...Array(filledStars)].map((_, index) => (
-          <span key={index} className="star" style={{ color: '#FFD700', fontSize: '24px', marginRight: '5px' }}>
-          ★
-          </span>
-        ))}
-        {[...Array(emptyStars)].map((_, index) => (
-          <span key={index} className="star" style={{ color: 'lightgray', fontSize: '24px', marginRight: '5px' }}>
-          ★
-          </span>
-        ))}
-      </div>
-    );
-  };
+  // const Rating = ({ value }) => {
+  //   if (value < 1 || value > 5) {
+  //     return <div>Invalid rating value</div>;
+  //   }
+
+  //   const filledStars = Math.floor(value);
+  //   const emptyStars = 5 - filledStars;
+
+  //   return (
+  //     <div className="rating">
+  //       {[...Array(filledStars)].map((_, index) => (
+  //         <span
+  //           key={index}
+  //           className="star"
+  //           style={{ color: "#FFD700", fontSize: "24px", marginRight: "5px" }}
+  //         >
+  //           ★
+  //         </span>
+  //       ))}
+  //       {[...Array(emptyStars)].map((_, index) => (
+  //         <span
+  //           key={index}
+  //           className="star"
+  //           style={{ color: "lightgray", fontSize: "24px", marginRight: "5px" }}
+  //         >
+  //           ★
+  //         </span>
+  //       ))}
+  //     </div>
+  //   );
+  // };
   const handleShowMore = () => {
-    setVisibleComments(prevVisibleComments => prevVisibleComments + 5);
+    setVisibleComments((prevVisibleComments) => prevVisibleComments + 5);
   };
-  
+
   return (
     <div
       style={{
@@ -308,7 +408,11 @@ export default function ProductDetails() {
                         borderRadius: "10px",
                         marginBottom: "10px",
                       }}
-                      src={`http://localhost:8080/mamababy/products/images/${product.image_url}`}
+                      src={
+                        product.image_url.includes("Product_")
+                          ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
+                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      }
                       alt={product.name}
                     />
                   </Paper>
@@ -555,65 +659,178 @@ export default function ProductDetails() {
         )}
       </Container>
       <Container sx={{ my: 4 }}>
-        <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', color: '#ff469e' }}>
+        <Typography
+          variant="h4"
+          sx={{ mb: 4, textAlign: "center", color: "#ff469e" }}
+        >
           Comments
         </Typography>
-        {isComment ? ( comment.slice(0, visibleComments).map((item, index) => (
-          <Card
-            key={item.id}
-            sx={{
-              backgroundColor: "#f9f9f9",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
-              border: "1px solid #e0e0e0",
-              color: "#333",
-              padding: "5px",
-            }}
+        {isComment ? (
+          comment.slice(0, visibleComments).map((item, index) => (
+            <Card
+              key={item.id}
+              sx={{
+                backgroundColor: "#f9f9f9",
+                boxShadow:
+                  "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
+                border: "1px solid #e0e0e0",
+                color: "#333",
+                padding: "5px",
+                position: "relative",
+              }}
+            >
+              <CardContent>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={2}>
+                    <Paper
+                      sx={{
+                        padding: "10px",
+                        backgroundColor: "#fafafa",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Typography variant="h6">
+                        {userMap[item.user_id]}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {format(new Date(item.date), "dd/MM/yyyy HH:mm")}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={10}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Rating value={item.rating} readOnly />
+                    </Box>
+                    <Typography variant="body1">{item.comment}</Typography>
+                  </Grid>
+                </Grid>
+                {item.user_id === userId && (
+                  <>
+                    <IconButton
+                      aria-label="more"
+                      aria-controls="long-menu"
+                      aria-haspopup="true"
+                      onClick={handleMenuClick}
+                      sx={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem onClick={() => handleOpenEditComment(item)}>
+                        Edit Comment
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            sx={{ textAlign: "center" }}
           >
-            <CardContent>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={2}>
-                  <Paper
-                    sx={{
-                      padding: "10px",
-                      backgroundColor: "#fafafa",
-                      textAlign: "center",
-                    }}
-                  >
-                    <Typography variant="h6">{userMap[item.user_id]}</Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {new Date(item.date).toLocaleDateString()}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} md={10}>
-                  <Box display="flex" alignItems="center" mb={2}>
-                    <Rating value={item.rating} readOnly />
-                  </Box>
-                  <Typography variant="body1">{item.comment}</Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        ))
-      ) : (
-        <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'center' }}>
-          No comments available.
-        </Typography>
-      )}
-      {visibleComments < comment?.length && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            No comments available.
+          </Typography>
+        )}
+        {visibleComments < comment?.length && (
+          <Box
+            sx={{ display: "flex", justifyContent: "center", width: "100%" }}
+          >
             <Button
               variant="contained"
               color="primary"
-              sx={{ backgroundColor: "#ff469e", "&:hover": { backgroundColor: "#e6338f" },
-                  marginTop : "20px"}}
+              sx={{
+                backgroundColor: "#ff469e",
+                "&:hover": { backgroundColor: "#e6338f" },
+                marginTop: "20px",
+              }}
               onClick={handleShowMore}
             >
               Show more
             </Button>
           </Box>
         )}
-    </Container>
+      </Container>
+      <Modal open={openEditComment} onClose={handleCloseEditComment}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Grid container alignItems="center" spacing={2} mb={2}>
+            <Grid item>
+              <Avatar src={avatarUrl} />
+            </Grid>
+            <Grid item>
+              <Typography variant="h6">
+                {userMap[selectedComment?.user_id]}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {selectedComment
+                  ? format(new Date(selectedComment.date), "dd/MM/yyyy HH:mm")
+                  : ""}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Rating
+            name="star-rating"
+            value={selectedComment?.rating}
+            onChange={(event, newValue) => handleChange("rating", newValue)}
+          />
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Comment"
+            variant="outlined"
+            value={selectedComment?.comment}
+            onChange={(e) => handleChange("comment", e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <Button
+            variant="contained"
+            sx={{
+              marginTop: 4,
+              backgroundColor: "white",
+              color: "#ff469e",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              fontSize: 16,
+              width: "10vw",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #ff469e",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+            onClick={handleEditComment}
+          >
+            Submit
+          </Button>
+        </Box>
+      </Modal>
     </div>
   );
 }
