@@ -78,6 +78,7 @@ export default function ProductDetails() {
   const [totalRating, setTotalRating] = useState(0);
 
   const accessToken = localStorage.getItem("accessToken");
+
   var username = "";
   var userId = 0;
   if (accessToken && typeof accessToken === "string") {
@@ -321,7 +322,7 @@ export default function ProductDetails() {
       return;
     }
 
-    if (comment.length < 20) {
+    if (commentInput.length < 20) {
       toast.warn("Please enter a comment of at least 50 characters.");
       return;
     }
