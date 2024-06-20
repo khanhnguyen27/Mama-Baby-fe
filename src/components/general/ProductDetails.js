@@ -925,7 +925,7 @@ export default function ProductDetails() {
         </Box>
 
         <>
-          {userId !== 0 && (
+          {userId !== "defaultUserId" && (
             <Box
               component="form"
               sx={{
