@@ -10,6 +10,8 @@ import { allUserApi } from "../../api/UserAPI";
 import { updateCommentApi, createCommentApi } from "../../api/CommentAPI";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Send from "@mui/icons-material/Send";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import StarIcon from "@mui/icons-material/Star";
 import {
   Star,
   StarHalf,
@@ -37,6 +39,7 @@ import {
   TextField,
   Avatar,
   Modal,
+  LinearProgress,
 } from "@mui/material";
 import { Rating } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
@@ -45,8 +48,9 @@ import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import personUrl from "../../images/user.png";
 
-export default function ProductDetails() {
+export default function ProductDetailsManagement() {
   const [visible, setVisible] = useState(false);
   const { state } = useLocation();
   const [age, setAge] = useState([]);
@@ -71,13 +75,15 @@ export default function ProductDetails() {
   const [halfStar, setHalfStar] = useState(0);
   const [fullStars, setFullStars] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
+  const [totalRating, setTotalRating] = useState(0);
 
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
+  const [ratingArr, setRatingArr] = useState([0, 0, 0, 0, 0]);
 
   const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
-  const dateTime = format(new Date(), "PPPppp"); // Formatted current date and time
+  const dateTime = format(new Date(), "PPPpz"); // Formatted current date and time
 
   const handleMenuClick = (event, item) => {
     setAnchorEl({ element: event.currentTarget, id: item.id });
@@ -210,25 +216,49 @@ export default function ProductDetails() {
       }, {});
       setUserMap(userMap);
 
-      const productComments = commentData.filter(
-        (x) => x.product_id === productData.id
-      );
+      if (!commentData || commentData.length === 0) {
+        const averageRating = 0;
+        const fullStars = 0;
+        const halfStar = false;
+        const emptyStars = 5;
 
-      const averageRating = productComments.length
-        ? (
-            productComments.reduce((acc, cmt) => acc + cmt.rating, 0) /
-            productComments.length
-          ).toFixed(1)
-        : 0;
+        setFullStars(fullStars);
+        setHalfStar(halfStar);
+        setEmptyStars(emptyStars);
+        setAverageRating(averageRating);
+        setTotalRating(0);
+        setRatingArr([0, 0, 0, 0, 0]);
+      } else {
+        const productComments = commentData.filter(
+          (x) => x.product_id === productData.id
+        );
 
-      const fullStars = Math.floor(averageRating);
-      const halfStar = averageRating - fullStars >= 0.5;
-      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        const averageRating = productComments.length
+          ? (
+              productComments.reduce((acc, cmt) => acc + cmt.rating, 0) /
+              productComments.length
+            ).toFixed(1)
+          : 0;
 
-      setFullStars(fullStars);
-      setHalfStar(halfStar);
-      setEmptyStars(emptyStars);
-      setAverageRating(averageRating);
+        const fullStars = Math.floor(averageRating);
+        const halfStar = averageRating - fullStars >= 0.5;
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+        setFullStars(fullStars);
+        setHalfStar(halfStar);
+        setEmptyStars(emptyStars);
+        setAverageRating(averageRating);
+        setTotalRating(productComments.length);
+
+        const ratingArr = [0, 0, 0, 0, 0];
+        productComments.forEach((comment) => {
+          if (comment.rating >= 1 && comment.rating <= 5) {
+            ratingArr[5 - comment.rating]++;
+          }
+        });
+
+        setRatingArr(ratingArr);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -252,6 +282,24 @@ export default function ProductDetails() {
   const username = decodedAccessToken.FullName;
   const [rating, setRating] = useState(0);
   const [commentInput, setCommentInput] = useState("");
+  const maxCharacters = 2000;
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= maxCharacters) {
+      setCommentInput(value);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (
+      commentInput.length >= maxCharacters &&
+      e.key !== "Backspace" &&
+      e.key !== "Delete"
+    ) {
+      e.preventDefault();
+    }
+  };
 
   const handleComment = async () => {
     if (rating === 0) {
@@ -315,37 +363,6 @@ export default function ProductDetails() {
     );
   };
 
-  // const Rating = ({ value }) => {
-  //   if (value < 1 || value > 5) {
-  //     return <div>Invalid rating value</div>;
-  //   }
-
-  //   const filledStars = Math.floor(value);
-  //   const emptyStars = 5 - filledStars;
-
-  //   return (
-  //     <div className="rating">
-  //       {[...Array(filledStars)].map((_, index) => (
-  //         <span
-  //           key={index}
-  //           className="star"
-  //           style={{ color: "#FFD700", fontSize: "24px", marginRight: "5px" }}
-  //         >
-  //           ★
-  //         </span>
-  //       ))}
-  //       {[...Array(emptyStars)].map((_, index) => (
-  //         <span
-  //           key={index}
-  //           className="star"
-  //           style={{ color: "lightgray", fontSize: "24px", marginRight: "5px" }}
-  //         >
-  //           ★
-  //         </span>
-  //       ))}
-  //     </div>
-  //   );
-  // };
   const handleShowMore = () => {
     setVisibleComments((prevVisibleComments) => prevVisibleComments + 5);
   };
@@ -362,27 +379,7 @@ export default function ProductDetails() {
       <Container sx={{ my: 4 }}>
         <Breadcrumbs separator=">" sx={{ color: "black" }}>
           <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-            }}
-          >
-            <Typography
-              sx={{
-                color: "black",
-                transition: "color 0.2s ease-in-out",
-                fontSize: 20,
-                fontWeight: "bold",
-                "&:hover": {
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              Home
-            </Typography>
-          </Link>
-          <Link
-            to="/products"
+            to="/staff/products"
             style={{
               textDecoration: "none",
             }}
@@ -475,38 +472,6 @@ export default function ProductDetails() {
                       alt={product.name}
                     />
                   </Paper>
-                  <div
-                    style={{
-                      padding: "30px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <Typography>
-                      <span
-                        style={{
-                          fontSize: "20px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {averageRating}/5
-                      </span>
-                    </Typography>
-                    <Typography variant="h6">
-                      {Array(fullStars).fill(
-                        <Star style={{ color: "#ff469e", fontSize: "36px" }} />
-                      )}
-                      {halfStar && (
-                        <StarHalf
-                          style={{ color: "#ff469e", fontSize: "36px" }}
-                        />
-                      )}
-                      {Array(emptyStars).fill(
-                        <StarOutline
-                          style={{ color: "#ff469e", fontSize: "36px" }}
-                        />
-                      )}
-                    </Typography>
-                  </div>
                 </Grid>
                 <Grid
                   item
@@ -573,149 +538,6 @@ export default function ProductDetails() {
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <Typography>{product.description}</Typography>
                   </div>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <ButtonGroup
-                      variant="outlined"
-                      aria-label="outlined button group"
-                      style={{ height: "2.5rem" }}
-                    >
-                      <Button
-                        variant="contained"
-                        disabled={quantity <= 1}
-                        onClick={() =>
-                          setQuantity((prevQuantity) =>
-                            Math.max(1, prevQuantity - 10)
-                          )
-                        }
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          borderRadius: "20px",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        --
-                      </Button>
-                      <Button
-                        variant="contained"
-                        disabled={quantity <= 1}
-                        onClick={() => setQuantity(quantity - 1)}
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        -
-                      </Button>
-                      <Button
-                        disableRipple
-                        style={{
-                          backgroundColor: "white",
-                          fontSize: "1.25rem",
-                          width: "4rem",
-                          cursor: "default",
-                          border: "1px solid #ff469e",
-                          color: "black",
-                        }}
-                      >
-                        {quantity}
-                      </Button>
-                      <Button
-                        variant="contained"
-                        disabled={quantity >= 99}
-                        onClick={() => setQuantity(quantity + 1)}
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        +
-                      </Button>
-                      <Button
-                        variant="contained"
-                        disabled={quantity >= 99}
-                        onClick={() =>
-                          setQuantity((prevQuantity) =>
-                            Math.min(99, prevQuantity + 10)
-                          )
-                        }
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          borderRadius: "20px",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        ++
-                      </Button>
-                    </ButtonGroup>
-                    <Button
-                      variant="contained"
-                      onClick={handleAddToCart}
-                      sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderRadius: "20px",
-                        fontSize: "0.95rem",
-                        fontWeight: "bold",
-                        boxShadow: "none",
-                        transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                        },
-                      }}
-                    >
-                      <Cart sx={{ mr: 1 }} />
-                      ADD TO CART
-                    </Button>
-                  </Box>
                 </Grid>
               </Grid>
             </CardContent>
@@ -757,6 +579,144 @@ export default function ProductDetails() {
           Comments
         </Typography>
         <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
+          <Grid
+            container
+            spacing={2}
+            className="rating-table row-small align-middle"
+            mb={5}
+          >
+            {/* Điểm đánh giá trung bình */}
+            <Grid
+              item
+              xs={12}
+              md={3}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "row",
+              }}
+            >
+              <Box className="rating-table__total" textAlign="center">
+                <Typography variant="h1" className="rating_total">
+                  {averageRating !== 0 ? averageRating : ""}
+                </Typography>
+                <Typography variant="h4" className="rating_total">
+                  {typeof averageRating === "number" &&
+                    averageRating === 0 &&
+                    "No reviews yet"}
+                </Typography>
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  className="star-rating-custom"
+                  sx={{ mt: 0 }}
+                >
+                  <Typography variant="h6">
+                    {Array(fullStars).fill(
+                      <Star style={{ color: "#ff469e", fontSize: "36px" }} />
+                    )}
+                    {halfStar && (
+                      <StarHalf
+                        style={{ color: "#ff469e", fontSize: "36px" }}
+                      />
+                    )}
+                    {Array(emptyStars).fill(
+                      <StarOutline
+                        style={{ color: "#ff469e", fontSize: "36px" }}
+                      />
+                    )}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    className="title-rating"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <Typography variant="body2" component="span">
+                      Total{" "}
+                    </Typography>
+                    <Avatar
+                      sx={{ ml: 1, mr: 1, width: 20, height: 20 }}
+                      alt="Icon Person"
+                      src={personUrl}
+                    />
+                    <Typography variant="body2" component="span">
+                      {totalRating}
+                    </Typography>
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Thanh thanh đánh giá từng sao */}
+            <Grid item xs={12} md={6}>
+              <Box className="rating-table__bar">
+                <div className="bar-star">
+                  {ratingArr.map((rating, index) => {
+                    const ratingPer = Math.round((rating / totalRating) * 100);
+                    const starIndex = 5 - index;
+                    var barColor = totalRating === 0 ? "#e0e0e0" : "#ff469e";
+
+                    return (
+                      <Box
+                        key={index}
+                        display="flex"
+                        alignItems="center"
+                        mb={0}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{ flex: "0 0 auto", minWidth: 50 }}
+                        >
+                          <Grid sx={{ padding: "0 0 5px 0" }}>
+                            <StarIcon style={{ color: "#ff469e" }} />
+                            {starIndex}
+                          </Grid>
+                        </Typography>
+                        <Box sx={{ width: 300, ml: 2 }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={ratingPer}
+                            sx={{
+                              height: 8,
+                              borderRadius: 5,
+                              backgroundColor: "#e0e0e0", // Màu nền nhạt khi ratingPer là 0
+                              "& .MuiLinearProgress-bar": {
+                                backgroundColor: barColor, // Màu sắc thanh tiến trình
+                              },
+                            }}
+                          />
+                        </Box>
+                        <Typography variant="body2" sx={{ ml: 2 }}>
+                          {rating}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </div>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Box
           component="form"
           sx={{
             borderRadius: 2,
@@ -764,6 +724,7 @@ export default function ProductDetails() {
             backgroundColor: "#f0f0f0",
             padding: 2,
             mb: 4,
+            position: "relative",
           }}
         >
           <Grid container alignItems="center" spacing={2} mb={2}>
@@ -790,7 +751,8 @@ export default function ProductDetails() {
             placeholder="Write a comment..."
             variant="outlined"
             value={commentInput}
-            onChange={(e) => setCommentInput(e.target.value)}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             InputProps={{
               endAdornment: (
                 <IconButton
@@ -803,6 +765,18 @@ export default function ProductDetails() {
               ),
             }}
           />
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 10,
+              right: 10,
+              p: "10px",
+              color: "gray",
+              fontSize: "0.8rem",
+            }}
+          >
+            {`${commentInput.length}/${maxCharacters}`}
+          </Box>
         </Box>
         {isComment ? (
           [...comment] // Tạo bản sao của mảng comment trước khi sắp xếp
@@ -982,101 +956,4 @@ export default function ProductDetails() {
       </Modal>
     </div>
   );
-}
-
-{
-  /* <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <div>
-                    <Typography
-                      style={{
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                    >
-                      Price
-                    </Typography>
-                    <Typography style={{ color: "black" }}>
-                      ${product.price}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <div>
-                    <Typography
-                      style={{
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                    >
-                      Brand
-                    </Typography>
-                    <Typography style={{ color: "black" }}>
-                      {brandMap[product.brand_id]}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <div>
-                    <Typography
-                      style={{
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                    >
-                      Category
-                    </Typography>
-                    <Typography style={{ color: "black" }}>
-                      {categoryMap[product.category_id]}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <div>
-                    <Typography
-                      style={{
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                    >
-                      Age Range
-                    </Typography>
-                    <Typography style={{ color: "black" }}>
-                      {ageMap[product.age_id]}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <div>
-                    <Typography
-                      style={{
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                    >
-                      Status
-                    </Typography>
-                    <Typography style={{ color: "black" }}>
-                      {product.status}
-                    </Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <div>
-                    <Typography
-                      style={{
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                    >
-                      Type
-                    </Typography>
-                    <Typography style={{ color: "black" }}>
-                      {product.type}
-                    </Typography>
-                  </div>
-                </Grid>
-              </Grid> 
-              <Button><Cart /></Button>
-              */
 }

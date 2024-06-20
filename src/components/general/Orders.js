@@ -542,7 +542,7 @@ export default function Orders() {
                     boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
                   }}
                 >
-                  <>{console.log(item.id)}</>
+                  {/* <>{console.log(item.id)}</> */}
                   <Typography
                     variant="h5"
                     sx={{ mb: "10px", fontWeight: "bold" }}
@@ -1443,114 +1443,6 @@ export default function Orders() {
                     {item.status_order_list[item.status_order_list.length - 1]
                       .status === "COMPLETED" && (
                       <Grid item xs={12} sx={{ textAlign: "right" }}>
-                        <Button
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "10px",
-                            fontSize: 16,
-                            fontWeight: "bold",
-                            my: 2,
-                            mx: 1,
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
-                          }}
-                          onClick={() => handleOpenComment(item)}
-                        >
-                          COMMENT
-                        </Button>
-                        <Modal
-                          open={openComment}
-                          onClose={handleCloseComment}
-                          slotProps={{
-                            backdrop: {
-                              style: {
-                                backgroundColor: "rgba(0, 0, 0, 0.1)",
-                              },
-                            },
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              width: 400,
-                              bgcolor: "background.paper",
-                              borderRadius: 2,
-                              boxShadow: 10,
-                              p: 4,
-                            }}
-                          >
-                            <Grid
-                              container
-                              alignItems="center"
-                              spacing={2}
-                              mb={2}
-                            >
-                              <Grid item>
-                                <Avatar src={avatarUrl} alt={username} />
-                              </Grid>
-                              <Grid item>
-                                <Typography variant="h6">{username}</Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                >
-                                  {dateTime}
-                                </Typography>
-                              </Grid>
-                            </Grid>
-                            <Rating
-                              name="star-rating"
-                              value={rating}
-                              onChange={(event, newValue) =>
-                                setRating(newValue)
-                              }
-                            />
-                            <TextField
-                              fullWidth
-                              multiline
-                              rows={4}
-                              label="Comment"
-                              variant="outlined"
-                              value={comment}
-                              onChange={(e) => setComment(e.target.value)}
-                              sx={{ mt: 2 }}
-                            />
-                            <Button
-                              variant="contained"
-                              sx={{
-                                marginTop: 4,
-                                backgroundColor: "white",
-                                color: "#ff469e",
-                                borderRadius: "30px",
-                                fontWeight: "bold",
-                                fontSize: 16,
-                                width: "10vw",
-                                transition:
-                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                border: "1px solid #ff469e",
-                                "&:hover": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  border: "1px solid white",
-                                },
-                              }}
-                              onClick={handleComment}
-                            >
-                              Submit
-                            </Button>
-                          </Box>
-                        </Modal>
                         <Button
                           variant="contained"
                           sx={{
