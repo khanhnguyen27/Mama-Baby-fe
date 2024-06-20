@@ -52,6 +52,8 @@ export default function RequestStore() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  const storeId = storeMap.id;
+
 
   const fetchData = async () => {
     try {
@@ -76,15 +78,18 @@ export default function RequestStore() {
       };
 
       storeData.forEach((store) => {
-        const latestStatus = store.status;
-        if (latestStatus) {
-          categorizedOrders[latestStatus]?.push(store);
-        }
+        const latestStatus = 
+        store.request_list[store.request_list.length - 1].status;
+        categorizedOrders[latestStatus]?.unshift(store);
+        // store.status;
+        // if (latestStatus) {
+        //   categorizedOrders[latestStatus]?.push(store);
+        // }
       });
 
-      for (const status in categorizedOrders) {
-        categorizedOrders[status].reverse();
-      }
+      // for (const status in categorizedOrders) {
+      //   categorizedOrders[status].reverse();
+      // }
 
       setRequestStores(categorizedOrders);
       setUser(userData);
@@ -107,11 +112,12 @@ export default function RequestStore() {
     } catch (err) {
       console.log(err);
     }
+    
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [storeId]);
 
   const handleTabChange = (e, newValue) => {
     setLoading(true);
@@ -145,6 +151,7 @@ export default function RequestStore() {
         toast.success("Request Accepted!", {
           autoClose: 1500,
         });
+        updateRequestStatus = (storeId, newStatus );
         handleClose();
         setLoading(true);
         setTimeout(() => {
@@ -182,6 +189,7 @@ export default function RequestStore() {
         toast.success("Request Rejected!", {
           autoClose: 1500,
         });
+        updateRequestStatus = (storeId, newStatus );
         handleClose();
         setLoading(true);
         setTimeout(() => {
@@ -194,11 +202,39 @@ export default function RequestStore() {
       })
       .catch((error) => console.log(error));
   };
+  const updateRequestStatus = (storeId, newStatus ) => {
+    setRequestStores((prevOrders) => {
+      const updatedRequest = { ...prevOrders };
+      let upToDateRequest;
+  
+      for (const status in updatedRequest) {
+        const storeIndex = updatedRequest[status].findIndex(store => store.id === storeId);
+        if (storeIndex !== -1) {
+          [upToDateRequest] = updatedRequest[status].splice(storeIndex, 1);
+          break;
+        }
+      }
+  
+      if (upToDateRequest) {
+        upToDateRequest.request_list.push({ status: newStatus });
+        updatedRequest[newStatus].unshift(upToDateRequest);
+      }
+  
+      return updatedRequest;
+    });
+    handleClose();
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/admin/requeststore");
+      setLoading(false);
+    }, 1500);
+  }
 
   const handleOpen = (type) => {
-    setActionType(type);
+    setActionType(type); // Đảm bảo type được set chính xác là "Accept" hoặc "Reject"
     setOpen(true);
   };
+  
   const handleClose = () => setOpen(false);
   console.log(storeMap);
 
@@ -416,6 +452,7 @@ export default function RequestStore() {
                       </Box>
                     </Typography>
                   </Grid>
+                  
                   <Grid item xs={12} md={5}>
                     <Typography
                       variant="body2"
@@ -477,6 +514,8 @@ export default function RequestStore() {
                       </Box>
                     </Typography>
                   </Grid>
+                  {item.request_list[item.request_list.length - 1]
+                      .status === "PROCESSING" && (
                   <Grid item xs={12} sx={{ textAlign: "right" }}>
                     <Button
                       variant="contained"
@@ -586,30 +625,27 @@ export default function RequestStore() {
                               },
                             }}
                             onClick={() => {
-                              {
-                                // storeId, nameStore, address, description, phone, status, isActive, userId
-                                actionType === "Accept"
-                                  ? handleAccept(
-                                      item.id,
-                                      item.name_store,
-                                      item.address,
-                                      item.description,
-                                      item.phone,
-                                      "APPROVED",
-                                      1,
-                                      item.user_id
-                                    )
-                                  : handleReject(
-                                      item.id,
-                                      item.name_store,
-                                      item.address,
-                                      item.description,
-                                      item.phone,
-                                      "REFUSE",
-                                      1,
-                                      item.user_id
-                                    );
-                              }
+                              actionType === "Accept"
+                                ? handleAccept(
+                                    item.id,
+                                    item.name_store,
+                                    item.address,
+                                    item.description,
+                                    item.phone,
+                                    "APPROVED",
+                                    1,
+                                    item.user_id
+                                  )
+                                : handleReject(
+                                    item.id,
+                                    item.name_store,
+                                    item.address,
+                                    item.description,
+                                    item.phone,
+                                    "REFUSE",
+                                    1,
+                                    item.user_id
+                                  );
                             }}
                           >
                             Yes
@@ -641,6 +677,8 @@ export default function RequestStore() {
                       </Box>
                     </Modal>
                   </Grid>
+                                      )}
+
                 </Grid>
               </Card>
             ))
@@ -676,4 +714,5 @@ export default function RequestStore() {
       </Container>
     </div>
   );
+
 }

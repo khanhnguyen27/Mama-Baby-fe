@@ -8,7 +8,16 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { regisStoreApi } from "../../api/StoreAPI";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+
 const RegistStore = () => {
   window.document.title = "Sign Up";
   const [storename, setStorename] = useState("");
@@ -18,6 +27,8 @@ const RegistStore = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
+  const [open, setOpen] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
@@ -27,12 +38,31 @@ const RegistStore = () => {
     const reg = /^[0-9]+$/;
     return reg.test(phone);
   };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleAgreeChange = (event) => {
+    setAgreed(event.target.checked);
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
+    if (!agreed) {
+      toast.error("You must agree to the terms and policies");
+      return;
+    }
 
     // Kiểm tra xem các trường đã được nhập đầy đủ chưa
-    if (storename === "" || address === "" || description === "" || phone === "") {
+    if (
+      storename === "" ||
+      address === "" ||
+      description === "" ||
+      phone === ""
+    ) {
       toast.error("Please input all fields", { autoClose: 2500 });
       return;
     }
@@ -59,7 +89,7 @@ const RegistStore = () => {
       .finally(() => {
         setLoading(false);
       });
-  }
+  };
 
   return (
     <div style={{ marginTop: "3rem" }}>
@@ -196,7 +226,6 @@ const RegistStore = () => {
                       },
                     },
                   }}
-
                 />
               </FormControl>
               <FormControl sx={{ mb: 3 }} fullWidth>
@@ -249,7 +278,6 @@ const RegistStore = () => {
                       },
                     },
                   }}
-
                 />
               </FormControl>
               <FormControl sx={{ mb: 3 }} fullWidth>
@@ -305,10 +333,78 @@ const RegistStore = () => {
                 />
               </FormControl>
 
+              <div style={{ textAlign: "center", color: "#777" }}>
+                By clicking Regist, you agree to the Terms, Main our privacy
+                policy and Cookie Policy. &nbsp;
+                <Link
+                  to="#"
+                  onClick={handleClickOpen}
+                  style={{ textDecoration: "underline", color: "#385898" }}
+                >
+                  Find out more
+                </Link>
+                <Dialog open={open} onClose={handleClose}>
+                  <DialogTitle
+                    style={{ backgroundColor: "#ff469e", color: "white" }}
+                  >
+                    Terms and Policies
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText
+                      style={{ fontSize: "16px", lineHeight: "1.5" }}
+                    >
+                      Alerts are urgent interruptions, requiring
+                      acknowledgement, that inform the user about a situation.
+                      Most alerts don't need titles. They summarize a decision
+                      in a sentence or two by either:
+                      <ul>
+                        <li>
+                          Asking a question (for example "Delete this
+                          conversation?")
+                        </li>
+                        <li>
+                          Making a statement related to the action buttons
+                        </li>
+                      </ul>
+                      Use title bar alerts only for high-risk situations, such
+                      as the potential loss of connectivity. Users should be
+                      able to understand the choices based on the title and
+                      button text alone.
+                      <br />
+                      <br />
+                      If a title is required:
+                      <ul>
+                        <li>
+                          Use a clear question or statement with an explanation
+                          in the content area, such as "Erase USB storage?"
+                        </li>
+                      </ul>
+                      Avoid apologies, ambiguity, or questions, such as
+                      "Warning!" or "Are you sure?"
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions sx = {{textAlign: "left",justifyContent:"left",ml:2}}>
+                  <FormControlLabel
+                  
+                    control={
+                      <Checkbox
+                        checked={agreed}
+                        onChange={handleAgreeChange}
+                        style={{ color: "#ff469e" }}
+                      />
+                    }
+                    label="I agree to the terms and policies"
+                  />
+                </DialogActions>
+                </Dialog>
+              </div>
+
               <div style={{ textAlign: "center", marginTop: "1rem" }}>
+
                 <Button
                   variant="contained"
                   type="submit"
+                  disabled={!agreed} // Disable nút khi chưa đồng ý
                   sx={{
                     backgroundColor: "white",
                     color: "#ff469e",
@@ -336,8 +432,7 @@ const RegistStore = () => {
                     flexDirection: "row",
                     justifyContent: "center",
                   }}
-                >
-                </div>
+                ></div>
               </div>
             </form>
           </div>
