@@ -114,8 +114,6 @@ export default function Products() {
     }
   };
 
-  console.log(comment);
-
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {

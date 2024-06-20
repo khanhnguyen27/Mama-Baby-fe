@@ -1012,6 +1012,8 @@ export default function StaffHome() {
                     >
                       <Card
                         sx={{
+                          display: "flex",
+                          flexDirection: "column",
                           minWidth: 180,
                           padding: 2,
                           border: "1px solid #f5f7fd",
@@ -1046,22 +1048,33 @@ export default function StaffHome() {
                           //     })
                           //   )
                           // }
-                          onClick={() => handleOpen(item)}
+                          //onClick={() => handleOpen(item)}
+                          onClick={() =>
+                            navigate(
+                              `/products/staff/${item.name
+                                .toLowerCase()
+                                .replace(/\s/g, "-")}`,
+                              { state: { productId: item.id } },
+                              window.scrollTo({
+                                top: 0,
+                                behavior: "smooth",
+                              })
+                            )
+                          }
                         />
                         <CardContent
-                          // onClick={() =>
-                          //   navigate(
-                          //     `/products/${item.name
-                          //       .toLowerCase()
-                          //       .replace(/\s/g, "-")}`,
-                          //     { state: { productId: item.id } },
-                          //     window.scrollTo({
-                          //       top: 0,
-                          //       behavior: "smooth",
-                          //     })
-                          //   )
-                          // }
-                          onClick={() => handleOpen(item)}
+                          onClick={() =>
+                            navigate(
+                              `/products/staff/${item.name
+                                .toLowerCase()
+                                .replace(/\s/g, "-")}`,
+                              { state: { productId: item.id } },
+                              window.scrollTo({
+                                top: 0,
+                                behavior: "smooth",
+                              })
+                            )
+                          }
                         >
                           <Typography
                             variant="subtitle1"
@@ -1098,6 +1111,29 @@ export default function StaffHome() {
                             {categoryMap[item.category_id]}
                           </Typography>
                         </CardContent>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            ml: "auto",
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "30px",
+                            fontSize: 15,
+                            fontWeight: "bold",
+                            width: "7vw",
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={() => handleOpen(item)}
+                        >
+                          Update
+                        </Button>
                       </Card>
                     </Tooltip>
                   </Grid>
