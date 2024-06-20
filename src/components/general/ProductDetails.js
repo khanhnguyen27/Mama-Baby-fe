@@ -78,8 +78,22 @@ export default function ProductDetails() {
   const [totalRating, setTotalRating] = useState(0);
 
   const accessToken = localStorage.getItem("accessToken");
-  const decodedAccessToken = jwtDecode(accessToken);
-  const userId = decodedAccessToken.UserID;
+  var username = "";
+  var userId = 0;
+  if (accessToken && typeof toaccessTokenken === "string") {
+    try {
+      const decodedAccessToken = jwtDecode(accessToken);
+      userId = decodedAccessToken.UserID ?? "defaultUserId";
+      username = decodedAccessToken.FullName ?? "defaultUsername";
+    } catch (error) {
+      console.error("Failed to decode token:", error);
+      // Xử lý lỗi nếu cần thiết
+    }
+  } else {
+    console.warn("Invalid token specified: must be a string");
+    // Xử lý trường hợp token không hợp lệ nếu cần thiết
+  }
+
   const [ratingArr, setRatingArr] = useState([0, 0, 0, 0, 0]);
 
   const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
@@ -279,7 +293,7 @@ export default function ProductDetails() {
   };
 
   //Add comment
-  const username = decodedAccessToken.FullName;
+
   const [rating, setRating] = useState(0);
   const [commentInput, setCommentInput] = useState("");
   const maxCharacters = 2000;
@@ -307,10 +321,10 @@ export default function ProductDetails() {
       return;
     }
 
-    // if (comment.length < 20) {
-    //   toast.warn("Please enter a comment of at least 50 characters.");
-    //   return;
-    // }
+    if (comment.length < 20) {
+      toast.warn("Please enter a comment of at least 50 characters.");
+      return;
+    }
 
     await createCommentApi(product.id, rating, commentInput, userId)
       .then((response) => {
@@ -910,68 +924,73 @@ export default function ProductDetails() {
           </Grid>
         </Box>
 
-        <Box
-          component="form"
-          sx={{
-            borderRadius: 2,
-            boxShadow: 10,
-            backgroundColor: "#f0f0f0",
-            padding: 2,
-            mb: 4,
-            position: "relative",
-          }}
-        >
-          <Grid container alignItems="center" spacing={2} mb={2}>
-            <Grid item>
-              <Avatar src={avatarUrl} alt={username} />
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">{username}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                {dateTime}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Rating
-            name="star-rating"
-            value={rating}
-            onChange={(event, newValue) => setRating(newValue)}
-            sx={{ mb: 2, color: "#ff469e" }}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            placeholder="Write a comment..."
-            variant="outlined"
-            value={commentInput}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            InputProps={{
-              endAdornment: (
-                <IconButton
-                  aria-label="submit comment"
-                  sx={{ p: "10px" }}
-                  onClick={handleComment}
-                >
-                  <Send />
-                </IconButton>
-              ),
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 10,
-              right: 10,
-              p: "10px",
-              color: "gray",
-              fontSize: "0.8rem",
-            }}
-          >
-            {`${commentInput.length}/${maxCharacters}`}
-          </Box>
-        </Box>
+        <>
+          {userId !== 0 && (
+            <Box
+              component="form"
+              sx={{
+                borderRadius: 2,
+                boxShadow: 10,
+                backgroundColor: "#f0f0f0",
+                padding: 2,
+                mb: 4,
+                position: "relative",
+              }}
+            >
+              <Grid container alignItems="center" spacing={2} mb={2}>
+                <Grid item>
+                  <Avatar src={avatarUrl} alt={username} />
+                </Grid>
+                <Grid item>
+                  <Typography variant="h6">{username}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {dateTime}
+                  </Typography>
+                </Grid>
+              </Grid>
+              <Rating
+                name="star-rating"
+                value={rating}
+                onChange={(event, newValue) => setRating(newValue)}
+                sx={{ mb: 2, color: "#ff469e" }}
+              />
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                placeholder="Write a comment..."
+                variant="outlined"
+                value={commentInput}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton
+                      aria-label="submit comment"
+                      sx={{ p: "10px" }}
+                      onClick={handleComment}
+                    >
+                      <Send />
+                    </IconButton>
+                  ),
+                }}
+              />
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 10,
+                  right: 10,
+                  p: "10px",
+                  color: "gray",
+                  fontSize: "0.8rem",
+                }}
+              >
+                {`${commentInput.length}/${maxCharacters}`}
+              </Box>
+            </Box>
+          )}
+        </>
+
         {isComment ? (
           [...comment] // Tạo bản sao của mảng comment trước khi sắp xếp
             .sort((a, b) =>
