@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import Button from "@mui/material/Button";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
@@ -36,12 +35,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import FormControl from "@mui/material/FormControl";
 import { toast } from "react-toastify";
-import { Label } from "@mui/icons-material";
 
 export default function Vouchers() {
   window.document.title = "Vouchers";
-  const { state } = useLocation();
-  const keyword = state?.keyword;
   const [loading, setLoading] = useState(false);
   const [vouchers, setVouchers] = useState([]);
   const [openUpdateVoucher, setOpenUpdateVoucher] = useState(false);
@@ -74,6 +70,10 @@ export default function Vouchers() {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     fetchData();
   }, []);
 
@@ -126,10 +126,10 @@ export default function Vouchers() {
     return moment(date, "YYYY-MM-DD").format("DD/MM/YYYY");
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedVoucher({ ...selectedVoucher, [name]: value });
-  };
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setSelectedVoucher({ ...selectedVoucher, [name]: value });
+  // };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -161,6 +161,7 @@ export default function Vouchers() {
   const [discountValue, setDiscountValue] = useState("");
   const [description, setDescription] = useState("");
   const [endAt, setEndAt] = useState('');
+  const [isActive, setActive] = useState(true);
 
   const handleOpenAddVoucher = () => {
     setOpenAddVoucher(true);
@@ -173,8 +174,10 @@ export default function Vouchers() {
   const now = new Date();
   const endDate = new Date(endAt);
 
+  console.log(isActive)
+
   const handleAddVoucher = () => {
-    if (!code || !discountValue || !description || !endAt) {
+    if (!code || !discountValue || !description || !endAt ) {
       toast.warn("Please fill in all required fields.");
       return;
     } else if (endDate <= now) {
@@ -186,6 +189,7 @@ export default function Vouchers() {
       discountValue,
       description,
       endAt,
+      isActive
     )
       .then((response) => {
         handleCloseAddVoucher();
@@ -409,6 +413,16 @@ export default function Vouchers() {
             value={endAt}
             onChange={(e) => setEndAt(e.target.value)}
           />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Active</InputLabel>
+            <Select
+              value={isActive}
+              onChange={(e) => setActive(e.target.value)}
+            >
+              <MenuItem value={true}>Active</MenuItem>
+              <MenuItem value={false}>Inactive</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAddVoucher}>Cancel</Button>
