@@ -25,13 +25,14 @@ import StaffLayout from "./components/staff/StaffLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import RegisStores from "./components/general/RegisStores";
 import Orders from "./components/general/Orders";
-import Articles from "./components/staff/Articles";
+import Articles from "./components/staff/ArticlesManagement";
 import VoucherManagement from "./components/admin/VoucherManagement";
 import RequestStore from "./components/admin/RequestStore";
 import AccountManagement from "./components/admin/AccountManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
 import ExchangesManagement from "./components/staff/ExchangesManagement";
 import RefundManagement from "./components/admin/RefundManagement";
+import ProductDetailsManagement from "./components/staff/ProductDetailsManagement";
 function App() {
   return (
     <div className="App">
@@ -53,6 +54,10 @@ function App() {
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
+          <Route
+            path="/products/staff/:productId"
+            element={<ProductDetailsManagement />}
+          />
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<Navigate to={"/staff/products"} />} />
             <Route path="profile" element={<Profile />} />
