@@ -27,20 +27,32 @@ const SignUp = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleLogin = (e) => {
+  const handleSignUp = (e) => {
     e.preventDefault();
     // if (!handleValidationEmail()) {
     //   return;
     // }
+    if (username.length < 6) {
+      toast.error("Username's length is at least 6 characters", {
+        autoClose: 1500,
+      });
+      return;
+    }
+    if (password.length < 8 || retype.length < 8) {
+      toast.error("Password's length and confirm's password is at least 8 characters", {
+        autoClose: 1500,
+      });
+      return;
+    }
     if (retype !== password) {
-      toast.error("Retype password must be the same as password", {
-        autoClose: 2500,
+      toast.error("Confirm password must be the same as password", {
+        autoClose: 1500,
       });
       return;
     }
     if (phone.length < 9 || phone.length > 11 || !/^\d+$/.test(phone)) {
       toast.error("Phone must be digit and its length is 9 - 11 characters", {
-        autoClose: 2500,
+        autoClose: 1500,
       });
       return;
     }
@@ -52,13 +64,13 @@ const SignUp = () => {
       address == "" ||
       phone == ""
     ) {
-      toast.error("Please input all fields", { autoClose: 2500 });
+      toast.error("Please input all fields", { autoClose: 1500 });
       return;
     }
     signupApi(username, password, retype, fullname, address, phone)
       .then((response) => {
         console.log("Sign Up Successfully", response);
-        toast.success(`Sign Up Successfully`, { autoClose: 2500 });
+        toast.success(`Sign Up Successfully`, { autoClose: 1500 });
         setTimeout(() => {
           setLoading(true);
         }, 2000);
@@ -68,7 +80,7 @@ const SignUp = () => {
       })
       .catch((error) => {
         console.error("Sign Up Failed", error);
-        toast.error("Sign Up Failed.", { autoClose: 2500 });
+        toast.error("Sign Up Failed.", { autoClose: 1500 });
       });
   };
 
@@ -135,7 +147,7 @@ const SignUp = () => {
                 Sign Up{" "}
               </h1>
             </div>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleSignUp}>
               <FormControl sx={{ mb: 3 }} fullWidth>
                 <Typography
                   sx={{

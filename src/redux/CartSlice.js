@@ -22,6 +22,16 @@ export const cartSlice = createSlice({
         state.data.products.push(action.payload);
       }
     },
+    updateQuantityCart: (state, action) => {
+      const { product, quantityChange } = action.payload;
+      const existingProduct = state.data.products.find(item => item.product.id === product.id);
+      if (existingProduct) {
+        existingProduct.quantity += quantityChange;
+        if (existingProduct.quantity <= 0) {
+          state.data.products = state.data.products.filter(item => item.product.id !== product.id);
+        }
+      }
+    },
     removeFromCart: (state, action) => {
       const removedProductId = action.payload.id;
       const removedProductIndex = state.data.products.findIndex(
@@ -36,7 +46,7 @@ export const cartSlice = createSlice({
     },
   },
 });
-export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
+export const { addToCart, updateQuantityCart, removeFromCart, clearCart } = cartSlice.actions;
 export const selectCart = (state) => state.cart.data;
 export const selectCartAmount = (state) => state.cart.data.products.length;
 export const selectTotalCost = (state) =>
