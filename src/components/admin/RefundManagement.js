@@ -12,7 +12,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Box
+  Box,
 } from "@mui/material";
 import {
   Dialog,
@@ -140,6 +140,7 @@ export default function Refund() {
     setOpenExchangeDetail(false);
   };
 
+
   return (
     <div
       style={{
@@ -184,6 +185,13 @@ export default function Refund() {
                       value={selectedMonthYear}
                       label="Month-Year"
                       onChange={handleMonthYearChange}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 200, // Set the max height of the dropdown
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="">
                         <em>None</em>
@@ -202,7 +210,7 @@ export default function Refund() {
         </Grid>
         <Grid container spacing={2}>
           {!isEmptyRefund ? (
-            Object.keys(groupedRefunds).map((userId) => {
+            Object.keys(groupedRefunds).map((userId, index) => {
               const userRefunds = groupedRefunds[userId];
               const filteredRefunds = selectedMonthYear
                 ? { [selectedMonthYear]: userRefunds[selectedMonthYear] }
@@ -329,12 +337,12 @@ export default function Refund() {
       {/* Dialog for Order Detail */}
       <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail}>
         <DialogTitle
-            sx={{
-              fontSize: "2rem",
-              color: "#323232",
-              fontWeight: "bold",
-              textAlign: "center",
-            }}
+          sx={{
+            fontSize: "2rem",
+            color: "#323232",
+            fontWeight: "bold",
+            textAlign: "center",
+          }}
         >
           Information order
         </DialogTitle>

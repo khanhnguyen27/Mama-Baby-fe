@@ -20,12 +20,14 @@ export const addVoucherApi = (
   discountValue,
   description,
   endAt,
+  isActive
 ) => {
   return axiosJWT.post(URL_VOUCHER, {
     code:code,
     discount_value:discountValue,
     description:description,
     end_at:endAt,
+    is_active:isActive
   });
 };
 
