@@ -6,7 +6,6 @@ import {
   IconButton,
   Grid,
   Card,
-  CardHeader,
   CardContent,
   Divider,
   Container,
@@ -15,11 +14,10 @@ import {
   Select,
   MenuItem,
   Modal,
-  List,
-  ListItem,
   TextField,
   FormControl,
-  InputLabel,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { Close, KeyboardCapslock } from "@mui/icons-material";
 import {
@@ -29,6 +27,7 @@ import {
   selectCart,
   selectCartAmount,
   selectTotalCost,
+  updateQuantityCart,
 } from "../../redux/CartSlice";
 import { redirect, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -46,6 +45,7 @@ export default function Cart() {
   const [userInfo, setUserInfo] = useState([]);
   const [store, setStore] = useState([]);
   const [storeMap, setStoreMap] = useState({});
+  const [selectedStore, setSelectedStore] = useState(""); // Add this state to store the selected store
   const [voucher, setVoucher] = useState([]);
   const [selectedVoucher, setSelectedVoucher] = useState("");
   const [fullName, setFullName] = useState("");
@@ -55,6 +55,7 @@ export default function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector(selectCart);
+  const [selectedStoreProducts, setSelectedStoreProducts] = useState([]);
   const cartAmount = useSelector(selectCartAmount);
   const totalCost = useSelector(selectTotalCost);
   const isEmptyCart = !cartItems.products.length;
@@ -115,9 +116,49 @@ export default function Cart() {
     setSelectedVoucher(e.target.value);
   };
 
+  // const getDiscountedTotal = () => {
+  //   if (selectedVoucher === null || selectedVoucher === 0)
+  //     return totalCost;
+  //   return totalCost - selectedVoucher <= 0
+  //     ? 0
+  //     : totalCost - selectedVoucher;
+  // };
+
   const getDiscountedTotal = () => {
-    if (selectedVoucher === null || selectedVoucher === 0) return totalCost;
-    return totalCost - selectedVoucher <= 0 ? 0 : totalCost - selectedVoucher;
+    if (selectedVoucher === null || selectedVoucher === 0)
+      return getFinalAmount();
+    return getFinalAmount() - selectedVoucher <= 0
+      ? 0
+      : getFinalAmount() - selectedVoucher;
+  };
+
+  const handleStoreChange = (storeId) => {
+    dispatch(removeFromCart({ products: [] }));
+
+    setSelectedStore((prevStores) => {
+      const newSelectedStore = { ...prevStores };
+      newSelectedStore[storeId] = !prevStores[storeId];
+
+      const selectedProducts = [];
+      Object.keys(newSelectedStore).forEach((storeId) => {
+        if (newSelectedStore[storeId]) {
+          selectedProducts.push(...groupedCartItems[storeId]);
+        }
+      });
+      setSelectedStoreProducts(selectedProducts);
+
+      return newSelectedStore;
+    });
+  };
+
+  const updateQuantity = (product, quantityChange) => {
+    setSelectedStoreProducts((prevProducts) =>
+      prevProducts.map((item) =>
+        item.product.id === product.id
+          ? { ...item, quantity: item.quantity + quantityChange }
+          : item
+      )
+    );
   };
 
   const handleOpen = () => {
@@ -155,7 +196,6 @@ export default function Cart() {
     const userId = decodedAccessToken.UserID;
     console.log(userId);
 
-    // Add phone and fullname of the user, also add these 2 column in the order database
     const selectedVoucherObj = voucher.find(
       (item) => item.discount_value === selectedVoucher
     );
@@ -175,13 +215,14 @@ export default function Cart() {
 
     const type = "ORDER";
 
-    const cartItems2 = cartItems.products.map((item) => ({
+    // selectedStoreProducts(cartItems.products.filter((item) => item.product.store_id === selectedStore));
+
+    const cartItems2 = selectedStoreProducts?.map((item) => ({
       product_id: item.product.id,
       store_id: item.product.store_id,
       quantity: item.quantity,
     }));
-
-    // const language = "vn";
+    console.log(cartItems2);
 
     if (paymentMethod === "COD") {
       createOrderApi(
@@ -203,10 +244,10 @@ export default function Cart() {
           toast.success("Create new order successfully", {
             autoClose: 1500,
           });
-          dispatch(clearCart());
           setTimeout(() => {
             navigate("/orders");
-          }, 1500);
+          }, 1000);
+          dispatch(clearCart());
         })
         .catch((error) => console.log(error));
     } else if (paymentMethod === "VNPAY") {
@@ -251,19 +292,19 @@ export default function Cart() {
       toast.error("Unable to checkout");
     }
   };
-  // axiosJWT.post(`http://localhost:8080/mamababy/payment/vn-pay?finalAmount=${getDiscountedTotal()}&bankCode=${paymentMethod}&language=${language}`, {
-  // products: cartItems.products.map(item => ({
-  //   productId: item.product.id,
-  //   quantity: item.quantity,
-  //   storeId: item.product.store_id
-  // })),
-  // amount: totalCost,
-  // totalDiscount: selectedVoucher,
-  // finalAmount: getDiscountedTotal(),
-  // bankCode: paymentMethod,
-  // language: "vn"
-  // })
 
+  const getFinalAmount = () => {
+    let finalAmount = 0;
+    Object.keys(selectedStore)?.forEach((storeId) => {
+      if (selectedStore[storeId]) {
+        const storeProducts = groupedCartItems[storeId];
+        storeProducts?.forEach((item) => {
+          finalAmount += item.product.price * item.quantity;
+        });
+      }
+    });
+    return finalAmount;
+  };
   console.log(voucher);
   console.log(selectedVoucher);
   return (
@@ -303,18 +344,42 @@ export default function Cart() {
                 {!isEmptyCart ? (
                   Object.keys(groupedCartItems).map((storeId) => (
                     <div key={storeId}>
-                      <Typography
-                        sx={{
-                          fontSize: "1.5rem",
-                          color: "#ff469e",
-                          fontWeight: "bold",
-                          marginTop: "1rem",
-                          marginLeft: "1.25rem",
-                        }}
-                      >
-                        {/* Store {storeId} */}
-                        {storeMap[storeId]}
-                      </Typography>
+                      <FormControlLabel
+                        key={storeId}
+                        control={
+                          <Checkbox
+                            checked={!!selectedStore[storeId]}
+                            onChange={() => handleStoreChange(storeId)}
+                            sx={{
+                              mt: 2,
+                              "&.Mui-checked": {
+                                color: "#ff469e",
+                              },
+                              "&:hover": {
+                                color: "#ff469e",
+                              },
+                              "&.Mui-checked + .MuiTypography-root, &:hover + .MuiTypography-root":
+                                {
+                                  color: "#ff469e",
+                                },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography
+                            sx={{
+                              fontSize: "1.5rem",
+                              color: "#ff469e",
+                              fontWeight: "bold",
+                              marginTop: "1rem",
+                              marginLeft: "1.25rem",
+                            }}
+                          >
+                            {storeMap[storeId]}
+                          </Typography>
+                        }
+                      />
+
                       {groupedCartItems[storeId].map((item) => (
                         <Card
                           sx={{
@@ -454,17 +519,30 @@ export default function Cart() {
                                 <Button
                                   variant="contained"
                                   disabled={item.quantity <= 1}
+                                  // onClick={() => {
+                                  //   const newQuantity =
+                                  //     item.quantity >= 11
+                                  //       ? -10
+                                  //       : -(item.quantity - 1);
+                                  //   dispatch(
+                                  //     addToCart({
+                                  //       product: item.product,
+                                  //       quantity: newQuantity,
+                                  //     })
+                                  //   );
+                                  // }}
                                   onClick={() => {
                                     const newQuantity =
                                       item.quantity >= 11
                                         ? -10
                                         : -(item.quantity - 1);
                                     dispatch(
-                                      addToCart({
+                                      updateQuantityCart({
                                         product: item.product,
-                                        quantity: newQuantity,
+                                        quantityChange: newQuantity,
                                       })
                                     );
+                                    updateQuantity(item.product, newQuantity);
                                   }}
                                   sx={{
                                     backgroundColor: "white",
@@ -489,13 +567,26 @@ export default function Cart() {
                                 <Button
                                   variant="contained"
                                   disabled={item.quantity <= 1}
+                                  // onClick={() => {
+                                  //   dispatch(
+                                  //     addToCart({
+                                  //       product: item.product,
+                                  //       quantity: -1,
+                                  //     })
+                                  //   );
+                                  // }}
                                   onClick={() => {
+                                    const newQuantity =
+                                      item.quantity >= 2
+                                        ? -1
+                                        : -(item.quantity - 1);
                                     dispatch(
-                                      addToCart({
+                                      updateQuantityCart({
                                         product: item.product,
-                                        quantity: -1,
+                                        quantityChange: newQuantity,
                                       })
                                     );
+                                    updateQuantity(item.product, newQuantity);
                                   }}
                                   sx={{
                                     backgroundColor: "white",
@@ -533,13 +624,26 @@ export default function Cart() {
                                 <Button
                                   variant="contained"
                                   disabled={item.quantity >= 99}
+                                  // onClick={() => {
+                                  //   dispatch(
+                                  //     addToCart({
+                                  //       product: item.product,
+                                  //       quantity: 1,
+                                  //     })
+                                  //   );
+                                  // }}
                                   onClick={() => {
+                                    const newQuantity =
+                                      item.quantity <= 98
+                                        ? 1
+                                        : item.quantity + 1;
                                     dispatch(
-                                      addToCart({
+                                      updateQuantityCart({
                                         product: item.product,
-                                        quantity: 1,
+                                        quantityChange: newQuantity,
                                       })
                                     );
+                                    updateQuantity(item.product, newQuantity);
                                   }}
                                   sx={{
                                     backgroundColor: "white",
@@ -562,17 +666,30 @@ export default function Cart() {
                                 <Button
                                   variant="contained"
                                   disabled={item.quantity >= 99}
+                                  // onClick={() => {
+                                  //   const newQuantity =
+                                  //     item.quantity <= 89
+                                  //       ? 10
+                                  //       : 99 - item.quantity;
+                                  //   dispatch(
+                                  //     addToCart({
+                                  //       product: item.product,
+                                  //       quantity: newQuantity,
+                                  //     })
+                                  //   );
+                                  // }}
                                   onClick={() => {
                                     const newQuantity =
                                       item.quantity <= 89
                                         ? 10
                                         : 99 - item.quantity;
                                     dispatch(
-                                      addToCart({
+                                      updateQuantityCart({
                                         product: item.product,
-                                        quantity: newQuantity,
+                                        quantityChange: newQuantity,
                                       })
                                     );
+                                    updateQuantity(item.product, newQuantity);
                                   }}
                                   sx={{
                                     backgroundColor: "white",
@@ -600,149 +717,6 @@ export default function Cart() {
                                 )}
                               </Typography>
                             </Box>
-                            <Box sx={{ textAlign: "right", mt: 2 }}>
-                              {/* <ButtonGroup
-                                variant="outlined"
-                                aria-label="outlined button group"
-                                style={{ height: "2.5rem" }}
-                              >
-                                <Button
-                                  variant="contained"
-                                  disabled={item.quantity <= 1}
-                                  onClick={() => {
-                                    const newQuantity =
-                                      item.quantity >= 11
-                                        ? -10
-                                        : -(item.quantity - 1);
-                                    dispatch(
-                                      addToCart({
-                                        product: item.product,
-                                        quantity: newQuantity,
-                                      })
-                                    );
-                                  }}
-                                  sx={{
-                                    backgroundColor: "white",
-                                    color: "#ff469e",
-                                    borderRadius: "20px",
-                                    fontSize: "1.25rem",
-                                    fontWeight: "bold",
-                                    boxShadow: "none",
-                                    transition:
-                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                    border: "1px solid #ff469e",
-                                    "&:hover": {
-                                      backgroundColor: "#ff469e",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  --
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  disabled={item.quantity <= 1}
-                                  onClick={() => {
-                                    dispatch(
-                                      addToCart({
-                                        product: item.product,
-                                        quantity: -1,
-                                      })
-                                    );
-                                  }}
-                                  sx={{
-                                    backgroundColor: "white",
-                                    color: "#ff469e",
-                                    fontSize: "1.25rem",
-                                    fontWeight: "bold",
-                                    boxShadow: "none",
-                                    transition:
-                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                    border: "1px solid #ff469e",
-                                    "&:hover": {
-                                      backgroundColor: "#ff469e",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  -
-                                </Button>
-                                <Button
-                                  disableRipple
-                                  style={{
-                                    backgroundColor: "white",
-                                    fontSize: "1.25rem",
-                                    width: "4rem",
-                                    cursor: "default",
-                                    border: "1px solid #ff469e",
-                                    color: "black",
-                                  }}
-                                >
-                                  {item.quantity}
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  disabled={item.quantity >= 99}
-                                  onClick={() => {
-                                    dispatch(
-                                      addToCart({
-                                        product: item.product,
-                                        quantity: 1,
-                                      })
-                                    );
-                                  }}
-                                  sx={{
-                                    backgroundColor: "white",
-                                    color: "#ff469e",
-                                    fontSize: "1.25rem",
-                                    fontWeight: "bold",
-                                    boxShadow: "none",
-                                    transition:
-                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                    border: "1px solid #ff469e",
-                                    "&:hover": {
-                                      backgroundColor: "#ff469e",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  +
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  disabled={item.quantity >= 99}
-                                  onClick={() => {
-                                    const newQuantity =
-                                      item.quantity <= 89
-                                        ? 10
-                                        : 99 - item.quantity;
-                                    dispatch(
-                                      addToCart({
-                                        product: item.product,
-                                        quantity: newQuantity,
-                                      })
-                                    );
-                                  }}
-                                  sx={{
-                                    backgroundColor: "white",
-                                    color: "#ff469e",
-                                    borderRadius: "20px",
-                                    fontSize: "1.25rem",
-                                    fontWeight: "bold",
-                                    boxShadow: "none",
-                                    transition:
-                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                    border: "1px solid #ff469e",
-                                    "&:hover": {
-                                      backgroundColor: "#ff469e",
-                                      color: "white",
-                                    },
-                                  }}
-                                >
-                                  ++
-                                </Button>
-                              </ButtonGroup> */}
-                            </Box>
                           </CardContent>
                         </Card>
                       ))}
@@ -763,111 +737,8 @@ export default function Cart() {
                   </Typography>
                 )}
               </Grid>
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    py: 2,
-                    px: 2,
-                    mt: 8.5,
-                    backgroundColor: "white",
-                    borderRadius: "20px",
-                    border: "1px solid #ff469e",
-                    boxShadow: "0px 1px 3px rgba(0, 0, 0.16)",
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 2 }}>
-                    Choose a voucher:
-                  </Typography>
-                  <Select
-                    fullWidth
-                    displayEmpty
-                    defaultValue=""
-                    value={selectedVoucher}
-                    onChange={handleVoucherChange}
-                    sx={{
-                      backgroundColor: "#fff4fc",
-                      color: "#ff469e",
-                      borderRadius: "20px",
-                      fontSize: "20px",
-                      border: "1px solid #ff469e",
-                      boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16)",
-                      transition:
-                        "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                      "&:hover": {
-                        color: "white",
-                        backgroundColor: "#ff469e",
-                        border: "1px solid white",
-                      },
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        border: "none",
-                      },
-                      "& .MuiSvgIcon-root": {
-                        color: "inherit",
-                      },
-                    }}
-                    MenuProps={{
-                      sx: {
-                        "& .MuiMenu-list": {
-                          backgroundColor: "white",
-                          borderRadius: "10px",
-                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.16)",
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem
-                      key={null}
-                      value={""}
-                      sx={{
-                        color: "black",
-                        fontSize: "18px",
-                        transition:
-                          "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                        "&:hover": {
-                          backgroundColor: "#fff4fc",
-                          color: "#ff469e",
-                        },
-                        "&.Mui-selected": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          "&:hover": {
-                            backgroundColor: "#fff4fc",
-                            color: "#ff469e",
-                          },
-                        },
-                      }}
-                    >
-                      -
-                    </MenuItem>
-                    {voucher.map((item) => (
-                      <MenuItem
-                        key={item.id}
-                        value={item.discount_value}
-                        sx={{
-                          color: "black",
-                          fontSize: "18px",
-                          transition:
-                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                          "&:hover": {
-                            backgroundColor: "#fff4fc",
-                            color: "#ff469e",
-                          },
-                          "&.Mui-selected": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                            "&:hover": {
-                              backgroundColor: "#fff4fc",
-                              color: "#ff469e",
-                            },
-                          },
-                        }}
-                      >
-                        {item.code}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Box>
-                <Box
+              <Grid item xs={12} md={4} sx={{ mt: 8 }}>
+                {/* <Box
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -940,10 +811,11 @@ export default function Cart() {
                       fontWeight: "bold",
                     }}
                   >
-                    {formatCurrency(getDiscountedTotal())}
+                   {formatCurrency(getDiscountedTotal())}
+                    {formatCurrency(getFinalAmount())}
                   </Typography>
                 </Box>
-                <Divider />
+                <Divider /> */}
                 <Button
                   variant="contained"
                   onClick={handleOpen}
@@ -1016,140 +888,257 @@ export default function Cart() {
                         />
                       </IconButton>
                     </div>
-                    <Typography
-                      sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
-                    >
-                      Your Information:
-                    </Typography>
-                    <Grid container spacing={4}>
-                      <Grid item xs={12} md={4}>
-                        <div style={{ margin: "1rem 0.25rem" }}>
-                          <span
-                            style={{ fontSize: "1.05rem", fontWeight: "600" }}
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                      <Grid item xs={12} md={6} lg={8}>
+                        <Box>
+                          <Typography
+                            sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
                           >
-                            Full Name:
-                          </span>
-                          <TextField
-                            fullWidth
-                            onChange={handleFullNameChange}
-                            value={fullName}
-                            placeholder="Enter your full name"
-                            size="small"
-                            variant="outlined"
-                            InputProps={{
-                              sx: {
-                                padding: 0,
-                                border: "1px solid #ff469e",
-                                borderRadius: "7px",
-                                backgroundColor: "white",
-                                transition: "0.2s ease-in-out",
-                                "&:hover": {
+                            Your Information:
+                          </Typography>
+
+                          <div style={{ margin: "0.25rem 0.25rem" }}>
+                            <span
+                              style={{
+                                fontSize: "1.05rem",
+                                fontWeight: "600",
+                              }}
+                            >
+                              Full Name:
+                            </span>
+                            <TextField
+                              fullWidth
+                              onChange={handleFullNameChange}
+                              value={fullName}
+                              placeholder="Enter your full name"
+                              size="small"
+                              variant="outlined"
+                              InputProps={{
+                                sx: {
+                                  padding: 0,
                                   border: "1px solid #ff469e",
+                                  borderRadius: "7px",
+                                  backgroundColor: "white",
+                                  transition: "0.2s ease-in-out",
+                                  "&:hover": {
+                                    border: "1px solid #ff469e",
+                                  },
+                                  "&:focus": {
+                                    backgroundColor: "#F8F8F8",
+                                  },
+                                  "&.Mui-focused": {
+                                    border: "1px solid #ff469e",
+                                    backgroundColor: "#F8F8F8",
+                                    boxShadow:
+                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                    outline: "none",
+                                  },
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    border: "none",
+                                  },
                                 },
-                                "&:focus": {
-                                  backgroundColor: "#F8F8F8",
-                                },
-                                "&.Mui-focused": {
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ margin: "0.25rem 0.25rem" }}>
+                            <span
+                              style={{
+                                fontSize: "1.05rem",
+                                fontWeight: "600",
+                              }}
+                            >
+                              Phone:
+                            </span>
+                            <TextField
+                              fullWidth
+                              onChange={handlePhoneChange}
+                              value={phone}
+                              placeholder="Enter your phone"
+                              size="small"
+                              variant="outlined"
+                              InputProps={{
+                                sx: {
+                                  padding: 0,
                                   border: "1px solid #ff469e",
-                                  backgroundColor: "#F8F8F8",
-                                  boxShadow:
-                                    "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                  outline: "none",
+                                  borderRadius: "7px",
+                                  backgroundColor: "white",
+                                  transition: "0.2s ease-in-out",
+                                  "&:hover": {
+                                    border: "1px solid #ff469e",
+                                  },
+                                  "&:focus": {
+                                    backgroundColor: "#F8F8F8",
+                                  },
+                                  "&.Mui-focused": {
+                                    border: "1px solid #ff469e",
+                                    backgroundColor: "#F8F8F8",
+                                    boxShadow:
+                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                    outline: "none",
+                                  },
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    border: "none",
+                                  },
                                 },
-                                "& .MuiOutlinedInput-notchedOutline": {
-                                  border: "none",
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ margin: "0.25rem 0.25rem" }}>
+                            <span
+                              style={{
+                                fontSize: "1.05rem",
+                                fontWeight: "600",
+                              }}
+                            >
+                              Address:
+                            </span>
+                            <TextField
+                              fullWidth
+                              onChange={handleAdressChange}
+                              value={address}
+                              placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
+                              size="small"
+                              variant="outlined"
+                              InputProps={{
+                                sx: {
+                                  padding: 0,
+                                  border: "1px solid #ff469e",
+                                  borderRadius: "7px",
+                                  backgroundColor: "white",
+                                  transition: "0.2s ease-in-out",
+                                  "&:hover": {
+                                    border: "1px solid #ff469e",
+                                  },
+                                  "&:focus": {
+                                    backgroundColor: "#F8F8F8",
+                                  },
+                                  "&.Mui-focused": {
+                                    border: "1px solid #ff469e",
+                                    backgroundColor: "#F8F8F8",
+                                    boxShadow:
+                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                    outline: "none",
+                                  },
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    border: "none",
+                                  },
                                 },
-                              },
-                            }}
-                          />
-                        </div>
+                              }}
+                            />
+                          </div>
+                        </Box>
                       </Grid>
-                      <Grid item xs={12} md={3}>
-                        <div style={{ margin: "1rem 0.25rem" }}>
-                          <span
-                            style={{ fontSize: "1.05rem", fontWeight: "600" }}
-                          >
-                            Phone:
-                          </span>
-                          <TextField
+                      <Grid item xs={12} md={6} lg={4}>
+                        <Typography
+                          sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
+                        >
+                          Choose a voucher:
+                        </Typography>
+                        <Box
+                          sx={{
+                            py: 2,
+                            px: 2,
+                            mt: 3,
+                            backgroundColor: "white",
+                            borderRadius: "20px",
+                            border: "1px solid #ff469e",
+                            boxShadow: "0px 1px 3px rgba(0, 0, 0.16)",
+                          }}
+                        >
+                          <Typography variant="h6" sx={{ mb: 2 }}></Typography>
+                          <Select
                             fullWidth
-                            onChange={handlePhoneChange}
-                            value={phone}
-                            placeholder="Enter your phone"
-                            size="small"
-                            variant="outlined"
-                            InputProps={{
+                            displayEmpty
+                            defaultValue=""
+                            value={selectedVoucher}
+                            onChange={handleVoucherChange}
+                            sx={{
+                              backgroundColor: "#fff4fc",
+                              color: "#ff469e",
+                              borderRadius: "20px",
+                              fontSize: "20px",
+                              border: "1px solid #ff469e",
+                              boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16)",
+                              transition:
+                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
+                              "&:hover": {
+                                color: "white",
+                                backgroundColor: "#ff469e",
+                                border: "1px solid white",
+                              },
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                border: "none",
+                              },
+                              "& .MuiSvgIcon-root": {
+                                color: "inherit",
+                              },
+                            }}
+                            MenuProps={{
                               sx: {
-                                padding: 0,
-                                border: "1px solid #ff469e",
-                                borderRadius: "7px",
-                                backgroundColor: "white",
-                                transition: "0.2s ease-in-out",
-                                "&:hover": {
-                                  border: "1px solid #ff469e",
-                                },
-                                "&:focus": {
-                                  backgroundColor: "#F8F8F8",
-                                },
-                                "&.Mui-focused": {
-                                  border: "1px solid #ff469e",
-                                  backgroundColor: "#F8F8F8",
-                                  boxShadow:
-                                    "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                  outline: "none",
-                                },
-                                "& .MuiOutlinedInput-notchedOutline": {
-                                  border: "none",
+                                "& .MuiMenu-list": {
+                                  backgroundColor: "white",
+                                  borderRadius: "10px",
+                                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.16)",
                                 },
                               },
                             }}
-                          />
-                        </div>
-                      </Grid>
-                      <Grid item xs={12} md={5}>
-                        <div style={{ margin: "1rem 0.25rem" }}>
-                          <span
-                            style={{ fontSize: "1.05rem", fontWeight: "600" }}
                           >
-                            Address:
-                          </span>
-                          <TextField
-                            fullWidth
-                            onChange={handleAdressChange}
-                            value={address}
-                            placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
-                            size="small"
-                            variant="outlined"
-                            InputProps={{
-                              sx: {
-                                padding: 0,
-                                border: "1px solid #ff469e",
-                                borderRadius: "7px",
-                                backgroundColor: "white",
-                                transition: "0.2s ease-in-out",
+                            <MenuItem
+                              key={null}
+                              value={""}
+                              sx={{
+                                color: "black",
+                                fontSize: "18px",
+                                transition:
+                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
                                 "&:hover": {
-                                  border: "1px solid #ff469e",
+                                  backgroundColor: "#fff4fc",
+                                  color: "#ff469e",
                                 },
-                                "&:focus": {
-                                  backgroundColor: "#F8F8F8",
+                                "&.Mui-selected": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  "&:hover": {
+                                    backgroundColor: "#fff4fc",
+                                    color: "#ff469e",
+                                  },
                                 },
-                                "&.Mui-focused": {
-                                  border: "1px solid #ff469e",
-                                  backgroundColor: "#F8F8F8",
-                                  boxShadow:
-                                    "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                  outline: "none",
-                                },
-                                "& .MuiOutlinedInput-notchedOutline": {
-                                  border: "none",
-                                },
-                              },
-                            }}
-                          />
-                        </div>
+                              }}
+                            >
+                              -
+                            </MenuItem>
+                            {voucher.map((item) => (
+                              <MenuItem
+                                key={item.id}
+                                value={item.discount_value}
+                                sx={{
+                                  color: "black",
+                                  fontSize: "18px",
+                                  transition:
+                                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                  "&:hover": {
+                                    backgroundColor: "#fff4fc",
+                                    color: "#ff469e",
+                                  },
+                                  "&.Mui-selected": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    "&:hover": {
+                                      backgroundColor: "#fff4fc",
+                                      color: "#ff469e",
+                                    },
+                                  },
+                                }}
+                              >
+                                {item.code}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </Box>
                       </Grid>
                     </Grid>
-
                     <Grid container spacing={4}>
                       <Grid item xs={12} md={6} lg={8}>
                         <Typography
@@ -1192,7 +1181,7 @@ export default function Cart() {
                               },
                             }}
                           >
-                            {cartItems.products.map((item, index) => (
+                            {selectedStoreProducts?.map((item, index) => (
                               <div
                                 key={index}
                                 style={{
@@ -1330,7 +1319,7 @@ export default function Cart() {
                             }}
                           >
                             <span>Subtotal:</span>
-                            <span>{formatCurrency(totalCost)}</span>
+                            <span>{formatCurrency(getFinalAmount())}</span>
                           </Box>
                           <Box
                             sx={{
@@ -1511,30 +1500,6 @@ export default function Cart() {
                             >
                               VNPAY
                             </MenuItem>
-                            {/* <MenuItem value={'NCB'}>Internal Payment</MenuItem> */}
-                            {/* <MenuItem
-                              value={"INTCARD"}
-                              sx={{
-                                color: "black",
-                                fontSize: "18px",
-                                transition:
-                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                },
-                              }}
-                            >
-                              International Payment
-                            </MenuItem> */}
                           </Select>
                         </FormControl>
 
