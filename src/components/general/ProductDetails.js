@@ -78,13 +78,14 @@ export default function ProductDetails() {
   const [totalRating, setTotalRating] = useState(0);
 
   const accessToken = localStorage.getItem("accessToken");
+
   var username = "";
   var userId = 0;
-  if (accessToken && typeof toaccessTokenken === "string") {
+  if (accessToken && typeof accessToken === "string") {
     try {
       const decodedAccessToken = jwtDecode(accessToken);
-      userId = decodedAccessToken.UserID ?? "defaultUserId";
-      username = decodedAccessToken.FullName ?? "defaultUsername";
+      userId = decodedAccessToken.UserID;
+      username = decodedAccessToken.FullName;
     } catch (error) {
       console.error("Failed to decode token:", error);
       // Xử lý lỗi nếu cần thiết
@@ -321,7 +322,7 @@ export default function ProductDetails() {
       return;
     }
 
-    if (comment.length < 20) {
+    if (commentInput.length < 20) {
       toast.warn("Please enter a comment of at least 50 characters.");
       return;
     }
@@ -925,7 +926,7 @@ export default function ProductDetails() {
         </Box>
 
         <>
-          {userId !== "defaultUserId" && (
+          {userId !== 0 && (
             <Box
               component="form"
               sx={{
