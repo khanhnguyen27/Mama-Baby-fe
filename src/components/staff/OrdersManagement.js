@@ -121,6 +121,9 @@ export default function OrdersManagement() {
           order.status_order_list[order.status_order_list.length - 1].status;
         categorizedOrders[latestStatus]?.unshift(order);
       });
+      for (const status in categorizedOrders) {
+        categorizedOrders[status].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+      }
       // for (const status in categorizedOrders) {
       //   categorizedOrders[status].reverse();
       // }

@@ -23,6 +23,9 @@ import {
   TextField,
   Rating,
   Avatar,
+  FormControlLabel,
+  Checkbox,
+  ButtonGroup,
 } from "@mui/material";
 import { makePaymentApi } from "../../api/VNPayAPI";
 import { toast } from "react-toastify";
@@ -30,11 +33,12 @@ import { allProductApi, productByIdApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
-import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
+import { Close, ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { createCommentApi, allCommentApi } from "../../api/CommentAPI";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
+import { addExchangeApi } from "../../api/ExchangeAPI";
 
 export default function Orders() {
   window.document.title = "Your Orders";
@@ -64,6 +68,9 @@ export default function Orders() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedFinalAmount, setSelectedFinalAmount] = useState(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
+  const [openExchange, setOpenExchange] = useState(false);
+  const [description, setDescription] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -113,9 +120,11 @@ export default function Orders() {
           order.status_order_list[order.status_order_list.length - 1].status;
         categorizedOrders[latestStatus]?.unshift(order);
       });
-      // for (const status in categorizedOrders) {
-      //   categorizedOrders[status].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-      // }
+      for (const status in categorizedOrders) {
+        categorizedOrders[status].sort(
+          (a, b) => new Date(b.orderDate) - new Date(a.orderDate)
+        );
+      }
       // for (const status in categorizedOrders) {
       //   categorizedOrders[status].reverse();
       // }
@@ -320,6 +329,118 @@ export default function Orders() {
   const handleClose = () => {
     setOpen(false);
     setSelectedOrderId(null);
+  };
+
+  const handleOpenExchage = (orderId) => {
+    setSelectedOrderId(orderId);
+    setOpenExchange(true);
+  };
+
+  const handleCloseExchange = () => {
+    setSelectedItems([]);
+    setOpenExchange(false);
+  };
+
+  const handleItemChange = (orderDetailId, quantity) => {
+    setSelectedItems((prev) => {
+      const updatedItems = prev.filter(
+        (item) => item.order_detail_id !== orderDetailId
+      );
+      if (quantity > 0) {
+        updatedItems.push({ order_detail_id: orderDetailId, quantity });
+      }
+      return updatedItems;
+    });
+  };
+
+  const handleRequestExchange = (item) => {
+    if (description === "") {
+      toast.warn("Please input your reason", { autoClose: 1000 });
+      return;
+    }
+    if (selectedItems.length === 0) {
+      toast.warn("No item selected for exchaging", { autoClose: 1000 });
+      return;
+    }
+    console.log(selectedItems);
+    const finalAmount = selectedItems.reduce((total, selectedItem) => {
+      const product = item.order_detail_list.find(
+        (detail) => detail.id === selectedItem.order_detail_id
+      );
+      if (product) {
+        const productPrice = productMap[product.product_id][3];
+        return total + selectedItem.quantity * productPrice;
+      }
+      return total;
+    }, 0);
+
+    console.log(finalAmount);
+    const status = "PROCESSING";
+    const storeId = item.store_id;
+    const userId = item.user_id;
+    const cartItemsExchange = selectedItems
+      .filter((item) => item.order_detail_id)
+      .map((item) => ({
+        order_detail_id: item.order_detail_id,
+        quantity: item.quantity,
+      }));
+
+    // addExchangeApi(description, finalAmount, status, storeId, userId, cartItemsExchange)
+    //   .then(() => {
+    //     toast.success("Request sent successfully", { autoClose: 1000 });
+    //     setSelectedItems([])
+    //     handleCloseExchange();
+    //   })
+    //   .catch((error) => {
+    //     toast.error("Failed to send request!");
+    //     console.error("Failed to send exchange request:", error);
+    //   });
+  };
+  const [openComment, setOpenComment] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [selectedComment, setSelectedComment] = useState(null);
+
+  const username = selectedComment?.full_name; // Replace with actual username
+  const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
+  const dateTime = format(new Date(), "PPPppp"); // Formatted current date and time
+
+  const handleOpenComment = (item) => {
+    setSelectedComment(item);
+    setOpenComment(true);
+  };
+
+  //console.log(commentMap);
+  //console.log(selectedComment);
+  //console.log(selectedComment?.order_detail_list);
+  const handleCloseComment = () => {
+    setOpenComment(false);
+  };
+
+  const handleComment = async () => {
+    if (rating === 0) {
+      toast.warn("Please select a rating.");
+      return;
+    }
+
+    if (comment.length < 50) {
+      toast.warn("Please enter a comment of at least 50 characters.");
+      return;
+    }
+
+    const cartItems =
+      selectedComment?.order_detail_list?.map((item) => ({
+        product_id: item.product_id,
+      })) || [];
+
+    await createCommentApi(cartItems, rating, comment, selectedComment?.user_id)
+      .then((response) => {
+        handleCloseComment();
+        toast.success("Comment added successfully!");
+      })
+      .catch((error) => {
+        toast.error("Failed to add comment. Please try again later.");
+      });
   };
 
   return (
@@ -1341,28 +1462,6 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                        >
-                          EXCHANGE
-                        </Button>
-                        <Button
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "10px",
-                            fontSize: 16,
-                            fontWeight: "bold",
-                            my: 2,
-                            mx: 1,
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
-                          }}
                           onClick={() => (
                             handleOpen("", "", item.order_detail_list),
                             console.log(item.order_detail_list)
@@ -1459,6 +1558,706 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={() => handleOpenExchage(item.id)}
+                        >
+                          EXCHANGE
+                        </Button>
+                        {item.id === selectedOrderId && (
+                          <Modal
+                            open={openExchange}
+                            onClose={handleCloseExchange}
+                            slotProps={{
+                              backdrop: {
+                                style: {
+                                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                },
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: 800,
+                                borderRadius: "20px",
+                                backgroundColor: "#fff4fc",
+                                border: "2px solid #ff469e",
+                                boxShadow: 10,
+                                p: 4,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Typography
+                                  variant="h6"
+                                  component="h2"
+                                  sx={{ mt: 1 }}
+                                >
+                                  Exchange Request
+                                </Typography>
+                                <IconButton
+                                  size="small"
+                                  onClick={handleCloseExchange}
+                                >
+                                  <Close
+                                    fontSize="large"
+                                    sx={{
+                                      color: "#ff469e",
+                                      borderRadius: "30px",
+                                      boxShadow: "none",
+                                      transition: "0.3s ease-in-out",
+                                      "&:hover": {
+                                        backgroundColor: "#ff469e",
+                                        color: "white",
+                                        transform: "scale(1.1)",
+                                      },
+                                    }}
+                                  />
+                                </IconButton>
+                              </Box>
+                              <Box sx={{ mt: 2 }}>
+                                <div style={{ margin: "1rem 0.25rem" }}>
+                                  <span
+                                    style={{
+                                      fontSize: "1.05rem",
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    Reason:
+                                  </span>
+                                  <TextField
+                                    multiline
+                                    rows={3}
+                                    fullWidth
+                                    placeholder="Input your reason of exchange. E.g: This product is not good"
+                                    size="small"
+                                    variant="outlined"
+                                    value={description}
+                                    onChange={(e) =>
+                                      setDescription(e.target.value)
+                                    }
+                                    InputProps={{
+                                      sx: {
+                                        padding: 1,
+                                        border: "1px solid #ff469e",
+                                        borderRadius: "7px",
+                                        backgroundColor: "white",
+                                        transition: "0.2s ease-in-out",
+                                        "&:hover": {
+                                          border: "1px solid #ff469e",
+                                        },
+                                        "&:focus": {
+                                          backgroundColor: "#F8F8F8",
+                                        },
+                                        "&.Mui-focused": {
+                                          border: "1px solid #ff469e",
+                                          backgroundColor: "#F8F8F8",
+                                          boxShadow:
+                                            "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                          outline: "none",
+                                        },
+                                        "& .MuiOutlinedInput-notchedOutline": {
+                                          border: "none",
+                                        },
+                                      },
+                                    }}
+                                  />
+                                </div>
+                                <Card
+                                  sx={{
+                                    pl: 2,
+                                    pr: 0,
+                                    border: "1px solid #ff469e",
+                                    borderRadius: "1rem",
+                                    my: 2.4,
+                                    minHeight: "120px",
+                                    maxHeight: "260px",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      overflowY: "auto",
+                                      maxHeight: "260px",
+                                      pr: 0.5,
+                                      "&::-webkit-scrollbar": {
+                                        width: "0.65rem",
+                                      },
+                                      "&::-webkit-scrollbar-track": {
+                                        background: "#f5f7fd",
+                                      },
+                                      "&::-webkit-scrollbar-thumb": {
+                                        background: "#ff469e",
+                                        borderRadius: "0.8rem",
+                                      },
+                                      "&::-webkit-scrollbar-thumb:hover": {
+                                        background: "#ffbbd0",
+                                      },
+                                    }}
+                                  >
+                                    {item.order_detail_list.map(
+                                      (detail, index) => (
+                                        <div
+                                          key={index}
+                                          style={{
+                                            display: "flex",
+                                            marginBottom: "10px",
+                                          }}
+                                        >
+                                          <CardMedia
+                                            sx={{
+                                              width: "70px",
+                                              height: "70px",
+                                              justifyContent: "center",
+                                              alignSelf: "center",
+                                              borderRadius: "10px",
+                                            }}
+                                            image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                            title={
+                                              productMap[detail.product_id][0]
+                                            }
+                                          />
+                                          <CardContent
+                                            sx={{
+                                              flex: "1 0 auto",
+                                              ml: 2,
+                                              borderBottom: "1px dashed black",
+                                            }}
+                                          >
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                mt: 2,
+                                              }}
+                                            >
+                                              <Typography
+                                                sx={{
+                                                  fontWeight: "600",
+                                                  fontSize: "1.25rem",
+                                                  "&:hover": {
+                                                    cursor: "pointer",
+                                                    color: "#ff469e",
+                                                  },
+                                                }}
+                                                onClick={() =>
+                                                  navigate(
+                                                    `/products/${productMap[
+                                                      detail.product_id
+                                                    ][0]
+                                                      .toLowerCase()
+                                                      .replace(/\s/g, "-")}`,
+                                                    {
+                                                      state: {
+                                                        productId:
+                                                          detail.product_id,
+                                                      },
+                                                    },
+                                                    window.scrollTo({
+                                                      top: 0,
+                                                      behavior: "smooth",
+                                                    })
+                                                  )
+                                                }
+                                              >
+                                                {
+                                                  productMap[
+                                                    detail.product_id
+                                                  ][0]
+                                                }
+                                              </Typography>
+                                              <Typography
+                                                sx={{
+                                                  fontWeight: "600",
+                                                  fontSize: "1.15rem",
+                                                }}
+                                              >
+                                                {formatCurrency(
+                                                  productMap[
+                                                    detail.product_id
+                                                  ][3]
+                                                )}
+                                                <span
+                                                  style={{
+                                                    fontSize: "1.05rem",
+                                                    opacity: 0.4,
+                                                  }}
+                                                >
+                                                  {" "}
+                                                  x{detail.quantity}
+                                                </span>
+                                              </Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                mt: 1,
+                                              }}
+                                            >
+                                              <Typography sx={{ opacity: 0.7 }}>
+                                                {
+                                                  brandMap[
+                                                    productMap[
+                                                      detail.product_id
+                                                    ][1]
+                                                  ]
+                                                }{" "}
+                                                |{" "}
+                                                {
+                                                  categoryMap[
+                                                    productMap[
+                                                      detail.product_id
+                                                    ][2]
+                                                  ]
+                                                }
+                                              </Typography>
+                                              <Typography sx={{ opacity: 0.8 }}>
+                                                <span
+                                                  style={{
+                                                    fontWeight: "bold",
+                                                    fontSize: "1.25rem",
+                                                  }}
+                                                >
+                                                  ={" "}
+                                                  {formatCurrency(
+                                                    detail.amount_price
+                                                  )}
+                                                </span>
+                                              </Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                mt: 1,
+                                              }}
+                                            >
+                                              <FormControlLabel
+                                                control={
+                                                  <Checkbox
+                                                    sx={{
+                                                      "&.Mui-checked": {
+                                                        color: "#ff469e",
+                                                      },
+                                                      "&:hover": {
+                                                        color: "#ff469e",
+                                                      },
+                                                      "&.Mui-checked + .MuiTypography-root, &:hover + .MuiTypography-root":
+                                                        {
+                                                          color: "#ff469e",
+                                                        },
+                                                    }}
+                                                    onChange={(e) =>
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        e.target.checked ? 1 : 0
+                                                      )
+                                                    }
+                                                  />
+                                                }
+                                                label={
+                                                  <Typography
+                                                    sx={{
+                                                      fontWeight: "600",
+                                                      "&:hover": {
+                                                        color: "#ff469e",
+                                                      },
+                                                      ".MuiCheckbox-root:hover ~ &":
+                                                        {
+                                                          color: "#ff469e",
+                                                        },
+                                                    }}
+                                                  >
+                                                    Exchange
+                                                  </Typography>
+                                                }
+                                              />
+                                              <ButtonGroup
+                                                variant="outlined"
+                                                aria-label="outlined button group"
+                                                style={{
+                                                  height: "2rem",
+                                                  marginLeft: "1rem",
+                                                }}
+                                                disabled={
+                                                  !selectedItems.some(
+                                                    (item) =>
+                                                      item.order_detail_id ===
+                                                      detail.id
+                                                  )
+                                                }
+                                              >
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    )?.quantity ||
+                                                      detail.quantity) === 1
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.order_detail_id ===
+                                                          detail.id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (currentQuantity >= 10) {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        currentQuantity - 10
+                                                      );
+                                                    } else {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        1
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    borderRadius: "20px",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  --
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    )?.quantity ||
+                                                      detail.quantity) === 1
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.order_detail_id ===
+                                                          detail.id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (currentQuantity >= 1) {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        currentQuantity - 1
+                                                      );
+                                                    } else {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        1
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  -
+                                                </Button>
+                                                <Button
+                                                  disableRipple
+                                                  style={{
+                                                    backgroundColor: "white",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    cursor: "default",
+                                                    border: "1px solid #ff469e",
+                                                    color: "black",
+                                                  }}
+                                                >
+                                                  {Math.max(
+                                                    1,
+                                                    Math.min(
+                                                      detail.quantity,
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.order_detail_id ===
+                                                          detail.id
+                                                      )?.quantity || 1
+                                                    )
+                                                  )}
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    )?.quantity ||
+                                                      detail.quantity) ===
+                                                      detail.quantity
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.order_detail_id ===
+                                                          detail.id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (
+                                                      currentQuantity <=
+                                                      detail.quantity
+                                                    ) {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        currentQuantity + 1
+                                                      );
+                                                    } else {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        detail.quantity
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  +
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.order_detail_id ===
+                                                        detail.id
+                                                    )?.quantity ||
+                                                      detail.quantity) ===
+                                                      detail.quantity
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.order_detail_id ===
+                                                          detail.id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (
+                                                      currentQuantity <=
+                                                      detail.quantity - 10
+                                                    ) {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        currentQuantity + 10
+                                                      );
+                                                    } else {
+                                                      handleItemChange(
+                                                        detail.id,
+                                                        detail.quantity
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    borderRadius: "20px",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  ++
+                                                </Button>
+                                              </ButtonGroup>
+                                            </Box>
+                                          </CardContent>
+                                        </div>
+                                      )
+                                    )}
+                                  </Box>
+                                </Card>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                  }}
+                                >
+                                  {/* <Box
+                                    sx={{
+                                      display: "flex",
+                                      width: "45%",
+                                      justifyContent: "space-between",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "1.45rem",
+                                      }}
+                                    >
+                                      Total Exchange:
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "1.5rem",
+                                        color: "#ff469e",
+                                      }}
+                                    >
+                                      {formatCurrency(
+                                        selectedItems.reduce(
+                                          (total, selectedItem) => {
+                                            const product =
+                                              item.order_detail_list.find(
+                                                (detail) =>
+                                                  detail.id ===
+                                                  selectedItem.order_detail_id
+                                              );
+                                            if (product) {
+                                              const productPrice =
+                                                productMap[
+                                                  product.product_id
+                                                ][3];
+                                              return (
+                                                total +
+                                                selectedItem.quantity *
+                                                  productPrice
+                                              );
+                                            }
+                                            return total;
+                                          },
+                                          0
+                                        )
+                                      )}
+                                    </span>
+                                  </Box> */}
+                                  <Button
+                                    variant="contained"
+                                    sx={{
+                                      backgroundColor: "white",
+                                      color: "#ff469e",
+                                      borderRadius: "20px",
+                                      fontSize: 16,
+                                      fontWeight: "bold",
+                                      my: 0.2,
+                                      mx: 1,
+                                      transition:
+                                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                      border: "1px solid #ff469e",
+                                      "&:hover": {
+                                        backgroundColor: "#ff469e",
+                                        color: "white",
+                                        border: "1px solid white",
+                                      },
+                                    }}
+                                    onClick={() => handleRequestExchange(item)}
+                                  >
+                                    Send
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </Modal>
+                        )}
                       </Grid>
                     )}
                   </Grid>

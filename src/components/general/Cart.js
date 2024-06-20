@@ -126,7 +126,7 @@ export default function Cart() {
         setFullName(userInfo.full_name),
         setPhone(userInfo.phone_number),
         setAddress(userInfo.address))
-      : toast.warn("There's no item in your cart", { autoClose: 2500 });
+      : toast.warn("There's no item in your cart", { autoClose: 1000 });
   };
   const handleClose = () => setOpen(false);
 
@@ -145,7 +145,7 @@ export default function Cart() {
   const handleCheckout = () => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken === null) {
-      toast.warn("Please login to continue your paycheck", { autoClose: 2500 });
+      toast.warn("Please login to continue your paycheck", { autoClose: 1000 });
       setTimeout(() => {
         navigate("/signin");
       }, 3000);
@@ -344,7 +344,7 @@ export default function Cart() {
                                   dispatch(removeFromCart(item.product)),
                                   toast.info(
                                     `Removed ${item.product.name} out of cart`,
-                                    { autoClose: 2500 }
+                                    { autoClose: 1000 }
                                   )
                                 )}
                               >
@@ -1592,7 +1592,7 @@ export default function Cart() {
                   <Button
                     onClick={() => (
                       dispatch(clearCart()),
-                      toast.info("Removed all items", { autoClose: 2500 }),
+                      toast.info("Removed all items", { autoClose: 1000 }),
                       window.scrollTo({ top: 0, behavior: "smooth" })
                     )}
                     variant="contained"

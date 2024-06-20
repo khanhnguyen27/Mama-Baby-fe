@@ -30,6 +30,7 @@ import VoucherManagement from "./components/admin/VoucherManagement";
 import RequestStore from "./components/admin/RequestStore";
 import AccountManagement from "./components/admin/AccountManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
+import ExchangesManagement from "./components/staff/ExchangesManagement";
 import RefundManagement from "./components/admin/RefundManagement";
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
             <Route index element={<Navigate to={"/staff/products"} />} />
             <Route path="profile" element={<Profile />} />
             <Route path="products" element={<StaffHome />} />
+            <Route path="exchanges" element={<ExchangesManagement />} />
             <Route path="orders" element={<OrdersManagement />} />
             <Route path="articles" element={<Articles />} />
           </Route>
