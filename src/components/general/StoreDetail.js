@@ -8,6 +8,8 @@ import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import { allVoucherApi } from "../../api/VoucherAPI";
+import { allArticleApi } from "../../api/ArticleAPI";
+
 import { storeByIdApi, productByStoreIdApi } from "../../api/StoreAPI";
 import {
   Paper,
@@ -25,6 +27,7 @@ import {
   Radio,
   Tooltip,
   Typography,
+  Pagination,
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
@@ -46,6 +49,10 @@ export default function Products() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [voucher, setVoucher] = useState([]);
   const [store, setStore] = useState([]);
+  const [article, setArticle] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+
   const storeId = state?.storeId;
   const keyword = state?.keyword;
 
@@ -79,6 +86,7 @@ export default function Products() {
         productRes,
         voucherRes,
         storeRes,
+        articleRes,
       ] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
@@ -89,9 +97,11 @@ export default function Products() {
           brand_id: brandFilter,
           category_id: categoryFilter,
           store_id: storeId,
+          page: currentPage - 1,
         }),
         allVoucherApi(),
         storeByIdApi(storeId),
+        allArticleApi(),
       ]);
 
       const ageData = ageRes?.data?.data || [];
@@ -100,6 +110,7 @@ export default function Products() {
       const productData = productRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
       const storeData = storeRes?.data?.data || [];
+      const articleData = articleRes?.data?.data || [];
 
       setAge(ageData);
       setBrand(brandData);
@@ -107,6 +118,7 @@ export default function Products() {
       setProduct(productData);
       setVoucher(voucherData);
       setStore(storeData);
+      setArticle(articleData);
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -135,7 +147,7 @@ export default function Products() {
       setLoading(false);
     }, 1000);
     fetchData();
-  }, [keyword, ageFilter, brandFilter, categoryFilter]);
+  }, [keyword, ageFilter, brandFilter, categoryFilter, currentPage]);
 
   const handleAgeChange = (id) => {
     setAgeFilter((prev) => (prev === id ? null : id));
@@ -151,8 +163,15 @@ export default function Products() {
     setCategoryFilter((prev) => (prev === id ? null : id));
     setLoading(true);
   };
+  const handlePageChange = (e, page) => {
+    setCurrentPage(page);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
   const listRef = useRef(null);
-  const listRef2 = useRef(null);
+  const listRef3 = useRef(null);
   const scrollLeft = () => {
     listRef.current.scrollBy({ left: -460, behavior: "smooth" });
   };
@@ -160,14 +179,13 @@ export default function Products() {
   const scrollRight = () => {
     listRef.current.scrollBy({ left: 460, behavior: "smooth" });
   };
-  const scrollLeft2 = () => {
-    listRef2.current.scrollBy({ left: -340, behavior: "smooth" });
+  const scrollLeft3 = () => {
+    listRef3.current.scrollBy({ left: -340, behavior: "smooth" });
   };
 
-  const scrollRight2 = () => {
-    listRef2.current.scrollBy({ left: 340, behavior: "smooth" });
+  const scrollRight3 = () => {
+    listRef3.current.scrollBy({ left: 340, behavior: "smooth" });
   };
-
   return (
     <div
       style={{
@@ -249,7 +267,7 @@ export default function Products() {
                 sx={{
                   color: "#ff469e",
                   marginBottom: "2rem",
-                  textAlign: "center",
+                  textAlign: "",
                   fontWeight: "bold",
                 }}
               >
@@ -286,9 +304,9 @@ export default function Products() {
                       ></Typography>
                     </Paper>
                   </Grid>
-                  <Grid item xs={12} md={8}>
+                  <Grid item xs={10} md={7}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid item xs={5} sm={10}>
                         <div>
                           <Typography
                             style={{
@@ -350,6 +368,81 @@ export default function Products() {
           </Card>
         </Container>
       </Container>
+      <Container>
+        <Carousel
+          PrevIcon={<ArrowLeft />}
+          NextIcon={<ArrowRight />}
+          height="240px"
+          animation="slide"
+          duration={500}
+          navButtonsProps={{
+            style: {
+              backgroundColor: "white",
+              color: "#ff469e",
+            },
+          }}
+          sx={{
+            border: "1px solid black",
+            borderRadius: "16px",
+            position: "relative",
+            marginBottom: "2rem",
+          }}
+          indicatorContainerProps={{
+            style: {
+              position: "absolute",
+              bottom: "10px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 99,
+            },
+          }}
+          indicatorIconButtonProps={{
+            style: {
+              color: "whitesmoke",
+              backgroundColor: "black",
+              borderRadius: "50%",
+              width: "12px",
+              height: "12px",
+              margin: "0 4px",
+            },
+          }}
+          activeIndicatorIconButtonProps={{
+            style: {
+              color: "#ff469e",
+              backgroundColor: "#ff469e",
+              border: "1px solid white",
+              borderRadius: "8px",
+              width: "28px",
+              height: "12px",
+            },
+          }}
+        >
+          {items.map((item, i) => (
+            <div
+              key={i}
+              style={{
+                padding: 20,
+                textAlign: "center",
+                backgroundImage: `url(${item.image})`,
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                height: "200px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                color: "white",
+                borderRadius: "16px",
+              }}
+            >
+              <Typography variant="h5" gutterBottom>
+                {item.name}
+              </Typography>
+              <Typography variant="body1">{item.description}</Typography>
+            </div>
+          ))}
+        </Carousel>
+      </Container>
       <Container sx={{ my: 4 }}>
         <Box
           sx={{
@@ -362,7 +455,6 @@ export default function Products() {
             marginTop: "3rem",
           }}
         >
-          {/* Header */}
           <Box
             sx={{
               display: "flex",
@@ -371,22 +463,23 @@ export default function Products() {
               marginBottom: "1rem",
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Voucher
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "#ff379b" }}
+            >
+              Take Voucher
             </Typography>
           </Box>
-          {/* List */}
+
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               position: "relative",
-              borderRadius: "16px",
-              background: "white",
             }}
           >
             <IconButton
-              onClick={scrollLeft2}
+              onClick={scrollLeft3}
               size="small"
               sx={{
                 position: "absolute",
@@ -410,7 +503,179 @@ export default function Products() {
               <ArrowLeft />
             </IconButton>
             <Box
-              ref={listRef2}
+              ref={listRef3}
+              sx={{
+                display: "flex",
+                overflowX: "hidden",
+                scrollBehavior: "smooth",
+                width: "100%",
+                padding: "0 8px",
+              }}
+            >
+              {voucher.map((item, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    minWidth: 350,
+                    padding: 2,
+                    textAlign: "center",
+                    border: "1px solid white",
+                    borderRadius: "16px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    marginRight: 2,
+                    backgroundColor: "#ffe4ec",
+                    transition: "border 0.2s",
+                    "&:hover": {
+                      border: "1px solid #ff469e",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                >
+                  {/* Bố trí phần bên trái */}
+                  <Box
+                    sx={{ flex: 1, borderRight: "dash", borderRadius: "10px" }}
+                  >
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: "bold", color: "#ae0258" }}
+                    >
+                      {item.code}
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: "bold", color: "#ff0064" }}
+                    >
+                      {formatCurrency(item.discount_value)}
+                    </Typography>
+                  </Box>
+
+                  {/* Bố trí phần bên phải */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#ff0064", marginBottom: "0.5rem" }}
+                    >
+                      {item.description}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#ae0258", marginBottom: "0.5rem" }}
+                    >
+                      {item.endAt}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+            <IconButton
+              onClick={scrollRight3}
+              size="small"
+              sx={{
+                position: "absolute",
+                right: -8,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              <ArrowRight />
+            </IconButton>
+          </Box>
+        </Box>
+      </Container>
+
+      <Container sx={{ my: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            borderRadius: "16px",
+            background: "white",
+            padding: "1rem",
+            marginTop: "3rem",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "#ff379b" }}
+            >
+              Store article
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#ff469e",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => {
+                navigate("/article");
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
+              }}
+            >
+              See more articles
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              borderRadius: "16px",
+              background: "white",
+            }}
+          >
+            <IconButton
+              onClick={scrollLeft}
+              size="small"
+              sx={{
+                position: "absolute",
+                left: -10,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              <ArrowLeft />
+            </IconButton>
+            <Box
+              ref={listRef}
               sx={{
                 display: "flex",
                 overflowX: "hidden",
@@ -419,11 +684,18 @@ export default function Products() {
                 padding: "0px 8px",
               }}
             >
-              {voucher?.map((item, index) => (
+              {article?.articles?.map((item, index) => (
                 <Box
                   key={index}
+                  onClick={() => {
+                    navigate("/article");
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
                   sx={{
-                    minWidth: 120,
+                    minWidth: 180,
                     padding: 2,
                     textAlign: "center",
                     border: "1px solid white",
@@ -439,30 +711,46 @@ export default function Products() {
                   }}
                 >
                   <img
-                    style={{ width: "50px", height: "65px" }}
-                    src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/store-logo-design%2C-online-shopping-store-logo-template-f16f818774fd63dead3a940d57b6c71d_screen.jpg?ts=1658656234react"
-                  ></img>
+                    src={
+                      item.image_url
+                        ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                        : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                    }
+                    style={{ width: "64px", height: "64px" }}
+                  />
                   <Typography
                     variant="subtitle1"
-                    sx={{ fontWeight: "bold", marginTop: "0.5rem" }}
+                    sx={{
+                      fontWeight: "bold",
+                      marginTop: "0.75rem",
+                      textAlign: "left",
+                      whiteSpace: "normal",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      maxWidth: "100%",
+                      lineHeight: "1.2rem",
+                      maxHeight: "2.4rem",
+                    }}
                   >
-                    {item.code}
+                    {item.header.length > 40
+                      ? `${item.header.substring(0, 40)}...`
+                      : item.header}
                   </Typography>
                   <Typography variant="body2" sx={{ color: "gray" }}>
-                    {item.discountValue}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "gray" }}>
-                    {item.description}
+                    {item.content}
                   </Typography>
                 </Box>
               ))}
             </Box>
             <IconButton
-              onClick={scrollRight2}
+              onClick={scrollRight}
               size="small"
               sx={{
                 position: "absolute",
-                right: -8,
+                right: -10,
                 zIndex: 1,
                 backgroundColor: "white",
                 color: "#ff469e",
@@ -482,70 +770,6 @@ export default function Products() {
               <ArrowRight />
             </IconButton>
           </Box>
-        </Box>
-      </Container>
-
-
-      <Container sx={{ my: 4 }}>
-        <Box></Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            borderRadius: "16px",
-            background: "white",
-            padding: "1rem",
-            marginTop: "3rem",
-          }}
-        >
-          {/* Header */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Store article
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#ff469e",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => navigate("/article")}
-            >
-              See more article
-            </Typography>
-          </Box>
-          <Carousel>
-            {items.map((item, i) => (
-              <div
-                onClick={() => navigate("/article")}
-                key={i}
-                style={{
-                  padding: 20,
-                  textAlign: "center",
-                  backgroundImage: `url(${item.image})`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  height: "200px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  color: "white",
-                  borderRadius: "16px",
-                }}
-              ></div>
-            ))}
-          </Carousel>
-          {/* List */}
         </Box>
       </Container>
 
@@ -826,6 +1050,88 @@ export default function Products() {
             </Grid>
           </Grid>
         </Grid>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pagination
+            count={store.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            showFirstButton={store.totalPages !== 1}
+            showLastButton={store.totalPages !== 1}
+            hidePrevButton={currentPage === 1}
+            hideNextButton={currentPage === store.totalPages}
+            size="large"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "2.5rem",
+              width: "70%",
+              p: 1,
+              opacity: 0.9,
+              borderRadius: "20px",
+              "& .MuiPaginationItem-root": {
+                backgroundColor: "white",
+                borderRadius: "20px",
+                border: "1px solid black",
+                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+                mx: 1,
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  border: "1px solid #ff469e",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    border: "1px solid #ff469e",
+                  },
+                },
+                fontSize: "1.25rem",
+              },
+              "& .MuiPaginationItem-ellipsis": {
+                mt: 1.25,
+                fontSize: "1.25rem",
+              },
+            }}
+            componentsProps={{
+              previous: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+              next: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
         {visible && (
           <IconButton
             size="large"

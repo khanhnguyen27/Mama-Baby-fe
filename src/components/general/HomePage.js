@@ -11,6 +11,7 @@ import {
   ListItemText,
   Tooltip,
   Typography,
+  Button,
 } from "@mui/material";
 import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
@@ -165,6 +166,7 @@ export default function HomePage() {
 
   const listRef = useRef(null);
   const listRef2 = useRef(null);
+  const listRef3 = useRef(null);
 
   const scrollLeft = () => {
     listRef.current.scrollBy({ left: -460, behavior: "smooth" });
@@ -179,6 +181,13 @@ export default function HomePage() {
 
   const scrollRight2 = () => {
     listRef2.current.scrollBy({ left: 340, behavior: "smooth" });
+  };
+  const scrollLeft3 = () => {
+    listRef3.current.scrollBy({ left: -340, behavior: "smooth" });
+  };
+
+  const scrollRight3 = () => {
+    listRef3.current.scrollBy({ left: 340, behavior: "smooth" });
   };
 
   return (
@@ -492,7 +501,6 @@ export default function HomePage() {
                 marginTop: "3rem",
               }}
             >
-              {/* Header */}
               <Box
                 sx={{
                   display: "flex",
@@ -502,21 +510,19 @@ export default function HomePage() {
                 }}
               >
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  Voucher
+                  Take Voucher
                 </Typography>
               </Box>
-              {/* List */}
+
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   position: "relative",
-                  borderRadius: "16px",
-                  background: "white",
                 }}
               >
                 <IconButton
-                  onClick={scrollLeft2}
+                  onClick={scrollLeft3}
                   size="small"
                   sx={{
                     position: "absolute",
@@ -540,55 +546,76 @@ export default function HomePage() {
                   <ArrowLeft />
                 </IconButton>
                 <Box
-                  ref={listRef2}
+                  ref={listRef3}
                   sx={{
                     display: "flex",
                     overflowX: "hidden",
                     scrollBehavior: "smooth",
                     width: "100%",
-                    padding: "0px 8px",
+                    padding: "0 8px",
                   }}
                 >
-                  {voucher?.map((item, index) => (
+                  {voucher.map((item, index) => (
                     <Box
                       key={index}
                       sx={{
-                        minWidth: 120,
+                        display: "flex",
+                        alignItems: "center",
+                        minWidth: 350 ,
                         padding: 2,
                         textAlign: "center",
                         border: "1px solid white",
                         borderRadius: "16px",
                         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                         marginRight: 2,
-                        backgroundColor: "white",
+                        backgroundColor: "#ffe4ec",
                         transition: "border 0.2s",
                         "&:hover": {
-                          border: "1px solid #ff496e",
+                          border: "1px solid #ff469e",
                           boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                         },
                       }}
                     >
-                      <img
-                        style={{ width: "50px", height: "65px" }}
-                        src="data:image/png;base64,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"
-                      ></img>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: "bold", marginTop: "0.5rem" }}
-                      >
-                        {item.code}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "gray" }}>
-                        {item.discount_value}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "gray" }}>
-                        {item.description}
-                      </Typography>
+                      {/* Bố trí phần bên trái */}
+                      <Box sx={{ flex: 1,
+                        borderRight: "dash",
+                        borderRadius: "10px",
+                       }}>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "bold", color: "#ae0258" }}
+                        >
+                          {item.code}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: "bold", color: "#ff0064" }}
+                        >
+                          {formatCurrency(item.discount_value)}
+                        </Typography>
+                      </Box>
+
+                      {/* Bố trí phần bên phải */}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "#ff0064", marginBottom: "0.5rem" }}
+                        >
+                          {item.description}
+                        </Typography>
+                        <Typography
+
+                          variant="body2"
+                          sx={{ color: "#ae0258", marginBottom: "0.5rem" }}
+                        >
+                          {item.endAt}
+                        </Typography>
+                      </Box>
                     </Box>
                   ))}
                 </Box>
                 <IconButton
-                  onClick={scrollRight2}
+                  onClick={scrollRight3}
                   size="small"
                   sx={{
                     position: "absolute",
@@ -597,12 +624,12 @@ export default function HomePage() {
                     backgroundColor: "white",
                     color: "#ff469e",
                     border: "1px solid #ff469e",
-                    boxShadow: "1px 1px 1px rgba(0, 0, 0.16)",
+                    boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
                     transition: "0.2s ease-in-out",
                     "&:hover": {
                       transform: "scale(1.15)",
                       background: "white",
-                      boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
+                      boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
                       "& svg": {
                         transform: "scale(1.1)",
                       },

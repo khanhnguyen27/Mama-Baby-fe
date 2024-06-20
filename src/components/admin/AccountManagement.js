@@ -26,6 +26,8 @@ import {
   DialogActions,
   Button,
   NativeSelect,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
@@ -119,9 +121,12 @@ export default function AccountManagement() {
     //   });
   };
 
-  const filteredAccounts = users.filter((item) =>
-    item.username.toLowerCase().includes(searchKeyword.toLowerCase())
+  const filteredAccounts = users.filter(
+    (item) =>
+      item.username.toLowerCase().includes(searchKeyword.toLowerCase()) &&
+      item.role_id.name !== "ADMIN" // Exclude accounts with role_id 'ADMIN'
   );
+  
 
   const indexOfLastItem = (page + 1) * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
@@ -197,17 +202,6 @@ export default function AccountManagement() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={9} style={{ textAlign: "right" }}>
-              <Button
-                variant="contained"
-                size="medium"
-                onClick={() => setOpenAddDialog(true)}
-                startIcon={<AddIcon />}
-                style={{ backgroundColor: "white", color: "black" }}
-              >
-                Add New Account
-              </Button>
-            </Grid>
           </Grid>
           {loading ? (
             <div style={{ textAlign: "center" }}>
@@ -235,8 +229,39 @@ export default function AccountManagement() {
                         align="left"
                         sx={{ fontWeight: "bold", fontSize: "16px" }}
                       >
+                        Full Name
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ fontWeight: "bold", fontSize: "16px" }}
+                      >
+                        Address
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ fontWeight: "bold", fontSize: "16px" }}
+                      >
+                        Phone Number
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ fontWeight: "bold", fontSize: "16px" }}
+                      >
+                        Point
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ fontWeight: "bold", fontSize: "16px" }}
+                      >
+                        Role of Users
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ fontWeight: "bold", fontSize: "16px" }}
+                      >
                         Status
                       </TableCell>
+     
                       <TableCell
                         align="left"
                         sx={{ fontWeight: "bold", fontSize: "16px" }}
@@ -260,6 +285,16 @@ export default function AccountManagement() {
                           {indexOfFirstItem + index + 1}
                         </TableCell>
                         <TableCell align="left">{item.username}</TableCell>
+                        <TableCell align="left">{item.full_name}</TableCell>
+                        <TableCell align="left">{item.address}</TableCell>
+                        <TableCell align="left">{item.phone_number}</TableCell>
+                        <TableCell align="left">
+                          {item.accumulated_points}
+                        </TableCell>
+                        <TableCell align="left">
+                          {item.role_id.name} {/* Display role name directly */}
+                        </TableCell>
+
                         <TableCell align="left">
                           {item.isActive ? (
                             <CheckIcon style={{ color: "green" }} />
