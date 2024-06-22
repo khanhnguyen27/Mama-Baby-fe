@@ -6,7 +6,15 @@ export const allRefundApi = (params) => {
     return axiosJWT.get(URL_REFUND, {
       params: params,
     });
+};
 
+export const refundByYearApi = async (selectedYear) => {
+  try {
+    const response = await axiosJWT.get(`${URL_REFUND}/findByYear?year=${selectedYear}`);
+    return response;
+  } catch (error) {
+    throw new Error(`Error fetching refunds: ${error.message}`);
+  }
 };
 
 export const refundByIdApi = (refundId) => {

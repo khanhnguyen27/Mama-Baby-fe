@@ -3,6 +3,10 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import io from "socket.io-client";
 import {
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Select,
   Stack,
   Container,
   Grid,
@@ -16,52 +20,36 @@ import {
   PieChart,
   LineChart
 } from "@mui/x-charts";
-import { allOrderApi, allStatusOrderApi } from "../../api/OrderAPI";
-import { allRefundApi } from "../../api/RefundAPI";
+import { allOrderApi, allStatusOrderApi, orderByYearApi } from "../../api/OrderAPI";
+import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
 
 export default function AdminHome() {
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [statusOrders, setStatusOrders] = useState([]);
   const [refunds, setRefunds] = useState([]);
-  const [revenueChartData, setRevenueChartData] = useState([]);
+  const [BarChartData, setBarChartData] = useState([]);
+  const [LineChartData, setLineChartData] = useState([]);
   const [cancelData, setCancelData] = useState(0);
-  const [cancelledCount, setCancelledCount] = useState(0);
   const [inProgressData, setInProgressData] = useState(0);
-  const [inProgressCount, setInProgressCount] = useState(0);
   const [completeData, setCompleteData] = useState(0);
+  const [cancelledCount, setCancelledCount] = useState(0);
+  const [inProgressCount, setInProgressCount] = useState(0);
   const [completedCount, setCompleteCount] = useState(0);
-  const [revenueLineChartData, setRevenueLineChartData] = useState([]);
-  const [totalRevenue, setTotalRevenue] = useState(0); // Tổng doanh thu
+  const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalRefund, setTotalRefund] = useState(0);
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [yearsList, setYearsList] = useState([]);
 
   useEffect(() => {
     fetchData();
-
-    const socket = io("http://localhost:3000");
-
-    socket.on("orderUpdate", (newOrder) => {
-      setOrders((prevOrders) => [...prevOrders, newOrder]);
-    });
-
-    socket.on("statusOrderUpdate", (newStatusOrder) => {
-      setStatusOrders((prevOrders) => [...prevOrders, newStatusOrder]);
-    });
-
-    socket.on("RefundUpdate", (newRefund) => {
-      setRefunds((prevRefunds) => [...prevRefunds, newRefund]);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
   }, []);
 
   useEffect(() => {
-    handleRevenueChartData();
+    handleBarChartData(selectedYear);
     calculateStatusPercentage();
-    handleRevenueLineChartData();
-  }, [orders, statusOrders, refunds]);
+    handleLineChartData();
+  }, [orders, statusOrders, refunds, selectedYear]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -69,71 +57,129 @@ export default function AdminHome() {
       const orderRes = await allOrderApi();
       const statusOrderRes = await allStatusOrderApi();
       const refundRes = await allRefundApi();
+
       setOrders(orderRes.data.data || []);
       setStatusOrders(statusOrderRes.data.data || []);
       setRefunds(refundRes.data.data || []);
     } catch (error) {
-      console.error("Error fetching order data:", error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRevenueChartData = () => {
-    // Khởi tạo đối tượng lưu trữ doanh thu và hoàn lại theo từng tháng
-    const monthlyData = {
-      Jan: { Revenue: 0, Refund: 0 },
-      Feb: { Revenue: 0, Refund: 0 },
-      Mar: { Revenue: 0, Refund: 0 },
-      Apr: { Revenue: 0, Refund: 0 },
-      May: { Revenue: 0, Refund: 0 },
-      Jun: { Revenue: 0, Refund: 0 },
-      Jul: { Revenue: 0, Refund: 0 },
-      Aug: { Revenue: 0, Refund: 0 },
-      Sep: { Revenue: 0, Refund: 0 },
-      Oct: { Revenue: 0, Refund: 0 },
-      Nov: { Revenue: 0, Refund: 0 },
-      Dec: { Revenue: 0, Refund: 0 },
+  useEffect(() => {
+    const fetchYears = async () => {
+      const years = await fetchYearsFromDatabase(orders);
+      setYearsList(years);
+      console.log("Years list:", years);
+      if (years.length > 0) {
+        setSelectedYear(years[0]);
+      }
     };
 
-    let totalRev = 0;
-    let totalRef = 0;
+    fetchYears();
+  }, [orders]);
 
-    // Tính toán doanh thu từ các đơn hàng
-    orders.forEach((order) => {
-      const date = new Date(order.order_date);
-      const year = date.getFullYear();
-      if (year === 2024) {
-        const month = date.toLocaleString("default", { month: "short" });
-        monthlyData[month].Revenue += order.amount;
-        totalRev += order.amount;
+  useEffect(() => {
+    if (selectedYear !== null) {
+      handleBarChartData(selectedYear);
+    }
+  }, [selectedYear, orders, refunds]);
+
+  const fetchYearsFromDatabase = async (ordersData) => {
+    try {
+      const yearsSet = new Set();
+
+      ordersData.forEach((order) => {
+        const date = new Date(order.orderDate);
+        const year = date.getFullYear();
+        yearsSet.add(year);
+      });
+
+      const yearsArray = Array.from(yearsSet).sort();
+      console.log("Years fetched:", yearsArray);
+      return yearsArray;
+    } catch (error) {
+      console.error("Error fetching years:", error);
+      return [];
+    }
+  };
+
+  const handleBarChartData = async (year = selectedYear) => { 
+    setLoading(true);
+    try {
+      let orderRes, refundRes;
+  
+      if (year) {
+        orderRes = await orderByYearApi(year);
+        refundRes = await refundByYearApi(year);
       }
-    });
-
-    // Tính toán số tiền hoàn lại từ các đơn hoàn trả
-    refunds.forEach((refund) => {
-      const date = new Date(refund.createDate);
-      const year = date.getFullYear();
-      if (year === 2024) {
+  
+      console.log("orderRes:", orderRes);
+      console.log("refundRes:", refundRes);
+  
+      const ordersData = orderRes?.data?.data || [];
+      const refundsData = refundRes?.data?.data || [];
+  
+      const monthlyData = {
+        Jan: { Revenue: 0, Refund: 0 },
+        Feb: { Revenue: 0, Refund: 0 },
+        Mar: { Revenue: 0, Refund: 0 },
+        Apr: { Revenue: 0, Refund: 0 },
+        May: { Revenue: 0, Refund: 0 },
+        Jun: { Revenue: 0, Refund: 0 },
+        Jul: { Revenue: 0, Refund: 0 },
+        Aug: { Revenue: 0, Refund: 0 },
+        Sep: { Revenue: 0, Refund: 0 },
+        Oct: { Revenue: 0, Refund: 0 },
+        Nov: { Revenue: 0, Refund: 0 },
+        Dec: { Revenue: 0, Refund: 0 },
+      };
+  
+      let totalRev = 0;
+      let totalRef = 0;
+  
+      ordersData.forEach((order) => {
+        const date = new Date(order.orderDate);
         const month = date.toLocaleString("default", { month: "short" });
-        monthlyData[month].Refund += refund.amount;
-        totalRef += refund.amount;
-      }
-    });
+        monthlyData[month].Revenue += order.amount || 0; // Ensure amount exists and is a number
+        totalRev += order.amount || 0; // Accumulate total revenue
+      });
+  
+      refundsData.forEach((refund) => {
+        const date = new Date(refund.createDate);
+        const month = date.toLocaleString("default", { month: "short" });
+        monthlyData[month].Refund += refund.amount || 0; // Ensure amount exists and is a number
+        totalRef += refund.amount || 0; // Accumulate total refund
+      });
+  
+      const BarData = Object.keys(monthlyData).map((month) => ({
+        month,
+        Revenue: monthlyData[month].Revenue,
+        Refund: monthlyData[month].Refund,
+      }));
+  
+      setBarChartData(BarData);
+      setTotalRevenue(totalRev); // Set total revenue state
+      setTotalRefund(totalRef); // Set total refund state
+  
+      console.log("ordersData", ordersData);
+      console.log("refundsData", refundsData);
+      console.log("totalRev", totalRev);
+      console.log("totalRef", totalRef);
+      console.log("BarData:", BarData);
+    } catch (error) {
+      console.error("Error fetching order and refund data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Chuyển đổi dữ liệu thành mảng để đưa vào state và hiển thị
-    const revenueData = Object.keys(monthlyData).map((month) => ({
-      month,
-      Revenue: monthlyData[month]?.Revenue,
-      Refund: monthlyData[month].Refund
-    }));
-
-    console.log(revenueData);
-    console.log(totalRev);
-    console.log(totalRef);
-    setRevenueChartData(revenueData);
-    setTotalRevenue(totalRev);
-    setTotalRefund(totalRef);
+  const handleYearChange = (event) => {
+    const selectedYear = parseInt(event.target.value);
+    setSelectedYear(selectedYear);
+    console.log("selectedYear", selectedYear);
   };
 
   const calculateStatusPercentage = () => {
@@ -179,46 +225,52 @@ export default function AdminHome() {
     setInProgressData(parseFloat(inProgressPercentage));
   };
 
-  const handleRevenueLineChartData = () => {
-    const yearlyRevenue = orders.reduce((acc, order) => {
-      const date = new Date(order.orderDate);
-      const year = date.getFullYear(); // Lấy năm từ ngày đặt hàng
-      if (!acc[year]) {
-        acc[year] = 0;
-      }
-      acc[year] += order.amount;
-      return acc;
-    }, {});
+  const handleLineChartData = async () => {
+    try {
+      const yearlyRevenue = orders.reduce((acc, order) => {
+        const date = new Date(order.orderDate);
+        const year = date.getFullYear();
+        if (!acc[year]) {
+          acc[year] = 0;
+        }
+        acc[year] += order.amount;
+        return acc;
+      }, {});
 
-    const yearlyRefund = refunds.reduce((acc, refund) => {
-      const date = new Date(refund.createDate);
-      const year = date.getFullYear(); // Lấy năm từ ngày hoàn trả
-      if (!acc[year]) {
-        acc[year] = 0;
-      }
-      acc[year] += refund.amount;
-      return acc;
-    }, {});
+      const refundRes = await allRefundApi();
+      const refundsData = refundRes.data.data.refunds || [];
 
-    const years = Object.keys(yearlyRevenue).concat(Object.keys(yearlyRefund));
-    const uniqueYears = Array.from(new Set(years)).sort();
+      const yearlyRefund = refundsData.reduce((acc, refund) => {
+        const date = new Date(refund.createDate);
+        const year = date.getFullYear();
+        if (!acc[year]) {
+          acc[year] = 0;
+        }
+        acc[year] += refund.amount;
+        return acc;
+      }, {});
 
-    const revenueLineData = uniqueYears.map((year) => ({
-      year,
-      label: year.toString(),
-      Revenue: yearlyRevenue[year] || 0,
-      Refund: yearlyRefund[year] || 0,
-    }));
+      const years = Object.keys(yearlyRevenue).concat(Object.keys(yearlyRefund));
+      const uniqueYears = Array.from(new Set(years)).sort();
 
-    console.log(revenueLineData)
-    setRevenueLineChartData(revenueLineData);
+      const LineData = uniqueYears.map((year) => ({
+        year,
+        label: year.toString(),
+        Revenue: yearlyRevenue[year] || 0,
+        Refund: yearlyRefund[year] || 0,
+      }));
+
+      setLineChartData(LineData);
+    } catch (error) {
+      console.error("Error handling line chart data:", error);
+    }
   };
 
   const valueFormatter = (value) => {
     if (value >= 1_000_000_000) {
-      return `${(value / 1_000_000_000).toFixed(1)}bn`;
+      return `${(value / 1_000_000_000).toFixed(0)}bn`;
     } else if (value >= 1_000_000) {
-      return `${(value / 1_000_000).toFixed(1)}mm`;
+      return `${(value / 1_000_000).toFixed(0)}mm`;
     } else if (value >= 1_000) {
       return `${(value / 1_000).toFixed(0)}k`;
     } else {
@@ -256,18 +308,50 @@ export default function AdminHome() {
           Dashboard
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid item xs={3}>
+            <Grid container spacing={2} direction="column">
+              <Grid item xs={12} md={12}>
+                <Card>
+                  <CardContent style={{ height: "192px", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+                    <Typography variant="body1" style={{ fontWeight: "bold", color: '#228B22', marginBottom: "10px", alignItems: "center" }}>
+                      <AttachMoneyIcon /> Total Revenue: <span style={{ color: "black" }}>{valueFormatter(totalRevenue)}</span>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <Card>
+                  <CardContent style={{ height: "193px", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+                    <Typography variant="body1" style={{ fontWeight: "bold", color: "rgb(2, 178, 175)", marginBottom: "20px", alignItems: "center" }}>
+                      <CurrencyExchangeIcon /> Total Refund: <span style={{ color: "black" }}>{valueFormatter(totalRefund)}</span>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={9} md={9} sx={{ position: 'relative' }}>
             <Card>
-              <CardContent style={{ height: "700px", display: "flex", flexDirection: "column" }}>
-                <Typography variant="h6" style={{ fontWeight: "bold", color: "black", marginBottom: "30px" }}>Total Revenue && Refund 2024</Typography>
-                <Typography variant="body1" style={{ fontWeight: "bold", color: '#228B22', marginBottom: "10px", alignItems: "center" }}>
-                  <AttachMoneyIcon /> Total Revenue: <span style={{ color: "black" }}>{valueFormatter(totalRevenue)}</span>
+              <CardContent style={{ height: "400px", display: "flex", flexDirection: "column" }}>
+                <Typography variant="h6" style={{ fontWeight: "bold", color: "#ff469e", marginBottom: "30px", position: 'absolute', top: 24, left: 32 }}>
+                  Overall Milk Profit
                 </Typography>
-                <Typography variant="body1" style={{ fontWeight: "bold", color: "rgb(2, 178, 175)", marginBottom: "20px", alignItems: "center" }}>
-                  <CurrencyExchangeIcon /> Total Refund: <span style={{ color: "black" }}>{valueFormatter(totalRefund)}</span>
-                </Typography>
+
+                <FormControl fullWidth style={{ width: 150, position: 'absolute', top: 15, right: 0 }}>
+                  <InputLabel>Year</InputLabel>
+                  <Select
+                    value={selectedYear}
+                    onChange={handleYearChange}
+                  >
+                    {yearsList.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <BarChart
-                  dataset={revenueChartData}
+                  dataset={BarChartData}
                   yAxis={[{ fontWeight: "bold", paddingBottom: "20px", valueFormatter }]}
                   xAxis={[{ scaleType: 'band', dataKey: 'month', label: 'Month' }]}
                   series={[
@@ -281,7 +365,7 @@ export default function AdminHome() {
           <Grid item xs={12} md={6}>
             <Card>
               <CardContent style={{ height: "350px", display: "flex", flexDirection: "column" }}>
-                <Typography variant="h6" style={{ fontWeight: "bold", color: "black", marginBottom: "20px", paddingBottom: "20px" }}>Order Status Percentage</Typography>
+                <Typography variant="h6" style={{ fontWeight: "bold", color: "#ff469e", marginBottom: "20px", paddingBottom: "20px" }}>Order Status Percentage</Typography>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" paddingTop="20px">
                   <Stack spacing={1} direction="column" >
                     <Typography variant="body1" style={{ fontWeight: "bold", color: "rgb(2, 178, 175)" }}>
@@ -294,7 +378,6 @@ export default function AdminHome() {
                       Pending Orders: <span style={{ color: "black", }}>{valueFormatter(inProgressCount)}</span>
                     </Typography>
                   </Stack>
-
                   <PieChart
                     series={[
                       {
@@ -303,31 +386,27 @@ export default function AdminHome() {
                           { id: 1, value: completeData, label: `Completed\n(${completeData}%)` },
                           { id: 2, value: inProgressData, label: `Pending\n(${inProgressData}%)` },
                         ],
-                        highlightScope: { highlighted: 'item' },
-                        faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                       },
                     ]}
                   />
-
                 </Stack>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6} >
+          <Grid item xs={12} md={6}>
             <Card>
               <CardContent style={{ height: "350px", display: "flex", flexDirection: "column" }}>
-                <Typography variant="h6" textAlign="center" fontWeight="bold">Revenue && Refund Each Year</Typography>
+                <Typography variant="h6" color="#ff469e" textAlign="center" fontWeight="bold" style={{ width: 150, position: 'absolute', top: 500, right: 30 }}>Profit Each Year</Typography>
                 <LineChart
                   xAxis={[
                     {
                       fontWeight: "bold", label: 'Year',
                       dataKey: 'year',
                       valueFormatter: (year) => year.toString(),
-                      min: 2011,
-                      max: 2035,
+                      min: 2020,
+                      max: 2030,
                     },
                   ]}
-
                   yAxis={[{ valueFormatter }]}
                   series={Object.keys(keyToLabel).map((key) => ({
                     dataKey: key,
@@ -337,7 +416,7 @@ export default function AdminHome() {
                     valueFormatter,
                     ...stackStrategy,
                   }))}
-                  dataset={revenueLineChartData}
+                  dataset={LineChartData}
                   {...customize}
                 />
               </CardContent>
@@ -348,4 +427,3 @@ export default function AdminHome() {
     </Container>
   );
 }
-// export default function AdminHome() {}

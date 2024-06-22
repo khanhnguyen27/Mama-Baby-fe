@@ -34,6 +34,15 @@ export const orderByStoreIdApi = (storeId) => {
   });
 };
 
+export const orderByYearApi = async (selectedYear) => {
+  try {
+    const response = await axiosJWT.get(`${URL_ORDER}/findByYear?year=${selectedYear}`);
+    return response;
+  } catch (error) {
+    throw new Error(`Error fetching orders: ${error.message}`);
+  }
+};
+
 export const createOrderApi = (
   userId,
   fullName,
@@ -65,7 +74,6 @@ export const createOrderApi = (
 };
 
 // Status Order
-
 export const allStatusOrderApi = (params) => {
   return axiosJWT.get(URL_STATUSORDER, {
     params: params,
@@ -77,6 +85,4 @@ export const changeStatusOrderApi = (orderId, status) => {
     order_id: orderId,
     status: status
   })
-
-
-}
+};
