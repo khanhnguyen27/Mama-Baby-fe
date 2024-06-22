@@ -372,6 +372,7 @@ export default function ProductDetails() {
           name: product.name,
           price: product.price,
           store_id: product.store_id,
+          image_url: product.image_url,
         },
         quantity: quantity,
       })
@@ -508,8 +509,8 @@ export default function ProductDetails() {
               border: "3px solid #ff469e",
               color: "black",
               padding: "20px",
-              maxWidth: "900px",
-              width: "60vw",
+              maxWidth: "72vw",
+              width: "100%",
               margin: "0 auto",
             }}
           >
@@ -535,6 +536,9 @@ export default function ProductDetails() {
                           ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
                           : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                       }
+                      onError={(e) => {
+                        e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                      }}
                       alt={product.name}
                     />
                   </Paper>

@@ -45,7 +45,8 @@ export default function Cart() {
   const [userInfo, setUserInfo] = useState([]);
   const [store, setStore] = useState([]);
   const [storeMap, setStoreMap] = useState({});
-  const [selectedStore, setSelectedStore] = useState(""); // Add this state to store the selected store
+  const [selectedStore, setSelectedStore] = useState("");
+  const [selectedStoreId, setSelectedStoreId] = useState("");
   const [voucher, setVoucher] = useState([]);
   const [selectedVoucher, setSelectedVoucher] = useState("");
   const [fullName, setFullName] = useState("");
@@ -73,7 +74,7 @@ export default function Cart() {
     try {
       const [storeRes, voucherRes] = await Promise.all([
         allStoreApi(),
-        allVoucherApi(),
+        allVoucherApi({ store_id: selectedStoreId }),
       ]);
 
       const storeData = storeRes?.data?.data || [];
@@ -98,7 +99,7 @@ export default function Cart() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedStoreId]);
 
   const groupedCartItems = cartItems.products.reduce((acc, item) => {
     if (!acc[item.product.store_id]) {
@@ -132,21 +133,41 @@ export default function Cart() {
       : getFinalAmount() - selectedVoucher;
   };
 
-  const handleStoreChange = (storeId) => {
-    dispatch(removeFromCart({ products: [] }));
+  // const handleStoreChange = (storeId) => {
+  //   dispatch(removeFromCart({ products: [] }));
 
+  //   setSelectedStore((prevStores) => {
+  //     const newSelectedStore = { ...prevStores };
+  //     newSelectedStore[storeId] = !prevStores[storeId];
+
+  //     const selectedProducts = [];
+  //     Object.keys(newSelectedStore).forEach((storeId) => {
+  //       if (newSelectedStore[storeId]) {
+  //         selectedProducts.push(...groupedCartItems[storeId]);
+  //       }
+  //     });
+  //     setSelectedStoreProducts(selectedProducts);
+
+  //     return newSelectedStore;
+  //   });
+  // };
+
+  const handleStoreChange = (storeId) => {
+    setSelectedStoreId(storeId)
     setSelectedStore((prevStores) => {
       const newSelectedStore = { ...prevStores };
-      newSelectedStore[storeId] = !prevStores[storeId];
-
-      const selectedProducts = [];
-      Object.keys(newSelectedStore).forEach((storeId) => {
-        if (newSelectedStore[storeId]) {
-          selectedProducts.push(...groupedCartItems[storeId]);
+      Object.keys(newSelectedStore).forEach((key) => {
+        if (key !== storeId) {
+          newSelectedStore[key] = false;
         }
       });
-      setSelectedStoreProducts(selectedProducts);
+      newSelectedStore[storeId] = !prevStores[storeId];
 
+      if (newSelectedStore[storeId]) {
+        setSelectedStoreProducts(groupedCartItems[storeId]);
+      } else {
+        setSelectedStoreProducts([]);
+      }
       return newSelectedStore;
     });
   };
@@ -189,7 +210,7 @@ export default function Cart() {
       toast.warn("Please login to continue your paycheck", { autoClose: 1000 });
       setTimeout(() => {
         navigate("/signin");
-      }, 3000);
+      }, 2000);
       return;
     }
     const decodedAccessToken = jwtDecode(accessToken);
@@ -215,6 +236,8 @@ export default function Cart() {
 
     const type = "ORDER";
 
+    const storeId = selectedStoreId;
+
     // selectedStoreProducts(cartItems.products.filter((item) => item.product.store_id === selectedStore));
 
     const cartItems2 = selectedStoreProducts?.map((item) => ({
@@ -237,17 +260,19 @@ export default function Cart() {
         shippingAddress,
         paymentMethod,
         type,
+        storeId,
         cartItems2
       )
         .then((res) => {
           console.log(res.data);
           toast.success("Create new order successfully", {
-            autoClose: 1500,
+            autoClose: 1000,
           });
           setTimeout(() => {
             navigate("/orders");
-          }, 1000);
-          dispatch(clearCart());
+          }, 500);
+          const productIdsToRemove = cartItems2.map((item) => item.product_id);
+          dispatch(removeFromCart(productIdsToRemove));
         })
         .catch((error) => console.log(error));
     } else if (paymentMethod === "VNPAY") {
@@ -263,6 +288,7 @@ export default function Cart() {
         shippingAddress,
         paymentMethod,
         type,
+        storeId,
         cartItems2
       )
         .then((res) => {
@@ -276,11 +302,12 @@ export default function Cart() {
               .then((res) => {
                 console.log(res.data);
                 toast.success("Now moving to payment page!", {
-                  autoClose: 1500,
+                  autoClose: 1000,
                 });
                 setTimeout(() => {
                   window.location.replace(res.data?.data?.payment_url);
-                }, 1500);
+                  // window.open(res.data?.data?.payment_url)
+                }, 500);
               })
               .catch((error) => console.log(error));
           }, 1000);
@@ -398,7 +425,14 @@ export default function Cart() {
                               justifyContent: "center",
                               alignSelf: "center",
                             }}
-                            image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                            image={
+                              item.product.image_url?.includes("Product_")
+                                ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                            }
+                            onError={(e) => {
+                              e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                            }}
                             title={item.product.name}
                           />
                           <CardContent sx={{ flex: "1 0 auto", ml: 2 }}>
@@ -441,6 +475,13 @@ export default function Cart() {
                                 sx={{
                                   fontSize: "22px",
                                   fontWeight: "bold",
+                                  whiteSpace: "normal",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  maxWidth: "100%",
                                   "&:hover": {
                                     cursor: "pointer",
                                     color: "#ff469e",
@@ -459,7 +500,9 @@ export default function Cart() {
                                   )
                                 }
                               >
-                                {item.product.name}
+                                {item.product.name.length > 40
+                                  ? `${item.product.name.substring(0, 40)}...`
+                                  : item.product.name}
                               </Typography>
                             </Box>
                             <Box
@@ -1197,7 +1240,14 @@ export default function Cart() {
                                     alignSelf: "center",
                                     borderRadius: "10px",
                                   }}
-                                  image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                  image={
+                                    item.product.image_url?.includes("Product_")
+                                      ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                      : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                  }
+                                  onError={(e) => {
+                                    e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                  }}
                                   title={item.product.name}
                                 />
                                 <CardContent
@@ -1219,6 +1269,13 @@ export default function Cart() {
                                       sx={{
                                         fontWeight: "600",
                                         fontSize: "1.25rem",
+                                        whiteSpace: "normal",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: "vertical",
+                                        maxWidth: "100%",
                                         "&:hover": {
                                           cursor: "pointer",
                                           color: "#ff469e",
@@ -1241,7 +1298,12 @@ export default function Cart() {
                                         )
                                       }
                                     >
-                                      {item.product.name}
+                                      {item.product.name.length > 28
+                                        ? `${item.product.name.substring(
+                                            0,
+                                            28
+                                          )}...`
+                                        : item.product.name}
                                     </Typography>
                                     <Typography
                                       sx={{

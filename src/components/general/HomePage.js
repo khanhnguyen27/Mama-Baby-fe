@@ -209,9 +209,8 @@ export default function HomePage() {
       }}
     >
       <Container>
-        <Grid container spacing={4}>
           {/* Left section */}
-          <Grid item xs={3}>
+          {/* <Grid item xs={3}>
             <div
               sx={{
                 position: "sticky",
@@ -224,11 +223,11 @@ export default function HomePage() {
                 padding: "16px 4px",
               }}
             >
-              {/* <Accordion disableGutters>
+              <Accordion disableGutters>
                 <AccordionSummary>
                   <Typography sx={{fontWeight: "bold", fontSize: "18px", marginBottom: "2px"}}>Filter</Typography>
                 </AccordionSummary>
-              </Accordion> */}
+              </Accordion>
               <Accordion
                 disableGutters
                 expanded={expanded === "panel1"}
@@ -424,9 +423,8 @@ export default function HomePage() {
                 </AccordionDetails>
               </Accordion>
             </div>
-          </Grid>
+          </Grid> */}
           {/* Right Section */}
-          <Grid item xs={9}>
             {/* Banner */}
             <Carousel
               PrevIcon={<ArrowLeft />}
@@ -802,6 +800,9 @@ export default function HomePage() {
                                 ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                             }
+                            onError={(e) => {
+                              e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                            }}
                             style={{ width: "64px", height: "64px" }}
                           />
                         </div>
@@ -1276,8 +1277,7 @@ export default function HomePage() {
                 </IconButton>
               </Box>
             </Box>
-          </Grid>
-        </Grid>
+          
         {visible && (
           <IconButton
             size="large"
