@@ -119,7 +119,7 @@ export default function Orders() {
       setOrdersByStatus(categorizedOrders);
 
       const productMap = productData.reduce((x, item) => {
-        x[item.id] = [item.name, item.brand_id, item.category_id, item.price];
+        x[item.id] = [item.name, item.brand_id, item.category_id, item.price, item.image_url];
         return x;
       }, {});
       setProductMap(productMap);
@@ -234,7 +234,7 @@ export default function Orders() {
     changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
-        toast.success("Order Cancelled!", {
+        toast.success("Order Received!", {
           autoClose: 1500,
         });
         updateOrderStatus(orderId, newStatus);
@@ -323,13 +323,13 @@ export default function Orders() {
     setOpenExchange(false);
   };
 
-  const handleItemChange = (orderDetailId, quantity) => {
+  const handleItemChange = (productId, quantity) => {
     setSelectedItems((prev) => {
       const updatedItems = prev.filter(
-        (item) => item.order_detail_id !== orderDetailId
+        (item) => item.product_id !== productId
       );
       if (quantity > 0) {
-        updatedItems.push({ order_detail_id: orderDetailId, quantity });
+        updatedItems.push({ product_id: productId, quantity });
       }
       return updatedItems;
     });
@@ -345,38 +345,41 @@ export default function Orders() {
       return;
     }
     console.log(selectedItems);
-    const finalAmount = selectedItems.reduce((total, selectedItem) => {
-      const product = item.order_detail_list.find(
-        (detail) => detail.id === selectedItem.order_detail_id
-      );
-      if (product) {
-        const productPrice = productMap[product.product_id][3];
-        return total + selectedItem.quantity * productPrice;
-      }
-      return total;
-    }, 0);
+    // const finalAmount = selectedItems.reduce((total, selectedItem) => {
+    //   const product = item.order_detail_list.find(
+    //     (detail) => detail.id === selectedItem.order_detail_id
+    //   );
+    //   if (product) {
+    //     const productPrice = productMap[product.product_id][3];
+    //     return total + selectedItem.quantity * productPrice;
+    //   }
+    //   return total;
+    // }, 0);
 
-    console.log(finalAmount);
+    // console.log(finalAmount);
+    const orderId = item.id;
     const status = "PROCESSING";
     const storeId = item.store_id;
     const userId = item.user_id;
     const cartItemsExchange = selectedItems
-      .filter((item) => item.order_detail_id)
+      .filter((item) => item.product_id)
       .map((item) => ({
-        order_detail_id: item.order_detail_id,
+        product_id: item.product_id,
         quantity: item.quantity,
       }));
 
-    // addExchangeApi(description, finalAmount, status, storeId, userId, cartItemsExchange)
-    //   .then(() => {
-    //     toast.success("Request sent successfully", { autoClose: 1000 });
-    //     setSelectedItems([])
-    //     handleCloseExchange();
-    //   })
-    //   .catch((error) => {
-    //     toast.error("Failed to send request!");
-    //     console.error("Failed to send exchange request:", error);
-    //   });
+    console.log(description, orderId, status, storeId, userId, cartItemsExchange)
+    addExchangeApi(description, orderId, status, storeId, userId, cartItemsExchange)
+      .then((res) => {
+        console.log(res.data)
+        toast.success("Request sent successfully", { autoClose: 1000 });
+        setSelectedItems([])
+        handleCloseExchange();
+      })
+      .catch((error) => {
+        toast.error("Failed to send request!");
+        console.error("Failed to send exchange request:", error);
+      });
   };
 
   return (
@@ -610,7 +613,14 @@ export default function Orders() {
                                         alignSelf: "center",
                                         borderRadius: "10px",
                                       }}
-                                      image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                      image={
+                                        productMap[detail.product_id][4]?.includes("Product_")
+                                          ? `http://localhost:8080/mamababy/products/images/${productMap[detail.product_id][4]}`
+                                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                      }
+                                      onError={(e) => {
+                                        e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                      }}
                                       title={productMap[detail.product_id][0]}
                                     />
                                     <CardContent
@@ -1901,7 +1911,7 @@ export default function Orders() {
                                                 disabled={
                                                   !selectedItems.some(
                                                     (item) =>
-                                                      item.order_detail_id ===
+                                                      item.product_id ===
                                                       detail.id
                                                   )
                                                 }
@@ -1911,12 +1921,12 @@ export default function Orders() {
                                                   disabled={
                                                     !selectedItems.some(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     ) ||
                                                     (selectedItems.find(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     )?.quantity ||
                                                       detail.quantity) === 1
@@ -1925,7 +1935,7 @@ export default function Orders() {
                                                     const currentQuantity =
                                                       selectedItems.find(
                                                         (item) =>
-                                                          item.order_detail_id ===
+                                                          item.product_id ===
                                                           detail.id
                                                       )?.quantity ||
                                                       detail.quantity;
@@ -1966,12 +1976,12 @@ export default function Orders() {
                                                   disabled={
                                                     !selectedItems.some(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     ) ||
                                                     (selectedItems.find(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     )?.quantity ||
                                                       detail.quantity) === 1
@@ -1980,7 +1990,7 @@ export default function Orders() {
                                                     const currentQuantity =
                                                       selectedItems.find(
                                                         (item) =>
-                                                          item.order_detail_id ===
+                                                          item.product_id ===
                                                           detail.id
                                                       )?.quantity ||
                                                       detail.quantity;
@@ -2032,7 +2042,7 @@ export default function Orders() {
                                                       detail.quantity,
                                                       selectedItems.find(
                                                         (item) =>
-                                                          item.order_detail_id ===
+                                                          item.product_id ===
                                                           detail.id
                                                       )?.quantity || 1
                                                     )
@@ -2043,12 +2053,12 @@ export default function Orders() {
                                                   disabled={
                                                     !selectedItems.some(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     ) ||
                                                     (selectedItems.find(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     )?.quantity ||
                                                       detail.quantity) ===
@@ -2058,7 +2068,7 @@ export default function Orders() {
                                                     const currentQuantity =
                                                       selectedItems.find(
                                                         (item) =>
-                                                          item.order_detail_id ===
+                                                          item.product_id ===
                                                           detail.id
                                                       )?.quantity ||
                                                       detail.quantity;
@@ -2101,12 +2111,12 @@ export default function Orders() {
                                                   disabled={
                                                     !selectedItems.some(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     ) ||
                                                     (selectedItems.find(
                                                       (item) =>
-                                                        item.order_detail_id ===
+                                                        item.product_id ===
                                                         detail.id
                                                     )?.quantity ||
                                                       detail.quantity) ===
@@ -2116,7 +2126,7 @@ export default function Orders() {
                                                     const currentQuantity =
                                                       selectedItems.find(
                                                         (item) =>
-                                                          item.order_detail_id ===
+                                                          item.product_id ===
                                                           detail.id
                                                       )?.quantity ||
                                                       detail.quantity;

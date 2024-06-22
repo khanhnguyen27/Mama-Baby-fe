@@ -55,6 +55,7 @@ export const createOrderApi = (
   shippingAddress,
   paymentMethod,
   type,
+  storeId,
   cartItems
 ) => {
   return axiosJWT.post(URL_ORDER, {
@@ -69,6 +70,7 @@ export const createOrderApi = (
     shipping_address: shippingAddress,
     payment_method: paymentMethod,
     type: type,
+    store_id: storeId,
     cart_items: cartItems,
   });
 };

@@ -75,6 +75,7 @@ export default function Products() {
             age_id: ageFilter,
             brand_id: brandFilter,
             category_id: categoryFilter,
+            page: currentPage - 1,
           }),
           allCommentApi(),
         ]);
@@ -164,6 +165,7 @@ export default function Products() {
           name: product.products[index].name,
           price: product.products[index].price,
           store_id: product.products[index].store_id,
+          image_url: product.products[index].image_url,
         },
         quantity: 1,
       })
@@ -284,7 +286,10 @@ export default function Products() {
                     <Grid container spacing={1}>
                       {age.map((item) => (
                         <Grid
-                          xs={6}
+                          xs={12}
+                          sm={6}
+                          md={12}
+                          lg={6}
                           item
                           key={item.id}
                           sx={{ textAlign: "left" }}
@@ -327,7 +332,10 @@ export default function Products() {
                     <Grid container spacing={1}>
                       {brand.map((item) => (
                         <Grid
-                          xs={6}
+                          xs={12}
+                          sm={6}
+                          md={12}
+                          lg={6}
                           item
                           key={item.id}
                           sx={{ textAlign: "left" }}
@@ -732,6 +740,10 @@ export default function Products() {
                                 ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                             }
+                            onError={(e) => {
+                              e.target.src =
+                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                            }}
                             alt={item.name}
                             sx={{
                               width: "64px",
@@ -855,6 +867,7 @@ export default function Products() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
+                                mt: 1.5
                               }}
                               onClick={() => handleAddToCart(index)}
                             >

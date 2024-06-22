@@ -53,12 +53,12 @@ export default function ExchangeManagement() {
   const fetchData = async () => {
     try {
       const [exchangesRes, orderDetailsRes, productRes] = await Promise.all([
-        exchangeByStoreIdApi(storeId),
+        allExchangeApi({ store_id: storeId }),
         allOrderDetailApi(),
         allProductApi(),
       ]);
 
-      const exchangesData = exchangesRes?.data?.data || [];
+      const exchangesData = exchangesRes?.data?.data?.exchanges || [];
       const orderDetailsData = orderDetailsRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
 
@@ -184,17 +184,13 @@ export default function ExchangeManagement() {
                       <strong>Detail:</strong>
                       <br />
                       {item?.exchange_detail_list?.map((detail) => {
-                        const product_id =
-                          orderDetailsMap[detail.order_detail_id];
-                        const name = productMap[product_id][0];
-                        const price = productMap[product_id][1];
                         return (
                           <Typography
                             variant="body2"
                             component="span"
-                            key={detail.order_detail_id}
+                            key={detail.id}
                           >
-                            <strong>{name}</strong> - {formatCurrency(price)} x{" "}
+                            <strong>{productMap[detail.product_id][0]}</strong> - {formatCurrency(productMap[detail.product_id][1])} x{" "}
                             {detail.quantity}
                             <br />
                           </Typography>

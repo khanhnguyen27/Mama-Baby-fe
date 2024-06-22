@@ -12,10 +12,11 @@ export const exchangeByStoreIdApi = (storeId) => {
   return axiosJWT.get(`${URL_EXCHANGE}/store/${storeId}`);
 }
 
-export const addExchangeApi = (description, finalAmount, status, storeId, userId, cartItemsExchange) => {
+export const addExchangeApi = (description, orderId, status, storeId, userId, cartItemsExchange) => {
     return axiosJWT.post(URL_EXCHANGE, {
         description: description,
-        amount: finalAmount,
+        // amount: finalAmount,
+        order_id: orderId,
         status: status,
         store_id: storeId,
         user_id: userId,

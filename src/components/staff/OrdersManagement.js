@@ -130,7 +130,7 @@ export default function OrdersManagement() {
       setOrdersByStatus(categorizedOrders);
 
       const productMap = productData.reduce((x, item) => {
-        x[item.id] = [item.name, item.brand_id, item.category_id, item.price];
+        x[item.id] = [item.name, item.brand_id, item.category_id, item.price, item.image_url];
         return x;
       }, {});
       setProductMap(productMap);
@@ -543,7 +543,14 @@ export default function OrdersManagement() {
                                         alignSelf: "center",
                                         borderRadius: "10px",
                                       }}
-                                      image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                      image={
+                                        productMap[detail.product_id][4]?.includes("Product_")
+                                          ? `http://localhost:8080/mamababy/products/images/${productMap[detail.product_id][4]}`
+                                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                      }
+                                      onError={(e) => {
+                                        e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                      }}
                                       title={productMap[detail.product_id][0]}
                                     />
                                     <CardContent
