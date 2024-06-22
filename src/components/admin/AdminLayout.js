@@ -23,8 +23,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Typography } from "@mui/material";
 import { toast } from "react-toastify";
-import Voucher from '@mui/icons-material/ConfirmationNumber';
-import Refund from '@mui/icons-material/CurrencyExchange';
 const drawerWidth = 260;
 const itemList = [
   {
@@ -66,18 +64,6 @@ const itemList = [
     label: "Age",
     Icon: PersonIcon,
     href: "age",
-  },
-
-  {
-    label: "Vouchers",
-    Icon: Voucher,
-    href: "vouchers",
-  },
-
-  {
-    label: "Refunds",
-    Icon: Refund,
-    href: "refunds",
   },
 ];
 

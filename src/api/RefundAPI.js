@@ -9,3 +9,35 @@ export const allRefundApi = (params) => {
 
 };
 
+export const refundByIdApi = (refundId) => {
+  return axiosJWT.get(`${URL_REFUND}/${refundId}`, {
+    refundId: refundId,
+  });
+};
+
+export const refundByStoreIdApi = (storeId) => {
+    return axiosJWT.get(`${URL_REFUND}/store/${storeId}`, {
+      storeId: storeId,
+    });
+};
+
+export const updateRefundApi = (
+  id,
+  description,
+  storeId,
+  userId,
+  orderId,
+  status,
+  cartItemsRefund
+) => {
+  return axiosJWT.put(`${URL_REFUND}/${id}`, {
+    description:description,
+    store_id:storeId,
+    user_id:userId,
+    order_id:orderId,
+    status:status,
+    cart_items_refund:cartItemsRefund
+  });
+};
+
+
