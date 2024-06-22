@@ -26,6 +26,7 @@ export const addProductApi = (
   name,
   price,
   point,
+  remain,
   status,
   description,
   type,
@@ -40,6 +41,7 @@ export const addProductApi = (
   formData.append("name", name);
   formData.append("price", price);
   formData.append("point", point);
+  formData.append("remain", remain);
   formData.append("status", status);
   formData.append("description", description);
   formData.append("imageUrl", "");
@@ -67,6 +69,7 @@ export const updateProductApi = (
   name,
   price,
   point,
+  remain,
   status,
   description,
   type,
@@ -82,6 +85,7 @@ export const updateProductApi = (
   formData.append("name", name);
   formData.append("price", price);
   formData.append("point", point);
+  formData.append("remain", remain);
   formData.append("status", status);
   formData.append("description", description);
   formData.append("imageUrl", "");

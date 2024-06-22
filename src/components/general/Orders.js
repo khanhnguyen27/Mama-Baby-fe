@@ -21,8 +21,6 @@ import {
   Modal,
   CircularProgress,
   TextField,
-  Rating,
-  Avatar,
   FormControlLabel,
   Checkbox,
   ButtonGroup,
@@ -35,7 +33,6 @@ import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
 import { Close, ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { allVoucherApi } from "../../api/VoucherAPI";
-import { createCommentApi, allCommentApi } from "../../api/CommentAPI";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { addExchangeApi } from "../../api/ExchangeAPI";
@@ -57,7 +54,6 @@ export default function Orders() {
     CANCELLED: [],
     RETURNED: [],
   });
-  const [commentMap, setCommentMap] = useState({});
   const [productMap, setProductMap] = useState({});
   const [brandMap, setBrandMap] = useState({});
   const [categoryMap, setCategoryMap] = useState({});
@@ -83,27 +79,19 @@ export default function Orders() {
 
   const fetchData = async () => {
     try {
-      const [
-        orderRes,
-        productRes,
-        brandRes,
-        categoryRes,
-        voucherRes,
-        comments,
-      ] = await Promise.all([
-        orderByUserIdApi(userId),
-        allProductApi(),
-        allBrandApi(),
-        allCategorytApi(),
-        allVoucherApi(),
-        allCommentApi(),
-      ]);
+      const [orderRes, productRes, brandRes, categoryRes, voucherRes] =
+        await Promise.all([
+          orderByUserIdApi(userId),
+          allProductApi(),
+          allBrandApi(),
+          allCategorytApi(),
+          allVoucherApi(),
+        ]);
       const orderData = orderRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
-      const commentData = comments?.data?.data || [];
 
       const categorizedOrders = {
         UNPAID: [],
@@ -153,12 +141,6 @@ export default function Orders() {
         return x;
       }, {});
       setVoucherMap(voucherMap);
-
-      const commentMap = commentData.reduce((x, item) => {
-        x[item.id] = item.product_id;
-        return x;
-      }, {});
-      setCommentMap(commentMap);
     } catch (err) {
       console.log(err);
     }
@@ -395,52 +377,6 @@ export default function Orders() {
     //     toast.error("Failed to send request!");
     //     console.error("Failed to send exchange request:", error);
     //   });
-  };
-  const [openComment, setOpenComment] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [selectedComment, setSelectedComment] = useState(null);
-
-  const username = selectedComment?.full_name; // Replace with actual username
-  const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
-  const dateTime = format(new Date(), "PPPppp"); // Formatted current date and time
-
-  const handleOpenComment = (item) => {
-    setSelectedComment(item);
-    setOpenComment(true);
-  };
-
-  //console.log(commentMap);
-  //console.log(selectedComment);
-  //console.log(selectedComment?.order_detail_list);
-  const handleCloseComment = () => {
-    setOpenComment(false);
-  };
-
-  const handleComment = async () => {
-    if (rating === 0) {
-      toast.warn("Please select a rating.");
-      return;
-    }
-
-    if (comment.length < 50) {
-      toast.warn("Please enter a comment of at least 50 characters.");
-      return;
-    }
-
-    const cartItems =
-      selectedComment?.order_detail_list?.map((item) => ({
-        product_id: item.product_id,
-      })) || [];
-
-    await createCommentApi(cartItems, rating, comment, selectedComment?.user_id)
-      .then((response) => {
-        handleCloseComment();
-        toast.success("Comment added successfully!");
-      })
-      .catch((error) => {
-        toast.error("Failed to add comment. Please try again later.");
-      });
   };
 
   return (
@@ -777,6 +713,59 @@ export default function Orders() {
                                           </span>
                                         </Typography>
                                       </Box>
+                                      {item.status_order_list[
+                                        item.status_order_list.length - 1
+                                      ].status === "COMPLETED" && (
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            flexDirection: "row",
+                                            justifyContent: "flex-end",
+                                            mt: 2,
+                                          }}
+                                          onClick={() =>
+                                            navigate(
+                                              `/products/${productMap[
+                                                detail.product_id
+                                              ][0]
+                                                .toLowerCase()
+                                                .replace(/\s/g, "-")}`,
+                                              {
+                                                state: {
+                                                  productId: detail.product_id,
+                                                },
+                                              },
+                                              window.scrollTo({
+                                                top: 0,
+                                                behavior: "smooth",
+                                              })
+                                            )
+                                          }
+                                        >
+                                          <Button
+                                            sx={{
+                                              color: "#ff469e",
+                                              border: "2px solid #ff469e",
+                                              borderRadius: "8px",
+                                              padding: "8px 16px",
+                                              transition: "all 0.3s ease",
+                                              "&:hover": {
+                                                backgroundColor: "#ff469e",
+                                                color: "#ffffff",
+                                                transform: "scale(1.05)",
+                                                boxShadow:
+                                                  "0 4px 8px rgba(0, 0, 0, 0.2)",
+                                              },
+                                              "&:active": {
+                                                backgroundColor: "#e0357b",
+                                                borderColor: "#e0357b",
+                                              },
+                                            }}
+                                          >
+                                            Comment
+                                          </Button>
+                                        </Box>
+                                      )}
                                     </CardContent>
                                   </div>
                                 ))}

@@ -86,7 +86,7 @@ export default function Articles() {
   const storeId = store.id;
   // console.log(userId);
   //console.log(storeId);
-  const fetchData = async (page = 1) => {
+  const fetchData = async (page) => {
     try {
       const articleRes = await getArticlesByStoreIdApi({
         keyword: keyword,
@@ -400,7 +400,7 @@ export default function Articles() {
       <Container>
         <Grid container justifyContent="center" spacing={3}>
           {/* List Articles */}
-          <Grid item sm={12} md={9}>
+          <Grid item sm={12} md={12}>
             <Grid container spacing={3}>
               {article?.articles?.length === 0 ? (
                 <Grid item xs={12} sm={12}>
@@ -413,7 +413,7 @@ export default function Articles() {
                 </Grid>
               ) : (
                 article?.articles?.map((item, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Grid item xs={12} sm={6} md={3} key={index}>
                     <Tooltip
                       title={item.header}
                       enterDelay={500}

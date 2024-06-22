@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Edit from "@mui/icons-material/Edit";
 import MailIcon from "@mui/icons-material/MailOutline";
+import ChatIcon from "@mui/icons-material/Chat";
 import PhoneInTalk from "@mui/icons-material/PhoneInTalk";
 import Cart from "@mui/icons-material/ShoppingCartOutlined";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -20,8 +21,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectCartAmount } from "../../redux/CartSlice";
 import { ListAlt } from "@mui/icons-material";
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-
+import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -63,13 +63,15 @@ const Navigation = () => {
       onClose={handleLogoutMenuClose}
     >
       <MenuItem
-        onClick={() =>
-          (pathname.includes("/staff")
+        onClick={() => (
+          pathname.includes("/staff")
             ? navigate("/staff/profile")
             : pathname.includes("/admin")
             ? navigate("/admin/profile")
-            : navigate("/profile"), setAnchorElLogout(null), setOpenLogoutMenu(false))
-        }
+            : navigate("/profile"),
+          setAnchorElLogout(null),
+          setOpenLogoutMenu(false)
+        )}
         sx={{
           transition:
             "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
@@ -96,7 +98,12 @@ const Navigation = () => {
       </MenuItem>
       <MenuItem
         onClick={() => (
-          navigate("/orders"), window.scrollTo({ top: 0, behavior: "instant" }, setAnchorElLogout(null), setOpenLogoutMenu(false))
+          navigate("/orders"),
+          window.scrollTo(
+            { top: 0, behavior: "instant" },
+            setAnchorElLogout(null),
+            setOpenLogoutMenu(false)
+          )
         )}
         sx={{
           transition:
@@ -125,7 +132,12 @@ const Navigation = () => {
 
       <MenuItem
         onClick={() => (
-          navigate("/regisstore"), window.scrollTo({ top: 0, behavior: "instant" }, setAnchorElLogout(null), setOpenLogoutMenu(false))
+          navigate("/regisstore"),
+          window.scrollTo(
+            { top: 0, behavior: "instant" },
+            setAnchorElLogout(null),
+            setOpenLogoutMenu(false)
+          )
         )}
         sx={{
           transition:
@@ -149,7 +161,6 @@ const Navigation = () => {
           >
             Regist Store
           </Typography>
-          
         </ListItemText>
       </MenuItem>
       <MenuItem
@@ -788,7 +799,14 @@ const Navigation = () => {
                 justifyContent: "flex-end",
               }}
             >
-              <IconButton size="large" color="inherit">
+              <IconButton
+                size="large"
+                color="inherit"
+                onClick={() => (
+                  navigate("/history/comment"),
+                  window.scrollTo({ top: 0, behavior: "instant" })
+                )}
+              >
                 <span
                   style={{
                     position: "absolute",
@@ -800,10 +818,8 @@ const Navigation = () => {
                     right: 10,
                     fontWeight: 700,
                   }}
-                >
-                  9
-                </span>
-                <MailIcon style={{ fontSize: 30, color: "#ff469e" }} />
+                ></span>
+                <ChatIcon style={{ fontSize: 30, color: "#ff469e" }} />
               </IconButton>
               <IconButton
                 size="large"

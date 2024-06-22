@@ -97,9 +97,7 @@ export default function StaffHome() {
   }, []);
 
   const storeId = store.id;
-  // console.log(userId);
-  // console.log(storeId);
-  const fetchData = async (page = 1) => {
+  const fetchData = async (page) => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
         allAgeApi(),
@@ -198,6 +196,7 @@ export default function StaffHome() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [point, setPoint] = useState("");
+  const [remain, setRemain] = useState("");
   const [status, setStatus] = useState("IN STOCK");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("WHOLESALE");
@@ -219,14 +218,16 @@ export default function StaffHome() {
   };
 
   const handleAddProduct = () => {
-    if (!name || !price || !point || !description || !image.file) {
+    if (!name || !price || !point || !remain || !description || !image.file) {
       // Nếu có ít nhất một trường dữ liệu bị thiếu
       // Hiển thị thông báo lỗi cho người dùng
 
       toast.warn("Please fill in all required fields.");
       return;
-    } else if (price <= 0 || point <= 0) {
-      toast.error("Price or Point cannot be less than or equal to 0.");
+    } else if (price <= 0 || point <= 0 || remain <= 0) {
+      toast.error(
+        "Price or Point or Remain cannot be less than or equal to 0."
+      );
       return;
     }
     addProductApi(
@@ -234,6 +235,7 @@ export default function StaffHome() {
       name,
       price,
       point,
+      remain,
       status,
       description,
       type,
@@ -285,6 +287,7 @@ export default function StaffHome() {
       !selectedProduct.name ||
       !selectedProduct.price ||
       !selectedProduct.point ||
+      !selectedProduct.remain ||
       !selectedProduct.description ||
       !image.url
     ) {
@@ -292,8 +295,14 @@ export default function StaffHome() {
       // Hiển thị thông báo lỗi cho người dùng
       toast.warn("Please fill in all required fields.");
       return;
-    } else if (selectedProduct.price <= 0 || selectedProduct.point <= 0) {
-      toast.error("Price or Point cannot be less than or equal to 0.");
+    } else if (
+      selectedProduct.price <= 0 ||
+      selectedProduct.point <= 0 ||
+      selectedProduct.remain <= 0
+    ) {
+      toast.error(
+        "Price or Point or Remain cannot be less than or equal to 0."
+      );
       return;
     }
     // Xử lý cập nhật sản phẩm
@@ -303,6 +312,7 @@ export default function StaffHome() {
       selectedProduct.name,
       selectedProduct.price,
       selectedProduct.point,
+      selectedProduct.remain,
       selectedProduct.status,
       selectedProduct.description,
       selectedProduct.type,
@@ -1227,6 +1237,14 @@ export default function StaffHome() {
             fullWidth
             margin="normal"
           />
+          <TextField
+            label="Remain"
+            value={remain}
+            onChange={(e) => setRemain(e.target.value)}
+            type="number"
+            fullWidth
+            margin="normal"
+          />
           <FormControl fullWidth margin="normal">
             <InputLabel>Status</InputLabel>
             <Select value={status} onChange={(e) => setStatus(e.target.value)}>
@@ -1404,6 +1422,14 @@ export default function StaffHome() {
               label="Point"
               value={selectedProduct?.point}
               onChange={(e) => handleChange("point", e.target.value)}
+              type="number"
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Remain"
+              value={selectedProduct?.remain}
+              onChange={(e) => handleChange("remain", e.target.value)}
               type="number"
               fullWidth
               margin="normal"
