@@ -4,6 +4,9 @@ import { toast } from "react-toastify";
 import {
   Container,
   Typography,
+  Select,
+  MenuItem,
+  InputLabel,
   CircularProgress,
   Paper,
   Table,
@@ -23,25 +26,27 @@ import {
   DialogActions,
   Button,
   NativeSelect,
-  InputLabel,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
-import { allUserApi, updateAccountApi } from "../../api/UserAPI";
+import CloseIcon from "@mui/icons-material/Close";
+import { allStoreApi, requestStoreApi } from "../../api/StoreAPI";
 
-export default function AccountManagement() {
-  window.document.title = "Account Management";
+export default function StoreManagement() {
+  window.document.title = "Store Management";
   const { state } = useLocation();
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState([]);
+  const [stores, setStores] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selectedAccount, setSelectedAccount] = useState(null);
-  const [openUpdateAccount, setOpenUpdateAccount] = useState(false);
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [openUpdatestore, setOpenUpdateStore] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -50,8 +55,8 @@ export default function AccountManagement() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const userRes = await allUserApi();
-      setUsers(userRes?.data?.data || []);
+      const StoreRes = await allStoreApi();
+      setStores(StoreRes?.data?.data?.stores || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -74,59 +79,66 @@ export default function AccountManagement() {
   };
 
   const openUpdate = (item) => {
-    setOpenUpdateAccount(true);
-    setSelectedAccount(item);
+    setOpenUpdateStore(true);
+    setSelectedStore(item);
   };
 
   const closeUpdate = () => {
-    setOpenUpdateAccount(false);
+    setOpenUpdateStore(false);
   };
 
   const handleChange = (field, value) => {
-    setSelectedAccount((prevAccount) => ({
-      ...prevAccount,
+    setSelectedStore((prevStore) => ({
+      ...prevStore,
       [field]: value,
     }));
   };
 
   const handleEdit = () => {
-    if (!selectedAccount) {
-      console.error("No account selected for editing.");
+    if (!selectedStore) {
+      console.error("No store selected for editing.");
       return;
     }
 
-    const { username, full_name, address, phone_number, isActive } = selectedAccount;
-
-    updateAccountApi(
-      username,
-      full_name,
+    const {
+      id,
+      name_store,
       address,
-      phone_number,
-      isActive // Ensure isActive is boolean (true/false)
+      description,
+      phone,
+      status,
+      is_active,
+      user_id,
+    } = selectedStore;
+
+    requestStoreApi(
+      id,
+      name_store,
+      address,
+      description,
+      phone,
+      status,
+      is_active,
+      user_id
     )
       .then((response) => {
-        toast.success("Account updated successfully!");
-        // Reload the page to keep the current search keyword
+        toast.success("Store updated successfully!");
         window.location.reload();
-      })
+    })
       .catch((error) => {
-        console.error("Error updating account:", error);
-        toast.error("Failed to update account. Please try again later.");
+        console.error("Error updating store:", error);
+        toast.error("Failed to update store. Please try again later.");
       });
   };
 
-  const filteredAccounts = users.filter(
-    (item) =>
-      item.username.toLowerCase().includes(searchKeyword.toLowerCase()) &&
-      item.role_id !== "ADMIN" // Exclude accounts with role_id 'ADMIN'
+  const filteredStore = stores.filter((item) =>
+    item.name_store.toLowerCase().includes(searchKeyword.toLowerCase())
   );
 
   const indexOfLastItem = (page + 1) * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentItems = filteredAccounts.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentItems = filteredStore.slice(indexOfFirstItem, indexOfLastItem);
+  console.log(selectedStore);
 
   return (
     <div>
@@ -154,7 +166,7 @@ export default function AccountManagement() {
               marginBottom: "16px",
             }}
           >
-            Manage Accounts
+            Store Manage
           </Typography>
           <Grid
             container
@@ -214,13 +226,13 @@ export default function AccountManagement() {
                         align="left"
                         sx={{ fontWeight: "bold", fontSize: "16px" }}
                       >
-                        User Name
+                        Store Name
                       </TableCell>
                       <TableCell
                         align="left"
                         sx={{ fontWeight: "bold", fontSize: "16px" }}
                       >
-                        Full Name
+                        description
                       </TableCell>
                       <TableCell
                         align="left"
@@ -234,24 +246,14 @@ export default function AccountManagement() {
                       >
                         Phone Number
                       </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Point
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Role of Users
-                      </TableCell>
+
                       <TableCell
                         align="left"
                         sx={{ fontWeight: "bold", fontSize: "16px" }}
                       >
                         Status
                       </TableCell>
+
                       <TableCell
                         align="left"
                         sx={{ fontWeight: "bold", fontSize: "16px" }}
@@ -274,18 +276,13 @@ export default function AccountManagement() {
                         <TableCell component="th" scope="row">
                           {indexOfFirstItem + index + 1}
                         </TableCell>
-                        <TableCell align="left">{item.username}</TableCell>
-                        <TableCell align="left">{item.full_name}</TableCell>
+                        <TableCell align="left">{item.name_store}</TableCell>
+                        <TableCell align="left">{item.description}</TableCell>
                         <TableCell align="left">{item.address}</TableCell>
-                        <TableCell align="left">{item.phone_number}</TableCell>
+                        <TableCell align="left">{item.phone}</TableCell>
+
                         <TableCell align="left">
-                          {item.accumulated_points}
-                        </TableCell>
-                        <TableCell align="left">
-                          {item.role_id.name} {/* Display role name directly */}
-                        </TableCell>
-                        <TableCell align="left">
-                          {item.isActive ? (
+                          {item.is_active ? (
                             <CheckIcon style={{ color: "green" }} />
                           ) : (
                             <CloseIcon style={{ color: "red" }} />
@@ -304,7 +301,7 @@ export default function AccountManagement() {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={filteredAccounts.length}
+                count={filteredStore.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
@@ -312,7 +309,7 @@ export default function AccountManagement() {
                 sx={{
                   borderTop: "1px solid #ddd",
                   justifyContent: "flex-end",
-                  backgroundColor: "#f1f1f1",
+                  backgroundColor: "f1f1f1",
                 }}
                 labelRowsPerPage="Rows:"
                 labelDisplayedRows={({ from, to, count }) =>
@@ -324,31 +321,33 @@ export default function AccountManagement() {
         </Paper>
 
         {/* Update Account Dialog */}
-        {selectedAccount && (
-          <Dialog open={openUpdateAccount} onClose={closeUpdate}>
-            <DialogTitle>Edit Account</DialogTitle>
+        {selectedStore && (
+          <Dialog open={openUpdatestore} onClose={closeUpdate}>
+            <DialogTitle>Edit Store</DialogTitle>
             <DialogContent>
               <TextField
                 label="Name"
-                value={selectedAccount.username || ""}
+                value={selectedStore.name_store || ""}
                 fullWidth
                 margin="normal"
-                onChange={(e) => handleChange("username", e.target.value)}
+                onChange={(e) => handleChange("name", e.target.value)}
               />
               <FormControl fullWidth>
                 <InputLabel variant="standard" htmlFor="uncontrolled-native">
                   Choose Status
                 </InputLabel>
                 <NativeSelect
-                  defaultValue={selectedAccount.isActive ? 'true' : 'false'}
+                  value={selectedStore.is_active} // Use value instead of defaultValue
+                  onChange={(e) =>
+                    handleChange("is_active", e.target.value === "true")
+                  } // Convert string to boolean
                   inputProps={{
-                    name: "isActive",
+                    name: "is_active",
                     id: "uncontrolled-native",
                   }}
-                  onChange={(e) => handleChange("isActive", e.target.value === 'true')}
                 >
-                  <option value={'true'}>Active</option>
-                  <option value={'false'}>Inactive</option>
+                  <option value={"true"}>Active</option>
+                  <option value={"false"}>Inactive</option>
                 </NativeSelect>
               </FormControl>
             </DialogContent>

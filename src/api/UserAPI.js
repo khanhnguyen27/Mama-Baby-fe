@@ -45,18 +45,17 @@ export const profileUserApi = () => {
 export const updateAccountApi = ( username, fullName, address, phoneNumber, status) => {
   return axiosJWT.put(URL_ACTIVE, {
     username: username,
-    password: "",
+    password: "888888888",
     fullName: fullName,
-    address: "",
+    address: address,
     phoneNumber: "123312312312",
-    status: status,
-    roleId: 1,
+    status: status
   });
 };
 export const updateRollUserApi = ( username, fullName, address, phoneNumber, status) => {
   return axiosJWT.put(URL_ACTIVESTORE, {
     username: username,
-    password: "",
+    password: "88888888",
     fullName: fullName,
     address: "",
     phoneNumber: "123312312312",

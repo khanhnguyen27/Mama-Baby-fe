@@ -46,18 +46,7 @@ export default function HomePage() {
     },
   ];
 
-  // useEffect(() => {  // Old way to get data from API
-  //   allAgeApi({ brand_id: 1, category_id: 4})
-  //     .then((res) => {
-  //       setAge(res?.data?.data);
-  //       const ageMap = age.reduce((x, item) => { // Create a list of item based on id of other variables (age, brand, category, etc.) from product
-  //         x[item.id] = item.rangeAge;
-  //         return x;
-  //       }, {});
-  //       setAgeMap(ageMap);
-  //     })
-  //     .catch((err) => console.log(err));
-  // }, []);
+
 
   const fetchData = async () => {
     try {
@@ -70,6 +59,9 @@ export default function HomePage() {
       console.log(err);
     }
   };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     fetchData();

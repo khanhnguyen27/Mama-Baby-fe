@@ -28,9 +28,15 @@ import {
   Tooltip,
   Typography,
   Pagination,
+  Avatar,
+  Divider,
+  Rating,
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PhoneIcon from "@mui/icons-material/Phone";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function Products() {
   const navigate = useNavigate();
@@ -51,7 +57,6 @@ export default function Products() {
   const [store, setStore] = useState([]);
   const [article, setArticle] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
 
   const storeId = state?.storeId;
   const keyword = state?.keyword;
@@ -241,24 +246,19 @@ export default function Products() {
             {store.name_store}
           </Typography>
         </Breadcrumbs>
-        <Container
-          sx={{
-            flexDirection: "column",
-            position: "relative",
-            borderRadius: "5px",
-            padding: "1rem",
-          }}
-        >
-          <Container>{/* Store Info */}</Container>
-          <Card
-            sx={{
-              backgroundColor: "#fff4fc",
 
-              border: "3px solid #ff469e",
-              borderRadius: "20px",
-              color: "black",
-              maxWidth: "1200px",
-              width: "100%",
+        <Box sx={{ p: 2 }}>
+          <Paper
+            sx={{
+              padding: "20px",
+              backgroundColor: "#f8f8f8",
+              textAlign: "center",
+              boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
+              borderRadius: "15px",
+              border: "2px solid #ff469e", // Màu viền hồng
+              "&:hover": {
+                border: "2px solid #ff469e", // Màu viền hồng khi hover
+              },
             }}
           >
             <CardContent>
@@ -266,107 +266,96 @@ export default function Products() {
                 variant="h4"
                 sx={{
                   color: "#ff469e",
-                  marginBottom: "2rem",
-                  textAlign: "",
                   fontWeight: "bold",
+                  marginBottom: "1rem",
+                  textAlign: "left",
                 }}
               >
-                {store.name_store}
+                {store?.name_store}
               </Typography>
-              {store && (
-                <Grid container spacing={6}>
-                  <Grid item xs={12} md={4}>
-                    <Paper
+              <Grid container spacing={3}>
+                <Grid item xs={10} md={4}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center", // Canh giữa các phần tử trong Box
+                      height: "100%", // Đảm bảo chiều cao của Box tương thích với Paper
+                      padding: "10px",
+                      border: "2px solid #ff469e", // Viền bọc quanh Avatar
+                      borderRadius: "15px",
+                    }}
+                  >
+                    <Avatar
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdZJVlDPE_mC28sugfpG-HdgSViHPXDHL5ww&s"
+                      alt={store?.name_store}
                       sx={{
-                        padding: "10px",
-                        backgroundColor: "#ffe6f0",
-                        textAlign: "center",
-                        boxShadow: "2px 2px 4px rgba(0, 0, 0.16)",
-                        borderRadius: "15px",
+                        width: "120px",
+                        height: "120px",
+                        borderRadius: "50%",
                       }}
+                    />
+                    <Box
+                      sx={{
+                        borderRadius: "15px",
+                        padding: "10px",
+                        marginTop: "20px",
+                      }}  
                     >
-                      <img
-                        style={{
-                          width: "200px",
-                          height: "200px",
-                          borderRadius: "100px",
-                          marginBottom: "10px",
-                        }}
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-5XlLXWqvo2uy4C2qB2r5M5hrpx13URBVTQ&s"
+
+                      <Divider
+                        sx={{ margin: "12px 0", backgroundColor: "#ff469e" }}
                       />
-                      <Typography
-                        style={{
-                          fontWeight: "bold",
-                          color: "black",
-                          marginBottom: "10px",
-                          fontSize: "1.75rem",
-                        }}
-                      ></Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={10} md={7}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={5} sm={10}>
-                        <div>
-                          <Typography
-                            style={{
-                              fontWeight: "bold",
-                              color: "black",
-                              fontSize: "1.25rem",
-                            }}
-                          >
-                            Description of Store
-                          </Typography>
-                          <Typography
-                            style={{ color: "black", fontSize: "1.3rem" }}
-                          >
-                            {store.description}
-                          </Typography>
-                        </div>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <div>
-                          <Typography
-                            style={{
-                              fontWeight: "bold",
-                              color: "black",
-                              fontSize: "1.25rem",
-                            }}
-                          >
-                            Address of Store
-                          </Typography>
-                          <Typography
-                            style={{ color: "black", fontSize: "1.3rem" }}
-                          >
-                            {store.address}
-                          </Typography>
-                        </div>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <div>
-                          <Typography
-                            style={{
-                              fontWeight: "bold",
-                              color: "black",
-                              fontSize: "1.25rem",
-                            }}
-                          >
-                            Phone Number
-                          </Typography>
-                          <Typography
-                            style={{ color: "black", fontSize: "1.3rem" }}
-                          >
-                            {store.phone}
-                          </Typography>
-                        </div>
-                      </Grid>
-                    </Grid>
-                  </Grid>
+                      <Typography variant="body1" gutterBottom>
+                        <LocationOnIcon
+                          sx={{
+                            fontSize: 20,
+                            verticalAlign: "middle",
+                            marginRight: "8px",
+                            color: "#ff469e",
+                          }}
+                        />
+                        {store?.address}
+                      </Typography>
+                      <Typography variant="body1" gutterBottom>
+                        <PhoneIcon
+                          sx={{
+                            fontSize: 20,
+                            verticalAlign: "middle",
+                            marginRight: "8px",
+                            color: "#ff469e",
+                          }}
+                        />
+                        {store?.phone}
+                      </Typography>
+
+                    </Box>
+                  </Box>
                 </Grid>
-              )}
+                <Grid item xs={12} md={8}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      marginBottom: "1rem",
+                      color: "#ff469e",
+                      textAlign: "left",
+                    }}
+                  >
+                    Description
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    paragraph
+                    sx={{ textAlign: "left" }}
+                  >
+                    {store?.description}
+                  </Typography>
+                  {/* Add more content or sections as needed */}
+                </Grid>
+              </Grid>
             </CardContent>
-          </Card>
-        </Container>
+          </Paper>
+        </Box>
       </Container>
       <Container>
         <Carousel

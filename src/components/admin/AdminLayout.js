@@ -43,11 +43,16 @@ const itemList = [
     href: "exchanges",
   },
   {
-    label: "Stores",
+    label: "Request Stores",
     Icon: Shop,
     href: "requeststore",
   },
-
+  
+  {
+    label: "Stores",
+    Icon: Shop,
+    href: "stores",
+  },
   {
     label: "Categories",
     Icon: CategoryIcon,

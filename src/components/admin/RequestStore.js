@@ -31,6 +31,7 @@ export default function RequestStore() {
   const [visible, setVisible] = useState(false);
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
+  const [selectedStoreId, setSelectedStoreId] = useState(null);
   const userId = decodedAccessToken.UserID;
   const [requestStore, setRequestStores] = useState({
     PROCESSING: [],
@@ -41,7 +42,7 @@ export default function RequestStore() {
   const [tabValue, setTabValue] = useState(0);
   const [open, setOpen] = useState(false);
   const [storeMap, setStoreMap] = useState([]);
-  const [user, setUser] = useState();
+  const [userMap, setUserMap] = useState();
   const [actionType, setActionType] = useState("");
 
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function RequestStore() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   const storeId = storeMap.id;
-
 
   const fetchData = async () => {
     try {
@@ -77,22 +77,20 @@ export default function RequestStore() {
         REFUSE: [],
       };
 
+      // storeData.forEach((store) => {
+      //   const latestStatus =
+      //     store[store.length - 1].status;
+      //   categorizedOrders[latestStatus]?.unshift(store);
+
+      // });
       storeData.forEach((store) => {
-        const latestStatus = 
-        store.request_list[store.request_list.length - 1].status;
+        const latestStatus = store.status; // Assuming `store` is correctly structured
         categorizedOrders[latestStatus]?.unshift(store);
-        // store.status;
-        // if (latestStatus) {
-        //   categorizedOrders[latestStatus]?.push(store);
-        // }
+        console.log(latestStatus);
       });
 
-      // for (const status in categorizedOrders) {
-      //   categorizedOrders[status].reverse();
-      // }
-
       setRequestStores(categorizedOrders);
-      setUser(userData);
+
 
       // Create storeMap assuming storeData is an array of objects
       const storeMap = storeData.reduce((x, item) => {
@@ -109,10 +107,14 @@ export default function RequestStore() {
       }, {});
 
       setStoreMap(storeMap);
+      const userMap = userData.reduce((x, item) => {
+        x[item.id] = [item.username, item.phone_number];
+        return x;
+      }, {});
+      setUserMap(userMap);
     } catch (err) {
       console.log(err);
     }
-    
   };
 
   useEffect(() => {
@@ -151,7 +153,7 @@ export default function RequestStore() {
         toast.success("Request Accepted!", {
           autoClose: 1500,
         });
-        updateRequestStatus = (storeId, newStatus );
+        updateRequestStatus(storeId, "APPROVED");
         handleClose();
         setLoading(true);
         setTimeout(() => {
@@ -189,7 +191,7 @@ export default function RequestStore() {
         toast.success("Request Rejected!", {
           autoClose: 1500,
         });
-        updateRequestStatus = (storeId, newStatus );
+        updateRequestStatus(storeId, "REFUSE");
         handleClose();
         setLoading(true);
         setTimeout(() => {
@@ -202,24 +204,26 @@ export default function RequestStore() {
       })
       .catch((error) => console.log(error));
   };
-  const updateRequestStatus = (storeId, newStatus ) => {
+  const updateRequestStatus = (storeId, newStatus) => {
     setRequestStores((prevOrders) => {
       const updatedRequest = { ...prevOrders };
       let upToDateRequest;
-  
+
       for (const status in updatedRequest) {
-        const storeIndex = updatedRequest[status].findIndex(store => store.id === storeId);
+        const storeIndex = updatedRequest[status].findIndex(
+          (store) => store.id === storeId
+        );
         if (storeIndex !== -1) {
           [upToDateRequest] = updatedRequest[status].splice(storeIndex, 1);
           break;
         }
       }
-  
+
       if (upToDateRequest) {
-        upToDateRequest.request_list.push({ status: newStatus });
+        upToDateRequest.push({ status: newStatus });
         updatedRequest[newStatus].unshift(upToDateRequest);
       }
-  
+
       return updatedRequest;
     });
     handleClose();
@@ -228,14 +232,19 @@ export default function RequestStore() {
       navigate("/admin/requeststore");
       setLoading(false);
     }, 1500);
-  }
+  };
 
-  const handleOpen = (type) => {
+  const handleOpen = (type, storeId) => {
     setActionType(type); // Đảm bảo type được set chính xác là "Accept" hoặc "Reject"
+    setSelectedStoreId(storeId);
     setOpen(true);
   };
-  
-  const handleClose = () => setOpen(false);
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedStoreId(null);
+  };
+
   console.log(storeMap);
 
   return (
@@ -452,7 +461,7 @@ export default function RequestStore() {
                       </Box>
                     </Typography>
                   </Grid>
-                  
+
                   <Grid item xs={12} md={5}>
                     <Typography
                       variant="body2"
@@ -496,7 +505,7 @@ export default function RequestStore() {
                         >
                           <span style={{ opacity: 0.7 }}>User Name:</span>
                           <span style={{ fontWeight: "600" }}>
-                            {user.full_name}
+                            {userMap[item.user_id][0]}
                           </span>
                         </Box>
                         <Box
@@ -508,177 +517,175 @@ export default function RequestStore() {
                         >
                           <span style={{ opacity: 0.7 }}>Phone:</span>
                           <span style={{ fontWeight: "600" }}>
-                            {user.phone_number}
+                            {userMap[item.user_id][1]}
                           </span>
                         </Box>
                       </Box>
                     </Typography>
                   </Grid>
-                  {item.request_list[item.request_list.length - 1]
-                      .status === "PROCESSING" && (
-                  <Grid item xs={12} sx={{ textAlign: "right" }}>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderRadius: "10px",
-                        fontSize: 16,
-                        fontWeight: "bold",
-                        my: 2,
-                        mx: 1,
-                        transition:
-                          "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          border: "1px solid white",
-                        },
-                      }}
-                      onClick={() => handleOpen("Reject")}
-                    >
-                      REJECT REQUEST
-                    </Button>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderRadius: "10px",
-                        fontSize: 16,
-                        fontWeight: "bold",
-                        my: 2,
-                        mx: 1,
-                        transition:
-                          "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          border: "1px solid white",
-                        },
-                      }}
-                      onClick={() => handleOpen("Accept")}
-                    >
-                      ACCEPT REQUEST
-                    </Button>
-                    <Modal
-                      open={open}
-                      onClose={handleClose}
-                      slotProps={{
-                        backdrop: {
-                          style: {
-                            backgroundColor: "rgba(0, 0, 0, 0.1)",
-                          },
-                        },
-                      }}
-                    >
-                      <Box
+                  {item.status === "PROCESSING" && (
+                    <Grid item xs={12} sx={{ textAlign: "right" }}>
+                      <Button
+                        variant="contained"
                         sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          width: 400,
-                          borderRadius: "20px",
-                          backgroundColor: "#fff4fc",
-                          border: "2px solid #ff469e",
-                          boxShadow: 20,
-                          p: 4,
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          borderRadius: "10px",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          my: 2,
+                          mx: 1,
+                          transition:
+                            "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            border: "1px solid white",
+                          },
+                        }}
+                        onClick={() => handleOpen("Reject", item.id)}
+                      >
+                        REJECT REQUEST
+                      </Button>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          borderRadius: "10px",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          my: 2,
+                          mx: 1,
+                          transition:
+                            "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            border: "1px solid white",
+                          },
+                        }}
+                        onClick={() => handleOpen("Accept")}
+                      >
+                        ACCEPT REQUEST
+                      </Button>
+                      <Modal
+                        open={open}
+                        onClose={handleClose}
+                        slotProps={{
+                          backdrop: {
+                            style: {
+                              backgroundColor: "rgba(0, 0, 0, 0.1)",
+                            },
+                          },
                         }}
                       >
-                        <Typography variant="h6" component="h2">
-                          {actionType === "Accept"
-                            ? "Accept Order"
-                            : "Reject Order"}
-                        </Typography>
-                        <Typography sx={{ mt: 2 }}>
-                          {actionType === "Accept"
-                            ? "Are you sure you want to accept this order?"
-                            : "Are you sure you want to reject this order?"}
-                        </Typography>
                         <Box
                           sx={{
-                            mt: 2,
-                            display: "flex",
-                            justifyContent: "flex-end",
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            width: 400,
+                            borderRadius: "20px",
+                            backgroundColor: "#fff4fc",
+                            border: "2px solid #ff469e",
+                            boxShadow: 20,
+                            p: 4,
                           }}
                         >
-                          <Button
-                            variant="contained"
+                          <Typography variant="h6" component="h2">
+                            {actionType === "Accept"
+                              ? "Accept Order"
+                              : "Reject Order"}
+                          </Typography>
+                          <Typography sx={{ mt: 2 }}>
+                            {actionType === "Accept"
+                              ? "Are you sure you want to accept this order?"
+                              : "Are you sure you want to reject this order?"}
+                          </Typography>
+                          <Box
                             sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "20px",
-                              fontSize: 16,
-                              fontWeight: "bold",
-                              my: 0.2,
-                              mx: 1,
-                              transition:
-                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid white",
-                              },
-                            }}
-                            onClick={() => {
-                              actionType === "Accept"
-                                ? handleAccept(
-                                    item.id,
-                                    item.name_store,
-                                    item.address,
-                                    item.description,
-                                    item.phone,
-                                    "APPROVED",
-                                    1,
-                                    item.user_id
-                                  )
-                                : handleReject(
-                                    item.id,
-                                    item.name_store,
-                                    item.address,
-                                    item.description,
-                                    item.phone,
-                                    "REFUSE",
-                                    1,
-                                    item.user_id
-                                  );
+                              mt: 2,
+                              display: "flex",
+                              justifyContent: "flex-end",
                             }}
                           >
-                            Yes
-                          </Button>
-                          <Button
-                            variant="contained"
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "20px",
-                              fontSize: 16,
-                              fontWeight: "bold",
-                              my: 0.2,
-                              mx: 1,
-                              transition:
-                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid white",
-                              },
-                            }}
-                            onClick={handleClose}
-                          >
-                            No
-                          </Button>
+                            <Button
+                              variant="contained"
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "20px",
+                                fontSize: 16,
+                                fontWeight: "bold",
+                                my: 0.2,
+                                mx: 1,
+                                transition:
+                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  border: "1px solid white",
+                                },
+                              }}
+                              onClick={() => {
+                                actionType === "Accept"
+                                  ? handleAccept(
+                                      item.id,
+                                      item.name_store,
+                                      item.address,
+                                      item.description,
+                                      item.phone,
+                                      "APPROVED",
+                                      1,
+                                      item.user_id
+                                    )
+                                  : handleReject(
+                                      item.id,
+                                      item.name_store,
+                                      item.address,
+                                      item.description,
+                                      item.phone,
+                                      "REFUSE",
+                                      1,
+                                      item.user_id
+                                    );
+                              }}
+                            >
+                              Yes
+                            </Button>
+                            <Button
+                              variant="contained"
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "20px",
+                                fontSize: 16,
+                                fontWeight: "bold",
+                                my: 0.2,
+                                mx: 1,
+                                transition:
+                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  border: "1px solid white",
+                                },
+                              }}
+                              onClick={handleClose}
+                            >
+                              No
+                            </Button>
+                          </Box>
                         </Box>
-                      </Box>
-                    </Modal>
-                  </Grid>
-                                      )}
-
+                      </Modal>
+                    </Grid>
+                  )}
                 </Grid>
               </Card>
             ))
@@ -714,5 +721,4 @@ export default function RequestStore() {
       </Container>
     </div>
   );
-
 }
