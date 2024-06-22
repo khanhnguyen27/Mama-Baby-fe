@@ -61,7 +61,7 @@ export default function HomePage() {
 
   const fetchData = async () => {
     try {
-      const [articleRes] = await Promise.all([allStoreApi(), allArticleApi()]);
+      const articleRes = await allArticleApi();
 
       const articleData = articleRes?.data?.data || [];
 
@@ -70,6 +70,10 @@ export default function HomePage() {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <Container>

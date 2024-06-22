@@ -803,31 +803,44 @@ export default function Products() {
                           <Divider />
                           <CardActions sx={{ justifyContent: "space-between" }}>
                             <CardContent sx={{ padding: "10px 0 0 0" }}>
-                              <Typography variant="h6">
-                                {Array(fullStars).fill(
-                                  <Star style={{ color: "#ff469e" }} />
-                                )}
-                                {halfStar && (
-                                  <StarHalf style={{ color: "#ff469e" }} />
-                                )}
-                                {Array(emptyStars).fill(
-                                  <StarOutline style={{ color: "#ff469e" }} />
-                                )}
-                              </Typography>
-                              <Typography>
-                                <span
+                              <Typography
+                                variant="h6"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <div
                                   style={{
-                                    color: "#ff469e",
-                                    fontWeight: "bold",
+                                    display: "flex",
+                                    alignItems: "center",
                                   }}
                                 >
-                                  {
-                                    comment.filter(
-                                      (x) => x.product_id === item.id
-                                    ).length
-                                  }
-                                </span>{" "}
-                                reviews
+                                  {Array(fullStars).fill(
+                                    <Star style={{ color: "#ff469e" }} />
+                                  )}
+                                  {halfStar && (
+                                    <StarHalf style={{ color: "#ff469e" }} />
+                                  )}
+                                  {Array(emptyStars).fill(
+                                    <StarOutline style={{ color: "#ff469e" }} />
+                                  )}
+                                  <span
+                                    style={{
+                                      color: "gray",
+                                      fontSize: "0.8em",
+                                    }}
+                                  >
+                                    (
+                                    {
+                                      comment.filter(
+                                        (x) => x.product_id === item.id
+                                      ).length
+                                    }
+                                    )
+                                  </span>
+                                </div>
                               </Typography>
                             </CardContent>
                             <IconButton

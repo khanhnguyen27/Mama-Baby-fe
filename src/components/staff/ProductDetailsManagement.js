@@ -4,14 +4,15 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { productByIdApi } from "../../api/ProductAPI";
-import { allCommentApi, commentByProductIdApi } from "../../api/CommentAPI";
+import { commentByProductIdWithStoreApi } from "../../api/CommentAPI";
 import { format } from "date-fns";
 import { allUserApi } from "../../api/UserAPI";
-import { updateCommentApi, createCommentApi } from "../../api/CommentAPI";
+import { updateCommentStatusApi, createCommentApi } from "../../api/CommentAPI";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Send from "@mui/icons-material/Send";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
+import PersonIcon from "@mui/icons-material/Person";
 import {
   Star,
   StarHalf,
@@ -48,7 +49,6 @@ import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
-import personUrl from "../../images/user.png";
 
 export default function ProductDetailsManagement() {
   const [visible, setVisible] = useState(false);
@@ -69,21 +69,42 @@ export default function ProductDetailsManagement() {
   const [user, setUser] = useState({});
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openEditComment, setOpenEditComment] = useState(false);
-  const [selectedComment, setSelectedComment] = useState(null);
   const [emptyStars, setEmptyStars] = useState(0);
   const [halfStar, setHalfStar] = useState(0);
   const [fullStars, setFullStars] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRating, setTotalRating] = useState(0);
+  const [blockComment, setBlockComment] = useState(true);
 
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
   const [ratingArr, setRatingArr] = useState([0, 0, 0, 0, 0]);
 
-  const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
-  const dateTime = format(new Date(), "PPPpz"); // Formatted current date and time
+  const handleLockComment = (item) => {
+    handleMenuClose();
+    setBlockComment(!blockComment);
+
+    if (item.status === false) {
+      updateCommentStatusApi(item.id, "true")
+        .then((response) => {
+          fetchData();
+          toast.success("Comment locked successfully!");
+        })
+        .catch((error) => {
+          toast.error("Failed to lock comment. Please try again later.");
+        });
+    } else {
+      updateCommentStatusApi(item.id, "false")
+        .then((response) => {
+          fetchData();
+          toast.success("Comment unlocked successfully!");
+        })
+        .catch((error) => {
+          toast.error("Failed to unlock comment. Please try again later.");
+        });
+    }
+  };
 
   const handleMenuClick = (event, item) => {
     setAnchorEl({ element: event.currentTarget, id: item.id });
@@ -91,70 +112,6 @@ export default function ProductDetailsManagement() {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleOpenEditComment = (item) => {
-    handleMenuClose();
-    setSelectedComment(item);
-    setOpenEditComment(true);
-  };
-
-  const handleChange = (field, value) => {
-    if (field === "rating") {
-      // Convert value to integer and ensure it's within the valid range (0 to 5)
-      const intValue = parseInt(value);
-      if (!isNaN(intValue) && intValue >= 0 && intValue <= 5) {
-        setSelectedComment((prevComment) => ({
-          ...prevComment,
-          [field]: intValue,
-        }));
-      }
-    } else {
-      setSelectedComment((prevComment) => ({
-        ...prevComment,
-        [field]: value,
-      }));
-    }
-  };
-
-  const handleCloseEditComment = () => {
-    setOpenEditComment(false);
-    setSelectedComment(null);
-  };
-
-  const handleEditComment = async () => {
-    // Logic để sửa bình luận
-    // console.log(selectedComment?.id);
-    // console.log(selectedComment?.product_id);
-    // console.log(selectedComment?.rating);
-    // console.log(selectedComment?.comment);
-    // console.log(userId);
-    // console.log(selectedComment?.date);
-
-    if (selectedComment?.rating === 0) {
-      toast.warn("Please select a rating.");
-      return;
-    }
-
-    if (selectedComment?.comment.length < 20) {
-      toast.warn("Please enter a comment of at least 50 characters.");
-      return;
-    }
-
-    await updateCommentApi(
-      selectedComment?.id,
-      selectedComment?.rating,
-      selectedComment?.comment,
-      userId
-    )
-      .then((response) => {
-        fetchData();
-        handleCloseEditComment();
-        toast.success("Comment Edit successfully!");
-      })
-      .catch((error) => {
-        toast.error("Failed to edit comment. Please try again later.");
-      });
   };
 
   useEffect(() => {
@@ -175,7 +132,7 @@ export default function ProductDetailsManagement() {
           allCategorytApi(),
           allUserApi(),
           productByIdApi(productId),
-          commentByProductIdApi(productId),
+          commentByProductIdWithStoreApi(productId),
         ]);
 
       const ageData = ageRes?.data?.data || [];
@@ -230,7 +187,7 @@ export default function ProductDetailsManagement() {
         setRatingArr([0, 0, 0, 0, 0]);
       } else {
         const productComments = commentData.filter(
-          (x) => x.product_id === productData.id
+          (x) => x.product_id === productData.id && x.status === true
         );
 
         const averageRating = productComments.length
@@ -278,52 +235,6 @@ export default function ProductDetailsManagement() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
-  //Add comment
-  const username = decodedAccessToken.FullName;
-  const [rating, setRating] = useState(0);
-  const [commentInput, setCommentInput] = useState("");
-  const maxCharacters = 2000;
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    if (value.length <= maxCharacters) {
-      setCommentInput(value);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (
-      commentInput.length >= maxCharacters &&
-      e.key !== "Backspace" &&
-      e.key !== "Delete"
-    ) {
-      e.preventDefault();
-    }
-  };
-
-  const handleComment = async () => {
-    if (rating === 0) {
-      toast.warn("Please select a rating.");
-      return;
-    }
-
-    // if (comment.length < 20) {
-    //   toast.warn("Please enter a comment of at least 50 characters.");
-    //   return;
-    // }
-
-    await createCommentApi(product.id, rating, commentInput, userId)
-      .then((response) => {
-        fetchData();
-        setRating(0);
-        setCommentInput("");
-        toast.success("Comment added successfully!");
-      })
-      .catch((error) => {
-        toast.error("Failed to add comment. Please try again later.");
-      });
-  };
-
   if (!product) {
     window.document.title = "Loading...";
     return (
@@ -340,28 +251,6 @@ export default function ProductDetailsManagement() {
       </Box>
     );
   }
-
-  const handleAddToCart = () => {
-    // if(quantity == 0){
-    //   toast.warn(`No item's quantity selected`);
-    //   return;
-    // }
-    toast.info(`${product.name} x ${quantity} was added to cart`, {
-      position: "top-right",
-      autoClose: 2500,
-    });
-    dispatch(
-      addToCart({
-        product: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          store_id: product.store_id,
-        },
-        quantity: quantity,
-      })
-    );
-  };
 
   const handleShowMore = () => {
     setVisibleComments((prevVisibleComments) => prevVisibleComments + 5);
@@ -652,10 +541,14 @@ export default function ProductDetailsManagement() {
                     <Typography variant="body2" component="span">
                       Total{" "}
                     </Typography>
-                    <Avatar
-                      sx={{ ml: 1, mr: 1, width: 20, height: 20 }}
-                      alt="Icon Person"
-                      src={personUrl}
+                    <PersonIcon
+                      sx={{
+                        ml: 1,
+                        mr: 1,
+                        width: 24,
+                        height: 24,
+                        color: "inherit",
+                      }}
                     />
                     <Typography variant="body2" component="span">
                       {totalRating}
@@ -666,7 +559,16 @@ export default function ProductDetailsManagement() {
             </Grid>
 
             {/* Thanh thanh đánh giá từng sao */}
-            <Grid item xs={12} md={6}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "row",
+              }}
+            >
               <Box className="rating-table__bar">
                 <div className="bar-star">
                   {ratingArr.map((rating, index) => {
@@ -685,12 +587,18 @@ export default function ProductDetailsManagement() {
                           variant="body1"
                           sx={{ flex: "0 0 auto", minWidth: 50 }}
                         >
-                          <Grid sx={{ padding: "0 0 5px 0" }}>
+                          <Grid
+                            sx={{
+                              padding: "0 0 5px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
                             <StarIcon style={{ color: "#ff469e" }} />
                             {starIndex}
                           </Grid>
                         </Typography>
-                        <Box sx={{ width: 300, ml: 2 }}>
+                        <Box sx={{ width: 300 }}>
                           <LinearProgress
                             variant="determinate"
                             value={ratingPer}
@@ -704,7 +612,7 @@ export default function ProductDetailsManagement() {
                             }}
                           />
                         </Box>
-                        <Typography variant="body2" sx={{ ml: 2 }}>
+                        <Typography variant="body2" sx={{ ml: 1 }}>
                           {rating}
                         </Typography>
                       </Box>
@@ -716,68 +624,6 @@ export default function ProductDetailsManagement() {
           </Grid>
         </Box>
 
-        <Box
-          component="form"
-          sx={{
-            borderRadius: 2,
-            boxShadow: 10,
-            backgroundColor: "#f0f0f0",
-            padding: 2,
-            mb: 4,
-            position: "relative",
-          }}
-        >
-          <Grid container alignItems="center" spacing={2} mb={2}>
-            <Grid item>
-              <Avatar src={avatarUrl} alt={username} />
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">{username}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                {dateTime}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Rating
-            name="star-rating"
-            value={rating}
-            onChange={(event, newValue) => setRating(newValue)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            placeholder="Write a comment..."
-            variant="outlined"
-            value={commentInput}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            InputProps={{
-              endAdornment: (
-                <IconButton
-                  aria-label="submit comment"
-                  sx={{ p: "10px" }}
-                  onClick={handleComment}
-                >
-                  <Send />
-                </IconButton>
-              ),
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 10,
-              right: 10,
-              p: "10px",
-              color: "gray",
-              fontSize: "0.8rem",
-            }}
-          >
-            {`${commentInput.length}/${maxCharacters}`}
-          </Box>
-        </Box>
         {isComment ? (
           [...comment] // Tạo bản sao của mảng comment trước khi sắp xếp
             .sort((a, b) =>
@@ -788,7 +634,7 @@ export default function ProductDetailsManagement() {
               <Card
                 key={item.id}
                 sx={{
-                  backgroundColor: "#f9f9f9",
+                  backgroundColor: item.status ? "#f9f9f9" : "#CACACA",
                   boxShadow:
                     "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
                   border: "1px solid #e0e0e0",
@@ -803,7 +649,7 @@ export default function ProductDetailsManagement() {
                       <Paper
                         sx={{
                           padding: "10px",
-                          backgroundColor: "#fafafa",
+                          backgroundColor: item.status ? "#fafafa" : "#CACACA",
                           textAlign: "center",
                         }}
                       >
@@ -811,49 +657,54 @@ export default function ProductDetailsManagement() {
                           {userMap[item.user_id]}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          {format(new Date(item.date), "dd/MM/yyyy HH:mm")}
+                          {new Date(item.date).toLocaleString()}
                         </Typography>
                       </Paper>
                     </Grid>
                     <Grid item xs={12} md={10}>
                       <Box display="flex" alignItems="center" mb={2}>
-                        <Rating value={item.rating} readOnly />
+                        <Rating
+                          value={item.rating}
+                          readOnly
+                          sx={{
+                            mb: 2,
+                            color: item.status ? "#ff469e" : "#aaa",
+                          }}
+                        />
                       </Box>
                       <Typography variant="body1">{item.comment}</Typography>
                     </Grid>
                   </Grid>
-                  {item.user_id === userId && (
-                    <>
-                      <IconButton
-                        aria-label="more"
-                        aria-controls="long-menu"
-                        aria-haspopup="true"
-                        onClick={(event) => handleMenuClick(event, item)}
-                        sx={{
-                          position: "absolute",
-                          top: "10px",
-                          right: "10px",
-                        }}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                      <Menu
-                        id={`menu-${item.id}`}
-                        anchorEl={
-                          anchorEl && anchorEl.id === item.id
-                            ? anchorEl.element
-                            : null
-                        }
-                        keepMounted
-                        open={Boolean(anchorEl && anchorEl.id === item.id)}
-                        onClose={handleMenuClose}
-                      >
-                        <MenuItem onClick={() => handleOpenEditComment(item)}>
-                          Edit Comment
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
+                  <>
+                    <IconButton
+                      aria-label="more"
+                      aria-controls="long-menu"
+                      aria-haspopup="true"
+                      onClick={(event) => handleMenuClick(event, item)}
+                      sx={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      id={`menu-${item.id}`}
+                      anchorEl={
+                        anchorEl && anchorEl.id === item.id
+                          ? anchorEl.element
+                          : null
+                      }
+                      keepMounted
+                      open={Boolean(anchorEl && anchorEl.id === item.id)}
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem onClick={() => handleLockComment(item)}>
+                        {item.status ? "Lock Comment" : "Unlock Comment"}
+                      </MenuItem>
+                    </Menu>
+                  </>
                 </CardContent>
               </Card>
             ))
@@ -885,75 +736,6 @@ export default function ProductDetailsManagement() {
           </Box>
         )}
       </Container>
-      <Modal open={openEditComment} onClose={handleCloseEditComment}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Grid container alignItems="center" spacing={2} mb={2}>
-            <Grid item>
-              <Avatar src={avatarUrl} />
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">
-                {userMap[selectedComment?.user_id]}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {selectedComment
-                  ? format(new Date(selectedComment.date), "dd/MM/yyyy HH:mm")
-                  : ""}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Rating
-            name="star-rating"
-            value={selectedComment?.rating}
-            onChange={(event, newValue) => handleChange("rating", newValue)}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Comment"
-            variant="outlined"
-            value={selectedComment?.comment}
-            onChange={(e) => handleChange("comment", e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Button
-            variant="contained"
-            sx={{
-              marginTop: 4,
-              backgroundColor: "white",
-              color: "#ff469e",
-              borderRadius: "30px",
-              fontWeight: "bold",
-              fontSize: 16,
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #ff469e",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-            onClick={handleEditComment}
-          >
-            Submit
-          </Button>
-        </Box>
-      </Modal>
     </div>
   );
 }

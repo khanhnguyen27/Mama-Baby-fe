@@ -33,6 +33,7 @@ import OrdersManagement from "./components/staff/OrdersManagement";
 import ExchangesManagement from "./components/staff/ExchangesManagement";
 import RefundManagement from "./components/staff/RefundManagement";
 import ProductDetailsManagement from "./components/staff/ProductDetailsManagement";
+import CommentHistory from "./components/general/CommentHistory";
 function App() {
   return (
     <div className="App">
@@ -48,6 +49,7 @@ function App() {
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/history/comment" element={<CommentHistory />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/regisstore" element={<RegisStores />} />
         <Route path="/orders" element={<Orders />} />

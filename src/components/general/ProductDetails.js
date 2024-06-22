@@ -4,7 +4,7 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { productByIdApi } from "../../api/ProductAPI";
-import { allCommentApi, commentByProductIdApi } from "../../api/CommentAPI";
+import { commentByProductIdApi } from "../../api/CommentAPI";
 import { format } from "date-fns";
 import { allUserApi } from "../../api/UserAPI";
 import { updateCommentApi, createCommentApi } from "../../api/CommentAPI";
@@ -12,6 +12,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Send from "@mui/icons-material/Send";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
+import PersonIcon from "@mui/icons-material/Person";
 import {
   Star,
   StarHalf,
@@ -48,7 +49,6 @@ import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
-import personUrl from "../../images/user.png";
 
 export default function ProductDetails() {
   const [visible, setVisible] = useState(false);
@@ -98,7 +98,7 @@ export default function ProductDetails() {
   const [ratingArr, setRatingArr] = useState([0, 0, 0, 0, 0]);
 
   const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
-  const dateTime = format(new Date(), "PPPpz"); // Formatted current date and time
+  const dateTime = format(new Date(), "Ppp"); // Formatted current date and time
 
   const handleMenuClick = (event, item) => {
     setAnchorEl({ element: event.currentTarget, id: item.id });
@@ -861,10 +861,14 @@ export default function ProductDetails() {
                     <Typography variant="body2" component="span">
                       Total{" "}
                     </Typography>
-                    <Avatar
-                      sx={{ ml: 1, mr: 1, width: 20, height: 20 }}
-                      alt="Icon Person"
-                      src={personUrl}
+                    <PersonIcon
+                      sx={{
+                        ml: 1,
+                        mr: 1,
+                        width: 24,
+                        height: 24,
+                        color: "inherit",
+                      }}
                     />
                     <Typography variant="body2" component="span">
                       {totalRating}
@@ -875,7 +879,16 @@ export default function ProductDetails() {
             </Grid>
 
             {/* Thanh thanh đánh giá từng sao */}
-            <Grid item xs={12} md={6}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "row",
+              }}
+            >
               <Box className="rating-table__bar">
                 <div className="bar-star">
                   {ratingArr.map((rating, index) => {
@@ -884,22 +897,23 @@ export default function ProductDetails() {
                     var barColor = totalRating === 0 ? "#e0e0e0" : "#ff469e";
 
                     return (
-                      <Box
-                        key={index}
-                        display="flex"
-                        alignItems="center"
-                        mb={0}
-                      >
+                      <Box key={index} display="flex" alignItems="center">
                         <Typography
                           variant="body1"
                           sx={{ flex: "0 0 auto", minWidth: 50 }}
                         >
-                          <Grid sx={{ padding: "0 0 5px 0" }}>
+                          <Grid
+                            sx={{
+                              padding: "0 0 5px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
                             <StarIcon style={{ color: "#ff469e" }} />
                             {starIndex}
                           </Grid>
                         </Typography>
-                        <Box sx={{ width: 300, ml: 2 }}>
+                        <Box sx={{ width: 300 }}>
                           <LinearProgress
                             variant="determinate"
                             value={ratingPer}
@@ -913,7 +927,7 @@ export default function ProductDetails() {
                             }}
                           />
                         </Box>
-                        <Typography variant="body2" sx={{ ml: 2 }}>
+                        <Typography variant="body2" sx={{ ml: 1 }}>
                           {rating}
                         </Typography>
                       </Box>
@@ -940,7 +954,18 @@ export default function ProductDetails() {
             >
               <Grid container alignItems="center" spacing={2} mb={2}>
                 <Grid item>
-                  <Avatar src={avatarUrl} alt={username} />
+                  <Avatar>
+                    {" "}
+                    <PersonIcon
+                      sx={{
+                        ml: 1,
+                        mr: 1,
+                        width: 24,
+                        height: 24,
+                        color: "inherit",
+                      }}
+                    />
+                  </Avatar>{" "}
                 </Grid>
                 <Grid item>
                   <Typography variant="h6">{username}</Typography>
@@ -1025,14 +1050,23 @@ export default function ProductDetails() {
                           {userMap[item.user_id]}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          {format(new Date(item.date), "dd/MM/yyyy HH:mm")}
+                          {new Date(item.date).toLocaleString()}
                         </Typography>
                       </Paper>
                     </Grid>
                     <Grid item xs={12} md={10}>
                       <Box display="flex" alignItems="center" mb={2}>
-                        <Rating value={item.rating} readOnly />
+                        <Rating
+                          value={item.rating}
+                          readOnly
+                          sx={{
+                            "& .MuiRating-iconFilled": {
+                              color: "#ff469e",
+                            },
+                          }}
+                        />
                       </Box>
+
                       <Typography variant="body1">{item.comment}</Typography>
                     </Grid>
                   </Grid>
@@ -1115,7 +1149,18 @@ export default function ProductDetails() {
         >
           <Grid container alignItems="center" spacing={2} mb={2}>
             <Grid item>
-              <Avatar src={avatarUrl} />
+              <Avatar>
+                {" "}
+                <PersonIcon
+                  sx={{
+                    ml: 1,
+                    mr: 1,
+                    width: 24,
+                    height: 24,
+                    color: "inherit",
+                  }}
+                />
+              </Avatar>{" "}
             </Grid>
             <Grid item>
               <Typography variant="h6">
@@ -1123,7 +1168,7 @@ export default function ProductDetails() {
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 {selectedComment
-                  ? format(new Date(selectedComment.date), "dd/MM/yyyy HH:mm")
+                  ? new Date(selectedComment.date).toLocaleString()
                   : ""}
               </Typography>
             </Grid>
@@ -1132,6 +1177,14 @@ export default function ProductDetails() {
             name="star-rating"
             value={selectedComment?.rating}
             onChange={(event, newValue) => handleChange("rating", newValue)}
+            sx={{
+              "& .MuiRating-iconFilled": {
+                color: "#ff469e",
+              },
+              "& .MuiRating-iconHover": {
+                color: "#ff69b4",
+              },
+            }}
           />
           <TextField
             fullWidth
