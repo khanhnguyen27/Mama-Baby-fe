@@ -26,12 +26,12 @@ import AdminLayout from "./components/admin/AdminLayout";
 import RegisStores from "./components/general/RegisStores";
 import Orders from "./components/general/Orders";
 import Articles from "./components/staff/ArticlesManagement";
-import VoucherManagement from "./components/admin/VoucherManagement";
+import VoucherManagement from "./components/staff/VoucherManagement";
 import RequestStore from "./components/admin/RequestStore";
 import AccountManagement from "./components/admin/AccountManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
 import ExchangesManagement from "./components/staff/ExchangesManagement";
-import RefundManagement from "./components/admin/RefundManagement";
+import RefundManagement from "./components/staff/RefundManagement";
 import ProductDetailsManagement from "./components/staff/ProductDetailsManagement";
 function App() {
   return (
@@ -65,6 +65,8 @@ function App() {
             <Route path="exchanges" element={<ExchangesManagement />} />
             <Route path="orders" element={<OrdersManagement />} />
             <Route path="articles" element={<Articles />} />
+            <Route path="vouchers" element={<VoucherManagement />} />
+            <Route path="refunds" element={<RefundManagement />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
@@ -75,8 +77,6 @@ function App() {
             <Route path="categories" element={<CategorieManagement />} />
             <Route path="brands" element={<BrandManagement />} />
             <Route path="age" element={<AgeManagement />} />
-            <Route path="vouchers" element={<VoucherManagement />} />
-            <Route path="refunds" element={<RefundManagement />} />
             <Route path="requeststore" element={<RequestStore />} />
             <Route path="accounts" element={<AccountManagement />} />
           </Route>

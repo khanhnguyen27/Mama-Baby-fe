@@ -15,11 +15,18 @@ export const allVoucherAdminApi = (params) => {
   });
 };
 
+export const getVoucherByStoreIdApi = (storeId) => {
+  return axiosJWT.get(`${URL_VOUCHER}/store/${storeId}`, {
+    storeId: storeId,
+  });
+};
+
 export const addVoucherApi = (
   code,
   discountValue,
   description,
   endAt,
+  storeId,
   isActive
 ) => {
   return axiosJWT.post(URL_VOUCHER, {
@@ -27,6 +34,7 @@ export const addVoucherApi = (
     discount_value:discountValue,
     description:description,
     end_at:endAt,
+    store_id:storeId,
     is_active:isActive
   });
 };

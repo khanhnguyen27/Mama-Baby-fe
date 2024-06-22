@@ -30,7 +30,9 @@ import {
   TablePagination,
   InputAdornment,
 } from "@mui/material";
-import { allVoucherAdminApi, updateVoucherApi, addVoucherApi } from "../../api/VoucherAPI";
+import { getVoucherByStoreIdApi, updateVoucherApi, addVoucherApi } from "../../api/VoucherAPI";
+import { storeByUserIdApi } from "../../api/StoreAPI";
+import { jwtDecode } from "jwt-decode";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import FormControl from "@mui/material/FormControl";
@@ -43,12 +45,28 @@ export default function Vouchers() {
   const [openUpdateVoucher, setOpenUpdateVoucher] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [store, setStore] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
-  };
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedAccessToken = jwtDecode(accessToken);
+  const userId = decodedAccessToken.UserID;
+
+  useEffect(() => {
+    const fetchStoreData = async () => {
+      try {
+        const res = await storeByUserIdApi(userId);
+        setStore(res?.data?.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchStoreData();
+  }, [userId]);
+
+  const storeId = store?.id;
 
   useEffect(() => {
     const savedSearchKeyword = localStorage.getItem("searchKeyword");
@@ -58,9 +76,13 @@ export default function Vouchers() {
   }, []);
 
   const fetchData = async () => {
+    if (!storeId) {
+      console.error("Store ID is undefined");
+      return;
+    }
     setLoading(true);
     try {
-      const voucherRes = await allVoucherAdminApi();
+      const voucherRes = await getVoucherByStoreIdApi(storeId);
       setVouchers(voucherRes.data.data || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -70,22 +92,20 @@ export default function Vouchers() {
   };
 
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    fetchData();
-  }, []);
+    if (storeId) {
+      fetchData();
+    }
+  }, [storeId]);
 
   const openUpdate = (item) => {
     setOpenUpdateVoucher(true);
     setSelectedVoucher(item);
-  }
+  };
 
   const closeUpdate = () => {
     setOpenUpdateVoucher(false);
     setSelectedVoucher(null);
-  }
+  };
 
   const handleChange = (field, value) => {
     setSelectedVoucher((prevVoucher) => ({
@@ -105,7 +125,7 @@ export default function Vouchers() {
       selectedVoucher.discount_value,
       selectedVoucher.description,
       selectedVoucher.endAt,
-      selectedVoucher.active,
+      selectedVoucher.active
     )
       .then((response) => {
         toast.success("Voucher updated successfully!");
@@ -126,10 +146,9 @@ export default function Vouchers() {
     return moment(date, "YYYY-MM-DD").format("DD/MM/YYYY");
   };
 
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setSelectedVoucher({ ...selectedVoucher, [name]: value });
-  // };
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -144,7 +163,6 @@ export default function Vouchers() {
     const value = event.target.value;
     setSearchKeyword(value);
     setPage(0); // Reset to the first page when search changes
-    // localStorage.setItem("searchKeyword", value);
   };
 
   const filteredVoucher = vouchers.filter((item) =>
@@ -174,10 +192,8 @@ export default function Vouchers() {
   const now = new Date();
   const endDate = new Date(endAt);
 
-  console.log(isActive)
-
   const handleAddVoucher = () => {
-    if (!code || !discountValue || !description || !endAt ) {
+    if (!code || !discountValue || !description || !endAt) {
       toast.warn("Please fill in all required fields.");
       return;
     } else if (endDate <= now) {
@@ -189,6 +205,7 @@ export default function Vouchers() {
       discountValue,
       description,
       endAt,
+      storeId,
       isActive
     )
       .then((response) => {
