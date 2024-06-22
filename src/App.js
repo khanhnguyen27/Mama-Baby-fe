@@ -28,12 +28,16 @@ import Orders from "./components/general/Orders";
 import Articles from "./components/staff/ArticlesManagement";
 import VoucherManagement from "./components/staff/VoucherManagement";
 import RequestStore from "./components/admin/RequestStore";
+import StoreManagement from "./components/admin/StoreManagement";
 import AccountManagement from "./components/admin/AccountManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
 import ExchangesManagement from "./components/staff/ExchangesManagement";
 import RefundManagement from "./components/staff/RefundManagement";
 import ProductDetailsManagement from "./components/staff/ProductDetailsManagement";
 import CommentHistory from "./components/general/CommentHistory";
+import ProductGiftDetails from "./components/general/ProductGiftDetails"; 
+import ProductGift from "./components/general/ProductGift";
+
 function App() {
   return (
     <div className="App">
@@ -45,7 +49,9 @@ function App() {
         <Route path="/introduction" element={<Introduction />} />
         <Route path="/promotion" element={<Promotion />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/productgift" element={<ProductGift />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="//productgiftdetail/:productId" element={<ProductGiftDetails />} /> 
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail />} />
         <Route path="/cart" element={<Cart />} />
@@ -80,6 +86,7 @@ function App() {
             <Route path="brands" element={<BrandManagement />} />
             <Route path="age" element={<AgeManagement />} />
             <Route path="requeststore" element={<RequestStore />} />
+            <Route path="stores" element={<StoreManagement />} />
             <Route path="accounts" element={<AccountManagement />} />
           </Route>
         </Route>
