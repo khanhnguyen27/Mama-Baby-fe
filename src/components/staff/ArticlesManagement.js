@@ -624,7 +624,7 @@ export default function Articles() {
           <Button
             onClick={handleCloseAddArticle}
             sx={{
-              backgroundColor: "#E0E0E0",
+              backgroundColor: "#F0F8FF",
               color: "#757575",
               borderRadius: "30px",
               fontSize: 16,
@@ -646,16 +646,16 @@ export default function Articles() {
             onClick={handleAddArticle}
             sx={{
               backgroundColor: "#F0F8FF",
-              color: "#008080",
+              color: "#ff469e",
               borderRadius: "30px",
               fontSize: 16,
               fontWeight: "bold",
               width: "10vw",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #008080",
+              border: "1px solid #ff469e",
               "&:hover": {
-                backgroundColor: "#008080",
+                backgroundColor: "#ff469e",
                 color: "white",
                 border: "1px solid white",
               },
@@ -755,7 +755,7 @@ export default function Articles() {
               variant="contained"
               onClick={handleClose}
               sx={{
-                backgroundColor: "#E0E0E0",
+                backgroundColor: "#F0F8FF",
                 color: "#757575",
                 borderRadius: "30px",
                 fontSize: 16,
@@ -778,16 +778,16 @@ export default function Articles() {
               onClick={handleUpdate}
               sx={{
                 backgroundColor: "#F0F8FF",
-                color: "#008080",
+                color: "#ff469e",
                 borderRadius: "30px",
                 fontSize: 16,
                 fontWeight: "bold",
                 width: "10vw",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                border: "1px solid #008080",
+                border: "1px solid #ff469e",
                 "&:hover": {
-                  backgroundColor: "#008080",
+                  backgroundColor: "#ff469e",
                   color: "white",
                   border: "1px solid white",
                 },

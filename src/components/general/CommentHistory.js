@@ -10,6 +10,7 @@ import {
   Container,
   Rating,
   Avatar,
+  CardMedia,
 } from "@mui/material";
 import { Close, KeyboardCapslock } from "@mui/icons-material";
 import { redirect, useNavigate } from "react-router-dom";
@@ -18,11 +19,13 @@ import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import { commentByUserIdApi } from "../../api/CommentAPI";
 import PersonIcon from "@mui/icons-material/Person";
+import { allProductCHApi } from "../../api/ProductAPI";
 export default function CommentHistory() {
   window.document.title = "Comment History";
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [comment, setComment] = useState([]);
+  const [product, setProduct] = useState([]);
   const [visibleComments, setVisibleComments] = useState(5);
   const accessToken = localStorage.getItem("accessToken");
   const isComment = comment?.length;
@@ -52,12 +55,20 @@ export default function CommentHistory() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  console.log(product);
   const fetchData = async () => {
     try {
-      const [commentRes] = await Promise.all([commentByUserIdApi(userId)]);
+      const [commentRes, productRes] = await Promise.all([
+        commentByUserIdApi(userId),
+        allProductCHApi({
+          type: "WHOLESALE",
+        }),
+      ]);
 
       const commentData = commentRes?.data?.data || [];
+      const productData = productRes?.data?.data?.products || [];
 
+      setProduct(productData);
       setComment(commentData);
     } catch (err) {
       console.log(err);
@@ -164,6 +175,54 @@ export default function CommentHistory() {
                       <Typography variant="body1" component="div">
                         {comment.comment}
                       </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        position: "relative",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {product.map((item) => {
+                        if (item.id === comment.product_id) {
+                          return (
+                            <Box
+                              key={item.id}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textAlign: "center",
+                              }}
+                            >
+                              <Typography
+                                variant="body1"
+                                color="textSecondary"
+                                sx={{ marginBottom: 1 }}
+                              >
+                                {item.name}
+                              </Typography>
+                              <CardMedia
+                                component="img"
+                                image={
+                                  item.image_url.includes("Product_")
+                                    ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                                    : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                }
+                                onError={(e) => {
+                                  e.target.src =
+                                    "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                }}
+                                alt={item.name}
+                                sx={{
+                                  width: "128px",
+                                  height: "auto",
+                                }}
+                              />
+                            </Box>
+                          );
+                        }
+                      })}
                     </Box>
                   </CardContent>
                 </Card>

@@ -53,8 +53,12 @@ export const cartSlice = createSlice({
     //   );
     // },
     removeFromCart: (state, action) => {
-      const productIdsToRemove = Array.isArray(action.payload)? action.payload : [action.payload.id];
-      state.data.products = state.data.products.filter((item) =>!productIdsToRemove.includes(item.product.id));
+      const productIdsToRemove = Array.isArray(action.payload)
+        ? action.payload
+        : [action.payload.id];
+      state.data.products = state.data.products.filter(
+        (item) => !productIdsToRemove.includes(item.product.id)
+      );
     },
     clearCart: (state) => {
       state.data.products = [];

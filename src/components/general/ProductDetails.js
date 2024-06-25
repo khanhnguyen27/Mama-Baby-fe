@@ -41,6 +41,12 @@ import {
   Avatar,
   Modal,
   LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import { Rating } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
@@ -76,6 +82,12 @@ export default function ProductDetails() {
   const [fullStars, setFullStars] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRating, setTotalRating] = useState(0);
+  const [details, setDetails] = useState(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleToggle = () => {
+    setExpanded(!expanded);
+  };
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -181,6 +193,28 @@ export default function ProductDetails() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const extractDescriptionDetails = (description) => {
+    const [
+      weight,
+      unit,
+      brandOrigin,
+      manufacturedAt,
+      manufacturer,
+      usageInstructions,
+      storageInstructions,
+    ] = description.split("|");
+
+    return {
+      weight,
+      unit,
+      brandOrigin,
+      manufacturedAt,
+      manufacturer,
+      usageInstructions,
+      storageInstructions,
+    };
+  };
+
   const fetchData = async () => {
     try {
       const [ageRes, brandRes, categoryRes, userRes, productRes, commentRes] =
@@ -206,6 +240,9 @@ export default function ProductDetails() {
       setUser(userData);
       setProduct(productData);
       setComment(commentData);
+
+      const details = extractDescriptionDetails(productData.description);
+      setDetails(details);
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -371,6 +408,7 @@ export default function ProductDetails() {
           id: product.id,
           name: product.name,
           price: product.price,
+          type: product.type,
           store_id: product.store_id,
           image_url: product.image_url,
         },
@@ -509,8 +547,8 @@ export default function ProductDetails() {
               border: "3px solid #ff469e",
               color: "black",
               padding: "20px",
-              maxWidth: "72vw",
-              width: "100%",
+              maxWidth: "900px",
+              width: "60vw",
               margin: "0 auto",
             }}
           >
@@ -537,7 +575,8 @@ export default function ProductDetails() {
                           : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                       }
                       onError={(e) => {
-                        e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                        e.target.src =
+                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                       }}
                       alt={product.name}
                     />
@@ -605,9 +644,9 @@ export default function ProductDetails() {
                       {categoryMap[product.category_id]}
                     </Typography>
                   </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {/* <div style={{ display: "flex", gap: "0.5rem" }}>
                     <Typography>{product.description}</Typography>
-                  </div>
+                  </div> */}
                   <Box
                     sx={{
                       display: "flex",
@@ -787,7 +826,147 @@ export default function ProductDetails() {
       <Container sx={{ my: 4 }}>
         <Typography
           variant="h4"
-          sx={{ mb: 4, textAlign: "center", color: "#ff469e" }}
+          sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
+        >
+          Product Details
+        </Typography>
+        <TableContainer
+          component={Paper}
+          sx={{ boxShadow: 3, borderRadius: 2 }}
+        >
+          <Table>
+            <TableBody>
+              <TableRow
+                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+              >
+                <TableCell
+                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                >
+                  Weight
+                </TableCell>
+                <TableCell
+                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                >
+                  {details.weight} {details.unit}
+                </TableCell>
+              </TableRow>
+              <TableRow
+                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+              >
+                <TableCell
+                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                >
+                  Brand Origin
+                </TableCell>
+                <TableCell
+                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                >
+                  {details.brandOrigin}
+                </TableCell>
+              </TableRow>
+              <TableRow
+                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+              >
+                <TableCell
+                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                >
+                  Manufactured At
+                </TableCell>
+                <TableCell
+                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                >
+                  {details.manufacturedAt}
+                </TableCell>
+              </TableRow>
+              <TableRow
+                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+              >
+                <TableCell
+                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                >
+                  Manufacturer
+                </TableCell>
+                <TableCell
+                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                >
+                  {details.manufacturer}
+                </TableCell>
+              </TableRow>
+              {expanded && (
+                <>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      Usage Instructions
+                    </TableCell>
+                    <TableCell
+                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                    >
+                      {details.usageInstructions}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      Storage Instructions
+                    </TableCell>
+                    <TableCell
+                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                    >
+                      {details.storageInstructions}
+                    </TableCell>
+                  </TableRow>
+                </>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleToggle}
+            sx={{
+              backgroundColor: "#f5f7fd",
+              color: "#ff469e",
+              borderRadius: "10px",
+              fontSize: 16,
+              fontWeight: "bold",
+              mr: 2,
+              padding: "0.25rem 0.5rem",
+              boxShadow: "none",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
+            {expanded ? "Show Less" : "Show More"}
+          </Button>
+        </Box>
+      </Container>
+      <Container sx={{ my: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
         >
           Comments
         </Typography>
@@ -809,7 +988,7 @@ export default function ProductDetails() {
             <Grid
               item
               xs={12}
-              md={3}
+              md={6}
               sx={{
                 display: "flex",
                 justifyContent: "center",
@@ -1042,7 +1221,7 @@ export default function ProductDetails() {
               >
                 <CardContent>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={2.5}>
                       <Paper
                         sx={{
                           padding: "10px",
@@ -1058,7 +1237,7 @@ export default function ProductDetails() {
                         </Typography>
                       </Paper>
                     </Grid>
-                    <Grid item xs={12} md={10}>
+                    <Grid item xs={12} md={9.5}>
                       <Box display="flex" alignItems="center" mb={2}>
                         <Rating
                           value={item.rating}
