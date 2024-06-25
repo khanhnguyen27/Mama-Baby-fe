@@ -18,15 +18,14 @@ import {
     CircularProgress,
     Tabs,
     Tab,
+    Pagination,
 } from "@mui/material";
-import { refundByStoreIdApi, refundByIdApi, updateRefundApi } from "../../api/RefundAPI";
+import { refundByStoreIdApi, updateRefundApi } from "../../api/RefundAPI";
 import { allProductApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { storeByUserIdApi } from "../../api/StoreAPI";
-import { allVoucherApi } from "../../api/VoucherAPI";
 import { allOrderApi } from "../../api/OrderAPI";
-import { allUserApi } from "../../api/UserAPI";
 import { useNavigate } from "react-router-dom";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { toast } from "react-toastify";
@@ -39,18 +38,14 @@ export default function OrdersManagement() {
     const decodedAccessToken = jwtDecode(accessToken);
     const userId = decodedAccessToken.UserID;
     const [refund, setRefund] = useState([]);
-    const [refundMap, setRefundMap] = useState({});
     const [productMap, setProductMap] = useState({});
     const [orderMap, setOrderMap] = useState({});
     const [brandMap, setBrandMap] = useState({});
     const [categoryMap, setCategoryMap] = useState({});
-    const [voucherMap, setVoucherMap] = useState({});
-    const [usersMap, setUsersMap] = useState({});
     const [store, setStore] = useState(null);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [selectedRefundId, setSelectedRefundId] = useState(null);
-    const [actionType, setActionType] = useState("");
     const [tabValue, setTabValue] = useState(0);
 
     useEffect(() => {
@@ -85,13 +80,12 @@ export default function OrdersManagement() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [refundRes, productRes, brandRes, categoryRes, voucherRes, orderRes] =
+            const [refundRes, productRes, brandRes, categoryRes, orderRes] =
                 await Promise.all([
                     refundByStoreIdApi(storeId),
                     allProductApi(),
                     allBrandApi(),
                     allCategorytApi(),
-                    allVoucherApi(),
                     allOrderApi(),
                 ]);
 
@@ -110,11 +104,6 @@ export default function OrdersManagement() {
 
             setCategoryMap(categoryRes?.data?.data.reduce((x, item) => {
                 x[item.id] = item.name;
-                return x;
-            }, {}));
-
-            setVoucherMap(voucherRes?.data?.data.reduce((x, item) => {
-                x[item.id] = item.code;
                 return x;
             }, {}));
 
@@ -181,6 +170,34 @@ export default function OrdersManagement() {
         }, 1000);
     };
 
+    // Tạo bản sao của mảng refund để tránh thay đổi mảng gốc
+    const refundCopy = [...refund];
+
+    // Sắp xếp các mục refund theo createDate từ cũ nhất đến mới nhất
+    const sortedRefunds = refundCopy.sort((a, b) => new Date(a.createDate) - new Date(b.createDate));
+
+    // Đảo ngược mảng để có thứ tự từ mới nhất đến cũ nhất
+    const reversedRefunds = sortedRefunds.reverse();
+
+    // Lọc các mục theo tabValue
+    const filteredRefunds = reversedRefunds.filter(item => {
+        if (tabValue === 0) {
+            return item.status === 'PROCESSING';
+        } else if (tabValue === 1) {
+            return item.status === 'PROCESSED';
+        }
+        return false;
+    });
+
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 5;
+    const handleChangePage = (event, value) => {
+        setPage(value);
+    };
+
+    // Tính toán các mục sẽ hiển thị trên trang hiện tại
+    const paginatedRefunds = filteredRefunds.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
     return (
         <div style={{
             display: "flex",
@@ -204,7 +221,7 @@ export default function OrdersManagement() {
                         opacity: 0.95,
                     }}
                 >
-                   <Tab
+                    <Tab
                         key={"PROCESSING"}
                         label={"PROCESSING"}
                         sx={{
@@ -263,12 +280,35 @@ export default function OrdersManagement() {
                             alignItems: "center",
                             minHeight: "75vh",
                             maxWidth: "100vw",
-                            backgroundColor: "#f5f7fd",
+                            backgroundColor: "#f5f7fd"
                         }}>
                             <CircularProgress sx={{ color: "#ff469e" }} size={90} />
                         </Box>
+                    ) : paginatedRefunds.length === 0 ? (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "75vh",
+                                maxWidth: 1000,
+                                maxHeight: "90vh",
+                                overflowY: "auto",
+                            }}
+                        >
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: "#ff469e",
+                                    fontSize: "1.75rem",
+                                    textAlign: "center",
+                                }}
+                            >
+                                There's no refund of this status
+                            </Typography>
+                        </Box>
                     ) : (
-                        refund.map((item) => (
+                        paginatedRefunds.map(item => (
                             <Card
                                 key={item.id}
                                 sx={{
@@ -276,7 +316,7 @@ export default function OrdersManagement() {
                                     padding: "16px",
                                     backgroundColor: "#ffffff",
                                     borderRadius: "20px",
-                                    boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                                    boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)"
                                 }}
                             >
                                 <Typography variant="h5" sx={{ mb: "10px", fontWeight: "bold" }}>
@@ -299,7 +339,7 @@ export default function OrdersManagement() {
                                             minWidth: "75vw",
                                             width: "100%",
                                             border: "none",
-                                            boxShadow: "none",
+                                            boxShadow: "none"
                                         }}>
                                             <AccordionSummary
                                                 expandIcon={<ExpandMore sx={{ color: "#ff469e" }} />}
@@ -309,14 +349,14 @@ export default function OrdersManagement() {
                                                     alignItems: "center",
                                                     width: "100%",
                                                     border: "none",
-                                                    boxShadow: "none",
+                                                    boxShadow: "none"
                                                 }}
                                             >
                                                 <Typography sx={{
                                                     width: "100%",
                                                     textAlign: "center",
                                                     color: "#ff469e",
-                                                    fontSize: "1.25rem",
+                                                    fontSize: "1.25rem"
                                                 }}>
                                                     View detail {item.refund_detail_list.length === 0
                                                         ? ""
@@ -325,14 +365,7 @@ export default function OrdersManagement() {
                                             </AccordionSummary>
                                             <AccordionDetails>
                                                 <Grid container spacing={4}>
-                                                    <Grid
-                                                        item
-                                                        xs={8.5}
-                                                        sm={9.5}
-                                                        md={10.5}
-                                                        lg={11.5}
-                                                        xl={12}
-                                                    >
+                                                    <Grid item xs={12}>
                                                         <Card
                                                             sx={{
                                                                 pl: 2,
@@ -342,7 +375,7 @@ export default function OrdersManagement() {
                                                                 my: 2.4,
                                                                 minHeight: "120px",
                                                                 maxHeight: "260px",
-                                                                overflow: "hidden",
+                                                                overflow: "hidden"
                                                             }}
                                                         >
                                                             <Box
@@ -351,18 +384,18 @@ export default function OrdersManagement() {
                                                                     maxHeight: "260px",
                                                                     pr: 0.5,
                                                                     "&::-webkit-scrollbar": {
-                                                                        width: "0.65rem",
+                                                                        width: "0.65rem"
                                                                     },
                                                                     "&::-webkit-scrollbar-track": {
-                                                                        background: "#f5f7fd",
+                                                                        background: "#f5f7fd"
                                                                     },
                                                                     "&::-webkit-scrollbar-thumb": {
                                                                         background: "#ff469e",
-                                                                        borderRadius: "0.8rem",
+                                                                        borderRadius: "0.8rem"
                                                                     },
                                                                     "&::-webkit-scrollbar-thumb:hover": {
-                                                                        background: "#ffbbd0",
-                                                                    },
+                                                                        background: "#ffbbd0"
+                                                                    }
                                                                 }}
                                                             >
                                                                 {item.refund_detail_list.map((detail, index) => {
@@ -385,7 +418,7 @@ export default function OrdersManagement() {
                                                                                     height: "70px",
                                                                                     justifyContent: "center",
                                                                                     alignSelf: "center",
-                                                                                    borderRadius: "10px",
+                                                                                    borderRadius: "10px"
                                                                                 }}
                                                                                 image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                                                                 title={product[0]}
@@ -394,7 +427,7 @@ export default function OrdersManagement() {
                                                                                 sx={{
                                                                                     flex: "1 0 auto",
                                                                                     ml: 2,
-                                                                                    borderBottom: "1px dashed black",
+                                                                                    borderBottom: "1px dashed black"
                                                                                 }}
                                                                             >
                                                                                 <Box
@@ -402,35 +435,26 @@ export default function OrdersManagement() {
                                                                                         display: "flex",
                                                                                         flexDirection: "row",
                                                                                         justifyContent: "space-between",
-                                                                                        mt: 2,
+                                                                                        mt: 2
                                                                                     }}
                                                                                 >
                                                                                     <Typography
                                                                                         sx={{
                                                                                             fontWeight: "600",
                                                                                             fontSize: "1.25rem",
-                                                                                            "&:hover": {
-                                                                                                cursor: "pointer",
-                                                                                                color: "#ff469e",
-                                                                                            },
+                                                                                            "&:hover": { cursor: "pointer", color: "#ff469e" }
                                                                                         }}
-                                                                                        onClick={() =>
-                                                                                            navigate(
-                                                                                                `/products/${product[0]
-                                                                                                    .toLowerCase()
-                                                                                                    .replace(/\s/g, "-")}`,
-                                                                                                {
-                                                                                                    state: { productId: detail.product_id },
-                                                                                                },
-                                                                                                window.scrollTo({ top: 0, behavior: "smooth" })
-                                                                                            )
-                                                                                        }
+                                                                                        onClick={() => navigate(
+                                                                                            `/products/${product[0].toLowerCase().replace(/\s/g, "-")}`,
+                                                                                            {
+                                                                                                state: { productId: detail.product_id }
+                                                                                            },
+                                                                                            window.scrollTo({ top: 0, behavior: "smooth" })
+                                                                                        )}
                                                                                     >
                                                                                         {product[0]}
                                                                                     </Typography>
-                                                                                    <Typography
-                                                                                        sx={{ fontWeight: "600", fontSize: "1.15rem" }}
-                                                                                    >
+                                                                                    <Typography sx={{ fontWeight: "600", fontSize: "1.15rem" }}>
                                                                                         {formatCurrency(detail.unit_price)}{" "}
                                                                                         <span style={{ fontSize: "1.05rem", opacity: 0.4 }}>
                                                                                             x{detail.quantity}
@@ -442,19 +466,14 @@ export default function OrdersManagement() {
                                                                                         display: "flex",
                                                                                         flexDirection: "row",
                                                                                         justifyContent: "space-between",
-                                                                                        mt: 1,
+                                                                                        mt: 1
                                                                                     }}
                                                                                 >
                                                                                     <Typography sx={{ opacity: 0.7 }}>
                                                                                         {brandMap[product[1]]} | {categoryMap[product[2]]}
                                                                                     </Typography>
                                                                                     <Typography sx={{ opacity: 0.8 }}>
-                                                                                        <span
-                                                                                            style={{
-                                                                                                fontWeight: "bold",
-                                                                                                fontSize: "1.25rem",
-                                                                                            }}
-                                                                                        >
+                                                                                        <span style={{ fontWeight: "bold", fontSize: "1.25rem" }}>
                                                                                             = {formatCurrency(detail.amount)}
                                                                                         </span>
                                                                                     </Typography>
@@ -477,14 +496,14 @@ export default function OrdersManagement() {
                                                 mb: "5px",
                                                 mt: 2,
                                                 fontWeight: "medium",
-                                                fontSize: "1.25rem",
+                                                fontSize: "1.25rem"
                                             }}
                                         >
                                             <span
                                                 style={{
                                                     fontWeight: "bold",
                                                     display: "block",
-                                                    marginBottom: "8px",
+                                                    marginBottom: "8px"
                                                 }}
                                             >
                                                 Delivery:
@@ -494,14 +513,14 @@ export default function OrdersManagement() {
                                                 sx={{
                                                     display: "flex",
                                                     flexDirection: "column",
-                                                    gap: 2,
+                                                    gap: 2
                                                 }}
                                             >
                                                 <Box
                                                     sx={{
                                                         display: "flex",
                                                         justifyContent: "space-between",
-                                                        width: "70%",
+                                                        width: "70%"
                                                     }}
                                                 >
                                                     <span style={{ opacity: 0.7 }}>Receiver:</span>
@@ -513,7 +532,7 @@ export default function OrdersManagement() {
                                                     sx={{
                                                         display: "flex",
                                                         justifyContent: "space-between",
-                                                        width: "70%",
+                                                        width: "70%"
                                                     }}
                                                 >
                                                     <span style={{ opacity: 0.7 }}>Address:</span>
@@ -525,7 +544,7 @@ export default function OrdersManagement() {
                                                     sx={{
                                                         display: "flex",
                                                         justifyContent: "space-between",
-                                                        width: "70%",
+                                                        width: "70%"
                                                     }}
                                                 >
                                                     <span style={{ opacity: 0.7 }}>Contact:</span>
@@ -542,7 +561,7 @@ export default function OrdersManagement() {
                                             sx={{
                                                 mb: "5px",
                                                 fontWeight: "medium",
-                                                fontSize: "1.25rem",
+                                                fontSize: "1.25rem"
                                             }}
                                         >
                                             <span style={{ fontWeight: "bold" }}>Description:</span>{" "}
@@ -553,13 +572,13 @@ export default function OrdersManagement() {
                                                 mb: "5px",
                                                 fontWeight: "medium",
                                                 textAlign: "right",
-                                                fontSize: "1.25rem",
+                                                fontSize: "1.25rem"
                                             }}
                                         >
                                             <Box
                                                 sx={{
                                                     display: "flex",
-                                                    justifyContent: "flex-end",
+                                                    justifyContent: "flex-end"
                                                 }}
                                             >
                                                 <Divider
@@ -568,7 +587,7 @@ export default function OrdersManagement() {
                                                         borderColor: "rgba(0, 0, 0, 0.7)",
                                                         borderWidth: "1px",
                                                         my: 1.5,
-                                                        width: "100%",
+                                                        width: "100%"
                                                     }}
                                                 />
                                             </Box>
@@ -576,50 +595,51 @@ export default function OrdersManagement() {
                                                 sx={{
                                                     display: "flex",
                                                     justifyContent: "space-between",
-                                                    marginBottom: "4px",
+                                                    marginBottom: "4px"
                                                 }}
                                             >
-                                                <span
-                                                    style={{ fontWeight: "bold", fontSize: "1.35rem" }}
-                                                >
-                                                    Refund Amount :
+                                                <span style={{ fontWeight: "bold", fontSize: "1.35rem" }}>
+                                                    Refund Amount:
                                                 </span>
-                                                <span
-                                                    style={{ fontWeight: "bold", fontSize: "1.5rem" }}
-                                                >
+                                                <span style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
                                                     {formatCurrency(item.amount)}
                                                 </span>
                                             </Box>
                                         </Typography>
-                                        <Box sx={{ textAlign: 'right' }}>
-                                            <Button
-                                                variant="contained"
-                                                sx={{
-                                                    backgroundColor: "white",
-                                                    color: "#ff469e",
-                                                    borderRadius: "10px",
-                                                    fontSize: 16,
-                                                    fontWeight: "bold",
-                                                    my: 2,
-                                                    mx: 1,
-                                                    transition: "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                                    border: "1px solid #ff469e",
-                                                    "&:hover": {
-                                                        backgroundColor: "#ff469e",
-                                                        color: "white",
-                                                        border: "1px solid white",
-                                                    },
-                                                }}
-                                                onClick={() => handleOpen(item.id)}
-                                            >
-                                                APPROVE REFUND
-                                            </Button>
-                                        </Box>
+                                        {item.status !== 'PROCESSED' && (
+                                            <Box sx={{ textAlign: 'right' }}>
+                                                <Button
+                                                    variant="contained"
+                                                    sx={{
+                                                        backgroundColor: "white",
+                                                        color: "#ff469e",
+                                                        borderRadius: "10px",
+                                                        fontSize: 16,
+                                                        fontWeight: "bold",
+                                                        my: 2,
+                                                        mx: 1,
+                                                        transition: "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                                        border: "1px solid #ff469e",
+                                                        "&:hover": { backgroundColor: "#ff469e", color: "white", border: "1px solid white" }
+                                                    }}
+                                                    onClick={() => handleOpen(item.id)}
+                                                >
+                                                    APPROVE REFUND
+                                                </Button>
+                                            </Box>
+                                        )}
                                     </Grid>
                                 </Grid>
                             </Card>
                         ))
                     )}
+                    <Pagination
+                        count={Math.ceil(filteredRefunds.length / itemsPerPage)}
+                        page={page}
+                        onChange={handleChangePage}
+                        color="primary"
+                        sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
+                    />
                 </Box>
                 {visible && (
                     <IconButton
