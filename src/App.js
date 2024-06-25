@@ -35,7 +35,7 @@ import ExchangesManagement from "./components/staff/ExchangesManagement";
 import RefundManagement from "./components/staff/RefundManagement";
 import ProductDetailsManagement from "./components/staff/ProductDetailsManagement";
 import CommentHistory from "./components/general/CommentHistory";
-import ProductGiftDetails from "./components/general/ProductGiftDetails"; 
+import ProductGiftDetails from "./components/general/ProductGiftDetails";
 import ProductGift from "./components/general/ProductGift";
 
 function App() {
@@ -51,7 +51,10 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/productgift" element={<ProductGift />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
-        <Route path="//productgiftdetail/:productId" element={<ProductGiftDetails />} /> 
+        <Route
+          path="/productgiftdetail/:productId"
+          element={<ProductGiftDetails />}
+        />
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail />} />
         <Route path="/cart" element={<Cart />} />

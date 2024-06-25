@@ -38,6 +38,7 @@ import { makePaymentApi } from "../../api/VNPayAPI";
 import { createOrderApi } from "../../api/OrderAPI";
 import { jwtDecode } from "jwt-decode";
 import { profileUserApi } from "../../api/UserAPI";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 export default function Cart() {
   window.document.title = "Cart";
   const [visible, setVisible] = useState(false);
@@ -101,6 +102,7 @@ export default function Cart() {
     fetchData();
   }, [selectedStoreId]);
 
+  console.log(cartItems);
   const groupedCartItems = cartItems.products.reduce((acc, item) => {
     if (!acc[item.product.store_id]) {
       acc[item.product.store_id] = [];
@@ -111,6 +113,24 @@ export default function Cart() {
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
+
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOnIcon
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 24,
+            }}
+          />
+        </Box>
+      </>
+    );
   };
 
   const handleVoucherChange = (e) => {
@@ -153,7 +173,7 @@ export default function Cart() {
   // };
 
   const handleStoreChange = (storeId) => {
-    setSelectedStoreId(storeId)
+    setSelectedStoreId(storeId);
     setSelectedStore((prevStores) => {
       const newSelectedStore = { ...prevStores };
       Object.keys(newSelectedStore).forEach((key) => {
@@ -192,7 +212,6 @@ export default function Cart() {
   };
   const handleClose = () => setOpen(false);
 
-  console.log(fullName);
   const handleFullNameChange = (e) => {
     setFullName(e.target.value);
   };
@@ -431,7 +450,8 @@ export default function Cart() {
                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                             }
                             onError={(e) => {
-                              e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                              e.target.src =
+                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                             }}
                             title={item.product.name}
                           />
@@ -516,7 +536,9 @@ export default function Cart() {
                                 <Typography
                                   sx={{ fontSize: "20px", fontWeight: "600" }}
                                 >
-                                  Unit Price
+                                  {item.product.type === "WHOLESALE"
+                                    ? "Unit Price"
+                                    : "Unit Point"}
                                 </Typography>
                               </Grid>
                               <Grid xs={6}>
@@ -551,9 +573,16 @@ export default function Cart() {
                                 mt: 1.5,
                               }}
                             >
-                              <Typography sx={{ fontSize: "20px" }}>
-                                {formatCurrency(item.product.price)}
-                              </Typography>
+                              {item.product.type === "WHOLESALE" ? (
+                                <Typography sx={{ fontSize: "20px" }}>
+                                  {formatCurrency(item.product.price)}
+                                </Typography>
+                              ) : (
+                                <Typography sx={{ fontSize: "20px" }}>
+                                  {formatCurrencyPoint(item.product.point)}
+                                </Typography>
+                              )}
+
                               <ButtonGroup
                                 variant="outlined"
                                 aria-label="outlined button group"
@@ -755,9 +784,17 @@ export default function Cart() {
                                 </Button>
                               </ButtonGroup>
                               <Typography sx={{ fontSize: "20px" }}>
-                                {formatCurrency(
-                                  Math.round(item.product.price * item.quantity)
-                                )}
+                                {item.product.type === "WHOLESALE"
+                                  ? formatCurrency(
+                                      Math.round(
+                                        item.product.price * item.quantity
+                                      )
+                                    )
+                                  : formatCurrencyPoint(
+                                      Math.round(
+                                        item.product.point * item.quantity
+                                      )
+                                    )}
                               </Typography>
                             </Box>
                           </CardContent>
@@ -1246,7 +1283,8 @@ export default function Cart() {
                                       : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                   }
                                   onError={(e) => {
-                                    e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                    e.target.src =
+                                      "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                   }}
                                   title={item.product.name}
                                 />
@@ -1311,15 +1349,27 @@ export default function Cart() {
                                         fontSize: "1.15rem",
                                       }}
                                     >
-                                      {formatCurrency(item.product.price)}{" "}
-                                      <span
-                                        style={{
-                                          fontSize: "1.05rem",
-                                          opacity: 0.4,
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
                                         }}
                                       >
-                                        x{item.quantity}
-                                      </span>
+                                        {item.product.type === "WHOLESALE"
+                                          ? formatCurrency(item.product.price)
+                                          : formatCurrencyPoint(
+                                              Math.round(item.product.point)
+                                            )}
+
+                                        <span
+                                          style={{
+                                            fontSize: "1.05rem",
+                                            opacity: 0.4,
+                                          }}
+                                        >
+                                          x{item.quantity}
+                                        </span>
+                                      </Box>
                                     </Typography>
                                   </Box>
                                   <Box
@@ -1334,17 +1384,36 @@ export default function Cart() {
                                       sx={{ opacity: 0.7 }}
                                     ></Typography>
                                     <Typography sx={{ opacity: 0.8 }}>
-                                      <span
-                                        style={{
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
                                           fontWeight: "bold",
                                           fontSize: "1.25rem",
                                         }}
                                       >
-                                        ={" "}
-                                        {formatCurrency(
-                                          item.product.price * item.quantity
-                                        )}
-                                      </span>
+                                        <span
+                                          style={{
+                                            fontWeight: "bold",
+                                            fontSize: "1.25rem",
+                                          }}
+                                        >
+                                          ={" "}
+                                        </span>
+                                        {item.product.type === "WHOLESALE"
+                                          ? formatCurrency(
+                                              Math.round(
+                                                item.product.price *
+                                                  item.quantity
+                                              )
+                                            )
+                                          : formatCurrencyPoint(
+                                              Math.round(
+                                                item.product.point *
+                                                  item.quantity
+                                              )
+                                            )}
+                                      </Box>
                                     </Typography>
                                   </Box>
                                 </CardContent>

@@ -72,6 +72,7 @@ export default function Products() {
           allCategorytApi(),
           allProductApi({
             keyword: keyword,
+            type: "WHOLESALE",
             age_id: ageFilter,
             brand_id: brandFilter,
             category_id: categoryFilter,
@@ -164,6 +165,7 @@ export default function Products() {
           id: product.products[index].id,
           name: product.products[index].name,
           price: product.products[index].price,
+          type: product.products[index].type,
           store_id: product.products[index].store_id,
           image_url: product.products[index].image_url,
         },
@@ -867,7 +869,7 @@ export default function Products() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                mt: 1.5
+                                mt: 1.5,
                               }}
                               onClick={() => handleAddToCart(index)}
                             >

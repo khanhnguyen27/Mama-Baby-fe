@@ -4,8 +4,6 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { allProductApi } from "../../api/ProductAPI";
-import { commentByProductIdApi, allCommentApi } from "../../api/CommentAPI";
-import { Star, StarHalf, StarOutline } from "@mui/icons-material";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 import {
@@ -47,7 +45,6 @@ export default function Products() {
   const [category, setCategory] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
   const [product, setProduct] = useState([]);
-  const [comment, setComment] = useState([]);
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -67,25 +64,24 @@ export default function Products() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes, commentRes] =
-        await Promise.all([
-          allAgeApi(),
-          allBrandApi(),
-          allCategorytApi(),
-          allProductApi({
-            keyword: keyword,
-            age_id: ageFilter,
-            brand_id: brandFilter,
-            category_id: categoryFilter,
-          }),
-          allCommentApi(),
-        ]);
+      const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
+        allAgeApi(),
+        allBrandApi(),
+        allCategorytApi(),
+        allProductApi({
+          keyword: keyword,
+          type: "GIFT",
+          age_id: ageFilter,
+          brand_id: brandFilter,
+          category_id: categoryFilter,
+          page: currentPage - 1,
+        }),
+      ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
-      const commentData = commentRes?.data?.data || [];
 
       setAge(ageData);
       setBrand(brandData);
@@ -109,14 +105,10 @@ export default function Products() {
         return x;
       }, {});
       setCategoryMap(categoryMap);
-
-      setComment(commentData);
     } catch (err) {
       console.log(err);
     }
   };
-
-  console.log(comment);
 
   useEffect(() => {
     setLoading(true);
@@ -167,7 +159,10 @@ export default function Products() {
           id: product.products[index].id,
           name: product.products[index].name,
           price: product.products[index].price,
+          point: product.products[index].point,
+          type: product.products[index].type,
           store_id: product.products[index].store_id,
+          image_url: product.products[index].image_url,
         },
         quantity: 1,
       })
@@ -458,7 +453,7 @@ export default function Products() {
           <Typography
             sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
           >
-            Products
+            Products Gift
           </Typography>
         </Breadcrumbs>
       </Container>
@@ -676,208 +671,167 @@ export default function Products() {
                 </Grid>
               ) : (
                 product?.products?.map((item, index) => {
-                  const productComments = comment.filter(
-                    (x) => x.product_id === item.id
-                  );
-
-                  const averageRating = productComments.length
-                    ? (
-                        productComments.reduce(
-                          (acc, cmt) => acc + cmt.rating,
-                          0
-                        ) / productComments.length
-                      ).toFixed(1)
-                    : 0;
-
-                  const fullStars = Math.floor(averageRating);
-                  const halfStar = averageRating - fullStars >= 0.5;
-                  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
                   return (
-                    item.type === "GIFT" && (
-                      <Grid item xs={12} sm={6} lg={4} key={index}>
-                        <Tooltip
-                          title={item.name}
-                          enterDelay={500}
-                          leaveDelay={50}
-                          placement="right-start"
-                          TransitionComponent={Fade}
-                          TransitionProps={{ timeout: 250 }}
-                          componentsProps={{
-                            tooltip: {
-                              sx: {
-                                backgroundColor: "white",
-                                boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
-                                color: "black",
-                                borderRadius: "8px",
-                                border: "1px solid black",
-                                fontSize: "12px",
-                              },
+                    <Grid item xs={12} sm={6} lg={4} key={index}>
+                      <Tooltip
+                        title={item.name}
+                        enterDelay={500}
+                        leaveDelay={50}
+                        placement="right-start"
+                        TransitionComponent={Fade}
+                        TransitionProps={{ timeout: 250 }}
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "white",
+                              boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                              color: "black",
+                              borderRadius: "8px",
+                              border: "1px solid black",
+                              fontSize: "12px",
+                            },
+                          },
+                        }}
+                      >
+                        <Card
+                          sx={{
+                            minWidth: 180,
+                            padding: 2,
+                            border: "1px solid #f5f7fd",
+                            borderRadius: "16px",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                            backgroundColor: "white",
+                            transition: "border 0.2s, box-shadow 0.2s",
+                            "&:hover": {
+                              border: "1px solid #ff469e",
+                              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                             },
                           }}
                         >
-                          <Card
+                          <CardMedia
+                            component="img"
+                            image={
+                              item.image_url.includes("Product_")
+                                ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                                : `https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid`
+                            }
+                            alt={item.name}
                             sx={{
-                              minWidth: 180,
-                              padding: 2,
-                              border: "1px solid #f5f7fd",
-                              borderRadius: "16px",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                              backgroundColor: "white",
-                              transition: "border 0.2s, box-shadow 0.2s",
-                              "&:hover": {
-                                border: "1px solid #ff469e",
-                                boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                              },
+                              width: "64px",
+                              height: "64px",
+                              margin: "auto",
                             }}
+                            onClick={() =>
+                              navigate(
+                                `/productgiftdetail/${item.name
+                                  .toLowerCase()
+                                  .replace(/\s/g, "-")}`,
+                                { state: { productId: item.id } },
+                                window.scrollTo({
+                                  top: 0,
+                                  behavior: "smooth",
+                                })
+                              )
+                            }
+                          />
+                          <CardContent
+                            onClick={() =>
+                              navigate(
+                                `/productgiftdetail/${item.name
+                                  .toLowerCase()
+                                  .replace(/\s/g, "-")}`,
+                                { state: { productId: item.id } },
+                                window.scrollTo({
+                                  top: 0,
+                                  behavior: "smooth",
+                                })
+                              )
+                            }
                           >
-                            <CardMedia
-                              component="img"
-                              image={
-                                item.image_url.includes("Product_")
-                                  ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
-                                  : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                              }
-                              alt={item.name}
+                            <Typography
+                              variant="subtitle1"
                               sx={{
-                                width: "64px",
-                                height: "64px",
-                                margin: "auto",
+                                fontWeight: "bold",
+                                marginTop: "0.75rem",
+                                textAlign: "left",
+                                whiteSpace: "normal",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                                maxWidth: "100%",
+                                lineHeight: "1.2rem",
+                                maxHeight: "2.4rem",
                               }}
-                              onClick={() =>
-                                navigate(
-                                  `/productgiftdetail/${item.name
-                                    .toLowerCase()
-                                    .replace(/\s/g, "-")}`,
-                                  { state: { productId: item.id } },
-                                  window.scrollTo({
-                                    top: 0,
-                                    behavior: "smooth",
-                                  })
-                                )
-                              }
-                            />
-                            <CardContent
-                              onClick={() =>
-                                navigate(
-                                  `/productgiftdetail/${item.name
-                                    .toLowerCase()
-                                    .replace(/\s/g, "-")}`,
-                                  { state: { productId: item.id } },
-                                  window.scrollTo({
-                                    top: 0,
-                                    behavior: "smooth",
-                                  })
-                                )
-                              }
                             >
-                              <Typography
-                                variant="subtitle1"
-                                sx={{
-                                  fontWeight: "bold",
-                                  marginTop: "0.75rem",
-                                  textAlign: "left",
-                                  whiteSpace: "normal",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  display: "-webkit-box",
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: "vertical",
-                                  maxWidth: "100%",
-                                  lineHeight: "1.2rem",
-                                  maxHeight: "2.4rem",
-                                }}
-                              >
-                                {item.name.length > 40
-                                  ? `${item.name.substring(0, 40)}...`
-                                  : item.name}
-                              </Typography>
+                              {item.name.length > 40
+                                ? `${item.name.substring(0, 40)}...`
+                                : item.name}
+                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
                               <Typography
                                 variant="body2"
                                 sx={{ color: "gray", textAlign: "left" }}
                               >
                                 {item.point}
-                                <MonetizationOnIcon variant="h6" sx={{
-                                    marginRight:"10px",
-                                }} />
                               </Typography>
-                              <Typography
-                                variant="body2"
-                                sx={{ color: "gray", textAlign: "left" }}
-                              >
-                                {brandMap[item.brand_id]} |{" "}
-                                {categoryMap[item.category_id]}
-                              </Typography>
-                            </CardContent>
-                            <Divider />
-                            <CardActions
-                              sx={{ justifyContent: "space-between" }}
-                            >
-                              <CardContent sx={{ padding: "10px 0 0 0" }}>
-                                <Typography variant="h6">
-                                  {Array(fullStars).fill(
-                                    <Star style={{ color: "#ff469e" }} />
-                                  )}
-                                  {halfStar && (
-                                    <StarHalf style={{ color: "#ff469e" }} />
-                                  )}
-                                  {Array(emptyStars).fill(
-                                    <StarOutline style={{ color: "#ff469e" }} />
-                                  )}
-                                </Typography>
-                                <Typography>
-                                  <span
-                                    style={{
-                                      color: "#ff469e",
-                                      fontWeight: "bold",
-                                    }}
-                                  >
-                                    {
-                                      comment.filter(
-                                        (x) => x.product_id === item.id
-                                      ).length
-                                    }
-                                  </span>{" "}
-                                  reviews
-                                </Typography>
-                              </CardContent>
-                              <IconButton
-                                size="large"
+                              <MonetizationOnIcon
+                                variant="h6"
                                 sx={{
-                                  transition:
-                                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
+                                  marginLeft: "4px",
+                                  color: "gray",
+                                  fontSize: 16,
                                 }}
-                                onClick={() => handleAddToCart(index)}
+                              />
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "gray", textAlign: "left" }}
+                            >
+                              {brandMap[item.brand_id]} |{" "}
+                              {categoryMap[item.category_id]}
+                            </Typography>
+                          </CardContent>
+                          <Divider />
+                          <CardActions sx={{ justifyContent: "end" }}>
+                            <IconButton
+                              size="large"
+                              sx={{
+                                transition:
+                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#fff4fc",
+                                  color: "#ff469e",
+                                },
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                mt: 1.5,
+                              }}
+                              onClick={() => handleAddToCart(index)}
+                            >
+                              <span
+                                style={{
+                                  position: "absolute",
+                                  width: "2px",
+                                  height: "2px",
+                                  fontSize: "22px",
+                                  color: "inherit",
+                                  top: "0",
+                                  right: 10,
+                                  fontWeight: 700,
+                                }}
                               >
-                                <span
-                                  style={{
-                                    position: "absolute",
-                                    width: "2px",
-                                    height: "2px",
-                                    fontSize: "22px",
-                                    color: "inherit",
-                                    top: "0",
-                                    right: 10,
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {" "}
-                                  +
-                                </span>
-                                <Cart />
-                              </IconButton>
-                            </CardActions>
-                          </Card>
-                        </Tooltip>
-                      </Grid>
-                    )
+                                {" "}
+                                +
+                              </span>
+                              <Cart />
+                            </IconButton>
+                          </CardActions>
+                        </Card>
+                      </Tooltip>
+                    </Grid>
                   );
                 })
               )}

@@ -11,6 +11,12 @@ export const allProductApi = (params) => {
   });
 };
 
+export const allProductCHApi = (params) => {
+  return axiosJWT.get(`${URL_PRODUCT}/comment_history`, {
+    params: params,
+  });
+};
+
 export const allProductByStoreApi = (params) => {
   return axiosJWT.get(`${URL_PRODUCT}/store`, {
     params: params,
