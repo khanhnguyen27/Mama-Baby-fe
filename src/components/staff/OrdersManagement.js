@@ -95,7 +95,7 @@ export default function OrdersManagement() {
       const [orderRes, productRes, brandRes, categoryRes, voucherRes] =
         await Promise.all([
           orderByStoreIdApi(storeId),
-          allProductApi(),
+          allProductApi({ limit: 1000 }),
           allBrandApi(),
           allCategorytApi(),
           allVoucherApi(),
@@ -595,8 +595,15 @@ export default function OrdersManagement() {
                                               })
                                             )
                                           }
-                                        >
-                                          {productMap[detail.product_id][0]}
+                                        >{productMap[
+                                          detail.product_id
+                                        ][0].length > 60
+                                          ? `${productMap[
+                                              detail.product_id
+                                            ][0].substring(0, 60)}...`
+                                          : productMap[
+                                              detail.product_id
+                                            ][0]}
                                         </Typography>
                                         <Typography
                                           sx={{
@@ -606,7 +613,8 @@ export default function OrdersManagement() {
                                         >
                                           {" "}
                                           {formatCurrency(
-                                            productMap[detail.product_id][3]
+                                            // productMap[detail.product_id][3]
+                                            detail.unit_price
                                           )}{" "}
                                           <span
                                             style={{

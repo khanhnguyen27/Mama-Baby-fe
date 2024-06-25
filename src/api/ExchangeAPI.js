@@ -23,3 +23,14 @@ export const addExchangeApi = (description, orderId, status, storeId, userId, ca
         cart_items_exchange: cartItemsExchange
       });
 };
+
+export const updateStatusExchangeApi = (exchangeId, description, orderId, status, storeId, userId, cartItemsExchange) => {
+  return axiosJWT.put(`${URL_EXCHANGE}/${exchangeId}`, {
+      description: description,
+      order_id: orderId,
+      status: status,
+      store_id: storeId,
+      user_id: userId,
+      cart_items_exchange: cartItemsExchange
+    });
+};

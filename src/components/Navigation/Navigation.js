@@ -9,7 +9,8 @@ import Edit from "@mui/icons-material/Edit";
 import MailIcon from "@mui/icons-material/MailOutline";
 import ChatIcon from "@mui/icons-material/Chat";
 import PhoneInTalk from "@mui/icons-material/PhoneInTalk";
-import Cart from "@mui/icons-material/ShoppingCartOutlined";
+import Cart from "@mui/icons-material/ShoppingCart";
+import CartOutlined from "@mui/icons-material/ShoppingCartOutlined";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -847,7 +848,11 @@ const Navigation = () => {
                 >
                   {cartAmount}
                 </span>
-                <Cart style={{ fontSize: 30, color: "#ff469e" }} />
+                {cartAmount >= 1 ? (
+                  <Cart style={{ fontSize: 30, color: "#ff469e" }} />
+                ) : (
+                  <CartOutlined style={{ fontSize: 30, color: "#ff469e" }} />
+                )}
               </IconButton>
             </Box>
           </Toolbar>

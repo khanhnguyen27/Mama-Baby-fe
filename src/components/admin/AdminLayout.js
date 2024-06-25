@@ -37,12 +37,6 @@ const itemList = [
     Icon: AccountCircleIcon,
     href: "accounts",
   },
-  
-  {
-    label: "Exchanges",
-    Icon: DesignServicesIcon,
-    href: "exchanges",
-  },
   {
     label: "Request Stores",
     Icon: ShoppingBagIcon,
