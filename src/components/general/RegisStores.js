@@ -32,7 +32,7 @@ const RegistStore = () => {
 
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
-
+  
   // Hàm kiểm tra phone có phải là số không
   const validatePhoneNumber = (phone) => {
     const reg = /^[0-9]+$/;
@@ -78,13 +78,17 @@ const RegistStore = () => {
     regisStoreApi(storename, address, description, phone, userId)
       .then((res) => {
         console.log(res);
-        toast.success("Send request successfully!");
-        // Sau khi gọi API thành công, bạn có thể điều hướng người dùng đến trang khác
-        // navigate('/some-path');
+        toast.success("Send request successfully!", { autoClose: 1500 });
+        setTimeout(() => {
+          setLoading(true);
+        }, 2000);
+        setTimeout(() => {
+          navigate("/");
+        }, 5000);
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Send request failed");
+        toast.error("Send request failed", { autoClose: 1500 });
       })
       .finally(() => {
         setLoading(false);
