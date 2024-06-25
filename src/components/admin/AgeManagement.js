@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import 'react-toastify/dist/ReactToastify.css';
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -38,6 +39,7 @@ import { allAgeAdminApi, addAgeApi, updateAgeApi } from "../../api/AgeAPI";
 export default function AgeManagement() {
   window.document.title = "AgeManagement";
   const { state } = useLocation();
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [ages, setAges] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -47,6 +49,15 @@ export default function AgeManagement() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newAgeName, setNewAgeName] = useState("");
   const [openUpdateAge, setOpenUpdateAge] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -103,6 +114,7 @@ export default function AgeManagement() {
       fetchData();
       handleCloseAddDialog();
       toast.success("RangeAge added successfully!");
+      setPage(0);
     } catch (error) {
       toast.error("Failed to add RangeAge. Please try again later.");
       console.error("Error adding RangeAge:", error);
@@ -163,9 +175,9 @@ export default function AgeManagement() {
   return (
     <div>
       <Container>
-        <Paper elevation={4} sx={{ position: "sticky", top: "80px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
+        <Paper elevation={4} sx={{ position: "sticky", marginTop: "20px",  padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
           <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-          Manage Ages
+            Manage Ages
           </Typography>
           <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
             <Grid item xs={12} md={3}>
@@ -328,6 +340,33 @@ export default function AgeManagement() {
               </Button>
             </DialogActions>
           </Dialog>
+        )}
+        {visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 75,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
         )}
       </Container>
     </div>
