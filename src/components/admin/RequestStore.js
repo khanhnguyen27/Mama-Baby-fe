@@ -20,6 +20,7 @@ import {
   Grid,
   Divider,
   IconButton,
+  Pagination,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +33,8 @@ export default function RequestStore() {
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const [selectedStoreId, setSelectedStoreId] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const userId = decodedAccessToken.UserID;
   const [requestStore, setRequestStores] = useState({
     PROCESSING: [],
@@ -58,15 +61,17 @@ export default function RequestStore() {
   const fetchData = async () => {
     try {
       const [storeRes, userRes] = await Promise.all([
-        allStoreApi(),
+        allStoreApi(
+          {
+            page: currentPage - 1,
+          }
+        ),
         allUserApi(),
       ]);
 
-      // Check if storeRes, storeRes.data, and storeRes.data.stores are defined
       const storeData = storeRes?.data?.data?.stores || [];
       const userData = userRes?.data?.data || [];
 
-      // Ensure storeData is an array
       if (!Array.isArray(storeData)) {
         throw new Error("storeData is not an array");
       }
@@ -77,22 +82,13 @@ export default function RequestStore() {
         REFUSE: [],
       };
 
-      // storeData.forEach((store) => {
-      //   const latestStatus =
-      //     store[store.length - 1].status;
-      //   categorizedOrders[latestStatus]?.unshift(store);
-
-      // });
       storeData.forEach((store) => {
-        const latestStatus = store.status; // Assuming `store` is correctly structured
+        const latestStatus = store.status;
         categorizedOrders[latestStatus]?.unshift(store);
-        console.log(latestStatus);
       });
 
       setRequestStores(categorizedOrders);
 
-
-      // Create storeMap assuming storeData is an array of objects
       const storeMap = storeData.reduce((x, item) => {
         x[item.id] = [
           item.address,
@@ -108,7 +104,7 @@ export default function RequestStore() {
 
       setStoreMap(storeMap);
       const userMap = userData.reduce((x, item) => {
-        x[item.id] = [item.username, item.phone_number];
+        x[item.id] = [item.username, item.full_name, item.address, item.phone_number];
         return x;
       }, {});
       setUserMap(userMap);
@@ -119,7 +115,7 @@ export default function RequestStore() {
 
   useEffect(() => {
     fetchData();
-  }, [storeId]);
+  }, [storeId, currentPage]);
 
   const handleTabChange = (e, newValue) => {
     setLoading(true);
@@ -128,124 +124,151 @@ export default function RequestStore() {
       setLoading(false);
     }, 1000);
   };
-  const handleAccept = (
-    storeId,
-    nameStore,
-    address,
-    description,
-    phone,
-    status,
-    isActive,
-    userId
-  ) => {
+
+  const handleAccept = () => {
+    if (selectedStoreId === null) return;
+    const selectedStore = storeMap[selectedStoreId];
+    if (!selectedStore) return;
+
+    const [address, description, phone, status, nameStore, isActive, userId] = selectedStore;
+
     requestStoreApi(
-      storeId,
+      selectedStoreId,
       nameStore,
       address,
       description,
       phone,
-      status,
-      isActive,
+      "APPROVED",
+      1,
       userId
     )
       .then((res) => {
-        console.log(res.data);
         toast.success("Request Accepted!", {
           autoClose: 1500,
         });
-        updateRequestStatus(storeId, "APPROVED");
+        handleApproveUserStatus(userId, 2); // Pass userId and new roleId
+        updateRequestStatus(selectedStoreId, "APPROVED");
         handleClose();
         setLoading(true);
         setTimeout(() => {
-          navigate("/admin/requeststore");
-        }, 1500);
-        setTimeout(() => {
           fetchData();
           setLoading(false);
-        }, 2500);
+        }, 1500);
       })
       .catch((error) => console.log(error));
   };
-  const handleReject = (
-    storeId,
-    nameStore,
-    address,
-    description,
-    phone,
-    status,
-    isActive,
-    userId
-  ) => {
+
+  const handleReject = () => {
+    if (selectedStoreId === null) return;
+    const selectedStore = storeMap[selectedStoreId];
+    if (!selectedStore) return;
+
+    const [address, description, phone, status, nameStore, isActive, userId] = selectedStore;
+
     requestStoreApi(
-      storeId,
+      selectedStoreId,
       nameStore,
       address,
       description,
       phone,
-      status,
-      isActive,
+      "REFUSE",
+      0,
       userId
     )
       .then((res) => {
-        console.log(res.data);
         toast.success("Request Rejected!", {
           autoClose: 1500,
         });
-        updateRequestStatus(storeId, "REFUSE");
+        handleApproveUserStatus(userId, 1); // Assuming roleId remains 1 when rejected
+        updateRequestStatus(selectedStoreId, "REFUSE");
         handleClose();
         setLoading(true);
         setTimeout(() => {
-          navigate("/admin/requeststore");
-        }, 1500);
-        setTimeout(() => {
           fetchData();
           setLoading(false);
-        }, 2500);
+        }, 1500);
       })
       .catch((error) => console.log(error));
   };
+
   const updateRequestStatus = (storeId, newStatus) => {
     setRequestStores((prevOrders) => {
       const updatedRequest = { ...prevOrders };
-      let upToDateRequest;
 
+      let updatedStore = null;
       for (const status in updatedRequest) {
         const storeIndex = updatedRequest[status].findIndex(
           (store) => store.id === storeId
         );
         if (storeIndex !== -1) {
-          [upToDateRequest] = updatedRequest[status].splice(storeIndex, 1);
+          updatedStore = updatedRequest[status].splice(storeIndex, 1)[0];
           break;
         }
       }
 
-      if (upToDateRequest) {
-        upToDateRequest.push({ status: newStatus });
-        updatedRequest[newStatus].unshift(upToDateRequest);
+      if (updatedStore) {
+        updatedStore.status = newStatus;
+        updatedRequest[newStatus] = [
+          updatedStore,
+          ...updatedRequest[newStatus],
+        ];
       }
 
       return updatedRequest;
     });
-    handleClose();
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/admin/requeststore");
-      setLoading(false);
-    }, 1500);
   };
 
+  const handleApproveUserStatus = async (userId, newRoleId) => {
+    const selectedUser = userMap[userId];
+    if (selectedUser) {
+      try {
+        console.log('UserAPI:', {
+          username: selectedUser[0],
+          full_name: selectedUser[1],
+          address: selectedUser[2],
+          phone_number: selectedUser[3],
+          status: true, // Ensure this is a Boolean
+          roleId: newRoleId
+        });
+  
+        await updateRollUserApi(
+          selectedUser[0], // username
+          selectedUser[1], // full_name
+          selectedUser[2], // address
+          selectedUser[3], // phone_number
+          true, // Assuming true represents the approved status
+          newRoleId // New roleId for user
+        );
+        toast.success("User role and status updated successfully!");
+        window.location.reload();
+      } catch (error) {
+        console.error("Error updating user status:", error);
+        toast.error("Failed to update user status.");
+      }
+    } else {
+      alert("Selected user not found in the list");
+    }
+  };
+  
+
   const handleOpen = (type, storeId) => {
-    setActionType(type); // Đảm bảo type được set chính xác là "Accept" hoặc "Reject"
+    setActionType(type);
     setSelectedStoreId(storeId);
+    const selectedStore = storeMap[storeId];
+    if (selectedStore) {
+      setSelectedUserId(selectedStore[6]); // Set the userId from the store details
+    }
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedStoreId(null);
+    setSelectedUserId(null);
   };
-
-  console.log(storeMap);
+  const handlePageChange = (e, page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div
@@ -567,7 +590,7 @@ export default function RequestStore() {
                             border: "1px solid white",
                           },
                         }}
-                        onClick={() => handleOpen("Accept")}
+                        onClick={() => handleOpen("Accept", item.id)}
                       >
                         ACCEPT REQUEST
                       </Button>
@@ -690,6 +713,88 @@ export default function RequestStore() {
               </Card>
             ))
           )}
+                  <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pagination
+            count={requestStore.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            showFirstButton={requestStore.totalPages !== 1}
+            showLastButton={requestStore.totalPages !== 1}
+            hidePrevButton={currentPage === 1}
+            hideNextButton={currentPage === requestStore.totalPages}
+            size="large"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "2.5rem",
+              width: "70%",
+              p: 1,
+              opacity: 0.9,
+              borderRadius: "20px",
+              "& .MuiPaginationItem-root": {
+                backgroundColor: "white",
+                borderRadius: "20px",
+                border: "1px solid black",
+                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+                mx: 1,
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  border: "1px solid #ff469e",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    border: "1px solid #ff469e",
+                  },
+                },
+                fontSize: "1.25rem",
+              },
+              "& .MuiPaginationItem-ellipsis": {
+                mt: 1.25,
+                fontSize: "1.25rem",
+              },
+            }}
+            componentsProps={{
+              previous: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+              next: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
         </Box>
         {visible && (
           <IconButton
