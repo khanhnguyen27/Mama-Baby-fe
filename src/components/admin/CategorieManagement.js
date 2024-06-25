@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import 'react-toastify/dist/ReactToastify.css';
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -38,6 +39,7 @@ import { allCategoryAdminApi, addCategoryApi, updateCategoryApi } from "../../ap
 export default function CategoryManagement() {
   window.document.title = "Category Management";
   const { state } = useLocation();
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -47,6 +49,15 @@ export default function CategoryManagement() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [openUpdateCategory, setOpenUpdateCategory] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -104,6 +115,7 @@ export default function CategoryManagement() {
       fetchData(); // Refresh category list
       handleCloseAddDialog();
       toast.success("Category added successfully!");
+      setPage(0);
     } catch (error) {
       toast.error("Failed to add category. Please try again later.");
       // Handle error
@@ -166,9 +178,9 @@ export default function CategoryManagement() {
   return (
     <div>
       <Container>
-        <Paper elevation={4} sx={{ position: "sticky", top: "80px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
+        <Paper elevation={4} sx={{ position: "sticky", marginTop: "20px",  padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
           <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-          Manage Categories
+            Manage Categories
           </Typography>
           <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
             <Grid item xs={12} md={3}>
@@ -331,6 +343,33 @@ export default function CategoryManagement() {
               </Button>
             </DialogActions>
           </Dialog>
+        )}
+        {visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 75,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
         )}
       </Container>
     </div>
