@@ -207,7 +207,7 @@ export default function HomePage() {
         backgroundColor: "#f5f7fd",
       }}
     >
-      <Container>
+      <Container sx={{ py: 3 }}>
         {/* Left section */}
         {/* <Grid item xs={3}>
             <div

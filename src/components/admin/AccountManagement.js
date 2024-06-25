@@ -118,7 +118,7 @@ export default function AccountManagement() {
   const filteredAccounts = users.filter(
     (item) =>
       item.username.toLowerCase().includes(searchKeyword.toLowerCase()) &&
-      item.role_id !== "ADMIN" // Exclude accounts with role_id 'ADMIN'
+      item.role_id.name !== "ADMIN" // Exclude accounts with role_id 'ADMIN'
   );
 
   const indexOfLastItem = (page + 1) * rowsPerPage;

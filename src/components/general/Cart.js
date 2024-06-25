@@ -293,7 +293,7 @@ export default function Cart() {
           const productIdsToRemove = cartItems2.map((item) => item.product_id);
           dispatch(removeFromCart(productIdsToRemove));
         })
-        .catch((error) => console.log(error));
+        .catch((err) => console.log(err));
     } else if (paymentMethod === "VNPAY") {
       createOrderApi(
         userId,
@@ -312,9 +312,10 @@ export default function Cart() {
       )
         .then((res) => {
           console.log(res.data);
-          const orders = res?.data?.data.map((item) => ({
-            id: item.id,
-          }));
+          // const orders = res.data.data.map((item) => ({
+          //   id: item.id,
+          // }));
+          const orders = [{ id: res?.data?.data?.id }];
           console.log(orders);
           setTimeout(() => {
             makePaymentApi(finalAmount, bankCode, orders)
@@ -324,8 +325,8 @@ export default function Cart() {
                   autoClose: 1000,
                 });
                 setTimeout(() => {
-                  window.location.replace(res.data?.data?.payment_url);
-                  // window.open(res.data?.data?.payment_url)
+                  // window.location.replace(res.data?.data?.payment_url);
+                  window.open(res.data?.data?.payment_url)
                 }, 500);
               })
               .catch((error) => console.log(error));
@@ -417,8 +418,8 @@ export default function Cart() {
                               fontSize: "1.5rem",
                               color: "#ff469e",
                               fontWeight: "bold",
-                              marginTop: "1rem",
-                              marginLeft: "1.25rem",
+                              mt: 2, // marginTop: "1rem"
+                              ml: 3, // marginLeft: "1.5rem"
                             }}
                           >
                             {storeMap[storeId]}
@@ -940,10 +941,12 @@ export default function Cart() {
                       },
                       "&::-webkit-scrollbar-track": {
                         background: "#f5f7fd",
+                        borderRadius: "0.6rem",
+                        my: 0.25,
                       },
                       "&::-webkit-scrollbar-thumb": {
                         background: "#ff469e",
-                        borderRadius: "0.8rem",
+                        borderRadius: "0.6rem",
                       },
                       "&::-webkit-scrollbar-thumb:hover": {
                         background: "#ffbbd0",

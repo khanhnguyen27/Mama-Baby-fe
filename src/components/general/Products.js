@@ -157,7 +157,7 @@ export default function Products() {
   const handleAddToCart = (index) => {
     toast.info(`${product.products[index].name} x 1 was added to cart`, {
       position: "top-right",
-      autoClose: 2500,
+      autoClose: 1000,
     });
     dispatch(
       addToCart({
@@ -699,7 +699,7 @@ export default function Products() {
                   const halfStar = averageRating - fullStars >= 0.5;
                   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                   return (
-                    <Grid item xs={12} sm={6} lg={4} key={index}>
+                    <Grid item xs={12} sm={6} lg={4} key={index} sx={{ display: 'flex', flexWrap: 'wrap' }}>
                       <Tooltip
                         title={item.name}
                         enterDelay={500}
@@ -724,6 +724,7 @@ export default function Products() {
                           sx={{
                             minWidth: 180,
                             padding: 2,
+                            flexGrow: 1,
                             border: "1px solid #f5f7fd",
                             borderRadius: "16px",
                             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
