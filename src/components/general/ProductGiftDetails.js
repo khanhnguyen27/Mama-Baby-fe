@@ -174,6 +174,7 @@ export default function ProductDetails() {
         product: {
           id: product.id,
           name: product.name,
+          price: product.price,
           point: product.point,
           type: product.type,
           store_id: product.store_id,

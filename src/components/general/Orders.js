@@ -2,6 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { changeStatusOrderApi, orderByUserIdApi } from "../../api/OrderAPI";
 import { format } from "date-fns"; // Optional: for date formatting
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import {
   Card,
   Container,
@@ -186,6 +187,24 @@ export default function Orders() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOnIcon
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 24,
+            }}
+          />
+        </Box>
+      </>
+    );
+  };
+
   const handleCheckout = (finalAmount, bankCode) => {
     const orders = [{ id: selectedOrderId }];
     console.log(finalAmount);
@@ -296,6 +315,8 @@ export default function Orders() {
       setLoading(false);
     }, 1500);
   };
+
+  console.log(ordersByStatus);
 
   const handleRepurchase = async (items) => {
     // const reversedItems = [...items].reverse();
@@ -814,16 +835,21 @@ export default function Orders() {
                                           sx={{
                                             fontWeight: "600",
                                             fontSize: "1.15rem",
+                                            display: "flex",
+                                            alignItems: "center",
                                           }}
                                         >
                                           {" "}
-                                          {formatCurrency(
-                                            productMap[detail.product_id][3]
-                                          )}{" "}
+                                          {detail.unit_price !== 0
+                                            ? formatCurrency(detail.unit_price)
+                                            : formatCurrencyPoint(
+                                                Math.round(detail.unit_point)
+                                              )}{" "}
                                           <span
                                             style={{
                                               fontSize: "1.05rem",
                                               opacity: 0.4,
+                                              marginLeft: "4px",
                                             }}
                                           >
                                             x{detail.quantity}
@@ -851,17 +877,24 @@ export default function Orders() {
                                             ]
                                           }
                                         </Typography>
-                                        <Typography sx={{ opacity: 0.8 }}>
-                                          <span
-                                            style={{
-                                              fontWeight: "bold",
-                                              fontSize: "1.25rem",
-                                            }}
-                                          >
-                                            ={" "}
-                                            {formatCurrency(
-                                              detail.amount_price
-                                            )}
+                                        <Typography
+                                          sx={{
+                                            opacity: 0.8,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            fontWeight: "bold",
+                                            fontSize: "1.25rem",
+                                          }}
+                                        >
+                                          <span>=</span>{" "}
+                                          <span style={{ marginLeft: "4px" }}>
+                                            {detail.unit_price !== 0
+                                              ? formatCurrency(
+                                                  detail.unit_price
+                                                )
+                                              : formatCurrencyPoint(
+                                                  Math.round(detail.unit_point)
+                                                )}
                                           </span>
                                         </Typography>
                                       </Box>

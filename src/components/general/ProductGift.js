@@ -52,6 +52,7 @@ export default function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch();
   const keyword = state?.keyword;
+  const typeGIFT = "GIFT";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,7 +71,7 @@ export default function Products() {
         allCategorytApi(),
         allProductApi({
           keyword: keyword,
-          type: "GIFT",
+          type: typeGIFT,
           age_id: ageFilter,
           brand_id: brandFilter,
           category_id: categoryFilter,

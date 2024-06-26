@@ -61,6 +61,9 @@ export default function Cart() {
   const cartAmount = useSelector(selectCartAmount);
   const totalCost = useSelector(selectTotalCost);
   const isEmptyCart = !cartItems.products.length;
+  const [typeGift, setTypeGift] = useState(false);
+  const [typeWholeSale, setTypeWholeSale] = useState(false);
+  const typeWHOLESALE = "WHOLESALE";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,7 +105,6 @@ export default function Cart() {
     fetchData();
   }, [selectedStoreId]);
 
-  console.log(cartItems);
   const groupedCartItems = cartItems.products.reduce((acc, item) => {
     if (!acc[item.product.store_id]) {
       acc[item.product.store_id] = [];
@@ -110,6 +112,9 @@ export default function Cart() {
     acc[item.product.store_id].push(item);
     return acc;
   }, {});
+
+  // console.log(cartItems);
+  // console.log(groupedCartItems);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
@@ -241,7 +246,7 @@ export default function Cart() {
     );
     const voucherId = selectedVoucherObj ? selectedVoucherObj.id : null;
 
-    const totalPoint = 0;
+    const totalPoint = getFinalPoint();
 
     const amount = totalCost;
 
@@ -326,7 +331,7 @@ export default function Cart() {
                 });
                 setTimeout(() => {
                   // window.location.replace(res.data?.data?.payment_url);
-                  window.open(res.data?.data?.payment_url)
+                  window.open(res.data?.data?.payment_url);
                 }, 500);
               })
               .catch((error) => console.log(error));
@@ -340,6 +345,44 @@ export default function Cart() {
     }
   };
 
+  useEffect(() => {
+    const checkForGift = () => {
+      let hasGift = false;
+      Object.keys(selectedStore)?.forEach((storeId) => {
+        if (selectedStore[storeId]) {
+          const storeProducts = groupedCartItems[storeId];
+          storeProducts?.forEach((item) => {
+            if (item.product.price === 0) {
+              hasGift = true;
+            }
+          });
+        }
+      });
+      setTypeGift(hasGift);
+    };
+
+    checkForGift();
+  }, [selectedStore, groupedCartItems]);
+
+  useEffect(() => {
+    const checkForWholeSale = () => {
+      let hasGift = false;
+      Object.keys(selectedStore)?.forEach((storeId) => {
+        if (selectedStore[storeId]) {
+          const storeProducts = groupedCartItems[storeId];
+          storeProducts?.forEach((item) => {
+            if (item.product.point === 0) {
+              hasGift = true;
+            }
+          });
+        }
+      });
+      setTypeWholeSale(hasGift);
+    };
+
+    checkForWholeSale();
+  }, [selectedStore, groupedCartItems]);
+
   const getFinalAmount = () => {
     let finalAmount = 0;
     Object.keys(selectedStore)?.forEach((storeId) => {
@@ -347,6 +390,19 @@ export default function Cart() {
         const storeProducts = groupedCartItems[storeId];
         storeProducts?.forEach((item) => {
           finalAmount += item.product.price * item.quantity;
+        });
+      }
+    });
+    return finalAmount;
+  };
+
+  const getFinalPoint = () => {
+    let finalAmount = 0;
+    Object.keys(selectedStore)?.forEach((storeId) => {
+      if (selectedStore[storeId]) {
+        const storeProducts = groupedCartItems[storeId];
+        storeProducts?.forEach((item) => {
+          finalAmount += item.product.point * item.quantity;
         });
       }
     });
@@ -537,7 +593,7 @@ export default function Cart() {
                                 <Typography
                                   sx={{ fontSize: "20px", fontWeight: "600" }}
                                 >
-                                  {item.product.type === "WHOLESALE"
+                                  {item.product.type === typeWHOLESALE
                                     ? "Unit Price"
                                     : "Unit Point"}
                                 </Typography>
@@ -574,7 +630,7 @@ export default function Cart() {
                                 mt: 1.5,
                               }}
                             >
-                              {item.product.type === "WHOLESALE" ? (
+                              {item.product.type === typeWHOLESALE ? (
                                 <Typography sx={{ fontSize: "20px" }}>
                                   {formatCurrency(item.product.price)}
                                 </Typography>
@@ -785,7 +841,7 @@ export default function Cart() {
                                 </Button>
                               </ButtonGroup>
                               <Typography sx={{ fontSize: "20px" }}>
-                                {item.product.type === "WHOLESALE"
+                                {item.product.type === typeWHOLESALE
                                   ? formatCurrency(
                                       Math.round(
                                         item.product.price * item.quantity
@@ -1358,7 +1414,7 @@ export default function Cart() {
                                           alignItems: "center",
                                         }}
                                       >
-                                        {item.product.type === "WHOLESALE"
+                                        {item.product.type === typeWHOLESALE
                                           ? formatCurrency(item.product.price)
                                           : formatCurrencyPoint(
                                               Math.round(item.product.point)
@@ -1368,6 +1424,7 @@ export default function Cart() {
                                           style={{
                                             fontSize: "1.05rem",
                                             opacity: 0.4,
+                                            marginLeft: "4px",
                                           }}
                                         >
                                           x{item.quantity}
@@ -1399,11 +1456,12 @@ export default function Cart() {
                                           style={{
                                             fontWeight: "bold",
                                             fontSize: "1.25rem",
+                                            marginRight: "4px",
                                           }}
                                         >
                                           ={" "}
                                         </span>
-                                        {item.product.type === "WHOLESALE"
+                                        {item.product.type === typeWHOLESALE
                                           ? formatCurrency(
                                               Math.round(
                                                 item.product.price *
@@ -1425,6 +1483,7 @@ export default function Cart() {
                           </Box>
                         </Card>
                       </Grid>
+
                       <Grid
                         item
                         xs={12}
@@ -1469,6 +1528,81 @@ export default function Cart() {
                             </span>
                             <span>- {formatCurrency(selectedVoucher)}</span>
                           </Box>
+                          {typeGift ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                opacity: 0.7,
+                                margin: "6px 0",
+                              }}
+                            >
+                              <span>
+                                Points used:{" "}
+                                <span style={{ fontSize: "1.05rem" }}> </span>
+                              </span>
+                              {formatCurrencyPoint(getFinalPoint())}
+                            </Box>
+                          ) : null}
+
+                          {typeGift ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                opacity: 0.7,
+                                margin: "6px 0",
+                              }}
+                            >
+                              <span>
+                                Your point:{" "}
+                                <span style={{ fontSize: "1.05rem" }}> </span>
+                              </span>
+                              <Box
+                                sx={{ display: "flex", alignItems: "center" }}
+                              >
+                                {userInfo.accumulated_points}
+                                <MonetizationOnIcon
+                                  variant="h6"
+                                  sx={{
+                                    marginLeft: "4px",
+                                    color: "gray",
+                                    fontSize: 24,
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+                          ) : null}
+
+                          {typeGift ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                opacity: 0.7,
+                                margin: "6px 0",
+                              }}
+                            >
+                              <span>
+                                Points remaining:{" "}
+                                <span style={{ fontSize: "1.05rem" }}> </span>
+                              </span>
+                              <Box
+                                sx={{ display: "flex", alignItems: "center" }}
+                              >
+                                {userInfo.accumulated_points - getFinalPoint()}
+                                <MonetizationOnIcon
+                                  variant="h6"
+                                  sx={{
+                                    marginLeft: "4px",
+                                    color: "gray",
+                                    fontSize: 24,
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+                          ) : null}
+
                           <Box
                             sx={{
                               display: "flex",
@@ -1507,7 +1641,9 @@ export default function Cart() {
                                 color: "#ff469e",
                               }}
                             >
-                              {formatCurrency(getDiscountedTotal())}
+                              <span>
+                                {formatCurrency(getDiscountedTotal())}
+                              </span>
                             </span>
                           </Box>
                         </Typography>
@@ -1611,29 +1747,31 @@ export default function Cart() {
                             >
                               COD
                             </MenuItem>
-                            <MenuItem
-                              value={"VNPAY"}
-                              sx={{
-                                color: "black",
-                                fontSize: "18px",
-                                transition:
-                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
+                            {typeWholeSale ? (
+                              <MenuItem
+                                value={"VNPAY"}
+                                sx={{
+                                  color: "black",
+                                  fontSize: "18px",
+                                  transition:
+                                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
                                   "&:hover": {
                                     backgroundColor: "#fff4fc",
                                     color: "#ff469e",
                                   },
-                                },
-                              }}
-                            >
-                              VNPAY
-                            </MenuItem>
+                                  "&.Mui-selected": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    "&:hover": {
+                                      backgroundColor: "#fff4fc",
+                                      color: "#ff469e",
+                                    },
+                                  },
+                                }}
+                              >
+                                VNPAY
+                              </MenuItem>
+                            ) : null}
                           </Select>
                         </FormControl>
 

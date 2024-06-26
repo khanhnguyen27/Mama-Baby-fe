@@ -79,6 +79,10 @@ export default function StaffHome() {
   const [storeName, setStoreName] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+  const typeWHOLESALE = "WHOLESALE";
+  const typeGIFT = "GIFT";
+  const statusInStock = "IN STOCK";
+  const statusComingSoon = "COMING SOON";
 
   const countries = [
     "Afghanistan",
@@ -400,9 +404,9 @@ export default function StaffHome() {
   const [price, setPrice] = useState("");
   const [point, setPoint] = useState("");
   const [remain, setRemain] = useState("");
-  const [status, setStatus] = useState("IN STOCK");
+  const [status, setStatus] = useState(statusInStock);
   const [description, setDescription] = useState("");
-  const [type, setType] = useState("WHOLESALE");
+  const [type, setType] = useState(typeWHOLESALE);
   const [brandId, setBrandId] = useState(1);
   const [categoryId, setCategoryId] = useState(1);
   const [ageId, setAgeId] = useState(1);
@@ -453,30 +457,30 @@ export default function StaffHome() {
       // Hiển thị thông báo lỗi cho người dùng
       toast.warn("Please fill in all required fields.");
       return;
-    } else if (status !== "COMING SOON" && remain <= 0) {
+    } else if (status !== statusComingSoon && remain <= 0) {
       toast.error(
         "If the status is in stock, the remain must be greater than 0."
       );
       return;
-    } else if (status !== "IN STOCK" && remain < 0) {
+    } else if (status !== statusInStock && remain < 0) {
       toast.error(
         "If the status is coming soon, the remain must be greater than or equal to 0."
       );
       return;
-    } else if (type === "WHOLESALE") {
+    } else if (type === typeWHOLESALE) {
       if (price <= 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
         );
         return;
       }
       if (point < 0 || point > 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
         );
         return;
       }
-    } else if (type === "GIFT") {
+    } else if (type === typeGIFT) {
       if (point <= 0) {
         toast.error(
           "If the type is gift, the point must be greater than 0 and the price must be 0."
@@ -487,6 +491,10 @@ export default function StaffHome() {
         toast.error(
           "If the type is gift, the point must be greater than 0 and the price must be 0."
         );
+        return;
+      }
+      if (status === statusComingSoon) {
+        toast.error("Gifts cannot have a coming soon status.");
         return;
       }
     }
@@ -597,7 +605,7 @@ export default function StaffHome() {
       toast.warn("Please fill in all required fields.");
       return;
     } else if (
-      selectedProduct?.status !== "COMING SOON" &&
+      selectedProduct?.status !== statusComingSoon &&
       selectedProduct?.remain <= 0
     ) {
       toast.error(
@@ -605,27 +613,27 @@ export default function StaffHome() {
       );
       return;
     } else if (
-      selectedProduct?.status !== "IN STOCK" &&
+      selectedProduct?.status !== statusInStock &&
       selectedProduct?.remain < 0
     ) {
       toast.error(
         "If the status is coming soon, the remain must be greater than or equal to 0."
       );
       return;
-    } else if (selectedProduct?.type === "WHOLESALE") {
+    } else if (selectedProduct?.type === typeWHOLESALE) {
       if (selectedProduct?.price <= 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
         );
         return;
       }
       if (selectedProduct?.point < 0 || selectedProduct?.point > 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
         );
         return;
       }
-    } else if (selectedProduct?.type === "GIFT") {
+    } else if (selectedProduct?.type === typeGIFT) {
       if (selectedProduct?.point <= 0) {
         toast.error(
           "If the type is gift, the point must be greater than 0 and the price must be 0."
@@ -636,6 +644,10 @@ export default function StaffHome() {
         toast.error(
           "If the type is gift, the point must be greater than 0 and the price must be 0."
         );
+        return;
+      }
+      if (status === statusComingSoon) {
+        toast.error("Gifts cannot have a coming soon status.");
         return;
       }
     }
@@ -1472,7 +1484,7 @@ export default function StaffHome() {
                             variant="body2"
                             sx={{ color: "gray", textAlign: "left" }}
                           >
-                            {item.type === "WHOLESALE" ? (
+                            {item.type === typeWHOLESALE ? (
                               formatCurrency(item.price)
                             ) : (
                               <Box
@@ -1697,8 +1709,8 @@ export default function StaffHome() {
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
-                  <MenuItem value="IN STOCK">IN STOCK</MenuItem>
-                  <MenuItem value="COMING SOON">COMING SOON</MenuItem>
+                  <MenuItem value={statusInStock}>IN STOCK</MenuItem>
+                  <MenuItem value={statusComingSoon}>COMING SOON</MenuItem>
                 </Select>
               </FormControl>{" "}
             </Grid>
@@ -1706,8 +1718,8 @@ export default function StaffHome() {
               <FormControl fullWidth margin="normal">
                 <InputLabel>Type</InputLabel>
                 <Select value={type} onChange={(e) => setType(e.target.value)}>
-                  <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
-                  <MenuItem value="GIFT">GIFT</MenuItem>
+                  <MenuItem value={typeWHOLESALE}>WHOLESALE</MenuItem>
+                  <MenuItem value={typeGIFT}>GIFT</MenuItem>
                 </Select>
               </FormControl>{" "}
             </Grid>
@@ -2046,9 +2058,9 @@ export default function StaffHome() {
                     value={selectedProduct?.status}
                     onChange={(e) => handleChange("status", e.target.value)}
                   >
-                    <MenuItem value="IN STOCK">IN STOCK</MenuItem>
+                    <MenuItem value={statusInStock}>IN STOCK</MenuItem>
                     <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
-                    <MenuItem value="COMING SOON">COMING SOON</MenuItem>
+                    <MenuItem value={statusComingSoon}>COMING SOON</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -2059,8 +2071,8 @@ export default function StaffHome() {
                     value={selectedProduct?.type}
                     onChange={(e) => handleChange("type", e.target.value)}
                   >
-                    <MenuItem value="WHOLESALE">WHOLESALE</MenuItem>
-                    <MenuItem value="GIFT">GIFT</MenuItem>
+                    <MenuItem value={typeWHOLESALE}>WHOLESALE</MenuItem>
+                    <MenuItem value={typeGIFT}>GIFT</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
