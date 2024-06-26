@@ -53,6 +53,7 @@ export default function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch();
   const keyword = state?.keyword;
+  const typeWHOLESALE = "WHOLESALE";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,7 +73,7 @@ export default function Products() {
           allCategorytApi(),
           allProductApi({
             keyword: keyword,
-            type: "WHOLESALE",
+            type: typeWHOLESALE,
             age_id: ageFilter,
             brand_id: brandFilter,
             category_id: categoryFilter,
@@ -165,6 +166,7 @@ export default function Products() {
           id: product.products[index].id,
           name: product.products[index].name,
           price: product.products[index].price,
+          point: product.products[index].point,
           type: product.products[index].type,
           store_id: product.products[index].store_id,
           image_url: product.products[index].image_url,
@@ -699,7 +701,14 @@ export default function Products() {
                   const halfStar = averageRating - fullStars >= 0.5;
                   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                   return (
-                    <Grid item xs={12} sm={6} lg={4} key={index} sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      lg={4}
+                      key={index}
+                      sx={{ display: "flex", flexWrap: "wrap" }}
+                    >
                       <Tooltip
                         title={item.name}
                         enterDelay={500}

@@ -408,6 +408,7 @@ export default function ProductDetails() {
           id: product.id,
           name: product.name,
           price: product.price,
+          point: product.point,
           type: product.type,
           store_id: product.store_id,
           image_url: product.image_url,
