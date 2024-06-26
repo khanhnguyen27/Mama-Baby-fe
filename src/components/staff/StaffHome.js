@@ -623,13 +623,13 @@ export default function StaffHome() {
     } else if (selectedProduct?.type === typeWHOLESALE) {
       if (selectedProduct?.price <= 0) {
         toast.error(
-          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the price must be greater than 0 and the point must be 0."
         );
         return;
       }
       if (selectedProduct?.point < 0 || selectedProduct?.point > 0) {
         toast.error(
-          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the price must be greater than 0 and the point must be 0."
         );
         return;
       }
