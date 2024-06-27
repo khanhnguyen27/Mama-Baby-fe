@@ -25,6 +25,10 @@ export const refundByIdApi = (refundId) => {
   });
 };
 
+export const refundByUserIdApi = (userId) => {
+  return axiosJWT.get(`${URL_REFUND}/user/${userId}`);
+};
+
 export const refundByStoreIdApi = (storeId) => {
   return axiosJWT.get(`${URL_REFUND}/store/${storeId}`, {
     storeId: storeId,
