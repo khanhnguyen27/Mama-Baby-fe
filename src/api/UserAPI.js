@@ -42,20 +42,33 @@ export const signupApi = (
 export const profileUserApi = () => {
   return axiosJWT.get(URL_USERDETAIL);
 };
-export const updateAccountApi = ( username, fullName, address, phoneNumber, status) => {
+export const updateAccountApi = (
+  username,
+  fullName,
+  address,
+  phoneNumber,
+  status,
+  roleId
+) => {
   return axiosJWT.put(URL_ACTIVE, {
     username: username,
-    password: "888888888",
     fullName: fullName,
     address: address,
     phoneNumber: phoneNumber,
-    status: status
+    status: status,
+    roleId: roleId,
   });
 };
-export const updateRollUserApi = (username, fullName, address, phoneNumber, status, newRoleId) => {
+export const updateRollUserApi = (
+  username,
+  fullName,
+  address,
+  phoneNumber,
+  status,
+  newRoleId
+) => {
   return axiosJWT.put(URL_ACTIVESTORE, {
     username: username,
-    password: "888888888", 
     fullName: fullName,
     address: address,
     phoneNumber: phoneNumber,
@@ -63,9 +76,6 @@ export const updateRollUserApi = (username, fullName, address, phoneNumber, stat
     roleId: newRoleId,
   });
 };
-
-
-
 
 // export const logoutApi = (token) => {
 //   return axiosJWT.post(URL_LOGOUT, null, {

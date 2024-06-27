@@ -13,6 +13,10 @@ import Send from "@mui/icons-material/Send";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
 import PersonIcon from "@mui/icons-material/Person";
+import CheckIcon from "@mui/icons-material/Check";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ShopIcon from "@mui/icons-material/Shop";
+import { allStoreApi } from "../../api/StoreAPI";
 import {
   Star,
   StarHalf,
@@ -55,9 +59,11 @@ import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductDetails() {
   const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
   const { state } = useLocation();
   const [age, setAge] = useState([]);
   const [ageMap, setAgeMap] = useState({});
@@ -84,6 +90,8 @@ export default function ProductDetails() {
   const [totalRating, setTotalRating] = useState(0);
   const [details, setDetails] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const typeGift = "GIFT";
+  const [store, setStore] = useState([]);
 
   const handleToggle = () => {
     setExpanded(!expanded);
@@ -164,7 +172,7 @@ export default function ProductDetails() {
     }
 
     if (selectedComment?.comment.length < 20) {
-      toast.warn("Please enter a comment of at least 50 characters.");
+      toast.warn("Please enter a comment of at least 20 characters.");
       return;
     }
 
@@ -217,15 +225,23 @@ export default function ProductDetails() {
 
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, userRes, productRes, commentRes] =
-        await Promise.all([
-          allAgeApi(),
-          allBrandApi(),
-          allCategorytApi(),
-          allUserApi(),
-          productByIdApi(productId),
-          commentByProductIdApi(productId),
-        ]);
+      const [
+        ageRes,
+        brandRes,
+        categoryRes,
+        userRes,
+        productRes,
+        commentRes,
+        storeRes,
+      ] = await Promise.all([
+        allAgeApi(),
+        allBrandApi(),
+        allCategorytApi(),
+        allUserApi(),
+        productByIdApi(productId),
+        commentByProductIdApi(productId),
+        allStoreApi(),
+      ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
@@ -233,6 +249,7 @@ export default function ProductDetails() {
       const userData = userRes?.data?.data || [];
       const productData = productRes?.data?.data || {};
       const commentData = commentRes?.data?.data || null;
+      const storeData = storeRes?.data?.data || [];
 
       setAge(ageData);
       setBrand(brandData);
@@ -240,6 +257,7 @@ export default function ProductDetails() {
       setUser(userData);
       setProduct(productData);
       setComment(commentData);
+      setStore(storeData);
 
       const details = extractDescriptionDetails(productData.description);
       setDetails(details);
@@ -315,6 +333,8 @@ export default function ProductDetails() {
       console.log(err);
     }
   };
+  console.log(store);
+  console.log(product);
 
   useEffect(() => {
     setTimeout(() => {
@@ -360,7 +380,7 @@ export default function ProductDetails() {
     }
 
     if (commentInput.length < 20) {
-      toast.warn("Please enter a comment of at least 50 characters.");
+      toast.warn("Please enter a comment of at least 20 characters.");
       return;
     }
 
@@ -511,629 +531,1066 @@ export default function ProductDetails() {
           </Typography>
         </Breadcrumbs>
       </Container>
-      <Container
-        sx={{
-          my: 4,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Badge
-          badgeContent={product.type}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
+      {product.type === typeGift ? (
+        <Typography
+          variant="h6"
+          color="textSecondary"
           sx={{
-            "& .MuiBadge-badge": {
-              transform: "rotate(45deg)",
-              color: "white",
-              fontSize: "16px",
-              fontWeight: "bold",
-              backgroundColor: "#ff469e",
-              borderRadius: "0 4px 4px 0",
-              padding: "5px 10px",
-              position: "absolute",
-              top: product.type == "WHOLESALE" ? "65px" : "40px",
-              right: product.type == "WHOLESALE" ? "-20px" : "0px",
-              boxShadow: "0 0 0 3px white",
-            },
+            marginBottom: 1,
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            fontSize: "1.5rem",
           }}
         >
-          <Card
-            style={{
-              backgroundColor: "#fff4fc",
-              boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.24)",
-              border: "3px solid #ff469e",
-              color: "black",
-              padding: "20px",
-              maxWidth: "900px",
-              width: "60vw",
-              margin: "0 auto",
+          No product available
+        </Typography>
+      ) : (
+        <Box>
+          <Container
+            sx={{
+              my: 4,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <CardContent>
-              <Grid container spacing={4}>
-                <Grid item xs={12} lg={4}>
-                  <Paper
+            <Badge
+              badgeContent={product.type}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              sx={{
+                "& .MuiBadge-badge": {
+                  transform: "rotate(45deg)",
+                  color: "white",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  backgroundColor: "#ff469e",
+                  borderRadius: "0 4px 4px 0",
+                  padding: "5px 10px",
+                  position: "absolute",
+                  top: product.type == "WHOLESALE" ? "65px" : "40px",
+                  right: product.type == "WHOLESALE" ? "-20px" : "0px",
+                  boxShadow: "0 0 0 3px white",
+                },
+              }}
+            >
+              <Card
+                style={{
+                  backgroundColor: "#fff4fc",
+                  boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.24)",
+                  border: "3px solid #ff469e",
+                  color: "black",
+                  padding: "20px",
+                  maxWidth: "900px",
+                  width: "60vw",
+                  margin: "0 auto",
+                }}
+              >
+                <CardContent>
+                  <Grid container spacing={4}>
+                    <Grid item xs={12} lg={4}>
+                      <Paper
+                        style={{
+                          padding: "10px",
+                          backgroundColor: "#ffe6f0",
+                          textAlign: "center",
+                        }}
+                      >
+                        <img
+                          style={{
+                            width: "200px",
+                            height: "200px",
+                            borderRadius: "10px",
+                            marginBottom: "10px",
+                          }}
+                          src={
+                            product.image_url.includes("Product_")
+                              ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
+                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          }
+                          onError={(e) => {
+                            e.target.src =
+                              "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                          }}
+                          alt={product.name}
+                        />
+                      </Paper>
+                    </Grid>
+                    <Grid
+                      item
+                      xs={12}
+                      lg={8}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
+                      }}
+                    >
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <Typography variant="h6">Brand:</Typography>
+                        <Typography
+                          variant="h6"
+                          style={{ color: "#ff469e", fontWeight: "bold" }}
+                        >
+                          {brandMap[product.brand_id]}
+                        </Typography>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <Typography
+                          variant="h5"
+                          style={{
+                            wordWrap: "break-word",
+                            fontWeight: "600",
+                            textAlign: "left",
+                          }}
+                        >
+                          {product.name}
+                        </Typography>
+                        <Typography variant="h6" style={{ textAlign: "left" }}>
+                          {formatCurrency(product.price)}
+                        </Typography>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <Typography variant="h6">Age Range:</Typography>
+                        <Typography
+                          variant="h6"
+                          style={{
+                            border: "1px solid #ff469e",
+                            color: "#ff469e",
+                            fontWeight: "bold",
+                            padding: "0 8px",
+                          }}
+                        >
+                          {ageMap[product.age_id]}
+                        </Typography>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <Typography variant="h6">Category:</Typography>
+                        <Typography
+                          variant="h6"
+                          style={{
+                            border: "1px solid #ff469e",
+                            color: "#ff469e",
+                            fontWeight: "bold",
+                            padding: "0 8px",
+                          }}
+                        >
+                          {categoryMap[product.category_id]}
+                        </Typography>
+                      </div>
+                      {/* <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <Typography>{product.description}</Typography>
+                  </div> */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <ButtonGroup
+                          variant="outlined"
+                          aria-label="outlined button group"
+                          style={{ height: "2.5rem" }}
+                        >
+                          <Button
+                            variant="contained"
+                            disabled={quantity <= 1}
+                            onClick={() =>
+                              setQuantity((prevQuantity) =>
+                                Math.max(1, prevQuantity - 10)
+                              )
+                            }
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "20px",
+                              fontSize: "1.25rem",
+                              fontWeight: "bold",
+                              boxShadow: "none",
+                              transition:
+                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            --
+                          </Button>
+                          <Button
+                            variant="contained"
+                            disabled={quantity <= 1}
+                            onClick={() => setQuantity(quantity - 1)}
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              fontSize: "1.25rem",
+                              fontWeight: "bold",
+                              boxShadow: "none",
+                              transition:
+                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            -
+                          </Button>
+                          <Button
+                            disableRipple
+                            style={{
+                              backgroundColor: "white",
+                              fontSize: "1.25rem",
+                              width: "4rem",
+                              cursor: "default",
+                              border: "1px solid #ff469e",
+                              color: "black",
+                            }}
+                          >
+                            {quantity}
+                          </Button>
+                          <Button
+                            variant="contained"
+                            disabled={quantity >= 99}
+                            onClick={() => setQuantity(quantity + 1)}
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              fontSize: "1.25rem",
+                              fontWeight: "bold",
+                              boxShadow: "none",
+                              transition:
+                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            +
+                          </Button>
+                          <Button
+                            variant="contained"
+                            disabled={quantity >= 99}
+                            onClick={() =>
+                              setQuantity((prevQuantity) =>
+                                Math.min(99, prevQuantity + 10)
+                              )
+                            }
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "20px",
+                              fontSize: "1.25rem",
+                              fontWeight: "bold",
+                              boxShadow: "none",
+                              transition:
+                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            ++
+                          </Button>
+                        </ButtonGroup>
+                        <Button
+                          variant="contained"
+                          onClick={handleAddToCart}
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "20px",
+                            fontSize: "0.95rem",
+                            fontWeight: "bold",
+                            boxShadow: "none",
+                            transition:
+                              "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                            },
+                          }}
+                        >
+                          <Cart sx={{ mr: 1 }} />
+                          ADD TO CART
+                        </Button>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Badge>
+            {visible && (
+              <IconButton
+                size="large"
+                sx={{
+                  position: "fixed",
+                  right: 25,
+                  bottom: 25,
+                  border: "1px solid #ff469e",
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  transition:
+                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                  },
+                }}
+                onClick={() =>
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  })
+                }
+              >
+                <KeyboardCapslock />
+              </IconButton>
+            )}
+          </Container>
+          <Container sx={{ my: 4, mt: 15 }}>
+            <Typography
+              variant="h4"
+              sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
+            >
+              <Container
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                  marginBottom: "24px",
+                  width: "100%",
+                  maxWidth: "800px",
+                  // backgroundImage:
+                  //   "linear-gradient(45deg, #FAD0C4 30%, #FFD1DC 90%)",
+                  backgroundImage:
+                    "linear-gradient(45deg, #FCE4EC 30%, #FFF3E0 90%)",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdZJVlDPE_mC28sugfpG-HdgSViHPXDHL5ww&s"
+                    alt="Shop Logo"
                     style={{
-                      padding: "10px",
-                      backgroundColor: "#ffe6f0",
-                      textAlign: "center",
+                      borderRadius: "50%",
+                      marginRight: "16px",
+                      height: "75px",
+                      width: "75px",
+                    }}
+                  />
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: "bold", color: "#000000" }}
+                    >
+                      {store?.stores?.map((item, index) =>
+                        item.id === product.store_id
+                          ? item.name_store.toUpperCase()
+                          : ""
+                      )}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginTop: "8px",
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          border: "2px solid #ff469e",
+                          color: "#ff469e",
+                          backgroundColor: "#fff",
+                          marginRight: "8px",
+                          fontSize: "0.75rem",
+                          padding: "3px 6px",
+                          borderRadius: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <CheckCircleIcon
+                          sx={{ marginRight: "4px", color: "#ff469e" }}
+                        />{" "}
+                        Authentic
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      marginRight: "8px",
+                      borderColor: "#FFC107",
+                      color: "#FFC107",
+                      padding: "8px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "20px",
+                      transition:
+                        "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        borderColor: "#FFB300",
+                        color: "#FFB300",
+                      },
+                    }}
+                    onClick={() => (
+                      navigate(
+                        `/stores/${product.store_id}`,
+
+                        { state: { storeId: product.store_id } }
+                      ),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                  >
+                    <ShopIcon
+                      sx={{
+                        marginRight: "4px",
+                        color: "#FFC107",
+                        verticalAlign: "middle",
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        verticalAlign: "middle",
+                        lineHeight: 1,
+                      }}
+                    >
+                      Visit Shop
+                    </Typography>
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      marginRight: "8px",
+                      borderColor: "#ff469e",
+                      color: "#ff469e",
+                      padding: "8px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "20px",
+                      transition:
+                        "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        borderColor: "#ff469e",
+                        color: "#ff469e",
+                      },
                     }}
                   >
-                    <img
-                      style={{
-                        width: "200px",
-                        height: "200px",
-                        borderRadius: "10px",
-                        marginBottom: "10px",
+                    + Follow
+                  </Button>
+                </Box>
+                <Box>
+                  <Typography variant="body2">
+                    Followers:{" "}
+                    <span style={{ color: "#ff469e", fontWeight: "bold" }}>
+                      1K
+                    </span>
+                  </Typography>
+                  <Typography variant="body2">
+                    Satisfaction:{" "}
+                    <span style={{ color: "#ff469e", fontWeight: "bold" }}>
+                      100%
+                    </span>
+                  </Typography>
+                  <Typography variant="body2">
+                    Ratings:{" "}
+                    <span style={{ color: "#ff469e", fontWeight: "bold" }}>
+                      5.0 / 5.0
+                    </span>
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <CheckIcon sx={{ color: "green", marginRight: "4px" }} />{" "}
+                    100% Quality
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <CheckIcon sx={{ color: "green", marginRight: "4px" }} />{" "}
+                    Authentic Distribution
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <CheckIcon sx={{ color: "green", marginRight: "4px" }} />{" "}
+                    Easy Returns
+                  </Typography>
+                </Box>
+              </Container>
+            </Typography>
+          </Container>
+          <Container sx={{ my: 4 }}>
+            <Typography
+              variant="h4"
+              sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
+            >
+              Product Details
+            </Typography>
+            <TableContainer
+              component={Paper}
+              sx={{ boxShadow: 3, borderRadius: 2 }}
+            >
+              <Table>
+                <TableBody>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
                       }}
-                      src={
-                        product.image_url.includes("Product_")
-                          ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
-                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                      }
-                      onError={(e) => {
-                        e.target.src =
-                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                    >
+                      Weight
+                    </TableCell>
+                    <TableCell
+                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                    >
+                      {details.weight} {details.unit}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
                       }}
-                      alt={product.name}
-                    />
-                  </Paper>
-                </Grid>
+                    >
+                      Brand Origin
+                    </TableCell>
+                    <TableCell
+                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                    >
+                      {details.brandOrigin}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      Manufactured At
+                    </TableCell>
+                    <TableCell
+                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                    >
+                      {details.manufacturedAt}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      Manufacturer
+                    </TableCell>
+                    <TableCell
+                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                    >
+                      {details.manufacturer}
+                    </TableCell>
+                  </TableRow>
+                  {expanded && (
+                    <>
+                      <TableRow
+                        sx={{
+                          "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                        }}
+                      >
+                        <TableCell
+                          sx={{
+                            fontWeight: "bold",
+                            borderBottom: "1px solid #ddd",
+                          }}
+                        >
+                          Usage Instructions
+                        </TableCell>
+                        <TableCell
+                          sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                        >
+                          {details.usageInstructions}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow
+                        sx={{
+                          "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                        }}
+                      >
+                        <TableCell
+                          sx={{
+                            fontWeight: "bold",
+                            borderBottom: "1px solid #ddd",
+                          }}
+                        >
+                          Storage Instructions
+                        </TableCell>
+                        <TableCell
+                          sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                        >
+                          {details.storageInstructions}
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
+              <Button
+                variant="contained"
+                onClick={handleToggle}
+                sx={{
+                  backgroundColor: "#f5f7fd",
+                  color: "#ff469e",
+                  borderRadius: "10px",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  mr: 2,
+                  padding: "0.25rem 0.5rem",
+                  boxShadow: "none",
+                  transition:
+                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    border: "1px solid white",
+                  },
+                }}
+              >
+                {expanded ? "Show Less" : "Show More"}
+              </Button>
+            </Box>
+          </Container>
+          <Container sx={{ my: 4 }}>
+            <Typography
+              variant="h4"
+              sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
+            >
+              Comments
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mt: 2,
+              }}
+            >
+              <Grid
+                container
+                spacing={2}
+                className="rating-table row-small align-middle"
+                mb={5}
+              >
+                {/* Điểm đánh giá trung bình */}
                 <Grid
                   item
                   xs={12}
-                  lg={8}
-                  style={{
+                  md={6}
+                  sx={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "1rem",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: "row",
                   }}
                 >
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <Typography variant="h6">Brand:</Typography>
-                    <Typography
-                      variant="h6"
-                      style={{ color: "#ff469e", fontWeight: "bold" }}
-                    >
-                      {brandMap[product.brand_id]}
+                  <Box className="rating-table__total" textAlign="center">
+                    <Typography variant="h1" className="rating_total">
+                      {averageRating !== 0 ? averageRating : ""}
                     </Typography>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Typography
-                      variant="h5"
-                      style={{
-                        wordWrap: "break-word",
-                        fontWeight: "600",
-                        textAlign: "left",
-                      }}
-                    >
-                      {product.name}
+                    <Typography variant="h4" className="rating_total">
+                      {typeof averageRating === "number" &&
+                        averageRating === 0 &&
+                        "No reviews yet"}
                     </Typography>
-                    <Typography variant="h6" style={{ textAlign: "left" }}>
-                      {formatCurrency(product.price)}
-                    </Typography>
-                  </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <Typography variant="h6">Age Range:</Typography>
-                    <Typography
-                      variant="h6"
-                      style={{
-                        border: "1px solid #ff469e",
-                        color: "#ff469e",
-                        fontWeight: "bold",
-                        padding: "0 8px",
-                      }}
+
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      className="star-rating-custom"
+                      sx={{ mt: 0 }}
                     >
-                      {ageMap[product.age_id]}
-                    </Typography>
-                  </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <Typography variant="h6">Category:</Typography>
-                    <Typography
-                      variant="h6"
-                      style={{
-                        border: "1px solid #ff469e",
-                        color: "#ff469e",
-                        fontWeight: "bold",
-                        padding: "0 8px",
-                      }}
-                    >
-                      {categoryMap[product.category_id]}
-                    </Typography>
-                  </div>
-                  {/* <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <Typography>{product.description}</Typography>
-                  </div> */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <ButtonGroup
-                      variant="outlined"
-                      aria-label="outlined button group"
-                      style={{ height: "2.5rem" }}
-                    >
-                      <Button
-                        variant="contained"
-                        disabled={quantity <= 1}
-                        onClick={() =>
-                          setQuantity((prevQuantity) =>
-                            Math.max(1, prevQuantity - 10)
-                          )
-                        }
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          borderRadius: "20px",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        --
-                      </Button>
-                      <Button
-                        variant="contained"
-                        disabled={quantity <= 1}
-                        onClick={() => setQuantity(quantity - 1)}
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        -
-                      </Button>
-                      <Button
-                        disableRipple
-                        style={{
-                          backgroundColor: "white",
-                          fontSize: "1.25rem",
-                          width: "4rem",
-                          cursor: "default",
-                          border: "1px solid #ff469e",
-                          color: "black",
-                        }}
-                      >
-                        {quantity}
-                      </Button>
-                      <Button
-                        variant="contained"
-                        disabled={quantity >= 99}
-                        onClick={() => setQuantity(quantity + 1)}
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        +
-                      </Button>
-                      <Button
-                        variant="contained"
-                        disabled={quantity >= 99}
-                        onClick={() =>
-                          setQuantity((prevQuantity) =>
-                            Math.min(99, prevQuantity + 10)
-                          )
-                        }
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          borderRadius: "20px",
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          boxShadow: "none",
-                          transition:
-                            "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        ++
-                      </Button>
-                    </ButtonGroup>
-                    <Button
-                      variant="contained"
-                      onClick={handleAddToCart}
+                      <Typography variant="h6">
+                        {Array(fullStars).fill(
+                          <Star
+                            style={{ color: "#ff469e", fontSize: "36px" }}
+                          />
+                        )}
+                        {halfStar && (
+                          <StarHalf
+                            style={{ color: "#ff469e", fontSize: "36px" }}
+                          />
+                        )}
+                        {Array(emptyStars).fill(
+                          <StarOutline
+                            style={{ color: "#ff469e", fontSize: "36px" }}
+                          />
+                        )}
+                      </Typography>
+                    </Box>
+                    <Box
                       sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderRadius: "20px",
-                        fontSize: "0.95rem",
-                        fontWeight: "bold",
-                        boxShadow: "none",
-                        transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                        },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <Cart sx={{ mr: 1 }} />
-                      ADD TO CART
-                    </Button>
+                      <Typography
+                        variant="h6"
+                        className="title-rating"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <Typography variant="body2" component="span">
+                          Total{" "}
+                        </Typography>
+                        <PersonIcon
+                          sx={{
+                            ml: 1,
+                            mr: 1,
+                            width: 24,
+                            height: 24,
+                            color: "inherit",
+                          }}
+                        />
+                        <Typography variant="body2" component="span">
+                          {totalRating}
+                        </Typography>
+                      </Typography>
+                    </Box>
                   </Box>
                 </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Badge>
-        {visible && (
-          <IconButton
-            size="large"
-            sx={{
-              position: "fixed",
-              right: 25,
-              bottom: 25,
-              border: "1px solid #ff469e",
-              backgroundColor: "#fff4fc",
-              color: "#ff469e",
-              transition:
-                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-              },
-            }}
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              })
-            }
-          >
-            <KeyboardCapslock />
-          </IconButton>
-        )}
-      </Container>
-      <Container sx={{ my: 4 }}>
-        <Typography
-          variant="h4"
-          sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
-        >
-          Product Details
-        </Typography>
-        <TableContainer
-          component={Paper}
-          sx={{ boxShadow: 3, borderRadius: 2 }}
-        >
-          <Table>
-            <TableBody>
-              <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
-              >
-                <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
-                >
-                  Weight
-                </TableCell>
-                <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
-                >
-                  {details.weight} {details.unit}
-                </TableCell>
-              </TableRow>
-              <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
-              >
-                <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
-                >
-                  Brand Origin
-                </TableCell>
-                <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
-                >
-                  {details.brandOrigin}
-                </TableCell>
-              </TableRow>
-              <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
-              >
-                <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
-                >
-                  Manufactured At
-                </TableCell>
-                <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
-                >
-                  {details.manufacturedAt}
-                </TableCell>
-              </TableRow>
-              <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
-              >
-                <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
-                >
-                  Manufacturer
-                </TableCell>
-                <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
-                >
-                  {details.manufacturer}
-                </TableCell>
-              </TableRow>
-              {expanded && (
-                <>
-                  <TableRow
-                    sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
-                    }}
-                  >
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
-                      }}
-                    >
-                      Usage Instructions
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
-                    >
-                      {details.usageInstructions}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow
-                    sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
-                    }}
-                  >
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
-                      }}
-                    >
-                      Storage Instructions
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
-                    >
-                      {details.storageInstructions}
-                    </TableCell>
-                  </TableRow>
-                </>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
-          <Button
-            variant="contained"
-            onClick={handleToggle}
-            sx={{
-              backgroundColor: "#f5f7fd",
-              color: "#ff469e",
-              borderRadius: "10px",
-              fontSize: 16,
-              fontWeight: "bold",
-              mr: 2,
-              padding: "0.25rem 0.5rem",
-              boxShadow: "none",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-          >
-            {expanded ? "Show Less" : "Show More"}
-          </Button>
-        </Box>
-      </Container>
-      <Container sx={{ my: 4 }}>
-        <Typography
-          variant="h4"
-          sx={{ mb: 4, textAlign: "start", color: "#ff469e" }}
-        >
-          Comments
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mt: 2,
-          }}
-        >
-          <Grid
-            container
-            spacing={2}
-            className="rating-table row-small align-middle"
-            mb={5}
-          >
-            {/* Điểm đánh giá trung bình */}
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <Box className="rating-table__total" textAlign="center">
-                <Typography variant="h1" className="rating_total">
-                  {averageRating !== 0 ? averageRating : ""}
-                </Typography>
-                <Typography variant="h4" className="rating_total">
-                  {typeof averageRating === "number" &&
-                    averageRating === 0 &&
-                    "No reviews yet"}
-                </Typography>
 
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  className="star-rating-custom"
-                  sx={{ mt: 0 }}
-                >
-                  <Typography variant="h6">
-                    {Array(fullStars).fill(
-                      <Star style={{ color: "#ff469e", fontSize: "36px" }} />
-                    )}
-                    {halfStar && (
-                      <StarHalf
-                        style={{ color: "#ff469e", fontSize: "36px" }}
-                      />
-                    )}
-                    {Array(emptyStars).fill(
-                      <StarOutline
-                        style={{ color: "#ff469e", fontSize: "36px" }}
-                      />
-                    )}
-                  </Typography>
-                </Box>
-                <Box
+                {/* Thanh thanh đánh giá từng sao */}
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
+                    flexDirection: "row",
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    className="title-rating"
-                    sx={{ display: "flex", alignItems: "center" }}
-                  >
-                    <Typography variant="body2" component="span">
-                      Total{" "}
-                    </Typography>
-                    <PersonIcon
-                      sx={{
-                        ml: 1,
-                        mr: 1,
-                        width: 24,
-                        height: 24,
-                        color: "inherit",
-                      }}
-                    />
-                    <Typography variant="body2" component="span">
-                      {totalRating}
-                    </Typography>
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
+                  <Box className="rating-table__bar">
+                    <div className="bar-star">
+                      {ratingArr.map((rating, index) => {
+                        const ratingPer = Math.round(
+                          (rating / totalRating) * 100
+                        );
+                        const starIndex = 5 - index;
+                        var barColor =
+                          totalRating === 0 ? "#e0e0e0" : "#ff469e";
 
-            {/* Thanh thanh đánh giá từng sao */}
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <Box className="rating-table__bar">
-                <div className="bar-star">
-                  {ratingArr.map((rating, index) => {
-                    const ratingPer = Math.round((rating / totalRating) * 100);
-                    const starIndex = 5 - index;
-                    var barColor = totalRating === 0 ? "#e0e0e0" : "#ff469e";
+                        return (
+                          <Box key={index} display="flex" alignItems="center">
+                            <Typography
+                              variant="body1"
+                              sx={{ flex: "0 0 auto", minWidth: 50 }}
+                            >
+                              <Grid
+                                sx={{
+                                  padding: "0 0 5px 0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <StarIcon style={{ color: "#ff469e" }} />
+                                {starIndex}
+                              </Grid>
+                            </Typography>
+                            <Box sx={{ width: 300 }}>
+                              <LinearProgress
+                                variant="determinate"
+                                value={ratingPer}
+                                sx={{
+                                  height: 8,
+                                  borderRadius: 5,
+                                  backgroundColor: "#e0e0e0", // Màu nền nhạt khi ratingPer là 0
+                                  "& .MuiLinearProgress-bar": {
+                                    backgroundColor: barColor, // Màu sắc thanh tiến trình
+                                  },
+                                }}
+                              />
+                            </Box>
+                            <Typography variant="body2" sx={{ ml: 1 }}>
+                              {rating}
+                            </Typography>
+                          </Box>
+                        );
+                      })}
+                    </div>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
 
-                    return (
-                      <Box key={index} display="flex" alignItems="center">
-                        <Typography
-                          variant="body1"
-                          sx={{ flex: "0 0 auto", minWidth: 50 }}
+            <>
+              {userId !== 0 && (
+                <Box
+                  component="form"
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: 10,
+                    backgroundColor: "#f0f0f0",
+                    padding: 2,
+                    mb: 4,
+                    position: "relative",
+                  }}
+                >
+                  <Grid container alignItems="center" spacing={2} mb={2}>
+                    <Grid item>
+                      <Avatar>
+                        {" "}
+                        <PersonIcon
+                          sx={{
+                            ml: 1,
+                            mr: 1,
+                            width: 24,
+                            height: 24,
+                            color: "inherit",
+                          }}
+                        />
+                      </Avatar>{" "}
+                    </Grid>
+                    <Grid item>
+                      <Typography variant="h6">{username}</Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {dateTime}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                  <Rating
+                    name="star-rating"
+                    value={rating}
+                    onChange={(event, newValue) => setRating(newValue)}
+                    sx={{ mb: 2, color: "#ff469e" }}
+                  />
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    placeholder="Write a comment..."
+                    variant="outlined"
+                    value={commentInput}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    InputProps={{
+                      endAdornment: (
+                        <IconButton
+                          aria-label="submit comment"
+                          sx={{ p: "10px" }}
+                          onClick={handleComment}
                         >
-                          <Grid
+                          <Send />
+                        </IconButton>
+                      ),
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 10,
+                      right: 10,
+                      p: "10px",
+                      color: "gray",
+                      fontSize: "0.8rem",
+                    }}
+                  >
+                    {`${commentInput.length}/${maxCharacters}`}
+                  </Box>
+                </Box>
+              )}
+            </>
+
+            {isComment ? (
+              [...comment] // Tạo bản sao của mảng comment trước khi sắp xếp
+                .sort((a, b) =>
+                  a.user_id === userId ? -1 : b.user_id === userId ? 1 : 0
+                )
+                .slice(0, visibleComments)
+                .map((item, index) => (
+                  <Card
+                    key={item.id}
+                    sx={{
+                      backgroundColor: "#f9f9f9",
+                      boxShadow:
+                        "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
+                      border: "1px solid #e0e0e0",
+                      color: "#333",
+                      padding: "5px",
+                      position: "relative",
+                    }}
+                  >
+                    <CardContent>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={2.5}>
+                          <Paper
                             sx={{
-                              padding: "0 0 5px 0",
-                              display: "flex",
-                              alignItems: "center",
+                              padding: "10px",
+                              backgroundColor: "#fafafa",
+                              textAlign: "center",
                             }}
                           >
-                            <StarIcon style={{ color: "#ff469e" }} />
-                            {starIndex}
-                          </Grid>
-                        </Typography>
-                        <Box sx={{ width: 300 }}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={ratingPer}
-                            sx={{
-                              height: 8,
-                              borderRadius: 5,
-                              backgroundColor: "#e0e0e0", // Màu nền nhạt khi ratingPer là 0
-                              "& .MuiLinearProgress-bar": {
-                                backgroundColor: barColor, // Màu sắc thanh tiến trình
-                              },
-                            }}
-                          />
-                        </Box>
-                        <Typography variant="body2" sx={{ ml: 1 }}>
-                          {rating}
-                        </Typography>
-                      </Box>
-                    );
-                  })}
-                </div>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+                            <Typography variant="h6">
+                              {userMap[item.user_id]}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              {new Date(item.date).toLocaleString()}
+                            </Typography>
+                          </Paper>
+                        </Grid>
+                        <Grid item xs={12} md={9.5}>
+                          <Box display="flex" alignItems="center" mb={2}>
+                            <Rating
+                              value={item.rating}
+                              readOnly
+                              sx={{
+                                "& .MuiRating-iconFilled": {
+                                  color: "#ff469e",
+                                },
+                              }}
+                            />
+                          </Box>
 
-        <>
-          {userId !== 0 && (
+                          <Typography variant="body1">
+                            {item.comment}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                      {item.user_id === userId && (
+                        <>
+                          <IconButton
+                            aria-label="more"
+                            aria-controls="long-menu"
+                            aria-haspopup="true"
+                            onClick={(event) => handleMenuClick(event, item)}
+                            sx={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                            }}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                          <Menu
+                            id={`menu-${item.id}`}
+                            anchorEl={
+                              anchorEl && anchorEl.id === item.id
+                                ? anchorEl.element
+                                : null
+                            }
+                            keepMounted
+                            open={Boolean(anchorEl && anchorEl.id === item.id)}
+                            onClose={handleMenuClose}
+                          >
+                            <MenuItem
+                              onClick={() => handleOpenEditComment(item)}
+                            >
+                              Edit Comment
+                            </MenuItem>
+                          </Menu>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+            ) : (
+              <Typography
+                variant="body1"
+                color="textSecondary"
+                sx={{ textAlign: "center" }}
+              >
+                No comments available.
+              </Typography>
+            )}
+            {visibleComments < comment?.length && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    backgroundColor: "#ff469e",
+                    "&:hover": { backgroundColor: "#e6338f" },
+                    marginTop: "20px",
+                  }}
+                  onClick={handleShowMore}
+                >
+                  Show more
+                </Button>
+              </Box>
+            )}
+          </Container>
+          <Modal open={openEditComment} onClose={handleCloseEditComment}>
             <Box
-              component="form"
               sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 400,
+                bgcolor: "background.paper",
                 borderRadius: 2,
-                boxShadow: 10,
-                backgroundColor: "#f0f0f0",
-                padding: 2,
-                mb: 4,
-                position: "relative",
+                boxShadow: 24,
+                p: 4,
               }}
             >
               <Grid container alignItems="center" spacing={2} mb={2}>
@@ -1152,259 +1609,66 @@ export default function ProductDetails() {
                   </Avatar>{" "}
                 </Grid>
                 <Grid item>
-                  <Typography variant="h6">{username}</Typography>
+                  <Typography variant="h6">
+                    {userMap[selectedComment?.user_id]}
+                  </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    {dateTime}
+                    {selectedComment
+                      ? new Date(selectedComment.date).toLocaleString()
+                      : ""}
                   </Typography>
                 </Grid>
               </Grid>
               <Rating
                 name="star-rating"
-                value={rating}
-                onChange={(event, newValue) => setRating(newValue)}
-                sx={{ mb: 2, color: "#ff469e" }}
+                value={selectedComment?.rating}
+                onChange={(event, newValue) => handleChange("rating", newValue)}
+                sx={{
+                  "& .MuiRating-iconFilled": {
+                    color: "#ff469e",
+                  },
+                  "& .MuiRating-iconHover": {
+                    color: "#ff69b4",
+                  },
+                }}
               />
               <TextField
                 fullWidth
                 multiline
                 rows={4}
-                placeholder="Write a comment..."
+                label="Comment"
                 variant="outlined"
-                value={commentInput}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton
-                      aria-label="submit comment"
-                      sx={{ p: "10px" }}
-                      onClick={handleComment}
-                    >
-                      <Send />
-                    </IconButton>
-                  ),
-                }}
+                value={selectedComment?.comment}
+                onChange={(e) => handleChange("comment", e.target.value)}
+                sx={{ mt: 2 }}
               />
-              <Box
+              <Button
+                variant="contained"
                 sx={{
-                  position: "absolute",
-                  bottom: 10,
-                  right: 10,
-                  p: "10px",
-                  color: "gray",
-                  fontSize: "0.8rem",
+                  marginTop: 4,
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderRadius: "30px",
+                  fontWeight: "bold",
+                  fontSize: 16,
+                  width: "10vw",
+                  transition:
+                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    border: "1px solid white",
+                  },
                 }}
+                onClick={handleEditComment}
               >
-                {`${commentInput.length}/${maxCharacters}`}
-              </Box>
+                Submit
+              </Button>
             </Box>
-          )}
-        </>
-
-        {isComment ? (
-          [...comment] // Tạo bản sao của mảng comment trước khi sắp xếp
-            .sort((a, b) =>
-              a.user_id === userId ? -1 : b.user_id === userId ? 1 : 0
-            )
-            .slice(0, visibleComments)
-            .map((item, index) => (
-              <Card
-                key={item.id}
-                sx={{
-                  backgroundColor: "#f9f9f9",
-                  boxShadow:
-                    "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
-                  border: "1px solid #e0e0e0",
-                  color: "#333",
-                  padding: "5px",
-                  position: "relative",
-                }}
-              >
-                <CardContent>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={2.5}>
-                      <Paper
-                        sx={{
-                          padding: "10px",
-                          backgroundColor: "#fafafa",
-                          textAlign: "center",
-                        }}
-                      >
-                        <Typography variant="h6">
-                          {userMap[item.user_id]}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {new Date(item.date).toLocaleString()}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} md={9.5}>
-                      <Box display="flex" alignItems="center" mb={2}>
-                        <Rating
-                          value={item.rating}
-                          readOnly
-                          sx={{
-                            "& .MuiRating-iconFilled": {
-                              color: "#ff469e",
-                            },
-                          }}
-                        />
-                      </Box>
-
-                      <Typography variant="body1">{item.comment}</Typography>
-                    </Grid>
-                  </Grid>
-                  {item.user_id === userId && (
-                    <>
-                      <IconButton
-                        aria-label="more"
-                        aria-controls="long-menu"
-                        aria-haspopup="true"
-                        onClick={(event) => handleMenuClick(event, item)}
-                        sx={{
-                          position: "absolute",
-                          top: "10px",
-                          right: "10px",
-                        }}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                      <Menu
-                        id={`menu-${item.id}`}
-                        anchorEl={
-                          anchorEl && anchorEl.id === item.id
-                            ? anchorEl.element
-                            : null
-                        }
-                        keepMounted
-                        open={Boolean(anchorEl && anchorEl.id === item.id)}
-                        onClose={handleMenuClose}
-                      >
-                        <MenuItem onClick={() => handleOpenEditComment(item)}>
-                          Edit Comment
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-        ) : (
-          <Typography
-            variant="body1"
-            color="textSecondary"
-            sx={{ textAlign: "center" }}
-          >
-            No comments available.
-          </Typography>
-        )}
-        {visibleComments < comment?.length && (
-          <Box
-            sx={{ display: "flex", justifyContent: "center", width: "100%" }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{
-                backgroundColor: "#ff469e",
-                "&:hover": { backgroundColor: "#e6338f" },
-                marginTop: "20px",
-              }}
-              onClick={handleShowMore}
-            >
-              Show more
-            </Button>
-          </Box>
-        )}
-      </Container>
-      <Modal open={openEditComment} onClose={handleCloseEditComment}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Grid container alignItems="center" spacing={2} mb={2}>
-            <Grid item>
-              <Avatar>
-                {" "}
-                <PersonIcon
-                  sx={{
-                    ml: 1,
-                    mr: 1,
-                    width: 24,
-                    height: 24,
-                    color: "inherit",
-                  }}
-                />
-              </Avatar>{" "}
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">
-                {userMap[selectedComment?.user_id]}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {selectedComment
-                  ? new Date(selectedComment.date).toLocaleString()
-                  : ""}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Rating
-            name="star-rating"
-            value={selectedComment?.rating}
-            onChange={(event, newValue) => handleChange("rating", newValue)}
-            sx={{
-              "& .MuiRating-iconFilled": {
-                color: "#ff469e",
-              },
-              "& .MuiRating-iconHover": {
-                color: "#ff69b4",
-              },
-            }}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Comment"
-            variant="outlined"
-            value={selectedComment?.comment}
-            onChange={(e) => handleChange("comment", e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Button
-            variant="contained"
-            sx={{
-              marginTop: 4,
-              backgroundColor: "white",
-              color: "#ff469e",
-              borderRadius: "30px",
-              fontWeight: "bold",
-              fontSize: 16,
-              width: "10vw",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #ff469e",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}
-            onClick={handleEditComment}
-          >
-            Submit
-          </Button>
+          </Modal>
         </Box>
-      </Modal>
+      )}
     </div>
   );
 }

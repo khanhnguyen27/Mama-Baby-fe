@@ -41,11 +41,14 @@ export default function HomePage() {
   const [brandMap, setBrandMap] = useState({});
   const [category, setCategory] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
-  const [product, setProduct] = useState([]);
+  const [productWholesale, setProductWholesale] = useState([]);
+  const [productGift, setProductGift] = useState([]);
   const [store, setStore] = useState([]);
   const [storeMap, setStoreMap] = useState([]);
   const [article, setArticle] = useState([]);
   const [voucher, setVoucher] = useState([]);
+  const typeGIFT = "GIFT";
+  const typeWHOLESALE = "WHOLESALE";
 
   const handleChange = (panel) => (e, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -98,34 +101,38 @@ export default function HomePage() {
         ageRes,
         brandRes,
         categoryRes,
-        productRes,
+        productResW,
+        productResG,
         storeRes,
-        // articleRes,
+        articleRes,
         voucherRes,
       ] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
-        allProductApi(),
+        allProductApi({ type: typeWHOLESALE }),
+        allProductApi({ type: typeGIFT }),
         allStoreApi(),
-        // allArticleApi(),
+        allArticleApi(),
         allVoucherApi(),
       ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
-      const productData = productRes?.data?.data || [];
+      const productDataW = productResW?.data?.data || [];
+      const productDataG = productResG?.data?.data || [];
       const storeData = storeRes?.data?.data || [];
-      // const articleData = articleRes?.data?.data || [];
+      const articleData = articleRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
-      setProduct(productData);
+      setProductWholesale(productDataW);
+      setProductGift(productDataG);
       setStore(storeData);
-      // setArticle(articleData);
+      setArticle(articleData);
       setVoucher(voucherData);
 
       const ageMap = ageData.reduce((x, item) => {
@@ -171,6 +178,15 @@ export default function HomePage() {
   const listRef2 = useRef(null);
   const listRef3 = useRef(null);
   const listRef4 = useRef(null);
+  const listRef6 = useRef(null);
+
+  const scrollLeft6 = () => {
+    listRef6.current.scrollBy({ left: -460, behavior: "smooth" });
+  };
+
+  const scrollRight6 = () => {
+    listRef6.current.scrollBy({ left: 460, behavior: "smooth" });
+  };
 
   const scrollLeft1 = () => {
     listRef1.current.scrollBy({ left: -460, behavior: "smooth" });
@@ -736,122 +752,119 @@ export default function HomePage() {
                 padding: "0px 8px",
               }}
             >
-              {product?.products?.map(
-                (item, index) =>
-                  item.type === "WHOLESALE" && (
-                    <Tooltip
-                      title={item.name}
-                      enterDelay={500}
-                      leaveDelay={50}
-                      placement="right-start"
-                      TransitionComponent={Fade}
-                      TransitionProps={{ timeout: 250 }}
-                      componentsProps={{
-                        tooltip: {
-                          sx: {
-                            backgroundColor: "white",
-                            boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                            color: "black",
-                            borderRadius: "8px",
-                            border: "1px solid black",
-                            fontSize: "12px",
-                          },
-                        },
+              {productWholesale?.products?.map((item, index) => (
+                <Tooltip
+                  title={item.name}
+                  enterDelay={500}
+                  leaveDelay={50}
+                  placement="right-start"
+                  TransitionComponent={Fade}
+                  TransitionProps={{ timeout: 250 }}
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "white",
+                        boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                        color: "black",
+                        borderRadius: "8px",
+                        border: "1px solid black",
+                        fontSize: "12px",
+                      },
+                    },
+                  }}
+                >
+                  <Box
+                    key={index}
+                    onClick={() => (
+                      navigate(
+                        `/products/${item.name
+                          .toLowerCase()
+                          .replace(/\s/g, "-")}`,
+                        { state: { productId: item.id } }
+                      ),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                    sx={{
+                      minWidth: 180,
+                      padding: 2,
+                      border: "1px solid white",
+                      borderRadius: "16px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      marginRight: 2,
+                      backgroundColor: "white",
+                      transition: "border 0.2s",
+                      "&:hover": {
+                        border: "1px solid #ff496e",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
                     >
-                      <Box
-                        key={index}
-                        onClick={() => (
-                          navigate(
-                            `/products/${item.name
-                              .toLowerCase()
-                              .replace(/\s/g, "-")}`,
-                            { state: { productId: item.id } }
-                          ),
-                          window.scrollTo({
-                            top: 0,
-                            behavior: "smooth",
-                          })
-                        )}
-                        sx={{
-                          minWidth: 180,
-                          padding: 2,
-                          border: "1px solid white",
-                          borderRadius: "16px",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                          marginRight: 2,
-                          backgroundColor: "white",
-                          transition: "border 0.2s",
-                          "&:hover": {
-                            border: "1px solid #ff496e",
-                            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                          },
+                      <img
+                        src={
+                          item.image_url.includes("Product_")
+                            ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                            : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                        }
+                        onError={(e) => {
+                          e.target.src =
+                            "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                         }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <img
-                            src={
-                              item.image_url.includes("Product_")
-                                ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
-                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                            }
-                            onError={(e) => {
-                              e.target.src =
-                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                            }}
-                            style={{ width: "64px", height: "64px" }}
-                          />
-                        </div>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            fontWeight: "bold",
-                            marginTop: "0.75rem",
-                            textAlign: "left",
-                            whiteSpace: "normal",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            maxWidth: "100%",
-                            lineHeight: "1.2rem",
-                            maxHeight: "2.4rem",
-                          }}
-                        >
-                          {item.name.length > 40
-                            ? `${item.name.substring(0, 40)}...`
-                            : item.name}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: "gray",
-                            textAlign: "left",
-                          }}
-                        >
-                          {formatCurrency(item.price)}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: "gray",
-                            textAlign: "left",
-                          }}
-                        >
-                          {brandMap[item.brand_id]} |{" "}
-                          {categoryMap[item.category_id]}
-                        </Typography>
-                      </Box>
-                    </Tooltip>
-                  )
-              )}
+                        style={{ width: "64px", height: "64px" }}
+                      />
+                    </div>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: "bold",
+                        marginTop: "0.75rem",
+                        textAlign: "left",
+                        whiteSpace: "normal",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        maxWidth: "100%",
+                        lineHeight: "1.2rem",
+                        maxHeight: "2.4rem",
+                      }}
+                    >
+                      {item.name.length > 40
+                        ? `${item.name.substring(0, 40)}...`
+                        : item.name}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "gray",
+                        textAlign: "left",
+                      }}
+                    >
+                      {formatCurrency(item.price)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "gray",
+                        textAlign: "left",
+                      }}
+                    >
+                      {brandMap[item.brand_id]} |{" "}
+                      {categoryMap[item.category_id]}
+                    </Typography>
+                  </Box>
+                </Tooltip>
+              ))}
             </Box>
             <IconButton
               onClick={scrollRight2}
@@ -965,129 +978,130 @@ export default function HomePage() {
                 padding: "0px 8px",
               }}
             >
-              {product?.products?.map(
-                (item, index) =>
-                  item.type === "GIFT" && (
-                    <Tooltip
-                      title={item.name}
-                      enterDelay={500}
-                      leaveDelay={50}
-                      placement="right-start"
-                      TransitionComponent={Fade}
-                      TransitionProps={{ timeout: 250 }}
-                      componentsProps={{
-                        tooltip: {
-                          sx: {
-                            backgroundColor: "white",
-                            boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                            color: "black",
-                            borderRadius: "8px",
-                            border: "1px solid black",
-                            fontSize: "12px",
-                          },
-                        },
-                      }}
-                    >
-                      <Box
-                        key={index}
-                        onClick={() => (
-                          navigate(
-                            `/productgiftdetail/${item.name
-                              .toLowerCase()
-                              .replace(/\s/g, "-")}`,
-                            { state: { productId: item.id } }
-                          ),
-                          window.scrollTo({
-                            top: 0,
-                            behavior: "smooth",
-                          })
-                        )}
-                        sx={{
-                          minWidth: 180,
-                          padding: 2,
-                          border: "1px solid white",
-                          borderRadius: "16px",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                          marginRight: 2,
-                          backgroundColor: "white",
-                          transition: "border 0.2s",
-                          "&:hover": {
-                            border: "1px solid #ff496e",
-                            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                          },
+              {productGift?.products?.map((item, index) => (
+                <Tooltip
+                  title={item.name}
+                  enterDelay={500}
+                  leaveDelay={50}
+                  placement="right-start"
+                  TransitionComponent={Fade}
+                  TransitionProps={{ timeout: 250 }}
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "white",
+                        boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                        color: "black",
+                        borderRadius: "8px",
+                        border: "1px solid black",
+                        fontSize: "12px",
+                      },
+                    },
+                  }}
+                >
+                  <Box
+                    key={index}
+                    onClick={() => (
+                      navigate(
+                        `/productgiftdetail/${item.name
+                          .toLowerCase()
+                          .replace(/\s/g, "-")}`,
+                        { state: { productId: item.id } }
+                      ),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                    sx={{
+                      minWidth: 180,
+                      padding: 2,
+                      border: "1px solid white",
+                      borderRadius: "16px",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      marginRight: 2,
+                      backgroundColor: "white",
+                      transition: "border 0.2s",
+                      "&:hover": {
+                        border: "1px solid #ff496e",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      {" "}
+                      <Box>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            mb: "10px",
+                            fontWeight: "bold",
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            marginLeft: "auto",
+                            fontSize: "1rem",
+                            textAlign: "right",
+                            width: "20%",
+                          }}
+                        >
+                          {item.type}{" "}
+                        </Typography>
+                      </Box>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
                         }}
                       >
-                        <Box sx={{ display: "flex", flexDirection: "column" }}>
-                          {" "}
-                          <Box>
-                            <Typography
-                              variant="h5"
-                              sx={{
-                                mb: "10px",
-                                fontWeight: "bold",
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                marginLeft: "auto",
-                                fontSize: "1rem",
-                                textAlign: "right",
-                                width: "20%",
-                              }}
-                            >
-                              {item.type}{" "}
-                            </Typography>
-                          </Box>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <img
-                              src={
-                                item.image_url.includes("Product_")
-                                  ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
-                                  : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                              }
-                              style={{ width: "64px", height: "64px" }}
-                            />
-                          </div>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              fontWeight: "bold",
-                              marginTop: "0.75rem",
-                              textAlign: "left",
-                              whiteSpace: "normal",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              maxWidth: "100%",
-                              lineHeight: "1.2rem",
-                              maxHeight: "2.4rem",
-                            }}
-                          >
-                            {item.name.length > 40
-                              ? `${item.name.substring(0, 40)}...`
-                              : item.name}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "gray",
-                              textAlign: "left",
-                            }}
-                          >
-                            {brandMap[item.brand_id]} |{" "}
-                            {categoryMap[item.category_id]}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Tooltip>
-                  )
-              )}
+                        <img
+                          src={
+                            item.image_url?.includes("Product_")
+                              ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          }
+                          onError={(e) => {
+                            e.target.src =
+                              "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                          }}
+                          style={{ width: "64px", height: "64px" }}
+                        />
+                      </div>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          marginTop: "0.75rem",
+                          textAlign: "left",
+                          whiteSpace: "normal",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          maxWidth: "100%",
+                          lineHeight: "1.2rem",
+                          maxHeight: "2.4rem",
+                        }}
+                      >
+                        {item.name.length > 40
+                          ? `${item.name.substring(0, 40)}...`
+                          : item.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "gray",
+                          textAlign: "left",
+                        }}
+                      >
+                        {brandMap[item.brand_id]} |{" "}
+                        {categoryMap[item.category_id]}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Tooltip>
+              ))}
             </Box>
             <IconButton
               onClick={scrollRight3}
@@ -1258,6 +1272,180 @@ export default function HomePage() {
               sx={{
                 position: "absolute",
                 right: -8,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 1px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              <ArrowRight />
+            </IconButton>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            borderRadius: "16px",
+            background: "white",
+            padding: "1rem",
+            marginTop: "3rem",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Articles
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#ff469e",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => {
+                navigate("/article");
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
+              }}
+            >
+              See more articles
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              borderRadius: "16px",
+              background: "white",
+            }}
+          >
+            <IconButton
+              onClick={scrollLeft6}
+              size="small"
+              sx={{
+                position: "absolute",
+                left: -10,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              <ArrowLeft />
+            </IconButton>
+            <Box
+              ref={listRef6}
+              sx={{
+                display: "flex",
+                overflowX: "hidden",
+                scrollBehavior: "smooth",
+                width: "100%",
+                padding: "0px 8px",
+              }}
+            >
+              {article?.articles?.map((item, index) => (
+                <Box
+                  key={index}
+                  onClick={() => {
+                    navigate("/article");
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                  sx={{
+                    minWidth: 180,
+                    padding: 2,
+                    textAlign: "center",
+                    border: "1px solid white",
+                    borderRadius: "16px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    marginRight: 2,
+                    backgroundColor: "white",
+                    transition: "border 0.2s",
+                    "&:hover": {
+                      border: "1px solid #ff496e",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                >
+                  <img
+                    src={
+                      item.link_image && item.link_image.includes("Article_")
+                        ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
+                        : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                    }
+                    onError={(e) => {
+                      e.target.src =
+                        "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                    }}
+                    style={{ width: "64px", height: "64px" }}
+                  />
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: "bold",
+                      marginTop: "0.75rem",
+                      textAlign: "left",
+                      whiteSpace: "normal",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      maxWidth: "100%",
+                      lineHeight: "1.2rem",
+                      maxHeight: "2.4rem",
+                    }}
+                  >
+                    {item.header.length > 40
+                      ? `${item.header.substring(0, 40)}...`
+                      : item.header}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "gray" }}>
+                    {item.content}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+            <IconButton
+              onClick={scrollRight6}
+              size="small"
+              sx={{
+                position: "absolute",
+                right: -10,
                 zIndex: 1,
                 backgroundColor: "white",
                 color: "#ff469e",

@@ -1409,10 +1409,16 @@ export default function StaffHome() {
                         <CardMedia
                           component="img"
                           image={
+                            item.image_url &&
                             item.image_url.includes("Product_")
                               ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
                               : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           }
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                          }}
                           alt={item.name}
                           sx={{
                             width: "64px",
@@ -1480,33 +1486,69 @@ export default function StaffHome() {
                               ? `${item.name.substring(0, 40)}...`
                               : item.name}
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "gray", textAlign: "left" }}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
                           >
-                            {item.type === typeWHOLESALE ? (
-                              formatCurrency(item.price)
-                            ) : (
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <Typography
-                                  variant="body2"
-                                  sx={{ color: "gray", textAlign: "left" }}
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "gray",
+                                textAlign: "left",
+                              }}
+                            >
+                              {item.type === typeWHOLESALE ? (
+                                formatCurrency(item.price)
+                              ) : (
+                                <Box
+                                  sx={{ display: "flex", alignItems: "center" }}
                                 >
-                                  {item.point}
-                                </Typography>
-                                <MonetizationOnIcon
-                                  variant="h6"
-                                  sx={{
-                                    marginLeft: "4px",
-                                    color: "gray",
-                                    fontSize: 16,
-                                  }}
-                                />
-                              </Box>
-                            )}
-                          </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ color: "gray", textAlign: "left" }}
+                                  >
+                                    {item.point}
+                                  </Typography>
+                                  <MonetizationOnIcon
+                                    variant="h6"
+                                    sx={{
+                                      marginLeft: "4px",
+                                      color: "gray",
+                                      fontSize: 16,
+                                    }}
+                                  />
+                                </Box>
+                              )}
+                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "gray",
+                                  fontSize: 14, // Adjust the font size as needed
+                                  textAlign: "left",
+                                  mr: 1,
+                                }}
+                              >
+                                Qty:
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "#333",
+                                  fontWeight: "bold",
+                                  fontSize: 16,
+                                  textAlign: "left",
+                                }}
+                              >
+                                {item.remain}
+                              </Typography>
+                            </Box>
+                          </Box>
+
                           <Typography
                             variant="body2"
                             sx={{ color: "gray", textAlign: "left" }}
@@ -1515,61 +1557,29 @@ export default function StaffHome() {
                             {categoryMap[item.category_id]}
                           </Typography>
                         </CardContent>
-                        <CardActions
+                        <Button
+                          variant="contained"
                           sx={{
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "16px",
+                            ml: "auto",
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "30px",
+                            fontSize: 15,
+                            fontWeight: "bold",
+                            width: "7vw",
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
                           }}
+                          onClick={() => handleOpen(item)}
                         >
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "gray",
-                                fontSize: 14, // Adjust the font size as needed
-                                textAlign: "left",
-                                mr: 1,
-                              }}
-                            >
-                              Quantity:
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "#333",
-                                fontWeight: "bold",
-                                fontSize: 16,
-                                textAlign: "left",
-                              }}
-                            >
-                              {item.remain}
-                            </Typography>
-                          </Box>
-                          <Button
-                            variant="contained"
-                            sx={{
-                              ml: "auto",
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "30px",
-                              fontSize: 15,
-                              fontWeight: "bold",
-                              width: "7vw",
-                              transition:
-                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid white",
-                              },
-                            }}
-                            onClick={() => handleOpen(item)}
-                          >
-                            Update
-                          </Button>
-                        </CardActions>
+                          Update
+                        </Button>
                       </Card>
                     </Tooltip>
                   </Grid>

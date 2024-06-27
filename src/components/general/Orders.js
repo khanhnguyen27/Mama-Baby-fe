@@ -474,7 +474,6 @@ export default function Orders() {
       toast.warn("No item selected for refunding", { autoClose: 1000 });
       return;
     }
-    console.log(selectedItems);
 
     const orderId = item.id;
     const status = "PROCESSING";
@@ -759,6 +758,7 @@ export default function Orders() {
                                     }}
                                   >
                                     <CardMedia
+                                      component="img"
                                       sx={{
                                         width: "70px",
                                         height: "70px",
@@ -796,41 +796,86 @@ export default function Orders() {
                                           mt: 2,
                                         }}
                                       >
-                                        <Typography
-                                          sx={{
-                                            fontWeight: "600",
-                                            fontSize: "1.25rem",
-                                            "&:hover": {
-                                              cursor: "pointer",
-                                              color: "#ff469e",
-                                            },
-                                          }}
-                                          onClick={() =>
-                                            navigate(
-                                              `/products/${productMap[
-                                                detail.product_id
-                                              ][0]
-                                                .toLowerCase()
-                                                .replace(/\s/g, "-")}`,
-                                              {
-                                                state: {
-                                                  productId: detail.product_id,
-                                                },
+                                        {detail.unit_price !== 0 ? (
+                                          <Typography
+                                            sx={{
+                                              fontWeight: "600",
+                                              fontSize: "1.25rem",
+                                              "&:hover": {
+                                                cursor: "pointer",
+                                                color: "#ff469e",
                                               },
-                                              window.scrollTo({
-                                                top: 0,
-                                                behavior: "smooth",
-                                              })
-                                            )
-                                          }
-                                        >
-                                          {productMap[detail.product_id][0]
-                                            .length > 50
-                                            ? `${productMap[
-                                                detail.product_id
-                                              ][0].substring(0, 50)}...`
-                                            : productMap[detail.product_id][0]}
-                                        </Typography>
+                                            }}
+                                            onClick={() =>
+                                              navigate(
+                                                `/products/${productMap[
+                                                  detail.product_id
+                                                ][0]
+                                                  .toLowerCase()
+                                                  .replace(/\s/g, "-")}`,
+                                                {
+                                                  state: {
+                                                    productId:
+                                                      detail.product_id,
+                                                  },
+                                                },
+                                                window.scrollTo({
+                                                  top: 0,
+                                                  behavior: "smooth",
+                                                })
+                                              )
+                                            }
+                                          >
+                                            {productMap[detail.product_id][0]
+                                              .length > 50
+                                              ? `${productMap[
+                                                  detail.product_id
+                                                ][0].substring(0, 50)}...`
+                                              : productMap[
+                                                  detail.product_id
+                                                ][0]}
+                                          </Typography>
+                                        ) : (
+                                          <Typography
+                                            sx={{
+                                              fontWeight: "600",
+                                              fontSize: "1.25rem",
+                                              "&:hover": {
+                                                cursor: "pointer",
+                                                color: "#ff469e",
+                                              },
+                                            }}
+                                            onClick={() =>
+                                              navigate(
+                                                `/productgiftdetail/${productMap[
+                                                  detail.product_id
+                                                ][0]
+                                                  .toLowerCase()
+                                                  .replace(/\s/g, "-")}`,
+                                                {
+                                                  state: {
+                                                    productId:
+                                                      detail.product_id,
+                                                  },
+                                                },
+                                                window.scrollTo({
+                                                  top: 0,
+                                                  behavior: "smooth",
+                                                })
+                                              )
+                                            }
+                                          >
+                                            {productMap[detail.product_id][0]
+                                              .length > 50
+                                              ? `${productMap[
+                                                  detail.product_id
+                                                ][0].substring(0, 50)}...`
+                                              : productMap[
+                                                  detail.product_id
+                                                ][0]}
+                                          </Typography>
+                                        )}
+
                                         <Typography
                                           sx={{
                                             fontWeight: "600",
@@ -890,10 +935,12 @@ export default function Orders() {
                                           <span style={{ marginLeft: "4px" }}>
                                             {detail.unit_price !== 0
                                               ? formatCurrency(
-                                                  detail.unit_price
+                                                  detail.amount_price
                                                 )
                                               : formatCurrencyPoint(
-                                                  Math.round(detail.unit_point)
+                                                  Math.round(
+                                                    detail.amount_point
+                                                  )
                                                 )}
                                           </span>
                                         </Typography>
@@ -1092,6 +1139,23 @@ export default function Orders() {
                           </span>
                           <span>- {formatCurrency(item.total_discount)}</span>
                         </Box>
+                        {item.total_point > 0 ? (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              opacity: 0.7,
+                              margin: "6px 0",
+                            }}
+                          >
+                            <span>
+                              Points used:{" "}
+                              <span style={{ fontSize: "1.05rem" }}> </span>
+                            </span>
+                            {formatCurrencyPoint(item.total_point)}
+                          </Box>
+                        ) : null}
+
                         <Box
                           sx={{
                             display: "flex",
@@ -1787,6 +1851,7 @@ export default function Orders() {
                                           }}
                                         >
                                           <CardMedia
+                                            component="img"
                                             sx={{
                                               width: "70px",
                                               height: "70px",

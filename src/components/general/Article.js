@@ -16,11 +16,16 @@ import {
   IconButton,
   Tooltip,
   Typography,
+  PaginationItem,
+  Pagination,
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
 export default function HomePage() {
   const [visible, setVisible] = useState(false);
   const [article, setArticle] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,11 +51,11 @@ export default function HomePage() {
     },
   ];
 
-
-
-  const fetchData = async () => {
+  const fetchData = async (page) => {
     try {
-      const articleRes = await allArticleApi();
+      const articleRes = await allArticleApi({
+        page: currentPage - 1,
+      });
 
       const articleData = articleRes?.data?.data || [];
 
@@ -59,13 +64,22 @@ export default function HomePage() {
       console.log(err);
     }
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
+
+  const handlePageChange = (e, page) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     fetchData();
-  }, []);
+  }, [currentPage]);
+
+  const onPageChange = (page) => {
+    fetchData(page);
+    window.scrollTo(0, 0);
+  };
 
   return (
     <Container>
@@ -185,7 +199,16 @@ export default function HomePage() {
                   >
                     <CardMedia
                       component="img"
-                      image="https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      image={
+                        item.link_image && item.link_image.includes("Article_")
+                          ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
+                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      }
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                      }}
                       alt={item.content}
                       sx={{ width: "64px", height: "64px", margin: "auto" }}
                     />
@@ -225,6 +248,88 @@ export default function HomePage() {
           </Grid>
         </Grid>
       </Grid>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Pagination
+          count={article.totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          showFirstButton={article.totalPages !== 1}
+          showLastButton={article.totalPages !== 1}
+          hidePrevButton={currentPage === 1}
+          hideNextButton={currentPage === article.totalPages}
+          size="large"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "2.5rem",
+            width: "70%",
+            p: 1,
+            opacity: 0.9,
+            borderRadius: "20px",
+            "& .MuiPaginationItem-root": {
+              backgroundColor: "white",
+              borderRadius: "20px",
+              border: "1px solid black",
+              boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+              mx: 1,
+              transition:
+                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#fff4fc",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+              },
+              "&.Mui-selected": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  border: "1px solid #ff469e",
+                },
+              },
+              fontSize: "1.25rem",
+            },
+            "& .MuiPaginationItem-ellipsis": {
+              mt: 1.25,
+              fontSize: "1.25rem",
+            },
+          }}
+          componentsProps={{
+            previous: {
+              sx: {
+                fontSize: "1.5rem",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                },
+              },
+            },
+            next: {
+              sx: {
+                fontSize: "1.5rem",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                },
+              },
+            },
+          }}
+        />
+      </Box>
       {visible && (
         <IconButton
           size="large"

@@ -714,8 +714,12 @@ export default function Products() {
                             image={
                               item.image_url.includes("Product_")
                                 ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
-                                : `https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid`
+                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                             }
+                            onError={(e) => {
+                              e.target.src =
+                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                            }}
                             alt={item.name}
                             sx={{
                               width: "64px",

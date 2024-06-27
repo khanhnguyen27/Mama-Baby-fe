@@ -112,6 +112,9 @@ export default function CommentHistory() {
                     backgroundColor: "#fff",
                     borderRadius: 2,
                     boxShadow: 3,
+                    "&:hover": {
+                      backgroundColor: "#f0f0f0",
+                    },
                   }}
                 >
                   <CardContent

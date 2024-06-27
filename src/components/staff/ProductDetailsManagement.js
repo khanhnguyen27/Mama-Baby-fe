@@ -375,10 +375,16 @@ export default function ProductDetailsManagement() {
                         marginBottom: "10px",
                       }}
                       src={
+                        product.image_url &&
                         product.image_url.includes("Product_")
                           ? `http://localhost:8080/mamababy/products/images/${product.image_url}`
                           : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                       }
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                      }}
                       alt={product.name}
                     />
                   </Paper>

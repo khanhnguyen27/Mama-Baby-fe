@@ -88,26 +88,30 @@ export default function AccountManagement() {
       [field]: value,
     }));
   };
-
+  console.log(selectedAccount);
   const handleEdit = () => {
     if (!selectedAccount) {
       console.error("No account selected for editing.");
       return;
     }
 
-    const { username, full_name, address, phone_number, isActive } = selectedAccount;
+    const { username, full_name, address, phone_number, isActive } =
+      selectedAccount;
 
     updateAccountApi(
       username,
       full_name,
       address,
       phone_number,
-      isActive // Ensure isActive is boolean (true/false)
+      isActive,
+      selectedAccount.role_id.id
     )
       .then((response) => {
         toast.success("Account updated successfully!");
         // Reload the page to keep the current search keyword
-        window.location.reload();
+        //window.location.reload();
+        fetchData();
+        closeUpdate();
       })
       .catch((error) => {
         console.error("Error updating account:", error);
@@ -340,15 +344,17 @@ export default function AccountManagement() {
                   Choose Status
                 </InputLabel>
                 <NativeSelect
-                  defaultValue={selectedAccount.isActive ? 'true' : 'false'}
+                  defaultValue={selectedAccount.isActive ? "true" : "false"}
                   inputProps={{
                     name: "isActive",
                     id: "uncontrolled-native",
                   }}
-                  onChange={(e) => handleChange("isActive", e.target.value === 'true')}
+                  onChange={(e) =>
+                    handleChange("isActive", e.target.value === "true")
+                  }
                 >
-                  <option value={'true'}>Active</option>
-                  <option value={'false'}>Inactive</option>
+                  <option value={"true"}>Active</option>
+                  <option value={"false"}>Inactive</option>
                 </NativeSelect>
               </FormControl>
             </DialogContent>
