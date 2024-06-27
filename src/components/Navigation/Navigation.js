@@ -21,7 +21,7 @@ import ProductSearch from "./ProductSearch";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectCartAmount } from "../../redux/CartSlice";
-import { ListAlt } from "@mui/icons-material";
+import { ListAlt, RequestPage } from "@mui/icons-material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
 const Navigation = () => {
@@ -127,6 +127,40 @@ const Navigation = () => {
             }}
           >
             Orders
+          </Typography>
+        </ListItemText>
+      </MenuItem>
+
+      <MenuItem
+        onClick={() => (
+          navigate("/requests"),
+          window.scrollTo(
+            { top: 0, behavior: "instant" },
+            setAnchorElLogout(null),
+            setOpenLogoutMenu(false)
+          )
+        )}
+        sx={{
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        <ListItemIcon sx={{ color: "inherit" }}>
+          <RequestPage fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>
+          <Typography
+            style={{
+              color: "inherit",
+              paddingLeft: 10,
+              fontWeight: "bold",
+            }}
+          >
+            Requests
           </Typography>
         </ListItemText>
       </MenuItem>

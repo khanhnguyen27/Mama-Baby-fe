@@ -8,6 +8,10 @@ export const allExchangeApi = (params) => {
   });
 };
 
+export const exchangeByUserIdApi = (userId) => {
+  return axiosJWT.get(`${URL_EXCHANGE}/user/${userId}`);
+}
+
 export const exchangeByStoreIdApi = (storeId) => {
   return axiosJWT.get(`${URL_EXCHANGE}/store/${storeId}`);
 }

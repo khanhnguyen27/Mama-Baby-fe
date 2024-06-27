@@ -123,7 +123,7 @@ export default function Orders() {
       });
       for (const status in categorizedOrders) {
         categorizedOrders[status].sort(
-          (a, b) => new Date(b.orderDate) - new Date(a.orderDate)
+          (a, b) => new Date(b.order_date) - new Date(a.order_date)
         );
       }
       // for (const status in categorizedOrders) {
@@ -642,7 +642,7 @@ export default function Orders() {
                       >
                         Order Date:{" "}
                         <span style={{ fontWeight: "600" }}>
-                          {item.orderDate}
+                          {item.order_date}
                         </span>
                       </Typography>
                     </Grid>
@@ -890,10 +890,10 @@ export default function Orders() {
                                           <span style={{ marginLeft: "4px" }}>
                                             {detail.unit_price !== 0
                                               ? formatCurrency(
-                                                  detail.unit_price
+                                                  detail.amount_price
                                                 )
                                               : formatCurrencyPoint(
-                                                  Math.round(detail.unit_point)
+                                                  Math.round(detail.amount_point)
                                                 )}
                                           </span>
                                         </Typography>
@@ -1039,7 +1039,7 @@ export default function Orders() {
                           >
                             <span style={{ opacity: 0.7 }}>Address:</span>
                             <span style={{ fontWeight: "600" }}>
-                              {item.shippingAddress}
+                              {item.shipping_address}
                             </span>
                           </Box>
                         </Box>
@@ -3178,6 +3178,739 @@ export default function Orders() {
                                       },
                                     }}
                                     onClick={() => handleRequestExchange(item)}
+                                  >
+                                    Send
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </Modal>
+                        )}
+                        <Button
+                            variant="contained"
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "10px",
+                              fontSize: 16,
+                              fontWeight: "bold",
+                              my: 2,
+                              mx: 1,
+                              transition:
+                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                border: "1px solid white",
+                              },
+                            }}
+                            onClick={() => handleOpenRefund(item.id)}
+                          >
+                            REFUND
+                          </Button>
+                          {item.id === selectedOrderId && (
+                          <Modal
+                            open={openRefund}
+                            onClose={handleCloseRefund}
+                            slotProps={{
+                              backdrop: {
+                                style: {
+                                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                },
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: 1080,
+                                borderRadius: "20px",
+                                backgroundColor: "#fff4fc",
+                                border: "2px solid #ff469e",
+                                boxShadow: 10,
+                                p: 4,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Typography
+                                  variant="h6"
+                                  component="h2"
+                                  sx={{ mt: 1 }}
+                                >
+                                  Refund Request
+                                </Typography>
+                                <IconButton
+                                  size="small"
+                                  onClick={handleCloseRefund}
+                                >
+                                  <Close
+                                    fontSize="large"
+                                    sx={{
+                                      color: "#ff469e",
+                                      borderRadius: "30px",
+                                      boxShadow: "none",
+                                      transition: "0.3s ease-in-out",
+                                      "&:hover": {
+                                        backgroundColor: "#ff469e",
+                                        color: "white",
+                                        transform: "scale(1.1)",
+                                      },
+                                    }}
+                                  />
+                                </IconButton>
+                              </Box>
+                              <Box sx={{ mt: 2 }}>
+                                <div style={{ margin: "1rem 0.25rem" }}>
+                                  <span
+                                    style={{
+                                      fontSize: "1.05rem",
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    Reason:
+                                  </span>
+                                  <TextField
+                                    multiline
+                                    rows={3}
+                                    fullWidth
+                                    placeholder="Input your reason of exchange. E.g: This product is not good"
+                                    size="small"
+                                    variant="outlined"
+                                    value={description}
+                                    onChange={(e) =>
+                                      setDescription(e.target.value)
+                                    }
+                                    InputProps={{
+                                      sx: {
+                                        padding: 1,
+                                        border: "1px solid #ff469e",
+                                        borderRadius: "7px",
+                                        backgroundColor: "white",
+                                        transition: "0.2s ease-in-out",
+                                        "&:hover": {
+                                          border: "1px solid #ff469e",
+                                        },
+                                        "&:focus": {
+                                          backgroundColor: "#F8F8F8",
+                                        },
+                                        "&.Mui-focused": {
+                                          border: "1px solid #ff469e",
+                                          backgroundColor: "#F8F8F8",
+                                          boxShadow:
+                                            "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                          outline: "none",
+                                        },
+                                        "& .MuiOutlinedInput-notchedOutline": {
+                                          border: "none",
+                                        },
+                                      },
+                                    }}
+                                  />
+                                </div>
+                                <Card
+                                  sx={{
+                                    pl: 2,
+                                    pr: 0,
+                                    border: "1px solid #ff469e",
+                                    borderRadius: "1rem",
+                                    my: 2.4,
+                                    minHeight: "120px",
+                                    maxHeight: "260px",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      overflowY: "auto",
+                                      maxHeight: "260px",
+                                      pr: 0.5,
+                                      "&::-webkit-scrollbar": {
+                                        width: "0.65rem",
+                                      },
+                                      "&::-webkit-scrollbar-track": {
+                                        background: "#f5f7fd",
+                                      },
+                                      "&::-webkit-scrollbar-thumb": {
+                                        background: "#ff469e",
+                                        borderRadius: "0.8rem",
+                                      },
+                                      "&::-webkit-scrollbar-thumb:hover": {
+                                        background: "#ffbbd0",
+                                      },
+                                    }}
+                                  >
+                                    {item.order_detail_list.map(
+                                      (detail, index) => (
+                                        <div
+                                          key={index}
+                                          style={{
+                                            display: "flex",
+                                            marginBottom: "10px",
+                                          }}
+                                        >
+                                          <CardMedia
+                                            sx={{
+                                              width: "70px",
+                                              height: "70px",
+                                              justifyContent: "center",
+                                              alignSelf: "center",
+                                              borderRadius: "10px",
+                                            }}
+                                            image={
+                                              productMap[
+                                                detail.product_id
+                                              ][4]?.includes("Product_")
+                                                ? `http://localhost:8080/mamababy/products/images/${
+                                                    productMap[
+                                                      detail.product_id
+                                                    ][4]
+                                                  }`
+                                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                            }
+                                            onError={(e) => {
+                                              e.target.src =
+                                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                            }}
+                                            title={
+                                              productMap[detail.product_id][0]
+                                            }
+                                          />
+                                          <CardContent
+                                            sx={{
+                                              flex: "1 0 auto",
+                                              ml: 2,
+                                              borderBottom: "1px dashed black",
+                                            }}
+                                          >
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                mt: 2,
+                                              }}
+                                            >
+                                              <Typography
+                                                sx={{
+                                                  fontWeight: "600",
+                                                  fontSize: "1.25rem",
+                                                  "&:hover": {
+                                                    cursor: "pointer",
+                                                    color: "#ff469e",
+                                                  },
+                                                }}
+                                                onClick={() =>
+                                                  navigate(
+                                                    `/products/${productMap[
+                                                      detail.product_id
+                                                    ][0]
+                                                      .toLowerCase()
+                                                      .replace(/\s/g, "-")}`,
+                                                    {
+                                                      state: {
+                                                        productId:
+                                                          detail.product_id,
+                                                      },
+                                                    },
+                                                    window.scrollTo({
+                                                      top: 0,
+                                                      behavior: "smooth",
+                                                    })
+                                                  )
+                                                }
+                                              >
+                                                {productMap[
+                                                  detail.product_id
+                                                ][0].length > 60
+                                                  ? `${productMap[
+                                                      detail.product_id
+                                                    ][0].substring(0, 60)}...`
+                                                  : productMap[
+                                                      detail.product_id
+                                                    ][0]}
+                                              </Typography>
+                                              <Typography
+                                                sx={{
+                                                  fontWeight: "600",
+                                                  fontSize: "1.15rem",
+                                                }}
+                                              >
+                                                {formatCurrency(
+                                                  // productMap[
+                                                  //   detail.product_id
+                                                  // ][3]
+                                                  detail.unit_price
+                                                )}
+                                                <span
+                                                  style={{
+                                                    fontSize: "1.05rem",
+                                                    opacity: 0.4,
+                                                  }}
+                                                >
+                                                  {" "}
+                                                  x{detail.quantity}
+                                                </span>
+                                              </Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                mt: 1,
+                                              }}
+                                            >
+                                              <Typography sx={{ opacity: 0.7 }}>
+                                                {
+                                                  brandMap[
+                                                    productMap[
+                                                      detail.product_id
+                                                    ][1]
+                                                  ]
+                                                }{" "}
+                                                |{" "}
+                                                {
+                                                  categoryMap[
+                                                    productMap[
+                                                      detail.product_id
+                                                    ][2]
+                                                  ]
+                                                }
+                                              </Typography>
+                                              <Typography sx={{ opacity: 0.8 }}>
+                                                <span
+                                                  style={{
+                                                    fontWeight: "bold",
+                                                    fontSize: "1.25rem",
+                                                  }}
+                                                >
+                                                  ={" "}
+                                                  {formatCurrency(
+                                                    detail.amount_price
+                                                  )}
+                                                </span>
+                                              </Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                mt: 1,
+                                              }}
+                                            >
+                                              <FormControlLabel
+                                                control={
+                                                  <Checkbox
+                                                    sx={{
+                                                      "&.Mui-checked": {
+                                                        color: "#ff469e",
+                                                      },
+                                                      "&:hover": {
+                                                        color: "#ff469e",
+                                                      },
+                                                      "&.Mui-checked + .MuiTypography-root, &:hover + .MuiTypography-root":
+                                                        {
+                                                          color: "#ff469e",
+                                                        },
+                                                    }}
+                                                    onChange={(e) =>
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        e.target.checked
+                                                          ? 1
+                                                          : 0,
+                                                        detail.unit_price
+                                                      )
+                                                    }
+                                                  />
+                                                }
+                                                label={
+                                                  <Typography
+                                                    sx={{
+                                                      fontWeight: "600",
+                                                      "&:hover": {
+                                                        color: "#ff469e",
+                                                      },
+                                                      ".MuiCheckbox-root:hover ~ &":
+                                                        {
+                                                          color: "#ff469e",
+                                                        },
+                                                    }}
+                                                  >
+                                                    Refund
+                                                  </Typography>
+                                                }
+                                              />
+                                              <ButtonGroup
+                                                variant="outlined"
+                                                aria-label="outlined button group"
+                                                style={{
+                                                  height: "2rem",
+                                                  marginLeft: "1rem",
+                                                }}
+                                                disabled={
+                                                  !selectedItems.some(
+                                                    (item) =>
+                                                      item.product_id ===
+                                                      detail.product_id
+                                                  )
+                                                }
+                                              >
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    )?.quantity ||
+                                                      detail.quantity) === 1
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.product_id ===
+                                                          detail.product_id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (currentQuantity >= 10) {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        currentQuantity - 10,
+                                                        detail.unit_price
+                                                      );
+                                                    } else {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        1,
+                                                        detail.unit_price
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    borderRadius: "20px",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  --
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    )?.quantity ||
+                                                      detail.quantity) === 1
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.product_id ===
+                                                          detail.product_id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (currentQuantity >= 1) {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        currentQuantity - 1,
+                                                        detail.unit_price
+                                                      );
+                                                    } else {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        1,
+                                                        detail.unit_price
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  -
+                                                </Button>
+                                                <Button
+                                                  disableRipple
+                                                  style={{
+                                                    backgroundColor: "white",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    cursor: "default",
+                                                    border: "1px solid #ff469e",
+                                                    color: "black",
+                                                  }}
+                                                >
+                                                  {Math.max(
+                                                    1,
+                                                    Math.min(
+                                                      detail.quantity,
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.product_id ===
+                                                          detail.product_id
+                                                      )?.quantity || 1
+                                                    )
+                                                  )}
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    )?.quantity ||
+                                                      detail.quantity) ===
+                                                      detail.quantity
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.product_id ===
+                                                          detail.product_id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (
+                                                      currentQuantity <=
+                                                      detail.quantity
+                                                    ) {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        currentQuantity + 1,
+                                                        detail.unit_price
+                                                      );
+                                                    } else {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        detail.quantity,
+                                                        detail.unit_price
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  +
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  disabled={
+                                                    !selectedItems.some(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    ) ||
+                                                    (selectedItems.find(
+                                                      (item) =>
+                                                        item.product_id ===
+                                                        detail.product_id
+                                                    )?.quantity ||
+                                                      detail.quantity) ===
+                                                      detail.quantity
+                                                  }
+                                                  onClick={() => {
+                                                    const currentQuantity =
+                                                      selectedItems.find(
+                                                        (item) =>
+                                                          item.product_id ===
+                                                          detail.product_id
+                                                      )?.quantity ||
+                                                      detail.quantity;
+                                                    if (
+                                                      currentQuantity <=
+                                                      detail.quantity - 10
+                                                    ) {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        currentQuantity + 10,
+                                                        detail.unit_price
+                                                      );
+                                                    } else {
+                                                      handleItemChange2(
+                                                        detail.product_id,
+                                                        detail.quantity,
+                                                        detail.unit_price
+                                                      );
+                                                    }
+                                                  }}
+                                                  sx={{
+                                                    backgroundColor: "white",
+                                                    color: "#ff469e",
+                                                    borderRadius: "20px",
+                                                    fontSize: "1rem",
+                                                    width: "2.9rem",
+                                                    fontWeight: "bold",
+                                                    boxShadow: "none",
+                                                    transition:
+                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                    border: "1px solid #ff469e",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#ff469e",
+                                                      color: "white",
+                                                    },
+                                                  }}
+                                                >
+                                                  ++
+                                                </Button>
+                                              </ButtonGroup>
+                                            </Box>
+                                          </CardContent>
+                                        </div>
+                                      )
+                                    )}
+                                  </Box>
+                                </Card>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      width: "35%",
+                                      justifyContent: "space-between",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "1.45rem",
+                                      }}
+                                    >
+                                      Total Refund:
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "1.5rem",
+                                        color: "#ff469e",
+                                      }}
+                                    >
+                                      {formatCurrency(
+                                        selectedItems.reduce(
+                                          (total, selectedItem) => {
+                                            const difference =
+                                              item.final_amount - total;
+                                            const itemAmount =
+                                              selectedItem.unit_price *
+                                              selectedItem.quantity;
+                                            return (
+                                              total +
+                                              Math.min(difference, itemAmount)
+                                            );
+                                          },
+                                          0
+                                        )
+                                      )}
+                                      {/* {formatCurrency(
+                                        selectedItems.reduce(
+                                          (total, selectedItem) => {
+                                            return (
+                                              Math.min(total +
+                                              selectedItem.unit_price *
+                                                selectedItem.quantity
+                                            ), item.final_amount);
+                                          },
+                                          0
+                                        )
+                                      )}{" "} */}
+                                    </span>
+                                  </Box>
+                                  <Button
+                                    variant="contained"
+                                    sx={{
+                                      backgroundColor: "white",
+                                      color: "#ff469e",
+                                      borderRadius: "20px",
+                                      fontSize: 16,
+                                      fontWeight: "bold",
+                                      my: 0.2,
+                                      mx: 1,
+                                      transition:
+                                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                      border: "1px solid #ff469e",
+                                      "&:hover": {
+                                        backgroundColor: "#ff469e",
+                                        color: "white",
+                                        border: "1px solid white",
+                                      },
+                                    }}
+                                    onClick={() => handleRequestRefund(item)}
                                   >
                                     Send
                                   </Button>

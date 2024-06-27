@@ -32,6 +32,7 @@ import { useNavigate } from "react-router-dom";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 export default function OrdersManagement() {
   window.document.title = "Orders Management";
@@ -122,7 +123,9 @@ export default function OrdersManagement() {
         categorizedOrders[latestStatus]?.unshift(order);
       });
       for (const status in categorizedOrders) {
-        categorizedOrders[status].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+        categorizedOrders[status].sort(
+          (a, b) => new Date(b.order_date) - new Date(a.order_date)
+        );
       }
       // for (const status in categorizedOrders) {
       //   categorizedOrders[status].reverse();
@@ -130,7 +133,13 @@ export default function OrdersManagement() {
       setOrdersByStatus(categorizedOrders);
 
       const productMap = productData.reduce((x, item) => {
-        x[item.id] = [item.name, item.brand_id, item.category_id, item.price, item.image_url];
+        x[item.id] = [
+          item.name,
+          item.brand_id,
+          item.category_id,
+          item.price,
+          item.image_url,
+        ];
         return x;
       }, {});
       setProductMap(productMap);
@@ -171,6 +180,24 @@ export default function OrdersManagement() {
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
+
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOnIcon
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 24,
+            }}
+          />
+        </Box>
+      </>
+    );
   };
 
   // const handleAccept = (orderId, status) => {
@@ -233,7 +260,6 @@ export default function OrdersManagement() {
   //     .catch((error) => console.log(error));
   // };
 
-
   const handleAccept = (orderId, newStatus) => {
     changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
@@ -243,7 +269,7 @@ export default function OrdersManagement() {
       })
       .catch((error) => console.log(error));
   };
-  
+
   const handleReject = (orderId, newStatus) => {
     changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
@@ -253,7 +279,7 @@ export default function OrdersManagement() {
       })
       .catch((error) => console.log(error));
   };
-  
+
   const handleDeliver = (orderId, newStatus) => {
     changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
@@ -263,28 +289,30 @@ export default function OrdersManagement() {
       })
       .catch((error) => console.log(error));
   };
-  
+
   const updateOrderStatus = (orderId, newStatus) => {
     setOrdersByStatus((prevOrders) => {
       const updatedOrders = { ...prevOrders };
       let upToDateOrder;
-  
+
       for (const status in updatedOrders) {
-        const orderIndex = updatedOrders[status].findIndex(order => order.id === orderId);
+        const orderIndex = updatedOrders[status].findIndex(
+          (order) => order.id === orderId
+        );
         if (orderIndex !== -1) {
           [upToDateOrder] = updatedOrders[status].splice(orderIndex, 1);
           break;
         }
       }
-  
+
       if (upToDateOrder) {
         upToDateOrder.status_order_list.push({ status: newStatus });
         updatedOrders[newStatus].unshift(upToDateOrder);
       }
-  
+
       return updatedOrders;
     });
-  
+
     handleClose();
     setLoading(true);
     setTimeout(() => {
@@ -292,7 +320,7 @@ export default function OrdersManagement() {
       setLoading(false);
     }, 1500);
   };
-  
+
   const handleOpen = (type, orderId) => {
     setActionType(type);
     setSelectedOrderId(orderId);
@@ -424,7 +452,7 @@ export default function OrdersManagement() {
                       >
                         Order Date:{" "}
                         <span style={{ fontWeight: "600" }}>
-                          {item.orderDate}
+                          {item.order_date}
                         </span>
                       </Typography>
                     </Grid>
@@ -544,12 +572,17 @@ export default function OrdersManagement() {
                                         borderRadius: "10px",
                                       }}
                                       image={
-                                        productMap[detail.product_id][4]?.includes("Product_")
-                                          ? `http://localhost:8080/mamababy/products/images/${productMap[detail.product_id][4]}`
+                                        productMap[
+                                          detail.product_id
+                                        ][4]?.includes("Product_")
+                                          ? `http://localhost:8080/mamababy/products/images/${
+                                              productMap[detail.product_id][4]
+                                            }`
                                           : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                       }
                                       onError={(e) => {
-                                        e.target.src = "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                        e.target.src =
+                                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                       }}
                                       title={productMap[detail.product_id][0]}
                                     />
@@ -595,27 +628,28 @@ export default function OrdersManagement() {
                                               })
                                             )
                                           }
-                                        >{productMap[
-                                          detail.product_id
-                                        ][0].length > 60
-                                          ? `${productMap[
-                                              detail.product_id
-                                            ][0].substring(0, 60)}...`
-                                          : productMap[
-                                              detail.product_id
-                                            ][0]}
+                                        >
+                                          {productMap[detail.product_id][0]
+                                            .length > 60
+                                            ? `${productMap[
+                                                detail.product_id
+                                              ][0].substring(0, 60)}...`
+                                            : productMap[detail.product_id][0]}
                                         </Typography>
                                         <Typography
                                           sx={{
                                             fontWeight: "600",
                                             fontSize: "1.15rem",
+                                            display: "flex",
+                                            alignItems: "center",
                                           }}
                                         >
                                           {" "}
-                                          {formatCurrency(
-                                            // productMap[detail.product_id][3]
-                                            detail.unit_price
-                                          )}{" "}
+                                          {detail.unit_price !== 0
+                                            ? formatCurrency(detail.unit_price)
+                                            : formatCurrencyPoint(
+                                                Math.round(detail.unit_point)
+                                              )}{" "}
                                           <span
                                             style={{
                                               fontSize: "1.05rem",
@@ -652,12 +686,22 @@ export default function OrdersManagement() {
                                             style={{
                                               fontWeight: "bold",
                                               fontSize: "1.25rem",
+                                              display: "flex",
+                                              alignItems: "center",
                                             }}
                                           >
-                                            ={" "}
-                                            {formatCurrency(
-                                              detail.amount_price
-                                            )}
+                                            <span>=</span>{" "}
+                                            <span style={{ marginLeft: "4px" }}>
+                                              {detail.unit_price !== 0
+                                                ? formatCurrency(
+                                                    detail.amount_price
+                                                  )
+                                                : formatCurrencyPoint(
+                                                    Math.round(
+                                                      detail.amount_point
+                                                    )
+                                                  )}
+                                            </span>
                                           </span>
                                         </Typography>
                                       </Box>
@@ -730,7 +774,7 @@ export default function OrdersManagement() {
                           >
                             <span style={{ opacity: 0.7 }}>Address:</span>
                             <span style={{ fontWeight: "600" }}>
-                              {item.shippingAddress}
+                              {item.shipping_address}
                             </span>
                           </Box>
                           <Box
@@ -945,8 +989,14 @@ export default function OrdersManagement() {
                                 onClick={() => {
                                   {
                                     actionType === "Accept"
-                                      ? handleAccept(selectedOrderId, "PREPARING")
-                                      : handleReject(selectedOrderId, "CANCELLED");
+                                      ? handleAccept(
+                                          selectedOrderId,
+                                          "PREPARING"
+                                        )
+                                      : handleReject(
+                                          selectedOrderId,
+                                          "CANCELLED"
+                                        );
                                   }
                                 }}
                               >

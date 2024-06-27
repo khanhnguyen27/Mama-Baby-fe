@@ -37,6 +37,7 @@ import ProductDetailsManagement from "./components/staff/ProductDetailsManagemen
 import CommentHistory from "./components/general/CommentHistory";
 import ProductGiftDetails from "./components/general/ProductGiftDetails";
 import ProductGift from "./components/general/ProductGift";
+import Requests from "./components/general/Requests";
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
+        <Route path="/requests" element={<Requests />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
           <Route
             path="/products/staff/:productId"
