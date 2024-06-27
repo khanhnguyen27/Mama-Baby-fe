@@ -168,7 +168,7 @@ export default function AdminHome() {
       const yearsSet = new Set();
 
       ordersData.forEach((order) => {
-        const date = new Date(order.orderDate);
+        const date = new Date(order.order_date);
         const year = date.getFullYear();
         yearsSet.add(year);
       });
@@ -187,7 +187,7 @@ export default function AdminHome() {
       const monthsSet = new Set();
 
       storesData.forEach((store) => {
-        const date = new Date(store.requestDate);
+        const date = new Date(store.request_date);
         const month = date.getMonth() + 1;
         monthsSet.add(month);
       });
@@ -208,7 +208,7 @@ export default function AdminHome() {
   const handleMonthChange = (event) => {
     const selectedMonth = parseInt(event.target.value);
     setSelectedMonth(selectedMonth);
-    calculatePercentage(selectedMonth);
+    console.log("selectedMonth", selectedMonth);
   };
 
   const handleBarChartData = async (year = selectedYear) => {
@@ -246,14 +246,14 @@ export default function AdminHome() {
       let totalRef = 0;
 
       ordersData.forEach((order) => {
-        const date = new Date(order.orderDate);
+        const date = new Date(order.order_date);
         const month = date.toLocaleString("default", { month: "short" });
         monthlyData[month].Revenue += order.amount || 0; // Ensure amount exists and is a number
         totalRev += order.amount || 0; // Accumulate total revenue
       });
 
       refundsData.forEach((refund) => {
-        const date = new Date(refund.createDate);
+        const date = new Date(refund.create_date);
         const month = date.toLocaleString("default", { month: "short" });
         monthlyData[month].Refund += refund.amount || 0;
         totalRef += refund.amount || 0;
@@ -362,7 +362,7 @@ export default function AdminHome() {
   const handleLineChartData = async () => {
     try {
       const yearlyRevenue = orders.reduce((acc, order) => {
-        const date = new Date(order.orderDate);
+        const date = new Date(order.order_date);
         const year = date.getFullYear();
         if (!acc[year]) {
           acc[year] = 0;
@@ -372,7 +372,7 @@ export default function AdminHome() {
       }, {});
 
       const yearlyRefund = refunds.reduce((acc, refund) => {
-        const date = new Date(refund.createDate);
+        const date = new Date(refund.create_date);
         const year = date.getFullYear();
         if (!acc[year]) {
           acc[year] = 0;
@@ -418,7 +418,7 @@ export default function AdminHome() {
     } else if (value >= 1_000) {
       return `${(value / 1_000).toFixed(1)}k`;
     } else {
-      return value.toString();
+      return value;
     }
   };
 
