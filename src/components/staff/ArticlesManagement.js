@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { environment } from "../../environments/environment";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   addArticleApi,
   updateArticleApi,
-  allArticleApi,
   getArticlesByStoreIdApi,
 } from "../../api/ArticleAPI";
 import FormControl from "@mui/material/FormControl";
-import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
-import ProductSearch from "../Navigation/ProductSearch";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   TextField,
@@ -24,22 +21,17 @@ import {
   InputAdornment,
 } from "@mui/material";
 import {
-  Box,
-  Breadcrumbs,
   Card,
-  CardActions,
   CardContent,
   CardMedia,
-  CircularProgress,
   Container,
-  Divider,
   Fade,
-  FormControlLabel,
   Grid,
   IconButton,
-  Radio,
   Tooltip,
   Typography,
+  Pagination,
+  PaginationItem,
 } from "@mui/material";
 import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
@@ -48,7 +40,6 @@ import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
-import { Pagination, PaginationItem } from "@mui/material";
 
 export default function Articles() {
   const navigate = useNavigate();
@@ -84,8 +75,6 @@ export default function Articles() {
   }, []);
 
   const storeId = store.id;
-  // console.log(userId);
-  //console.log(storeId);
   const fetchData = async (page) => {
     try {
       const articleRes = await getArticlesByStoreIdApi({
@@ -451,8 +440,18 @@ export default function Articles() {
                       >
                         <CardMedia
                           component="img"
-                          height="140"
-                          image={`http://localhost:8080/mamababy/article/images/${item.link_image}`}
+                          height="120"
+                          image={
+                            item.link_image &&
+                            item.link_image.includes("Article_")
+                              ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
+                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          }
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                          }}
                           alt={item.header}
                           onClick={() => handleOpen(item)}
                         />

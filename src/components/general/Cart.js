@@ -113,9 +113,6 @@ export default function Cart() {
     return acc;
   }, {});
 
-  // console.log(cartItems);
-  // console.log(groupedCartItems);
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
@@ -237,9 +234,12 @@ export default function Cart() {
       }, 2000);
       return;
     }
+    if (userInfo.accumulated_points < getFinalPoint() && typeGift === true) {
+      toast.warn("You don't have enough points to redeem the gift");
+      return;
+    }
     const decodedAccessToken = jwtDecode(accessToken);
     const userId = decodedAccessToken.UserID;
-    console.log(userId);
 
     const selectedVoucherObj = voucher.find(
       (item) => item.discount_value === selectedVoucher
@@ -269,7 +269,6 @@ export default function Cart() {
       store_id: item.product.store_id,
       quantity: item.quantity,
     }));
-    console.log(cartItems2);
 
     if (paymentMethod === "COD") {
       createOrderApi(
@@ -413,8 +412,6 @@ export default function Cart() {
     });
     return finalAmount;
   };
-  console.log(voucher);
-  console.log(selectedVoucher);
   return (
     <div
       style={{
@@ -500,6 +497,7 @@ export default function Cart() {
                           }}
                         >
                           <CardMedia
+                            component="img"
                             sx={{
                               width: "100px",
                               height: "100px",
@@ -507,11 +505,13 @@ export default function Cart() {
                               alignSelf: "center",
                             }}
                             image={
+                              item.product.image_url &&
                               item.product.image_url?.includes("Product_")
                                 ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                             }
                             onError={(e) => {
+                              e.target.onerror = null;
                               e.target.src =
                                 "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                             }}
@@ -551,41 +551,79 @@ export default function Cart() {
                                 justifyContent: "space-between",
                               }}
                             >
-                              <Typography
-                                gutterBottom
-                                noWrap
-                                sx={{
-                                  fontSize: "22px",
-                                  fontWeight: "bold",
-                                  whiteSpace: "normal",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  display: "-webkit-box",
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: "vertical",
-                                  maxWidth: "100%",
-                                  "&:hover": {
-                                    cursor: "pointer",
-                                    color: "#ff469e",
-                                  },
-                                }}
-                                onClick={() =>
-                                  navigate(
-                                    `/products/${item.product.name
-                                      .toLowerCase()
-                                      .replace(/\s/g, "-")}`,
-                                    { state: { productId: item.product.id } },
-                                    window.scrollTo({
-                                      top: 0,
-                                      behavior: "smooth",
-                                    })
-                                  )
-                                }
-                              >
-                                {item.product.name.length > 40
-                                  ? `${item.product.name.substring(0, 40)}...`
-                                  : item.product.name}
-                              </Typography>
+                              {item.product.price > 0 ? (
+                                <Typography
+                                  gutterBottom
+                                  noWrap
+                                  sx={{
+                                    fontSize: "22px",
+                                    fontWeight: "bold",
+                                    whiteSpace: "normal",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    maxWidth: "100%",
+                                    "&:hover": {
+                                      cursor: "pointer",
+                                      color: "#ff469e",
+                                    },
+                                  }}
+                                  onClick={() =>
+                                    navigate(
+                                      `/products/${item.product.name
+                                        .toLowerCase()
+                                        .replace(/\s/g, "-")}`,
+                                      { state: { productId: item.product.id } },
+                                      window.scrollTo({
+                                        top: 0,
+                                        behavior: "smooth",
+                                      })
+                                    )
+                                  }
+                                >
+                                  {item.product.name.length > 40
+                                    ? `${item.product.name.substring(0, 40)}...`
+                                    : item.product.name}
+                                </Typography>
+                              ) : (
+                                <Typography
+                                  gutterBottom
+                                  noWrap
+                                  sx={{
+                                    fontSize: "22px",
+                                    fontWeight: "bold",
+                                    whiteSpace: "normal",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    maxWidth: "100%",
+                                    "&:hover": {
+                                      cursor: "pointer",
+                                      color: "#ff469e",
+                                    },
+                                  }}
+                                  onClick={() =>
+                                    navigate(
+                                      `/productgiftdetail/${item.product.name
+                                        .toLowerCase()
+                                        .replace(/\s/g, "-")}`,
+                                      { state: { productId: item.product.id } },
+                                      window.scrollTo({
+                                        top: 0,
+                                        behavior: "smooth",
+                                      })
+                                    )
+                                  }
+                                >
+                                  {item.product.name.length > 40
+                                    ? `${item.product.name.substring(0, 40)}...`
+                                    : item.product.name}
+                                </Typography>
+                              )}
                             </Box>
                             <Box
                               sx={{
@@ -1334,6 +1372,7 @@ export default function Cart() {
                                 }}
                               >
                                 <CardMedia
+                                  component="img"
                                   sx={{
                                     width: "70px",
                                     height: "70px",
@@ -1595,7 +1634,10 @@ export default function Cart() {
                               <Box
                                 sx={{ display: "flex", alignItems: "center" }}
                               >
-                                {userInfo.accumulated_points - getFinalPoint()}
+                                {userInfo.accumulated_points > getFinalPoint()
+                                  ? userInfo.accumulated_points -
+                                    getFinalPoint()
+                                  : 0}
                                 <MonetizationOnIcon
                                   variant="h6"
                                   sx={{
