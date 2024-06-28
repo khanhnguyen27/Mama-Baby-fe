@@ -1056,7 +1056,7 @@ export default function HomePage() {
                       >
                         <img
                           src={
-                            item.image_url?.includes("Product_")
+                            item.image_url.includes("Product_")
                               ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
                               : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           }

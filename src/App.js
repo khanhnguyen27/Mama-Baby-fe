@@ -39,6 +39,7 @@ import CommentHistory from "./components/general/CommentHistory";
 import ProductGiftDetails from "./components/general/ProductGiftDetails";
 import ProductGift from "./components/general/ProductGift";
 import Requests from "./components/general/Requests";
+import Dashboard from "./components/staff/Dashboard";
 
 function App() {
   return (
@@ -82,6 +83,7 @@ function App() {
             <Route path="articles" element={<Articles />} />
             <Route path="vouchers" element={<VoucherManagement />} />
             <Route path="refunds" element={<RefundManagement />} />
+            <Route path="dashboard" element={<Dashboard />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>

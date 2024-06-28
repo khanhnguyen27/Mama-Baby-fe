@@ -17,6 +17,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { TextField,InputLabel } from "@mui/material";
 
 const RegistStore = () => {
   window.document.title = "Sign Up";
@@ -29,10 +30,13 @@ const RegistStore = () => {
   const accessToken = localStorage.getItem("accessToken");
   const [open, setOpen] = useState(false);
   const [agreed, setAgreed] = useState(false);
-
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
-  
+  const [image, setImage] = useState({
+    file: null,
+    url: "",
+  });
+
   // Hàm kiểm tra phone có phải là số không
   const validatePhoneNumber = (phone) => {
     const reg = /^[0-9]+$/;
@@ -75,7 +79,7 @@ const RegistStore = () => {
 
     // Nếu điều kiện hợp lệ, thực hiện gọi API
     setLoading(true);
-    regisStoreApi(storename, address, description, phone, userId)
+    regisStoreApi(storename, address, description, phone, userId, image.file)
       .then((res) => {
         console.log(res);
         toast.success("Send request successfully!", { autoClose: 1500 });
@@ -93,6 +97,18 @@ const RegistStore = () => {
       .finally(() => {
         setLoading(false);
       });
+
+
+  };
+  const handleImage = (e) => {
+    if (e.target.files[0]) {
+      const file = e.target.files[0];
+      const url = URL.createObjectURL(file);
+      setImage({
+        file: file,
+        url: url,
+      });
+    }
   };
 
   return (
@@ -336,6 +352,42 @@ const RegistStore = () => {
                   }}
                 />
               </FormControl>
+              <FormControl sx={{ mb: 3 }} fullWidth>
+                <Typography
+                  sx={{
+                    color: "black",
+                    textAlign: "left",
+                    paddingBottom: 1,
+                    fontWeight: "700",
+                  }}
+                >
+                  Giay phep kinh doanh <span style={{ color: "red" }}>*</span>
+                </Typography>
+                <input
+                  type="file"
+                  accept="image/*"
+                   onChange={handleImage}
+                  style={{ marginTop: "16px", marginBottom: "16px" }}
+                />
+                {image && (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel shrink>Image</InputLabel>
+                    <div
+                      style={{
+                        border: "1px solid #ccc",
+                        padding: "10px",
+                        textAlign: "center",
+                      }}
+                    >
+                      <img
+                        src={image.url}
+                        alt="Selected"
+                        style={{ width: "100%", marginTop: "16px" }}
+                      />
+                    </div>
+                  </FormControl>
+                )}
+              </FormControl>
 
               <div style={{ textAlign: "center", color: "#777" }}>
                 By clicking Regist, you agree to the Terms, Main our privacy
@@ -387,24 +439,24 @@ const RegistStore = () => {
                       "Warning!" or "Are you sure?"
                     </DialogContentText>
                   </DialogContent>
-                  <DialogActions sx = {{textAlign: "left",justifyContent:"left",ml:2}}>
-                  <FormControlLabel
-                  
-                    control={
-                      <Checkbox
-                        checked={agreed}
-                        onChange={handleAgreeChange}
-                        style={{ color: "#ff469e" }}
-                      />
-                    }
-                    label="I agree to the terms and policies"
-                  />
-                </DialogActions>
+                  <DialogActions
+                    sx={{ textAlign: "left", justifyContent: "left", ml: 2 }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={agreed}
+                          onChange={handleAgreeChange}
+                          style={{ color: "#ff469e" }}
+                        />
+                      }
+                      label="I agree to the terms and policies"
+                    />
+                  </DialogActions>
                 </Dialog>
               </div>
 
               <div style={{ textAlign: "center", marginTop: "1rem" }}>
-
                 <Button
                   variant="contained"
                   type="submit"

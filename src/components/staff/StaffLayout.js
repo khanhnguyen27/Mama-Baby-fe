@@ -54,6 +54,11 @@ const itemList = [
     Icon: Refund,
     href: "refunds",
   },
+  {
+    label: "Dashboard",
+    Icon: Dashboard,
+    href: "dashboard",
+  },
 ];
 
 export default function StaffLayout() {
