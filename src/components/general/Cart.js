@@ -330,6 +330,11 @@ export default function Cart() {
                 });
                 setTimeout(() => {
                   // window.location.replace(res.data?.data?.payment_url);
+                  const productIdsToRemove = cartItems2.map(
+                    (item) => item.product_id
+                  );
+                  dispatch(removeFromCart(productIdsToRemove));
+                  handleClose();
                   window.open(res.data?.data?.payment_url);
                 }, 500);
               })

@@ -21,6 +21,7 @@ import Stores from "./components/general/Stores";
 import StoreDetail from "./components/general/StoreDetail";
 import ProductDetails from "./components/general/ProductDetails";
 import Article from "./components/general/Article";
+import ArticleDetails from "./components/general/ArticleDetails";
 import StaffLayout from "./components/staff/StaffLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import RegisStores from "./components/general/RegisStores";
@@ -37,6 +38,7 @@ import ProductDetailsManagement from "./components/staff/ProductDetailsManagemen
 import CommentHistory from "./components/general/CommentHistory";
 import ProductGiftDetails from "./components/general/ProductGiftDetails";
 import ProductGift from "./components/general/ProductGift";
+import Requests from "./components/general/Requests";
 
 function App() {
   return (
@@ -51,6 +53,7 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/productgift" element={<ProductGift />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="/article/:articleId" element={<ArticleDetails />} />
         <Route
           path="/productgiftdetail/:productId"
           element={<ProductGiftDetails />}
@@ -64,6 +67,7 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/article" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
+        <Route path="/requests" element={<Requests />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
           <Route
             path="/products/staff/:productId"

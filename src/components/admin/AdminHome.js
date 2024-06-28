@@ -401,7 +401,7 @@ export default function AdminHome() {
     try {
       const orderRes = await orderByYearApi();
       const ordersData = orderRes.data.data || [];
-      const years = ordersData.map((order) => new Date(order.orderDate).getFullYear());
+      const years = ordersData.map((order) => new Date(order.order_date).getFullYear());
       const min = Math.min(...years);
       setMinYear(min);
       setMaxYear(min + 15);

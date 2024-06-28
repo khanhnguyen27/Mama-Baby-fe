@@ -58,3 +58,7 @@ export const updateArticleApi = (id, articleData, file) => {
     },
   });
 };
+
+export const articleByIdApi = (articleId) => {
+  return axiosJWT.get(`${URL_ARTICLE}/${articleId}`);
+};
