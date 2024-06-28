@@ -8,6 +8,12 @@ export const allStoreApi = (params) => {
   });
 };
 
+export const allStoreByAdminApi = (params) => {
+  return axiosJWT.get(`${URL_STORE}/admin`, {
+    params: params,
+  });
+};
+
 export const storeByIdApi = (storeId) => {
   return axiosJWT.get(`http://localhost:8080/mamababy/stores/${storeId}`);
 };
@@ -18,7 +24,9 @@ export const storeByUserIdApi = (userId) => {
 
 export const StoreByMonthApi = async (selectedMonth) => {
   try {
-    const response = await axiosJWT.get(`${URL_STORE}/findByMonth?month=${selectedMonth}`);
+    const response = await axiosJWT.get(
+      `${URL_STORE}/findByMonth?month=${selectedMonth}`
+    );
     return response;
   } catch (error) {
     throw new Error(`Error fetching orders: ${error.message}`);
@@ -30,18 +38,34 @@ export const regisStoreApi = (
   address,
   description,
   phone,
-  userId
+  userId,
+  license // Thêm tham số licenseUrl vào hàm
 ) => {
-  return axiosJWT.post(URL_STORE, {
-    name_store: storename,
-    address: address,
-    description: description,
-    phone: phone,
-    user_id: userId,
+  const formData = new FormData();
+  formData.append("nameStore", storename);
+  formData.append("address", address);
+  formData.append("description", description);
+  formData.append("phone", phone);
+  formData.append("userId", userId);
+  formData.append("license", license); // Thêm giá trị licenseUrl vào FormData
+
+  return axiosJWT.post(URL_STORE, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
 };
 
-export const requestStoreApi = (storeId, nameStore, address, description, phone, status, isActive, userId) => {
+export const requestStoreApi = (
+  storeId,
+  nameStore,
+  address,
+  description,
+  phone,
+  status,
+  isActive,
+  userId
+) => {
   return axiosJWT.put(`${URL_STORE}/admin/update_status/${storeId}`, {
     name_store: nameStore,
     address: address,
@@ -51,5 +75,7 @@ export const requestStoreApi = (storeId, nameStore, address, description, phone,
     is_active: isActive,
     user_id: userId,
   });
-
+};
+export const deleteStoreApi = (storeId) => {
+  return axiosJWT.delete(`${URL_STORE}/${storeId}`);
 };

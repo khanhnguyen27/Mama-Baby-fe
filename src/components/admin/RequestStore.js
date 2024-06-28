@@ -1,12 +1,12 @@
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { allUserApi, updateRollUserApi } from "../../api/UserAPI";
-
 import {
   requestStoreApi,
-  storeByUserIdApi,
-  allStoreApi,
+  allStoreByAdminApi,
+  deleteStoreApi,
 } from "../../api/StoreAPI";
+import { environment } from "../../environments/environment";
 import {
   Modal,
   Button,
@@ -21,10 +21,14 @@ import {
   Divider,
   IconButton,
   Pagination,
+  Dialog,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function RequestStore() {
   window.document.title = "Request of Store";
@@ -34,12 +38,10 @@ export default function RequestStore() {
   const decodedAccessToken = jwtDecode(accessToken);
   const [selectedStoreId, setSelectedStoreId] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const userId = decodedAccessToken.UserID;
   const [requestStore, setRequestStores] = useState({
     PROCESSING: [],
     APPROVED: [],
-    REFUSE: [],
   });
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -47,6 +49,15 @@ export default function RequestStore() {
   const [storeMap, setStoreMap] = useState([]);
   const [userMap, setUserMap] = useState();
   const [actionType, setActionType] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openLicense, setOpenLicense] = useState(false);
+  const [image, setImage] = useState({
+    file: null,
+    url: "",
+  });
+  const [selectedLicense, setSelectedLicense] = useState(null);
+
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,11 +72,7 @@ export default function RequestStore() {
   const fetchData = async () => {
     try {
       const [storeRes, userRes] = await Promise.all([
-        allStoreApi(
-          {
-            page: currentPage - 1,
-          }
-        ),
+        allStoreByAdminApi({}),
         allUserApi(),
       ]);
 
@@ -79,7 +86,6 @@ export default function RequestStore() {
       const categorizedOrders = {
         PROCESSING: [],
         APPROVED: [],
-        REFUSE: [],
       };
 
       storeData.forEach((store) => {
@@ -98,13 +104,21 @@ export default function RequestStore() {
           item.name_store,
           item.is_active,
           item.user_id,
+          item.license_url,
         ];
+
         return x;
       }, {});
+      console.log(storeData);
 
       setStoreMap(storeMap);
       const userMap = userData.reduce((x, item) => {
-        x[item.id] = [item.username, item.full_name, item.address, item.phone_number];
+        x[item.id] = [
+          item.username,
+          item.full_name,
+          item.address,
+          item.phone_number,
+        ];
         return x;
       }, {});
       setUserMap(userMap);
@@ -115,7 +129,7 @@ export default function RequestStore() {
 
   useEffect(() => {
     fetchData();
-  }, [storeId, currentPage]);
+  }, [storeId]);
 
   const handleTabChange = (e, newValue) => {
     setLoading(true);
@@ -124,13 +138,17 @@ export default function RequestStore() {
       setLoading(false);
     }, 1000);
   };
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
   const handleAccept = () => {
     if (selectedStoreId === null) return;
     const selectedStore = storeMap[selectedStoreId];
     if (!selectedStore) return;
 
-    const [address, description, phone, status, nameStore, isActive, userId] = selectedStore;
+    const [address, description, phone, status, nameStore, isActive, userId] =
+      selectedStore;
 
     requestStoreApi(
       selectedStoreId,
@@ -144,7 +162,7 @@ export default function RequestStore() {
     )
       .then((res) => {
         toast.success("Request Accepted!", {
-          autoClose: 1500,
+          autoClose: 3000,
         });
         handleApproveUserStatus(userId, 2); // Pass userId and new roleId
         updateRequestStatus(selectedStoreId, "APPROVED");
@@ -163,32 +181,27 @@ export default function RequestStore() {
     const selectedStore = storeMap[selectedStoreId];
     if (!selectedStore) return;
 
-    const [address, description, phone, status, nameStore, isActive, userId] = selectedStore;
+    const [address, description, phone, status, nameStore, isActive, userId] =
+      selectedStore;
 
-    requestStoreApi(
-      selectedStoreId,
-      nameStore,
-      address,
-      description,
-      phone,
-      "REFUSE",
-      0,
-      userId
-    )
-      .then((res) => {
-        toast.success("Request Rejected!", {
-          autoClose: 1500,
-        });
-        handleApproveUserStatus(userId, 1); // Assuming roleId remains 1 when rejected
-        updateRequestStatus(selectedStoreId, "REFUSE");
-        handleClose();
+    handleApproveUserStatus(userId, 1); // Assuming roleId remains 1 when rejected
+
+    // Call deleteStoreApi to remove the rejected store from the system
+    deleteStoreApi(selectedStoreId)
+      .then(() => {
+        toast.success("Store deleted successfully!");
         setLoading(true);
         setTimeout(() => {
           fetchData();
           setLoading(false);
-        }, 1500);
+        }, 3000);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log("Error deleting store:", error);
+        setLoading(false); // Handle loading state accordingly
+      });
+
+    handleClose();
   };
 
   const updateRequestStatus = (storeId, newStatus) => {
@@ -222,15 +235,15 @@ export default function RequestStore() {
     const selectedUser = userMap[userId];
     if (selectedUser) {
       try {
-        console.log('UserAPI:', {
+        console.log("UserAPI:", {
           username: selectedUser[0],
           full_name: selectedUser[1],
           address: selectedUser[2],
           phone_number: selectedUser[3],
           status: true, // Ensure this is a Boolean
-          roleId: newRoleId
+          roleId: newRoleId,
         });
-  
+
         await updateRollUserApi(
           selectedUser[0], // username
           selectedUser[1], // full_name
@@ -249,7 +262,15 @@ export default function RequestStore() {
       alert("Selected user not found in the list");
     }
   };
-  
+  const handleOpenLicense = (item) => {
+    setOpenLicense(true);
+    setSelectedLicense(item);
+  };
+
+  const handleCloseLicense = () => {
+    setOpenLicense(false);
+    setSelectedLicense(null);
+  };
 
   const handleOpen = (type, storeId) => {
     setActionType(type);
@@ -266,9 +287,14 @@ export default function RequestStore() {
     setSelectedStoreId(null);
     setSelectedUserId(null);
   };
-  const handlePageChange = (e, page) => {
-    setCurrentPage(page);
-  };
+
+  const totalPages = Math.ceil((storeMap?.stores?.length || 0) / itemsPerPage);
+  const currentStores =
+    storeMap?.stores?.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    ) || [];
+  console.log();
 
   return (
     <div
@@ -484,6 +510,34 @@ export default function RequestStore() {
                       </Box>
                     </Typography>
                   </Grid>
+                  <Dialog
+                    open={openLicense}
+                    onClose={handleCloseLicense}
+                    maxWidth="md"
+                    fullWidth
+                    PaperProps={{
+                      style: {
+                        borderRadius: 20, // Adjust border radius as per your requirement
+                        boxShadow: "0px 4px 8px #ff469e", // Add boxShadow for a raised effect
+                      },
+                    }}
+                  >
+                    <FormControl fullWidth margin="normal">
+                      <div
+                        style={{
+                          border: "1px solid #ccc",
+                          padding: "10px",
+                          textAlign: "center",
+                        }}
+                      >
+                        <img
+                          src={`${environment.apiBaseUrl}/stores/images/${selectedLicense}`}
+                          alt="Selected"
+                          style={{ width: "100%", marginTop: "16px" }}
+                        />
+                      </div>
+                    </FormControl>
+                  </Dialog>
 
                   <Grid item xs={12} md={5}>
                     <Typography
@@ -567,6 +621,29 @@ export default function RequestStore() {
                             border: "1px solid white",
                           },
                         }}
+                        onClick={() => handleOpenLicense(item.license_url)}
+                      >
+                        See The License
+                      </Button>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          borderRadius: "10px",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          my: 2,
+                          mx: 1,
+                          transition:
+                            "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            border: "1px solid white",
+                          },
+                        }}
                         onClick={() => handleOpen("Reject", item.id)}
                       >
                         REJECT REQUEST
@@ -594,6 +671,7 @@ export default function RequestStore() {
                       >
                         ACCEPT REQUEST
                       </Button>
+
                       <Modal
                         open={open}
                         onClose={handleClose}
@@ -713,89 +791,44 @@ export default function RequestStore() {
               </Card>
             ))
           )}
-                  <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Pagination
-            count={requestStore.totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            showFirstButton={requestStore.totalPages !== 1}
-            showLastButton={requestStore.totalPages !== 1}
-            hidePrevButton={currentPage === 1}
-            hideNextButton={currentPage === requestStore.totalPages}
-            size="large"
+          <Box
             sx={{
+              width: "100%",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              marginTop: "2.5rem",
-              width: "70%",
-              p: 1,
-              opacity: 0.9,
-              borderRadius: "20px",
-              "& .MuiPaginationItem-root": {
-                backgroundColor: "white",
-                borderRadius: "20px",
-                border: "1px solid black",
-                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
-                mx: 1,
-                transition:
-                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                "&:hover": {
-                  backgroundColor: "#fff4fc",
-                  color: "#ff469e",
-                  border: "1px solid #ff469e",
-                },
-                "&.Mui-selected": {
-                  backgroundColor: "#ff469e",
-                  color: "white",
-                  border: "1px solid #ff469e",
-                  "&:hover": {
-                    backgroundColor: "#fff4fc",
-                    color: "#ff469e",
-                    border: "1px solid #ff469e",
-                  },
-                },
-                fontSize: "1.25rem",
-              },
-              "& .MuiPaginationItem-ellipsis": {
-                mt: 1.25,
-                fontSize: "1.25rem",
-              },
             }}
-            componentsProps={{
-              previous: {
-                sx: {
-                  fontSize: "1.5rem",
-                  "&:hover": {
-                    backgroundColor: "#fff4fc",
-                    color: "#ff469e",
-                    transition:
-                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                  },
+          ></Box>
+        </Box>
+        <Grid container justifyContent="center" sx={{ mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            sx={{
+              "& .MuiPaginationItem-root": {
+                border: "1px solid #f5f7fd",
+                borderRadius: "16px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                transition: "border 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  border: "1px solid #ff469e",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                  backgroundColor: "white",
+                  color: "#ff469e",
                 },
               },
-              next: {
-                sx: {
-                  fontSize: "1.5rem",
-                  "&:hover": {
-                    backgroundColor: "#fff4fc",
-                    color: "#ff469e",
-                    transition:
-                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                  },
-                },
+              "& .Mui-selected": {
+                border: "1px solid #ff469e",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                backgroundColor: "white !important",
+                color: "#ff469e !important",
               },
             }}
           />
-        </Box>
-        </Box>
+        </Grid>
         {visible && (
           <IconButton
             size="large"

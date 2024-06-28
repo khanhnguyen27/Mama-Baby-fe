@@ -35,7 +35,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { allStoreApi, requestStoreApi } from "../../api/StoreAPI";
+import { allStoreByAdminApi, requestStoreApi } from "../../api/StoreAPI";
 
 export default function StoreManagement() {
   window.document.title = "Store Management";
@@ -55,7 +55,7 @@ export default function StoreManagement() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const StoreRes = await allStoreApi();
+      const StoreRes = await allStoreByAdminApi();
       setStores(StoreRes?.data?.data?.stores || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
