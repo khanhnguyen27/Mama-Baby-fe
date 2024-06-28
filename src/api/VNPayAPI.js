@@ -3,15 +3,16 @@ import axiosJWT from "./ConfigAxiosInterceptor";
 const URL_MAKEPAYMENT = `http://localhost:8080/mamababy/payment/vn-pay`;
 
 
-export const makePaymentApi = (finalAmount, bankCode, orders) => {
+export const makePaymentApi = (finalAmount, bankCode, orderId, storeId) => {
   // const formData = new FormData();
   // formData.append('finalAmount', finalAmount);
   // formData.append('bankCode', bankCode);
-  // formData.append('orders', orders);
+  // formData.append('order_id', order_id);
   return axiosJWT.post(URL_MAKEPAYMENT, {
     finalAmount: finalAmount,
     bankCode: bankCode,
-    orders: orders
+    orderId: orderId,
+    storeId: storeId
   });
 };
 

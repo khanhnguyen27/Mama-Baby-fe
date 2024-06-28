@@ -801,7 +801,126 @@ export default function StaffHome() {
           padding: "20px",
         }}
       >
-        <Container sx={{ my: 4 }}></Container>
+        <Container sx={{ my: 4 }}>
+          <Grid container justifyContent="center" spacing={2}>
+            {/* Grid item for ProductSearch and Add Product button */}
+            <Grid
+              item
+              xs={12}
+              md={8}
+              sx={{
+                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {/* ProductSearch */}
+              <div style={{ position: "relative", zIndex: "99" }}>
+                <TextField
+                  placeholder="What do you want to find?"
+                  size="small"
+                  variant="outlined"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          sx={{
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            height: "40px",
+                            marginRight: "0.6px",
+                            borderRadius: "5px",
+                            boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                            transition: "0.2s ease-in-out",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              opacity: 0.8,
+                              color: "white",
+                              boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                            },
+                            "&:active": {
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              boxShadow:
+                                "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                            },
+                          }}
+                        >
+                          <SearchIcon
+                            sx={{
+                              color: "inherit",
+                              cursor: "pointer",
+                              fontSize: "35px",
+                            }}
+                          />
+                        </Button>
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      width: { md: "650px" },
+                      padding: 0,
+                      border: "2px solid #ff469e",
+                      borderRadius: "7px",
+                      backgroundColor: "white",
+                      transition: "0.2s ease-in-out",
+                      "&:hover": {
+                        border: "2px solid #ff469e",
+                      },
+                      "&:focus": {
+                        backgroundColor: "#F8F8F8",
+                      },
+                      "&.Mui-focused": {
+                        border: "1px solid #ff469e",
+                        backgroundColor: "#F8F8F8",
+                        boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                        outline: "none",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                    },
+                  }}
+                />
+              </div>
+              {/* Add Product button */}
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderRadius: "30px",
+                  fontWeight: "bold",
+                  fontSize: 10,
+                  width: "15vw",
+                  height: "3vw", // Adjust as necessary to ensure it's a square
+                  transition:
+                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    border: "1px solid white",
+                  },
+                  ml: 2,
+                }}
+                onClick={handleOpenAddProduct}
+              >
+                <AddIcon style={{ fontSize: "2rem" }} />
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
         <Container>
           <Grid container spacing={3}>
             {/* Filters */}
@@ -1557,6 +1676,7 @@ export default function StaffHome() {
                             {categoryMap[item.category_id]}
                           </Typography>
                         </CardContent>
+                        <Divider sx={{ mt: 0.5, mb: 2 }} />
                         <Button
                           variant="contained"
                           sx={{

@@ -1,9 +1,11 @@
+import { Close } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   CircularProgress,
   TextField,
   InputAdornment,
   Button,
+  IconButton,
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -57,6 +59,12 @@ const ProductSearch = () => {
               {loading ? (
                 <CircularProgress sx={{ color: "#ff469e", mx: 2 }} size={24} />
               ) : (
+                <>
+                {searchTerm && (
+                  <IconButton onClick={() => setSearchTerm("")} size="small">
+                    <Close fontSize="small" />
+                  </IconButton>
+                )}
                 <Button
                   onClick={handleSearch}
                   sx={{
@@ -88,6 +96,7 @@ const ProductSearch = () => {
                     }}
                   />
                 </Button>
+                </>
               )}
             </InputAdornment>
           ),

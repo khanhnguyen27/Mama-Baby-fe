@@ -174,24 +174,41 @@ export default function Cart() {
   //   });
   // };
 
+  // const handleStoreChange = (storeId) => {
+  //   setSelectedStoreId(storeId);
+  //   setSelectedStore((prevStores) => {
+  //     const newSelectedStore = { ...prevStores };
+  //     Object.keys(newSelectedStore).forEach((key) => {
+  //       if (key !== storeId) {
+  //         newSelectedStore[key] = false;
+  //       }
+  //     });
+  //     newSelectedStore[storeId] = !prevStores[storeId];
+
+  //     if (newSelectedStore[storeId]) {
+  //       setSelectedStoreProducts(groupedCartItems[storeId]);
+  //     } else {
+  //       setSelectedStoreProducts([]);
+  //     }
+  //     return newSelectedStore;
+  //   });
+  // };
+
   const handleStoreChange = (storeId) => {
     setSelectedStoreId(storeId);
-    setSelectedStore((prevStores) => {
-      const newSelectedStore = { ...prevStores };
-      Object.keys(newSelectedStore).forEach((key) => {
-        if (key !== storeId) {
-          newSelectedStore[key] = false;
-        }
-      });
-      newSelectedStore[storeId] = !prevStores[storeId];
+    const updatedState = setSelectedStore((prevStores) => ({
+      ...prevStores,
+      [storeId]: !prevStores[storeId],
+    }));
 
-      if (newSelectedStore[storeId]) {
-        setSelectedStoreProducts(groupedCartItems[storeId]);
-      } else {
-        setSelectedStoreProducts([]);
-      }
-      return newSelectedStore;
-    });
+    if (typeof updatedState?.then === "function") {
+      updatedState.then(() => {
+        !isEmptyCart && handleOpen();
+      });
+    } else {
+      !isEmptyCart && handleOpen();
+    }
+    setSelectedStoreProducts(groupedCartItems[storeId] || []);
   };
 
   const updateQuantity = (product, quantityChange) => {
@@ -212,7 +229,13 @@ export default function Cart() {
         setAddress(userInfo.address))
       : toast.warn("There's no item in your cart", { autoClose: 1000 });
   };
-  const handleClose = () => setOpen(false);
+  const handleClose = () => (
+    setOpen(false),
+    setSelectedStoreId(""),
+    setSelectedStore(""),
+    setSelectedStoreProducts([]),
+    setSelectedVoucher("")
+  );
 
   const handleFullNameChange = (e) => {
     setFullName(e.target.value);
@@ -248,7 +271,7 @@ export default function Cart() {
 
     const totalPoint = getFinalPoint();
 
-    const amount = totalCost;
+    const amount = getFinalAmount();
 
     const totalDiscount = selectedVoucher;
 
@@ -296,6 +319,8 @@ export default function Cart() {
           }, 500);
           const productIdsToRemove = cartItems2.map((item) => item.product_id);
           dispatch(removeFromCart(productIdsToRemove));
+          setSelectedStore("");
+          setSelectedStoreId("");
         })
         .catch((err) => console.log(err));
     } else if (paymentMethod === "VNPAY") {
@@ -319,10 +344,11 @@ export default function Cart() {
           // const orders = res.data.data.map((item) => ({
           //   id: item.id,
           // }));
-          const orders = [{ id: res?.data?.data?.id }];
-          console.log(orders);
+          const orderId = res?.data?.data?.id;
+          const storeId = res?.data?.data?.store_id;
+          console.log(orderId);
           setTimeout(() => {
-            makePaymentApi(finalAmount, bankCode, orders)
+            makePaymentApi(finalAmount, bankCode, orderId, storeId)
               .then((res) => {
                 console.log(res.data);
                 toast.success("Now moving to payment page!", {
@@ -336,6 +362,8 @@ export default function Cart() {
                   dispatch(removeFromCart(productIdsToRemove));
                   handleClose();
                   window.open(res.data?.data?.payment_url);
+                  setSelectedStore("");
+                  setSelectedStoreId("");
                 }, 500);
               })
               .catch((error) => console.log(error));
@@ -449,7 +477,7 @@ export default function Cart() {
                 {!isEmptyCart ? (
                   Object.keys(groupedCartItems).map((storeId) => (
                     <div key={storeId}>
-                      <FormControlLabel
+                      {/* <FormControlLabel
                         key={storeId}
                         control={
                           <Checkbox
@@ -483,8 +511,943 @@ export default function Cart() {
                             {storeMap[storeId]}
                           </Typography>
                         }
-                      />
+                      /> */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            cursor: "pointer",
+                            fontSize: "1.5rem",
+                            color: "#ff469e",
+                            fontWeight: "bold",
+                            mt: 2, // marginTop: "1rem"
+                            ml: 3, // marginLeft: "1.5rem"
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                            },
+                          }}
+                          onClick={() =>
+                            navigate(
+                              `/stores/${storeId}`,
+                              { state: { storeId: storeId } },
+                              window.scrollTo({ top: 0, behavior: "smooth" })
+                            )
+                          }
+                        >
+                          {storeMap[storeId]}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          onClick={() => handleStoreChange(storeId)}
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "10px",
+                            fontSize: "1rem",
+                            fontWeight: "bold",
+                            mt: 1.5,
+                            minWidth: "12vw",
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                        >
+                          Checkout
+                        </Button>
+                        <Modal
+                          open={open}
+                          onClose={handleClose}
+                          slotProps={{
+                            backdrop: {
+                              style: {
+                                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                              },
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              width: "90%",
+                              borderRadius: "10px",
+                              maxWidth: 1000,
+                              maxHeight: "85vh",
+                              overflowY: "auto",
+                              backgroundColor: "#fff4fc",
+                              border: "2px solid #ff469e",
+                              boxShadow: 20,
+                              p: 4,
+                              "&::-webkit-scrollbar": {
+                                width: "0.6rem",
+                              },
+                              "&::-webkit-scrollbar-track": {
+                                background: "#f5f7fd",
+                                borderRadius: "0.6rem",
+                                my: 0.25,
+                              },
+                              "&::-webkit-scrollbar-thumb": {
+                                background: "#ff469e",
+                                borderRadius: "0.6rem",
+                              },
+                              "&::-webkit-scrollbar-thumb:hover": {
+                                background: "#ffbbd0",
+                              },
+                            }}
+                          >
+                            <div style={{ textAlign: "right" }}>
+                              <IconButton onClick={handleClose}>
+                                <Close
+                                  fontSize="large"
+                                  sx={{
+                                    color: "#ff469e",
+                                    borderRadius: "30px",
+                                    boxShadow: "none",
+                                    transition: "0.3s ease-in-out",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                      transform: "scale(1.1)",
+                                    },
+                                  }}
+                                />
+                              </IconButton>
+                            </div>
+                            <Grid container spacing={2} sx={{ mb: 3 }}>
+                              <Grid item xs={12} md={6} lg={8}>
+                                <Box>
+                                  <Typography
+                                    sx={{
+                                      fontWeight: "bold",
+                                      fontSize: "1.25rem",
+                                    }}
+                                  >
+                                    Your Information:
+                                  </Typography>
 
+                                  <div style={{ margin: "0.25rem 0.25rem" }}>
+                                    <span
+                                      style={{
+                                        fontSize: "1.05rem",
+                                        fontWeight: "600",
+                                      }}
+                                    >
+                                      Full Name:
+                                    </span>
+                                    <TextField
+                                      fullWidth
+                                      onChange={handleFullNameChange}
+                                      value={fullName}
+                                      placeholder="Enter your full name"
+                                      size="small"
+                                      variant="outlined"
+                                      InputProps={{
+                                        sx: {
+                                          padding: 0,
+                                          border: "1px solid #ff469e",
+                                          borderRadius: "7px",
+                                          backgroundColor: "white",
+                                          transition: "0.2s ease-in-out",
+                                          "&:hover": {
+                                            border: "1px solid #ff469e",
+                                          },
+                                          "&:focus": {
+                                            backgroundColor: "#F8F8F8",
+                                          },
+                                          "&.Mui-focused": {
+                                            border: "1px solid #ff469e",
+                                            backgroundColor: "#F8F8F8",
+                                            boxShadow:
+                                              "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                            outline: "none",
+                                          },
+                                          "& .MuiOutlinedInput-notchedOutline":
+                                            {
+                                              border: "none",
+                                            },
+                                        },
+                                      }}
+                                    />
+                                  </div>
+
+                                  <div style={{ margin: "0.25rem 0.25rem" }}>
+                                    <span
+                                      style={{
+                                        fontSize: "1.05rem",
+                                        fontWeight: "600",
+                                      }}
+                                    >
+                                      Phone:
+                                    </span>
+                                    <TextField
+                                      fullWidth
+                                      onChange={handlePhoneChange}
+                                      value={phone}
+                                      placeholder="Enter your phone"
+                                      size="small"
+                                      variant="outlined"
+                                      InputProps={{
+                                        sx: {
+                                          padding: 0,
+                                          border: "1px solid #ff469e",
+                                          borderRadius: "7px",
+                                          backgroundColor: "white",
+                                          transition: "0.2s ease-in-out",
+                                          "&:hover": {
+                                            border: "1px solid #ff469e",
+                                          },
+                                          "&:focus": {
+                                            backgroundColor: "#F8F8F8",
+                                          },
+                                          "&.Mui-focused": {
+                                            border: "1px solid #ff469e",
+                                            backgroundColor: "#F8F8F8",
+                                            boxShadow:
+                                              "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                            outline: "none",
+                                          },
+                                          "& .MuiOutlinedInput-notchedOutline":
+                                            {
+                                              border: "none",
+                                            },
+                                        },
+                                      }}
+                                    />
+                                  </div>
+
+                                  <div style={{ margin: "0.25rem 0.25rem" }}>
+                                    <span
+                                      style={{
+                                        fontSize: "1.05rem",
+                                        fontWeight: "600",
+                                      }}
+                                    >
+                                      Address:
+                                    </span>
+                                    <TextField
+                                      fullWidth
+                                      onChange={handleAdressChange}
+                                      value={address}
+                                      placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
+                                      size="small"
+                                      variant="outlined"
+                                      InputProps={{
+                                        sx: {
+                                          padding: 0,
+                                          border: "1px solid #ff469e",
+                                          borderRadius: "7px",
+                                          backgroundColor: "white",
+                                          transition: "0.2s ease-in-out",
+                                          "&:hover": {
+                                            border: "1px solid #ff469e",
+                                          },
+                                          "&:focus": {
+                                            backgroundColor: "#F8F8F8",
+                                          },
+                                          "&.Mui-focused": {
+                                            border: "1px solid #ff469e",
+                                            backgroundColor: "#F8F8F8",
+                                            boxShadow:
+                                              "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                            outline: "none",
+                                          },
+                                          "& .MuiOutlinedInput-notchedOutline":
+                                            {
+                                              border: "none",
+                                            },
+                                        },
+                                      }}
+                                    />
+                                  </div>
+                                </Box>
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4}>
+                                <Typography
+                                  sx={{
+                                    fontWeight: "bold",
+                                    fontSize: "1.25rem",
+                                  }}
+                                >
+                                  Choose a voucher:
+                                </Typography>
+                                <Box
+                                  sx={{
+                                    py: 2,
+                                    px: 2,
+                                    mt: 3,
+                                    backgroundColor: "white",
+                                    borderRadius: "20px",
+                                    border: "1px solid #ff469e",
+                                    boxShadow: "0px 1px 3px rgba(0, 0, 0.16)",
+                                  }}
+                                >
+                                  <Typography
+                                    variant="h6"
+                                    sx={{ mb: 2 }}
+                                  ></Typography>
+                                  <Select
+                                    fullWidth
+                                    displayEmpty
+                                    defaultValue=""
+                                    value={selectedVoucher}
+                                    onChange={handleVoucherChange}
+                                    sx={{
+                                      backgroundColor: "#fff4fc",
+                                      color: "#ff469e",
+                                      borderRadius: "20px",
+                                      fontSize: "20px",
+                                      border: "1px solid #ff469e",
+                                      boxShadow:
+                                        "0 3px 6px rgba(0, 0, 0, 0.16)",
+                                      transition:
+                                        "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
+                                      "&:hover": {
+                                        color: "white",
+                                        backgroundColor: "#ff469e",
+                                        border: "1px solid white",
+                                      },
+                                      "& .MuiOutlinedInput-notchedOutline": {
+                                        border: "none",
+                                      },
+                                      "& .MuiSvgIcon-root": {
+                                        color: "inherit",
+                                      },
+                                    }}
+                                    MenuProps={{
+                                      sx: {
+                                        "& .MuiMenu-list": {
+                                          backgroundColor: "white",
+                                          borderRadius: "10px",
+                                          boxShadow:
+                                            "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                        },
+                                      },
+                                    }}
+                                  >
+                                    <MenuItem
+                                      key={null}
+                                      value={""}
+                                      sx={{
+                                        color: "black",
+                                        fontSize: "18px",
+                                        transition:
+                                          "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                        "&:hover": {
+                                          backgroundColor: "#fff4fc",
+                                          color: "#ff469e",
+                                        },
+                                        "&.Mui-selected": {
+                                          backgroundColor: "#ff469e",
+                                          color: "white",
+                                          "&:hover": {
+                                            backgroundColor: "#fff4fc",
+                                            color: "#ff469e",
+                                          },
+                                        },
+                                      }}
+                                    >
+                                      -
+                                    </MenuItem>
+                                    {voucher.map((item) => (
+                                      <MenuItem
+                                        key={item.id}
+                                        value={item.discount_value}
+                                        sx={{
+                                          color: "black",
+                                          fontSize: "18px",
+                                          transition:
+                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                          "&:hover": {
+                                            backgroundColor: "#fff4fc",
+                                            color: "#ff469e",
+                                          },
+                                          "&.Mui-selected": {
+                                            backgroundColor: "#ff469e",
+                                            color: "white",
+                                            "&:hover": {
+                                              backgroundColor: "#fff4fc",
+                                              color: "#ff469e",
+                                            },
+                                          },
+                                        }}
+                                      >
+                                        {item.code}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </Box>
+                              </Grid>
+                            </Grid>
+                            <Grid container spacing={4}>
+                              <Grid item xs={12} md={6} lg={8}>
+                                <Typography
+                                  sx={{ fontWeight: "bold", fontSize: "20px" }}
+                                >
+                                  Your Order:
+                                </Typography>
+                                <Card
+                                  sx={{
+                                    pl: 2,
+                                    pr: 0,
+                                    border: "1px solid #ff469e",
+                                    borderRadius: "1rem",
+                                    my: 2.4,
+                                    minHeight: "120px",
+                                    maxHeight: "260px",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      overflowY: "auto",
+                                      maxHeight: "260px",
+                                      pr: 0.5,
+                                      // "&::-webkit-scrollbar": { // Remove scrollbar
+                                      //   display: "none",
+                                      // },
+                                      "&::-webkit-scrollbar": {
+                                        width: "0.65rem",
+                                      },
+                                      "&::-webkit-scrollbar-track": {
+                                        background: "#f5f7fd",
+                                      },
+                                      "&::-webkit-scrollbar-thumb": {
+                                        background: "#ff469e",
+                                        borderRadius: "0.8rem",
+                                      },
+                                      "&::-webkit-scrollbar-thumb:hover": {
+                                        background: "#ffbbd0",
+                                      },
+                                    }}
+                                  >
+                                    {selectedStoreProducts?.map(
+                                      (item, index) => (
+                                        <div
+                                          key={index}
+                                          style={{
+                                            display: "flex",
+                                            marginBottom: "10px",
+                                          }}
+                                        >
+                                          <CardMedia
+                                            sx={{
+                                              width: "70px",
+                                              height: "70px",
+                                              justifyContent: "center",
+                                              alignSelf: "center",
+                                              borderRadius: "10px",
+                                            }}
+                                            image={
+                                              item.product.image_url?.includes(
+                                                "Product_"
+                                              )
+                                                ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                            }
+                                            onError={(e) => {
+                                              e.target.src =
+                                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                            }}
+                                            title={item.product.name}
+                                          />
+                                          <CardContent
+                                            sx={{
+                                              flex: "1 0 auto",
+                                              ml: 2,
+                                              borderBottom: "1px dashed black",
+                                            }}
+                                          >
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                mt: 2,
+                                              }}
+                                            >
+                                              <Typography
+                                                sx={{
+                                                  fontWeight: "600",
+                                                  fontSize: "1.25rem",
+                                                  whiteSpace: "normal",
+                                                  overflow: "hidden",
+                                                  textOverflow: "ellipsis",
+                                                  display: "-webkit-box",
+                                                  WebkitLineClamp: 2,
+                                                  WebkitBoxOrient: "vertical",
+                                                  maxWidth: "100%",
+                                                  "&:hover": {
+                                                    cursor: "pointer",
+                                                    color: "#ff469e",
+                                                  },
+                                                }}
+                                                onClick={() =>
+                                                  navigate(
+                                                    `/products/${item.product.name
+                                                      .toLowerCase()
+                                                      .replace(/\s/g, "-")}`,
+                                                    {
+                                                      state: {
+                                                        productId:
+                                                          item.product.id,
+                                                      },
+                                                    },
+                                                    window.scrollTo({
+                                                      top: 0,
+                                                      behavior: "smooth",
+                                                    })
+                                                  )
+                                                }
+                                              >
+                                                {item.product.name.length > 28
+                                                  ? `${item.product.name.substring(
+                                                      0,
+                                                      28
+                                                    )}...`
+                                                  : item.product.name}
+                                              </Typography>
+                                              <Typography
+                                                sx={{
+                                                  fontWeight: "600",
+                                                  fontSize: "1.15rem",
+                                                }}
+                                              >
+                                                <Box
+                                                  sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                  }}
+                                                >
+                                                  {item.product.type ===
+                                                  typeWHOLESALE
+                                                    ? formatCurrency(
+                                                        item.product.price
+                                                      )
+                                                    : formatCurrencyPoint(
+                                                        Math.round(
+                                                          item.product.point
+                                                        )
+                                                      )}
+
+                                                  <span
+                                                    style={{
+                                                      fontSize: "1.05rem",
+                                                      opacity: 0.4,
+                                                      marginLeft: "4px",
+                                                    }}
+                                                  >
+                                                    x{item.quantity}
+                                                  </span>
+                                                </Box>
+                                              </Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                mt: 1,
+                                              }}
+                                            >
+                                              <Typography
+                                                sx={{ opacity: 0.7 }}
+                                              ></Typography>
+                                              <Typography sx={{ opacity: 0.8 }}>
+                                                <Box
+                                                  sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    fontWeight: "bold",
+                                                    fontSize: "1.25rem",
+                                                  }}
+                                                >
+                                                  <span
+                                                    style={{
+                                                      fontWeight: "bold",
+                                                      fontSize: "1.25rem",
+                                                      marginRight: "4px",
+                                                    }}
+                                                  >
+                                                    ={" "}
+                                                  </span>
+                                                  {item.product.type ===
+                                                  typeWHOLESALE
+                                                    ? formatCurrency(
+                                                        Math.round(
+                                                          item.product.price *
+                                                            item.quantity
+                                                        )
+                                                      )
+                                                    : formatCurrencyPoint(
+                                                        Math.round(
+                                                          item.product.point *
+                                                            item.quantity
+                                                        )
+                                                      )}
+                                                </Box>
+                                              </Typography>
+                                            </Box>
+                                          </CardContent>
+                                        </div>
+                                      )
+                                    )}
+                                  </Box>
+                                </Card>
+                              </Grid>
+
+                              <Grid
+                                item
+                                xs={12}
+                                md={6}
+                                lg={4}
+                                sx={{ textAlign: "right" }}
+                              >
+                                <Typography
+                                  sx={{
+                                    mb: "5px",
+                                    fontWeight: "medium",
+                                    textAlign: "left",
+                                    fontSize: "1.25rem",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      display: "block",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    Order Summary:
+                                  </span>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      margin: "12px 0",
+                                    }}
+                                  >
+                                    <span>Subtotal:</span>
+                                    <span>
+                                      {formatCurrency(getFinalAmount())}
+                                    </span>
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      opacity: 0.7,
+                                      margin: "6px 0",
+                                    }}
+                                  >
+                                    <span>
+                                      Discount:{" "}
+                                      <span style={{ fontSize: "1.05rem" }}>
+                                        {" "}
+                                      </span>
+                                    </span>
+                                    <span>
+                                      - {formatCurrency(selectedVoucher)}
+                                    </span>
+                                  </Box>
+                                  {typeGift ? (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        opacity: 0.7,
+                                        margin: "6px 0",
+                                      }}
+                                    >
+                                      <span>
+                                        Points used:{" "}
+                                        <span style={{ fontSize: "1.05rem" }}>
+                                          {" "}
+                                        </span>
+                                      </span>
+                                      {formatCurrencyPoint(getFinalPoint())}
+                                    </Box>
+                                  ) : null}
+
+                                  {typeGift ? (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        opacity: 0.7,
+                                        margin: "6px 0",
+                                      }}
+                                    >
+                                      <span>
+                                        Your point:{" "}
+                                        <span style={{ fontSize: "1.05rem" }}>
+                                          {" "}
+                                        </span>
+                                      </span>
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        {userInfo.accumulated_points}
+                                        <MonetizationOnIcon
+                                          variant="h6"
+                                          sx={{
+                                            marginLeft: "4px",
+                                            color: "gray",
+                                            fontSize: 24,
+                                          }}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  ) : null}
+
+                                  {typeGift ? (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        opacity: 0.7,
+                                        margin: "6px 0",
+                                      }}
+                                    >
+                                      <span>
+                                        Points remaining:{" "}
+                                        <span style={{ fontSize: "1.05rem" }}>
+                                          {" "}
+                                        </span>
+                                      </span>
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        {formatCurrencyPoint(
+                                          userInfo.accumulated_points >
+                                            getFinalPoint()
+                                            ? userInfo.accumulated_points -
+                                                getFinalPoint()
+                                            : 0
+                                        )}
+                                      </Box>
+                                    </Box>
+                                  ) : null}
+
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "flex-end",
+                                    }}
+                                  >
+                                    <Divider
+                                      sx={{
+                                        borderStyle: "dashed",
+                                        borderColor: "rgba(0, 0, 0, 0.7)",
+                                        borderWidth: "1px",
+                                        my: 1.5,
+                                        width: "100%",
+                                      }}
+                                    />
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      marginBottom: "4px",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "1.45rem",
+                                      }}
+                                    >
+                                      Total:
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontWeight: "bold",
+                                        fontSize: "1.5rem",
+                                        color: "#ff469e",
+                                      }}
+                                    >
+                                      <span>
+                                        {formatCurrency(getDiscountedTotal())}
+                                      </span>
+                                    </span>
+                                  </Box>
+                                </Typography>
+
+                                <FormControl fullWidth>
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      fontWeight: "bold",
+                                      fontSize: "1.25rem",
+                                      mt: 2,
+                                      textAlign: "left",
+                                    }}
+                                  >
+                                    Select Payment Method:
+                                  </Typography>
+                                  <Select
+                                    fullWidth
+                                    displayEmpty
+                                    defaultValue=""
+                                    value={paymentMethod}
+                                    onChange={(e) =>
+                                      setPaymentMethod(e.target.value)
+                                    }
+                                    sx={{
+                                      backgroundColor: "#fff4fc",
+                                      color: "#ff469e",
+                                      borderRadius: "20px",
+                                      mt: 2.4,
+                                      mb: 1,
+                                      fontSize: "16px",
+                                      textAlign: "left",
+                                      border: "1px solid #ff469e",
+                                      boxShadow:
+                                        "0 3px 6px rgba(0, 0, 0, 0.16)",
+                                      transition:
+                                        "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
+                                      "&:hover": {
+                                        color: "white",
+                                        backgroundColor: "#ff469e",
+                                        border: "1px solid white",
+                                      },
+                                      "& .MuiOutlinedInput-notchedOutline": {
+                                        border: "none",
+                                      },
+                                      "& .MuiSvgIcon-root": {
+                                        color: "inherit",
+                                      },
+                                    }}
+                                    MenuProps={{
+                                      sx: {
+                                        "& .MuiMenu-list": {
+                                          backgroundColor: "white",
+                                          borderRadius: "10px",
+                                          boxShadow:
+                                            "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                        },
+                                      },
+                                    }}
+                                  >
+                                    <MenuItem
+                                      key={null}
+                                      value={""}
+                                      sx={{
+                                        color: "black",
+                                        fontSize: "18px",
+                                        transition:
+                                          "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                        "&:hover": {
+                                          backgroundColor: "#fff4fc",
+                                          color: "#ff469e",
+                                        },
+                                        "&.Mui-selected": {
+                                          backgroundColor: "#ff469e",
+                                          color: "white",
+                                          "&:hover": {
+                                            backgroundColor: "#fff4fc",
+                                            color: "#ff469e",
+                                          },
+                                        },
+                                      }}
+                                    >
+                                      -
+                                    </MenuItem>
+                                    <MenuItem
+                                      value={"COD"}
+                                      sx={{
+                                        color: "black",
+                                        fontSize: "18px",
+                                        transition:
+                                          "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                        "&:hover": {
+                                          backgroundColor: "#fff4fc",
+                                          color: "#ff469e",
+                                        },
+                                        "&.Mui-selected": {
+                                          backgroundColor: "#ff469e",
+                                          color: "white",
+                                          "&:hover": {
+                                            backgroundColor: "#fff4fc",
+                                            color: "#ff469e",
+                                          },
+                                        },
+                                      }}
+                                    >
+                                      COD
+                                    </MenuItem>
+                                    {typeWholeSale ? (
+                                      <MenuItem
+                                        value={"VNPAY"}
+                                        sx={{
+                                          color: "black",
+                                          fontSize: "18px",
+                                          transition:
+                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                          "&:hover": {
+                                            backgroundColor: "#fff4fc",
+                                            color: "#ff469e",
+                                          },
+                                          "&.Mui-selected": {
+                                            backgroundColor: "#ff469e",
+                                            color: "white",
+                                            "&:hover": {
+                                              backgroundColor: "#fff4fc",
+                                              color: "#ff469e",
+                                            },
+                                          },
+                                        }}
+                                      >
+                                        VNPAY
+                                      </MenuItem>
+                                    ) : null}
+                                  </Select>
+                                </FormControl>
+
+                                <Button
+                                  variant="contained"
+                                  fullWidth
+                                  onClick={handleCheckout}
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "10px",
+                                    fontSize: 16,
+                                    fontWeight: "bold",
+                                    mt: 3,
+                                    transition:
+                                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                      border: "1px solid white",
+                                    },
+                                  }}
+                                >
+                                  Payment Check
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </Modal>
+                      </Box>
                       {groupedCartItems[storeId].map((item) => (
                         <Card
                           sx={{
@@ -900,7 +1863,7 @@ export default function Cart() {
                           </CardContent>
                         </Card>
                       ))}
-                      <Divider />
+                      <Divider sx={{ my: 2 }} />
                     </div>
                   ))
                 ) : (
@@ -918,937 +1881,6 @@ export default function Cart() {
                 )}
               </Grid>
               <Grid item xs={12} md={4} sx={{ mt: 8 }}>
-                {/* <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    px: 2,
-                    mt: 3,
-                  }}
-                >
-                  <Typography variant="h6">Subtotal:</Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: "black",
-                      fontSize: "1.25rem",
-                    }}
-                  >
-                    {formatCurrency(totalCost)}
-                  </Typography>
-                </Box>
-                {selectedVoucher != 0 && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      px: 2,
-                    }}
-                  >
-                    <Typography variant="h6">Discount:</Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        color: "black",
-                        fontSize: "1.25rem",
-                      }}
-                    >
-                      - {formatCurrency(selectedVoucher)}
-                    </Typography>
-                  </Box>
-                )}
-                <Divider
-                  sx={{
-                    borderStyle: "dashed",
-                    borderColor: "rgba(0, 0, 0, 0.7)",
-                    borderWidth: "1px",
-                    my: 1.5,
-                    width: "100%",
-                  }}
-                />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    px: 2,
-                    my: 2,
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-                  >
-                    Final Total:
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: "black",
-                      fontSize: "1.5rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                   {formatCurrency(getDiscountedTotal())}
-                    {formatCurrency(getFinalAmount())}
-                  </Typography>
-                </Box>
-                <Divider /> */}
-                <Button
-                  variant="contained"
-                  onClick={handleOpen}
-                  fullWidth
-                  sx={{
-                    backgroundColor: "white",
-                    color: "#ff469e",
-                    borderRadius: "10px",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    my: 1,
-                    transition:
-                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                    border: "1px solid #ff469e",
-                    "&:hover": {
-                      backgroundColor: "#ff469e",
-                      color: "white",
-                      border: "1px solid white",
-                    },
-                  }}
-                >
-                  Checkout
-                </Button>
-                <Modal open={open} onClose={handleClose}>
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                      width: "90%",
-                      borderRadius: "10px",
-                      maxWidth: 1000,
-                      maxHeight: "90vh",
-                      overflowY: "auto",
-                      backgroundColor: "#fff4fc",
-                      border: "2px solid #ff469e",
-                      boxShadow: 20,
-                      p: 4,
-                      "&::-webkit-scrollbar": {
-                        width: "0.6rem",
-                      },
-                      "&::-webkit-scrollbar-track": {
-                        background: "#f5f7fd",
-                        borderRadius: "0.6rem",
-                        my: 0.25,
-                      },
-                      "&::-webkit-scrollbar-thumb": {
-                        background: "#ff469e",
-                        borderRadius: "0.6rem",
-                      },
-                      "&::-webkit-scrollbar-thumb:hover": {
-                        background: "#ffbbd0",
-                      },
-                    }}
-                  >
-                    <div style={{ textAlign: "right" }}>
-                      <IconButton onClick={handleClose}>
-                        <Close
-                          fontSize="large"
-                          sx={{
-                            color: "#ff469e",
-                            borderRadius: "30px",
-                            boxShadow: "none",
-                            transition: "0.3s ease-in-out",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              transform: "scale(1.1)",
-                            },
-                          }}
-                        />
-                      </IconButton>
-                    </div>
-                    <Grid container spacing={2} sx={{ mb: 3 }}>
-                      <Grid item xs={12} md={6} lg={8}>
-                        <Box>
-                          <Typography
-                            sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
-                          >
-                            Your Information:
-                          </Typography>
-
-                          <div style={{ margin: "0.25rem 0.25rem" }}>
-                            <span
-                              style={{
-                                fontSize: "1.05rem",
-                                fontWeight: "600",
-                              }}
-                            >
-                              Full Name:
-                            </span>
-                            <TextField
-                              fullWidth
-                              onChange={handleFullNameChange}
-                              value={fullName}
-                              placeholder="Enter your full name"
-                              size="small"
-                              variant="outlined"
-                              InputProps={{
-                                sx: {
-                                  padding: 0,
-                                  border: "1px solid #ff469e",
-                                  borderRadius: "7px",
-                                  backgroundColor: "white",
-                                  transition: "0.2s ease-in-out",
-                                  "&:hover": {
-                                    border: "1px solid #ff469e",
-                                  },
-                                  "&:focus": {
-                                    backgroundColor: "#F8F8F8",
-                                  },
-                                  "&.Mui-focused": {
-                                    border: "1px solid #ff469e",
-                                    backgroundColor: "#F8F8F8",
-                                    boxShadow:
-                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                    outline: "none",
-                                  },
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    border: "none",
-                                  },
-                                },
-                              }}
-                            />
-                          </div>
-
-                          <div style={{ margin: "0.25rem 0.25rem" }}>
-                            <span
-                              style={{
-                                fontSize: "1.05rem",
-                                fontWeight: "600",
-                              }}
-                            >
-                              Phone:
-                            </span>
-                            <TextField
-                              fullWidth
-                              onChange={handlePhoneChange}
-                              value={phone}
-                              placeholder="Enter your phone"
-                              size="small"
-                              variant="outlined"
-                              InputProps={{
-                                sx: {
-                                  padding: 0,
-                                  border: "1px solid #ff469e",
-                                  borderRadius: "7px",
-                                  backgroundColor: "white",
-                                  transition: "0.2s ease-in-out",
-                                  "&:hover": {
-                                    border: "1px solid #ff469e",
-                                  },
-                                  "&:focus": {
-                                    backgroundColor: "#F8F8F8",
-                                  },
-                                  "&.Mui-focused": {
-                                    border: "1px solid #ff469e",
-                                    backgroundColor: "#F8F8F8",
-                                    boxShadow:
-                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                    outline: "none",
-                                  },
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    border: "none",
-                                  },
-                                },
-                              }}
-                            />
-                          </div>
-
-                          <div style={{ margin: "0.25rem 0.25rem" }}>
-                            <span
-                              style={{
-                                fontSize: "1.05rem",
-                                fontWeight: "600",
-                              }}
-                            >
-                              Address:
-                            </span>
-                            <TextField
-                              fullWidth
-                              onChange={handleAdressChange}
-                              value={address}
-                              placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
-                              size="small"
-                              variant="outlined"
-                              InputProps={{
-                                sx: {
-                                  padding: 0,
-                                  border: "1px solid #ff469e",
-                                  borderRadius: "7px",
-                                  backgroundColor: "white",
-                                  transition: "0.2s ease-in-out",
-                                  "&:hover": {
-                                    border: "1px solid #ff469e",
-                                  },
-                                  "&:focus": {
-                                    backgroundColor: "#F8F8F8",
-                                  },
-                                  "&.Mui-focused": {
-                                    border: "1px solid #ff469e",
-                                    backgroundColor: "#F8F8F8",
-                                    boxShadow:
-                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                    outline: "none",
-                                  },
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    border: "none",
-                                  },
-                                },
-                              }}
-                            />
-                          </div>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} md={6} lg={4}>
-                        <Typography
-                          sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
-                        >
-                          Choose a voucher:
-                        </Typography>
-                        <Box
-                          sx={{
-                            py: 2,
-                            px: 2,
-                            mt: 3,
-                            backgroundColor: "white",
-                            borderRadius: "20px",
-                            border: "1px solid #ff469e",
-                            boxShadow: "0px 1px 3px rgba(0, 0, 0.16)",
-                          }}
-                        >
-                          <Typography variant="h6" sx={{ mb: 2 }}></Typography>
-                          <Select
-                            fullWidth
-                            displayEmpty
-                            defaultValue=""
-                            value={selectedVoucher}
-                            onChange={handleVoucherChange}
-                            sx={{
-                              backgroundColor: "#fff4fc",
-                              color: "#ff469e",
-                              borderRadius: "20px",
-                              fontSize: "20px",
-                              border: "1px solid #ff469e",
-                              boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16)",
-                              transition:
-                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                              "&:hover": {
-                                color: "white",
-                                backgroundColor: "#ff469e",
-                                border: "1px solid white",
-                              },
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                border: "none",
-                              },
-                              "& .MuiSvgIcon-root": {
-                                color: "inherit",
-                              },
-                            }}
-                            MenuProps={{
-                              sx: {
-                                "& .MuiMenu-list": {
-                                  backgroundColor: "white",
-                                  borderRadius: "10px",
-                                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.16)",
-                                },
-                              },
-                            }}
-                          >
-                            <MenuItem
-                              key={null}
-                              value={""}
-                              sx={{
-                                color: "black",
-                                fontSize: "18px",
-                                transition:
-                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                },
-                              }}
-                            >
-                              -
-                            </MenuItem>
-                            {voucher.map((item) => (
-                              <MenuItem
-                                key={item.id}
-                                value={item.discount_value}
-                                sx={{
-                                  color: "black",
-                                  fontSize: "18px",
-                                  transition:
-                                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                  "&.Mui-selected": {
-                                    backgroundColor: "#ff469e",
-                                    color: "white",
-                                    "&:hover": {
-                                      backgroundColor: "#fff4fc",
-                                      color: "#ff469e",
-                                    },
-                                  },
-                                }}
-                              >
-                                {item.code}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={4}>
-                      <Grid item xs={12} md={6} lg={8}>
-                        <Typography
-                          sx={{ fontWeight: "bold", fontSize: "20px" }}
-                        >
-                          Your Order:
-                        </Typography>
-                        <Card
-                          sx={{
-                            pl: 2,
-                            pr: 0,
-                            border: "1px solid #ff469e",
-                            borderRadius: "1rem",
-                            my: 2.4,
-                            minHeight: "120px",
-                            maxHeight: "260px",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              overflowY: "auto",
-                              maxHeight: "260px",
-                              pr: 0.5,
-                              // "&::-webkit-scrollbar": { // Remove scrollbar
-                              //   display: "none",
-                              // },
-                              "&::-webkit-scrollbar": {
-                                width: "0.65rem",
-                              },
-                              "&::-webkit-scrollbar-track": {
-                                background: "#f5f7fd",
-                              },
-                              "&::-webkit-scrollbar-thumb": {
-                                background: "#ff469e",
-                                borderRadius: "0.8rem",
-                              },
-                              "&::-webkit-scrollbar-thumb:hover": {
-                                background: "#ffbbd0",
-                              },
-                            }}
-                          >
-                            {selectedStoreProducts?.map((item, index) => (
-                              <div
-                                key={index}
-                                style={{
-                                  display: "flex",
-                                  marginBottom: "10px",
-                                }}
-                              >
-                                <CardMedia
-                                  component="img"
-                                  sx={{
-                                    width: "70px",
-                                    height: "70px",
-                                    justifyContent: "center",
-                                    alignSelf: "center",
-                                    borderRadius: "10px",
-                                  }}
-                                  image={
-                                    item.product.image_url?.includes("Product_")
-                                      ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
-                                      : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                  }
-                                  onError={(e) => {
-                                    e.target.src =
-                                      "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                                  }}
-                                  title={item.product.name}
-                                />
-                                <CardContent
-                                  sx={{
-                                    flex: "1 0 auto",
-                                    ml: 2,
-                                    borderBottom: "1px dashed black",
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      flexDirection: "row",
-                                      justifyContent: "space-between",
-                                      mt: 2,
-                                    }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        fontWeight: "600",
-                                        fontSize: "1.25rem",
-                                        whiteSpace: "normal",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: "vertical",
-                                        maxWidth: "100%",
-                                        "&:hover": {
-                                          cursor: "pointer",
-                                          color: "#ff469e",
-                                        },
-                                      }}
-                                      onClick={() =>
-                                        navigate(
-                                          `/products/${item.product.name
-                                            .toLowerCase()
-                                            .replace(/\s/g, "-")}`,
-                                          {
-                                            state: {
-                                              productId: item.product_id,
-                                            },
-                                          },
-                                          window.scrollTo({
-                                            top: 0,
-                                            behavior: "smooth",
-                                          })
-                                        )
-                                      }
-                                    >
-                                      {item.product.name.length > 28
-                                        ? `${item.product.name.substring(
-                                            0,
-                                            28
-                                          )}...`
-                                        : item.product.name}
-                                    </Typography>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: "600",
-                                        fontSize: "1.15rem",
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                      >
-                                        {item.product.type === typeWHOLESALE
-                                          ? formatCurrency(item.product.price)
-                                          : formatCurrencyPoint(
-                                              Math.round(item.product.point)
-                                            )}
-
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            opacity: 0.4,
-                                            marginLeft: "4px",
-                                          }}
-                                        >
-                                          x{item.quantity}
-                                        </span>
-                                      </Box>
-                                    </Typography>
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      flexDirection: "row",
-                                      justifyContent: "space-between",
-                                      mt: 1,
-                                    }}
-                                  >
-                                    <Typography
-                                      sx={{ opacity: 0.7 }}
-                                    ></Typography>
-                                    <Typography sx={{ opacity: 0.8 }}>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                          fontWeight: "bold",
-                                          fontSize: "1.25rem",
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.25rem",
-                                            marginRight: "4px",
-                                          }}
-                                        >
-                                          ={" "}
-                                        </span>
-                                        {item.product.type === typeWHOLESALE
-                                          ? formatCurrency(
-                                              Math.round(
-                                                item.product.price *
-                                                  item.quantity
-                                              )
-                                            )
-                                          : formatCurrencyPoint(
-                                              Math.round(
-                                                item.product.point *
-                                                  item.quantity
-                                              )
-                                            )}
-                                      </Box>
-                                    </Typography>
-                                  </Box>
-                                </CardContent>
-                              </div>
-                            ))}
-                          </Box>
-                        </Card>
-                      </Grid>
-
-                      <Grid
-                        item
-                        xs={12}
-                        md={6}
-                        lg={4}
-                        sx={{ textAlign: "right" }}
-                      >
-                        <Typography
-                          sx={{
-                            mb: "5px",
-                            fontWeight: "medium",
-                            textAlign: "left",
-                            fontSize: "1.25rem",
-                          }}
-                        >
-                          <span
-                            style={{ display: "block", fontWeight: "bold" }}
-                          >
-                            Order Summary:
-                          </span>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              margin: "12px 0",
-                            }}
-                          >
-                            <span>Subtotal:</span>
-                            <span>{formatCurrency(getFinalAmount())}</span>
-                          </Box>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              opacity: 0.7,
-                              margin: "6px 0",
-                            }}
-                          >
-                            <span>
-                              Discount:{" "}
-                              <span style={{ fontSize: "1.05rem" }}> </span>
-                            </span>
-                            <span>- {formatCurrency(selectedVoucher)}</span>
-                          </Box>
-                          {typeGift ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                opacity: 0.7,
-                                margin: "6px 0",
-                              }}
-                            >
-                              <span>
-                                Points used:{" "}
-                                <span style={{ fontSize: "1.05rem" }}> </span>
-                              </span>
-                              {formatCurrencyPoint(getFinalPoint())}
-                            </Box>
-                          ) : null}
-
-                          {typeGift ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                opacity: 0.7,
-                                margin: "6px 0",
-                              }}
-                            >
-                              <span>
-                                Your point:{" "}
-                                <span style={{ fontSize: "1.05rem" }}> </span>
-                              </span>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                {userInfo.accumulated_points}
-                                <MonetizationOnIcon
-                                  variant="h6"
-                                  sx={{
-                                    marginLeft: "4px",
-                                    color: "gray",
-                                    fontSize: 24,
-                                  }}
-                                />
-                              </Box>
-                            </Box>
-                          ) : null}
-
-                          {typeGift ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                opacity: 0.7,
-                                margin: "6px 0",
-                              }}
-                            >
-                              <span>
-                                Points remaining:{" "}
-                                <span style={{ fontSize: "1.05rem" }}> </span>
-                              </span>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                {userInfo.accumulated_points > getFinalPoint()
-                                  ? userInfo.accumulated_points -
-                                    getFinalPoint()
-                                  : 0}
-                                <MonetizationOnIcon
-                                  variant="h6"
-                                  sx={{
-                                    marginLeft: "4px",
-                                    color: "gray",
-                                    fontSize: 24,
-                                  }}
-                                />
-                              </Box>
-                            </Box>
-                          ) : null}
-
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "flex-end",
-                            }}
-                          >
-                            <Divider
-                              sx={{
-                                borderStyle: "dashed",
-                                borderColor: "rgba(0, 0, 0, 0.7)",
-                                borderWidth: "1px",
-                                my: 1.5,
-                                width: "100%",
-                              }}
-                            />
-                          </Box>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontWeight: "bold",
-                                fontSize: "1.45rem",
-                              }}
-                            >
-                              Total:
-                            </span>
-                            <span
-                              style={{
-                                fontWeight: "bold",
-                                fontSize: "1.5rem",
-                                color: "#ff469e",
-                              }}
-                            >
-                              <span>
-                                {formatCurrency(getDiscountedTotal())}
-                              </span>
-                            </span>
-                          </Box>
-                        </Typography>
-
-                        <FormControl fullWidth>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontWeight: "bold",
-                              fontSize: "1.25rem",
-                              mt: 2,
-                              textAlign: "left",
-                            }}
-                          >
-                            Select Payment Method:
-                          </Typography>
-                          <Select
-                            fullWidth
-                            displayEmpty
-                            defaultValue=""
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            sx={{
-                              backgroundColor: "#fff4fc",
-                              color: "#ff469e",
-                              borderRadius: "20px",
-                              mt: 2.4,
-                              mb: 1,
-                              fontSize: "16px",
-                              textAlign: "left",
-                              border: "1px solid #ff469e",
-                              boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16)",
-                              transition:
-                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                              "&:hover": {
-                                color: "white",
-                                backgroundColor: "#ff469e",
-                                border: "1px solid white",
-                              },
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                border: "none",
-                              },
-                              "& .MuiSvgIcon-root": {
-                                color: "inherit",
-                              },
-                            }}
-                            MenuProps={{
-                              sx: {
-                                "& .MuiMenu-list": {
-                                  backgroundColor: "white",
-                                  borderRadius: "10px",
-                                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.16)",
-                                },
-                              },
-                            }}
-                          >
-                            <MenuItem
-                              key={null}
-                              value={""}
-                              sx={{
-                                color: "black",
-                                fontSize: "18px",
-                                transition:
-                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                },
-                              }}
-                            >
-                              -
-                            </MenuItem>
-                            <MenuItem
-                              value={"COD"}
-                              sx={{
-                                color: "black",
-                                fontSize: "18px",
-                                transition:
-                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                },
-                              }}
-                            >
-                              COD
-                            </MenuItem>
-                            {typeWholeSale ? (
-                              <MenuItem
-                                value={"VNPAY"}
-                                sx={{
-                                  color: "black",
-                                  fontSize: "18px",
-                                  transition:
-                                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                  "&:hover": {
-                                    backgroundColor: "#fff4fc",
-                                    color: "#ff469e",
-                                  },
-                                  "&.Mui-selected": {
-                                    backgroundColor: "#ff469e",
-                                    color: "white",
-                                    "&:hover": {
-                                      backgroundColor: "#fff4fc",
-                                      color: "#ff469e",
-                                    },
-                                  },
-                                }}
-                              >
-                                VNPAY
-                              </MenuItem>
-                            ) : null}
-                          </Select>
-                        </FormControl>
-
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          onClick={handleCheckout}
-                          sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "10px",
-                            fontSize: 16,
-                            fontWeight: "bold",
-                            mt: 3,
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
-                          }}
-                        >
-                          Payment Check
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Modal>
                 <Button
                   onClick={() => (navigate("/products"), window.scrollTo(0, 0))}
                   variant="contained"
