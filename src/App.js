@@ -21,6 +21,7 @@ import Stores from "./components/general/Stores";
 import StoreDetail from "./components/general/StoreDetail";
 import ProductDetails from "./components/general/ProductDetails";
 import Article from "./components/general/Article";
+import ArticleDetails from "./components/general/ArticleDetails";
 import StaffLayout from "./components/staff/StaffLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import RegisStores from "./components/general/RegisStores";
@@ -52,6 +53,7 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/productgift" element={<ProductGift />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="/article/:articleId" element={<ArticleDetails />} />
         <Route
           path="/productgiftdetail/:productId"
           element={<ProductGiftDetails />}

@@ -300,7 +300,7 @@ export default function Products() {
                         borderRadius: "15px",
                         padding: "10px",
                         marginTop: "20px",
-                      }}  
+                      }}
                     >
 
                       <Divider
@@ -677,59 +677,90 @@ export default function Products() {
                 <Box
                   key={index}
                   onClick={() => {
-                    navigate("/article");
+                    navigate(
+                      `/article/${item.header.toLowerCase().replace(/\s/g, '-')}`,
+                      { state: { articleId: item.id } }
+                    );
                     window.scrollTo({
                       top: 0,
-                      behavior: "smooth",
+                      behavior: 'smooth',
                     });
                   }}
                   sx={{
+                    position: 'relative',
                     minWidth: 180,
-                    padding: 2,
-                    textAlign: "center",
-                    border: "1px solid white",
-                    borderRadius: "16px",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    maxWidth: 600,
+                    textAlign: 'center',
+                    border: '3px solid white',
+                    borderRadius: '16px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                     marginRight: 2,
-                    backgroundColor: "white",
-                    transition: "border 0.2s",
-                    "&:hover": {
-                      border: "1px solid #ff496e",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    backgroundColor: 'white',
+                    transition: 'border 0.2s',
+                    '&:hover': {
+                      border: '3px solid #ff496e',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
                     },
                   }}
                 >
                   <img
+                    style={{
+                      width: '100%',
+                      maxWidth: '600px',
+                      height: 'auto',
+                      borderRadius: '10px',
+                    }}
                     src={
-                      item.image_url
-                        ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
-                        : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      item.link_image.includes('Article_')
+                        ? `http://localhost:8080/mamababy/article/images/${item.link_image}`
+                        : 'https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid'
                     }
-                    style={{ width: "64px", height: "64px" }}
+                    onError={(e) => {
+                      e.target.src = 'https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid';
+                    }}
+                    alt={item.header}
                   />
                   <Typography
                     variant="subtitle1"
                     sx={{
-                      fontWeight: "bold",
-                      marginTop: "0.75rem",
-                      textAlign: "left",
-                      whiteSpace: "normal",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      width: '100%',
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      backgroundImage: 'linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent)',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      borderBottomLeftRadius: '10px',
+                      borderBottomRightRadius: '10px',
+                      textAlign: 'left',
+                      whiteSpace: 'normal',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
                       WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      maxWidth: "100%",
-                      lineHeight: "1.2rem",
-                      maxHeight: "2.4rem",
+                      WebkitBoxOrient: 'vertical',
+                      lineHeight: '1.2rem',
+                      height: '2.4rem',
+                      maxHeight: '2.4rem',
+                      paddingTop: "20px",
+                      paddingBottom: "15px",
                     }}
                   >
-                    {item.header.length > 40
-                      ? `${item.header.substring(0, 40)}...`
-                      : item.header}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "gray" }}>
-                    {item.content}
+                    <span>
+                      {`\u00A0\u00A0\u00A0\u00A0${item.header.length > 55
+                        ? `${item.header.substring(0, 55)}...`
+                        : item.header}`}
+                    </span><br/>
+                    <span style={{
+                      wordWrap: "break-word",
+                      textAlign: "left",
+                      color: "white",
+                      marginBottom: "10px",
+                      marginLeft: "15px"
+                    }}>
+                      Created at: {new Date(item.created_at).toLocaleDateString()}
+                    </span>
                   </Typography>
                 </Box>
               ))}

@@ -83,7 +83,7 @@ export default function OrdersManagement() {
             const [refundRes, productRes, brandRes, categoryRes, orderRes] =
                 await Promise.all([
                     refundByStoreIdApi(storeId),
-                    allProductApi(),
+                    allProductApi({ limit: 1000 }),
                     allBrandApi(),
                     allCategorytApi(),
                     allOrderApi(),
@@ -108,7 +108,7 @@ export default function OrdersManagement() {
             }, {}));
 
             setOrderMap(orderRes?.data?.data.reduce((acc, item) => {
-                acc[item.id] = [item.full_name, item.shippingAddress, item.phone_number];
+                acc[item.id] = [item.full_name, item.shipping_address, item.phone_number];
                 return acc;
             }, {}));
 
@@ -174,13 +174,11 @@ export default function OrdersManagement() {
     const refundCopy = [...refund];
 
     // Sắp xếp các mục refund theo createDate từ cũ nhất đến mới nhất
-    const sortedRefunds = refundCopy.sort((a, b) => new Date(a.createDate) - new Date(b.createDate));
+    const sortedRefunds = refundCopy.sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
 
-    // Đảo ngược mảng để có thứ tự từ mới nhất đến cũ nhất
-    const reversedRefunds = sortedRefunds.reverse();
 
     // Lọc các mục theo tabValue
-    const filteredRefunds = reversedRefunds.filter(item => {
+    const filteredRefunds = sortedRefunds.filter(item => {
         if (tabValue === 0) {
             return item.status === 'PROCESSING';
         } else if (tabValue === 1) {
@@ -326,7 +324,7 @@ export default function OrdersManagement() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
                                         <Typography sx={{ mb: "5px", fontWeight: "medium", fontSize: "1.25rem" }}>
-                                            Refund Date: <span style={{ fontWeight: "600" }}>{item.createDate}</span>
+                                            Refund Date: <span style={{ fontWeight: "600" }}>{item.create_date}</span>
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12} md={6}>
@@ -349,14 +347,14 @@ export default function OrdersManagement() {
                                                     alignItems: "center",
                                                     width: "100%",
                                                     border: "none",
-                                                    boxShadow: "none"
+                                                    boxShadow: "none",
                                                 }}
                                             >
                                                 <Typography sx={{
                                                     width: "100%",
                                                     textAlign: "center",
                                                     color: "#ff469e",
-                                                    fontSize: "1.25rem"
+                                                    fontSize: "1.25rem",
                                                 }}>
                                                     View detail {item.refund_detail_list.length === 0
                                                         ? ""
