@@ -1,10 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
 const initialState = {
   data: {
     products: [],
   },
 };
+
+const persistConfig = {
+  key: "cart",
+  version: 1,
+  storage
+}
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -76,4 +84,7 @@ export const selectTotalCost = (state) =>
       0
     )
   );
-export default cartSlice.reducer;
+
+  const persistedReducer = persistReducer(persistConfig, cartSlice.reducer);
+
+export default persistedReducer;

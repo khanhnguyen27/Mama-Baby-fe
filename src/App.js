@@ -100,8 +100,8 @@ function App() {
           </Route>
         </Route>
       </Routes>
-      <ToastContainer />
       <Footer />
+      <ToastContainer />
     </div>
   );
 }

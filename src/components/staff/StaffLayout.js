@@ -229,7 +229,6 @@ export default function StaffLayout() {
       >
         <Outlet />
       </Box>
-      <ToastContainer />
     </Box>
   );
 }

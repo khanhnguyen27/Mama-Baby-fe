@@ -223,7 +223,6 @@ export default function AdminLayout() {
       >
         <Outlet />
       </Box>
-      <ToastContainer />
     </Box>
   );
 }

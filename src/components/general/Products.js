@@ -23,6 +23,8 @@ import {
   IconButton,
   Pagination,
   Radio,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -46,6 +48,7 @@ export default function Products() {
   const [categoryMap, setCategoryMap] = useState({});
   const [product, setProduct] = useState([]);
   const [comment, setComment] = useState([]);
+  const [sortPrice, setSortPrice] = useState("");
   const [ageFilter, setAgeFilter] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -73,6 +76,7 @@ export default function Products() {
           allCategorytApi(),
           allProductApi({
             keyword: keyword,
+            sort_price: sortPrice,
             type: typeWHOLESALE,
             age_id: ageFilter,
             brand_id: brandFilter,
@@ -123,10 +127,14 @@ export default function Products() {
       setLoading(false);
     }, 1000);
     fetchData();
-  }, [keyword, ageFilter, brandFilter, categoryFilter, currentPage]);
+  }, [keyword, sortPrice, ageFilter, brandFilter, categoryFilter, currentPage]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  };
+
+  const handleSortChange = (e, sortPrice) => {
+    setSortPrice(sortPrice);
   };
 
   const handleAgeChange = (id) => {
@@ -186,33 +194,131 @@ export default function Products() {
         }}
       >
         <Container sx={{ my: 4 }}>
-          <Breadcrumbs separator=">" sx={{ color: "black" }}>
-            <Link
-              to="/"
-              style={{
-                textDecoration: "none",
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}
+          >
+            <Breadcrumbs separator=">" sx={{ color: "black" }}>
+              <Link
+                to="/"
+                style={{
+                  textDecoration: "none",
+                }}
+              >
+                <Typography
+                  sx={{
+                    color: "black",
+                    transition: "color 0.2s ease-in-out",
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Home
+                </Typography>
+              </Link>
+              <Typography
+                sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+              >
+                Products
+              </Typography>
+            </Breadcrumbs>
+            <ToggleButtonGroup
+              value={sortPrice}
+              exclusive
+              onChange={handleSortChange}
+              variant="outlined"
+              sx={{
+                mt: 0.5,
+                height: "40px",
+                "& .MuiToggleButton-root": {
+                  color: "black",
+                  border: "1px solid #ff469e",
+                  fontSize: "1rem",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                  },
+                  "&.Mui-selected": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    fontWeight: "600",
+                    "&:hover": {
+                      backgroundColor: "#fff4fc",
+                      color: "#ff469e",
+                    },
+                  },
+                },
               }}
             >
-              <Typography
+              <ToggleButton
+                value=""
                 sx={{
-                  color: "black",
-                  transition: "color 0.2s ease-in-out",
-                  fontSize: 20,
-                  fontWeight: "bold",
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderRadius: "20px",
+                  fontSize: "1rem",
+                  boxShadow: "none",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
                   "&:hover": {
-                    textDecoration: "underline",
+                    backgroundColor: "#ff469e",
+                    color: "white",
                   },
                 }}
               >
-                Home
-              </Typography>
-            </Link>
-            <Typography
-              sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
-            >
-              Products
-            </Typography>
-          </Breadcrumbs>
+                All
+              </ToggleButton>
+              <ToggleButton
+                value="ASC"
+                sx={{
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderLeft: "1px solid #ff469e",
+                  borderRight: "1px solid #ff469e",
+                  fontSize: "1rem",
+                  boxShadow: "none",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                  },
+                }}
+              >
+                Low - High
+              </ToggleButton>
+              <ToggleButton
+                value="DESC"
+                sx={{
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderRadius: "20px",
+                  fontSize: "1rem",
+                  boxShadow: "none",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                  },
+                }}
+              >
+                High - Low
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         </Container>
         <Container>
           <Grid container spacing={3}>
@@ -442,33 +548,131 @@ export default function Products() {
       }}
     >
       <Container sx={{ my: 4 }}>
-        <Breadcrumbs separator=">" sx={{ color: "black" }}>
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
+          <Breadcrumbs separator=">" sx={{ color: "black" }}>
+            <Link
+              to="/"
+              style={{
+                textDecoration: "none",
+              }}
+            >
+              <Typography
+                sx={{
+                  color: "black",
+                  transition: "color 0.2s ease-in-out",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Home
+              </Typography>
+            </Link>
+            <Typography
+              sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+            >
+              Products
+            </Typography>
+          </Breadcrumbs>
+          <ToggleButtonGroup
+            value={sortPrice}
+            exclusive
+            onChange={handleSortChange}
+            variant="outlined"
+            sx={{
+              mt: 0.5,
+              height: "40px",
+              "& .MuiToggleButton-root": {
+                color: "black",
+                border: "1px solid #ff469e",
+                fontSize: "1rem",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  fontWeight: "600",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                  },
+                },
+              },
             }}
           >
-            <Typography
+            <ToggleButton
+              value=""
               sx={{
-                color: "black",
-                transition: "color 0.2s ease-in-out",
-                fontSize: 20,
-                fontWeight: "bold",
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: "1rem",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
                 "&:hover": {
-                  textDecoration: "underline",
+                  backgroundColor: "#ff469e",
+                  color: "white",
                 },
               }}
             >
-              Home
-            </Typography>
-          </Link>
-          <Typography
-            sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
-          >
-            Products
-          </Typography>
-        </Breadcrumbs>
+              All
+            </ToggleButton>
+            <ToggleButton
+              value="ASC"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderLeft: "1px solid #ff469e",
+                borderRight: "1px solid #ff469e",
+                fontSize: "1rem",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                },
+              }}
+            >
+              Low - High
+            </ToggleButton>
+            <ToggleButton
+              value="DESC"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: "1rem",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                },
+              }}
+            >
+              High - Low
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </Container>
       <Container>
         <Grid container spacing={3}>

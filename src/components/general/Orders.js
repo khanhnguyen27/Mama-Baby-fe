@@ -68,6 +68,7 @@ export default function Orders() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedFinalAmount, setSelectedFinalAmount] = useState(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
+  const [selectedStoreId, setSelectedStoreId] = useState(null);
   const [openExchange, setOpenExchange] = useState(false);
   const [openRefund, setOpenRefund] = useState(false);
   const [description, setDescription] = useState("");
@@ -205,18 +206,20 @@ export default function Orders() {
     );
   };
 
-  const handleCheckout = (finalAmount, bankCode) => {
-    const orders = [{ id: selectedOrderId }];
-    console.log(finalAmount);
-    makePaymentApi(finalAmount, bankCode, orders)
+  const handleCheckout = () => {
+    const bankCode = "VNBANK";
+    console.log(selectedFinalAmount, bankCode, selectedOrderId, selectedStoreId);
+    makePaymentApi(selectedFinalAmount, bankCode, selectedOrderId, selectedStoreId)
       .then((res) => {
         console.log(res.data);
         toast.success("Now moving to payment page!", {
           autoClose: 1500,
         });
         setTimeout(() => {
-          window.location.replace(res.data?.data?.payment_url);
+          // window.location.replace(res.data?.data?.payment_url);
+          window.open(res.data?.data?.payment_url);
         }, 1500);
+        handleClose();
       })
       .catch((error) => console.log(error));
   };
@@ -346,16 +349,18 @@ export default function Orders() {
   };
 
   // const handleOpen = () => setOpen(true);
-  const handleOpen = (orderId, finalAmount, orderDetails) => {
+  const handleOpen = (orderId, finalAmount, orderDetails, storeId) => {
     setSelectedOrderId(orderId);
     setSelectedFinalAmount(finalAmount);
     setSelectedOrderDetails(orderDetails);
+    setSelectedStoreId(storeId)
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedOrderId(null);
+    setSelectedStoreId(null)
   };
 
   const handleOpenExchange = (orderId) => {
@@ -1215,7 +1220,7 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={() => handleOpen(item.id, item.final_amount)}
+                          onClick={() => handleOpen(item.id, item.final_amount, "", item.store_id)}
                         >
                           COMPLETE PAYMENT
                         </Button>
@@ -1284,15 +1289,7 @@ export default function Orders() {
                                     border: "1px solid white",
                                   },
                                 }}
-                                onClick={() => (
-                                  handleCheckout(
-                                    selectedFinalAmount,
-                                    "VNBANK",
-                                    selectedOrderId
-                                  ),
-                                  console.log(selectedFinalAmount),
-                                  console.log(selectedOrderId)
-                                )}
+                                onClick={handleCheckout}
                               >
                                 Yes
                               </Button>

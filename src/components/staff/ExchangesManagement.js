@@ -79,7 +79,7 @@ export default function ExchangeManagement() {
         await Promise.all([
           exchangeByStoreIdApi(storeId),
           allOrderDetailApi(),
-          allProductApi(),
+          allProductApi({ limit: 1000}),
           allUserApi(),
         ]);
 
