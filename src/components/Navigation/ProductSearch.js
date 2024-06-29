@@ -71,7 +71,6 @@ const ProductSearch = () => {
                     backgroundColor: "#ff469e",
                     color: "white",
                     height: "40px",
-                    marginRight: "0.6px",
                     borderRadius: "5px",
                     boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
                     transition: "0.2s ease-in-out",
@@ -101,7 +100,7 @@ const ProductSearch = () => {
             </InputAdornment>
           ),
           sx: {
-            width: { md: "650px" },
+            width: { sm: "400px", md: "520px" },
             padding: 0,
             border: "2px solid #ff469e",
             borderRadius: "7px",

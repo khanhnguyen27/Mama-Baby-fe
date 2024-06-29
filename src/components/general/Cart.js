@@ -526,9 +526,9 @@ export default function Cart() {
                             fontWeight: "bold",
                             mt: 2, // marginTop: "1rem"
                             ml: 3, // marginLeft: "1.5rem"
-                            "&:hover": {
-                              transform: "scale(1.05)",
-                            },
+                            // "&:hover": {
+                            //   transform: "scale(1.05)",
+                            // },
                           }}
                           onClick={() =>
                             navigate(
@@ -941,6 +941,7 @@ export default function Cart() {
                                           }}
                                         >
                                           <CardMedia
+                                            component="img"
                                             sx={{
                                               width: "70px",
                                               height: "70px",
@@ -949,6 +950,7 @@ export default function Cart() {
                                               borderRadius: "10px",
                                             }}
                                             image={
+                                              item.product.image_url &&
                                               item.product.image_url?.includes(
                                                 "Product_"
                                               )
@@ -956,6 +958,7 @@ export default function Cart() {
                                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                             }
                                             onError={(e) => {
+                                              e.target.onerror = null;
                                               e.target.src =
                                                 "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                             }}

@@ -155,9 +155,11 @@ const SignUp = () => {
                     textAlign: "left",
                     paddingBottom: 1,
                     fontWeight: "700",
+                    display: "flex",
+                    justifyContent: "space-between"
                   }}
                 >
-                  Username <span style={{ color: "red" }}>*</span>
+                  <span>Username <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(At least 6 characters)</span>
                 </Typography>
                 <Input
                   id="username"
@@ -208,9 +210,11 @@ const SignUp = () => {
                     textAlign: "left",
                     paddingBottom: 1,
                     fontWeight: "700",
+                    display: "flex",
+                    justifyContent: "space-between"
                   }}
                 >
-                  Password <span style={{ color: "red" }}>*</span>
+                  <span>Password <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(At least 8 characters)</span>
                 </Typography>
                 <Input
                   id="password"
@@ -270,9 +274,11 @@ const SignUp = () => {
                     textAlign: "left",
                     paddingBottom: 1,
                     fontWeight: "700",
+                    display: "flex",
+                    justifyContent: "space-between"
                   }}
                 >
-                  Confirm Password <span style={{ color: "red" }}>*</span>
+                  <span>Confirm Password <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(Re-type your password)</span>
                 </Typography>
                 <Input
                   id="retype"
@@ -438,9 +444,11 @@ const SignUp = () => {
                     textAlign: "left",
                     paddingBottom: 1,
                     fontWeight: "700",
+                    display: "flex",
+                    justifyContent: "space-between"
                   }}
                 >
-                  Phone <span style={{ color: "red" }}>*</span>
+                  <span>Phone <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(9 - 11 digits)</span>
                 </Typography>
                 <Input
                   id="phone"

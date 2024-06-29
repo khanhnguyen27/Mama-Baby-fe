@@ -134,7 +134,9 @@ export default function Products() {
   };
 
   const handleSortChange = (e, sortPrice) => {
-    setSortPrice(sortPrice);
+    if (sortPrice !== null) {
+      setSortPrice(sortPrice);
+    }
   };
 
   const handleAgeChange = (id) => {

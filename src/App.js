@@ -40,8 +40,35 @@ import ProductGiftDetails from "./components/general/ProductGiftDetails";
 import ProductGift from "./components/general/ProductGift";
 import Requests from "./components/general/Requests";
 import Dashboard from "./components/staff/Dashboard";
+import { useEffect } from "react";
+const applyScrollbarStyles = () => {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    ::-webkit-scrollbar {
+      width: 0.7rem;
+    }
 
-function App() {
+    ::-webkit-scrollbar-track {
+      background: #f5f7fd;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ff469e;
+      border-radius: 0.6rem;
+      border: 2px solid #f5f7fd;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ffbbd0;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+function App () {
+  useEffect(() => {
+    applyScrollbarStyles();
+  }, []);
   return (
     <div className="App">
       <Navigation />

@@ -14,7 +14,7 @@ import CartOutlined from "@mui/icons-material/ShoppingCartOutlined";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Menu, MenuItem } from "@mui/material";
+import { Container, Menu, MenuItem } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import ProductSearch from "./ProductSearch";
@@ -327,16 +327,13 @@ const Navigation = () => {
         <AppBar
           sx={{
             // backgroundColor: "#fffbfd",
-            backgroundColor: "white",
-            color: "black",
-            padding: "10px 80px",
-            height: "90px",
             boxShadow: "none",
             position: "fixed",
             borderBottom: "1px solid #fffbfd",
+            backgroundColor: "white"
           }}
         >
-          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+          <Container style={{ display: "flex", justifyContent: "space-between", height: "6rem", backgroundColor: "white" }}>
             <Link
               to="/"
               style={{
@@ -351,7 +348,7 @@ const Navigation = () => {
                 alt="logo"
               />
             </Link>
-          </Toolbar>
+          </Container>
         </AppBar>
       </Box>
     );
@@ -362,16 +359,13 @@ const Navigation = () => {
         <AppBar
           sx={{
             // backgroundColor: "#fffbfd",
-            backgroundColor: "white",
-            color: "black",
-            padding: "10px 80px",
             boxShadow: "none",
             position: "fixed",
-            height: "90px",
             borderBottom: "1px solid #fffbfd",
+            backgroundColor: "white"
           }}
         >
-          <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+          <Container style={{ display: "flex", justifyContent: "space-between", height: "6rem", backgroundColor: "white" }}>
             <Link
               to="/"
               style={{
@@ -386,7 +380,7 @@ const Navigation = () => {
                 alt="logo"
               />
             </Link>
-          </Toolbar>
+          </Container>
         </AppBar>
       </Box>
     );
@@ -619,11 +613,19 @@ const Navigation = () => {
           sx={{
             backgroundColor: "#ff469e",
             color: "white",
-            padding: "4px 20px",
+            padding: "4px 0px",
             boxShadow: "none",
           }}
         >
-          <Toolbar>
+          <Container
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              height: "4rem",
+            }}
+          >
             <Box
               sx={{
                 alignItems: "center",
@@ -726,7 +728,6 @@ const Navigation = () => {
                           sx={{
                             borderRadius: 2,
                             height: 40,
-                            marginRight: "1rem",
                             transition:
                               "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
                             "&:hover": {
@@ -762,7 +763,6 @@ const Navigation = () => {
                         sx={{
                           borderRadius: 2,
                           height: 40,
-                          marginRight: "1rem",
                           transition:
                             "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
                           "&:hover": {
@@ -787,10 +787,10 @@ const Navigation = () => {
                 </Box>
               </>
             </Box>
-          </Toolbar>
+          </Container>
         </AppBar>
       </Box>
-      <Box sx={{ flexGrow: 1, mb: 2 }}>
+      <Box sx={{ flexGrow: 1 }}>
         <AppBar
           position={visible ? "fixed" : "static"}
           sx={{
@@ -800,25 +800,30 @@ const Navigation = () => {
             boxShadow: "none",
           }}
         >
-          <Toolbar>
-            <Toolbar>
-              <Link
-                to="/"
-                style={{
-                  display: { xs: "none", sm: "block" },
-                  textDecoration: "none",
-                  fontSize: "24px",
-                  color: "black",
-                }}
-              >
-                <img
-                  src={Logo}
-                  style={{ width: "80px", height: "80px" }}
-                  alt="logo"
-                />
-              </Link>
-            </Toolbar>
-
+          <Container
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              height: "5.5rem",
+            }}
+          >
+            <Link
+              to="/"
+              style={{
+                display: { xs: "none", sm: "block" },
+                textDecoration: "none",
+                fontSize: "24px",
+                color: "black",
+              }}
+            >
+              <img
+                src={Logo}
+                style={{ width: "80px", height: "80px" }}
+                alt="logo"
+              />
+            </Link>
             <Box
               sx={{
                 flexGrow: 1,
@@ -830,7 +835,7 @@ const Navigation = () => {
             </Box>
             <Box
               sx={{
-                display: { sm: "none", md: "flex" },
+                display: { sm: "flex" },
                 justifyContent: "flex-end",
               }}
             >
@@ -889,7 +894,7 @@ const Navigation = () => {
                 )}
               </IconButton>
             </Box>
-          </Toolbar>
+          </Container>
         </AppBar>
       </Box>
     </>
