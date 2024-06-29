@@ -2,9 +2,14 @@ import React, { useState, useEffect } from "react";
 import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
+import { CSVLink } from "react-csv";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import io from "socket.io-client";
 import {
+  Menu,
   IconButton,
   MenuItem,
   InputLabel,
@@ -37,10 +42,8 @@ export default function AdminHome() {
   const [refunds, setRefunds] = useState([]);
   const [BarChartData, setBarChartData] = useState([]);
   const [LineChartData, setLineChartData] = useState([]);
-  const [cancelData, setCancelData] = useState(0);
   const [inProgressData, setInProgressData] = useState(0);
   const [completeData, setCompleteData] = useState(0);
-  const [cancelledCount, setCancelledCount] = useState(0);
   const [inProgressCount, setInProgressCount] = useState(0);
   const [completedCount, setCompleteCount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -51,6 +54,7 @@ export default function AdminHome() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);;
   const [minYear, setMinYear] = useState(new Date().getFullYear() - 15);
   const [maxYear, setMaxYear] = useState(new Date().getFullYear());
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -213,6 +217,7 @@ export default function AdminHome() {
 
   const handleBarChartData = async (year = selectedYear) => {
     setLoading(true);
+
     try {
       let orderRes, refundRes;
 
@@ -245,16 +250,33 @@ export default function AdminHome() {
       let totalRev = 0;
       let totalRef = 0;
 
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
       ordersData.forEach((order) => {
-        const date = new Date(order.order_date);
-        const month = date.toLocaleString("default", { month: "short" });
-        monthlyData[month].Revenue += order.amount || 0; // Ensure amount exists and is a number
-        totalRev += order.amount || 0; // Accumulate total revenue
+        if (order.type.toUpperCase() === "ORDER") {
+          const date = new Date(order.order_date);
+          const month = monthNames[date.getMonth()];
+          monthlyData[month].Revenue += order.final_amount || 0;
+          totalRev += order.final_amount || 0;
+        }
       });
 
       refundsData.forEach((refund) => {
         const date = new Date(refund.create_date);
-        const month = date.toLocaleString("default", { month: "short" });
+        const month = monthNames[date.getMonth()];
         monthlyData[month].Refund += refund.amount || 0;
         totalRef += refund.amount || 0;
       });
@@ -281,11 +303,63 @@ export default function AdminHome() {
     }
   };
 
+  const headers = [
+    { label: "Month", key: "month" },
+    { label: "Revenue", key: "Revenue" },
+    { label: "Refund", key: "Refund" },
+  ];
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleExportCSV = () => {
+    // Logic to export CSV
+    // You can use react-csv to handle CSV export
+    console.log("Exporting CSV...");
+  };
+
+  const handleExportPDF = async () => {
+    const input = document.getElementById('dashboard');
+    if (input) {
+      const canvas = await html2canvas(input);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF();
+      const imgWidth = 190;
+      const pageHeight = 290;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 25;
+
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("Dashboard.pdf");
+    } else {
+      console.error("Element not found: #Dashboard");
+    }
+  };
+  const csvData = BarChartData.map(item => ({
+    month: item.month,
+    Revenue: item.Revenue,
+    Refund: item.Refund,
+  }));
+
   const calculatePercentage = async (month = selectedMonth) => {
     setLoading(true);
     try {
       if (!Array.isArray(stores) || stores.length === 0) {
-        setCancelData(0);
         setCompleteData(0);
         setInProgressData(0);
         return;
@@ -301,15 +375,11 @@ export default function AdminHome() {
 
       const storeData = storeMonth?.data?.data || [];
 
-      let cancelledCount = 0;
       let completedCount = 0;
       let inProgressCount = 0;
 
       storeData.forEach((store) => {
         switch (store.status.trim().toUpperCase()) {
-          case "REFUSE":
-            cancelledCount++;
-            break;
           case "APPROVED":
             completedCount++;
             break;
@@ -321,22 +391,18 @@ export default function AdminHome() {
         }
       });
 
-      const totalCount = cancelledCount + completedCount + inProgressCount;
+      const totalCount = completedCount + inProgressCount;
 
       if (totalCount > 0) {
-        const cancelPercentage = ((cancelledCount / totalCount) * 100).toFixed(2);
         const completePercentage = ((completedCount / totalCount) * 100).toFixed(2);
         const inProgressPercentage = ((inProgressCount / totalCount) * 100).toFixed(2);
 
-        setCancelledCount(cancelledCount);
         setCompleteCount(completedCount);
         setInProgressCount(inProgressCount);
 
-        setCancelData(parseFloat(cancelPercentage));
         setCompleteData(parseFloat(completePercentage));
         setInProgressData(parseFloat(inProgressPercentage));
       } else {
-        setCancelData(0);
         setCompleteData(0);
         setInProgressData(0);
       }
@@ -350,7 +416,6 @@ export default function AdminHome() {
   const currentYear = new Date().getFullYear();
 
   const data = [
-    { value: cancelData, label: 'Refuse', color: '#FF8042' },
     { value: inProgressData, label: 'Processing', color: '#FFBB28' },
     { value: completeData, label: 'Approved', color: '#00C49F' },
   ];
@@ -412,11 +477,11 @@ export default function AdminHome() {
 
   const valueFormatter = (value) => {
     if (value >= 1_000_000_000) {
-      return `${(value / 1_000_000_000).toFixed(1)}bil`;
+      return `${(value / 1_000_000_000).toFixed(1)} Bil`;
     } else if (value >= 1_000_000) {
-      return `${(value / 1_000_000).toFixed(1)}mil`;
+      return `${(value / 1_000_000).toFixed(1)} Mil`;
     } else if (value >= 1_000) {
-      return `${(value / 1_000).toFixed(1)}k`;
+      return `${(value / 1_000).toFixed(1)}K`;
     } else {
       return value;
     }
@@ -444,15 +509,32 @@ export default function AdminHome() {
   };
 
   return (
-    <Container>
+    <Container id="dashboard">
       <Paper elevation={3} sx={{ position: "sticky", marginTop: "20px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
         <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
           Dashboard
         </Typography>
+        <IconButton style={{ position: 'absolute', top: 18, right: 15, color: "white" }} onClick={handleMenuClick}>
+          <MenuIcon />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleExportCSV}>
+            <CSVLink data={csvData} headers={headers} filename={`Overall Milk Profit in year ${selectedYear}.csv`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              Export CSV
+            </CSVLink>
+          </MenuItem>
+          <MenuItem onClick={() => { handleExportPDF(); handleMenuClose(); }}>
+            Export PDF
+          </MenuItem>
+        </Menu>
         <Grid container spacing={2}>
           <Grid item xs={3}>
             <Grid container spacing={2} direction="column">
-              <Grid item xs={12} md={12}>
+              <Grid item xs={12} md={12} >
                 <Card>
                   <CardContent style={{ height: "242px" }}>
                     <Typography variant="body1" style={{ fontWeight: "bold", color: "#E9967A", marginBottom: "20px", paddingBottom: "20px" }}>
@@ -473,7 +555,7 @@ export default function AdminHome() {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={12} md={12}>
+              <Grid item xs={12} md={12} >
                 <Card>
                   <CardContent style={{ height: "243px" }}>
                     <Typography variant="body1" style={{ fontWeight: "bold", color: "#E9967A", marginBottom: "20px", paddingBottom: "20px" }}>
@@ -496,7 +578,7 @@ export default function AdminHome() {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={9} md={9} sx={{ position: 'relative' }}>
+          <Grid item xs={9} md={9} sx={{ position: 'relative' }} >
             <Card>
               <CardContent style={{ height: "500px", display: "flex", flexDirection: "column" }}>
                 <Grid>
@@ -547,9 +629,22 @@ export default function AdminHome() {
             <Card>
               <CardContent style={{ height: "420px", display: "flex" }}>
                 <Grid marginTop={"90px"}>
-                  <Typography variant="h6" style={{ fontSize: "25px", fontWeight: "bold", color: "#ff469e", textAlign: "center", paddingTop: "10px", paddingLeft: "25px", paddingBottom: "20px" }}>
-                    Monthly Stores Status
-                    <span style={{ color: "#D2B48C" }}> {currentYear}</span>
+                  <Typography sx={{
+                    fontSize: '25px',
+                    fontWeight: 'bold',
+                    color: '#ff469e',
+                    textAlign: 'center',
+                    paddingTop: '10px',
+                    paddingLeft: '25px',
+                    paddingBottom: '20px',
+                    '&:hover': {
+                      cursor: 'pointer',
+                      color: '#DAA520',
+                    },
+                  }}
+                    variant="h6"
+                    onClick={handlePieChartClick}>
+                    Monthly Stores Status {currentYear}
                   </Typography>
                   <FormControl
                     variant="outlined"
@@ -559,7 +654,7 @@ export default function AdminHome() {
                       marginLeft: 78,
                     }}
                   >
-                    <InputLabel htmlFor="month-select" shrink style={{ fontWeight: "bold", color: "#D2B48C" }}>Month</InputLabel>
+                    <InputLabel htmlFor="month-select" shrink style={{ fontWeight: "bold", color: "#DAA520" }}>Month</InputLabel>
                     <Select
                       value={selectedMonth}
                       onChange={handleMonthChange}
@@ -601,7 +696,6 @@ export default function AdminHome() {
                   series={[
                     {
                       data: [
-                        { id: 0, value: cancelData, label: `Refuse\n(${cancelData}%)`, color: "#FF6347" },
                         { id: 1, value: completeData, label: `Approved\n(${completeData}%)`, color: "#66CDAA" },
                         { id: 2, value: inProgressData, label: `Pending\n(${inProgressData}%)`, color: "#FFD700" },
                       ],
@@ -614,39 +708,18 @@ export default function AdminHome() {
           <Grid item xs={2} md={2}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card onClick={handlePieChartClick} sx={{ ":hover": { backgroundColor: '#FFFAF0' } }}>
-                  <CardContent style={{ height: "129px" }}>
+                <Card>
+                  <CardContent style={{ height: "202px" }}>
                     <Grid>
-                      <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#FF8042' }}>
-                        Refuse
-                      </Typography>
-                      <Typography
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px"
-                        }}
-                      >
-                        <span>{valueFormatter(cancelledCount)}</span>
-                      </Typography>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <Card onClick={handlePieChartClick} sx={{ ":hover": { backgroundColor: '#FFFAF0' } }}>
-                  <CardContent style={{ height: "130px" }}>
-                    <Grid>
-                      <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#FFBB28'}}>
+                      <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#FFBB28' }}>
                         Processing
                       </Typography>
                       <Typography
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px"
+                          paddingTop: "40px",
+                          fontSize: "40px"
                         }}
                       >
                         <span>{valueFormatter(inProgressCount)}</span>
@@ -656,8 +729,8 @@ export default function AdminHome() {
                 </Card>
               </Grid>
               <Grid item xs={12} md={12}>
-                <Card onClick={handlePieChartClick} sx={{ ":hover": { backgroundColor: '#FFFAF0' } }}>
-                  <CardContent style={{ height: "130px" }}>
+                <Card>
+                  <CardContent style={{ height: "201px" }}>
                     <Grid>
                       <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#00C49F' }}>
                         Approved
@@ -666,8 +739,8 @@ export default function AdminHome() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px"
+                          paddingTop: "40px",
+                          fontSize: "40px"
                         }}
                       >
                         <span>{valueFormatter(completedCount)}</span>
