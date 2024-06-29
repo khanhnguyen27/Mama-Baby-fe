@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, FormControl, Input, Typography } from "@mui/material";
+import { Button, Container, FormControl, Input, Typography } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import { Link, useLocation } from "react-router-dom";
@@ -15,14 +15,15 @@ const Footer = () => {
         backgroundColor: "#303036",
         color: "#f8f8f8",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
         margin: 0,
         padding: "2rem 0",
         paddingBottom: "1rem",
       }}
     >
-      <div style={{ maxWidth: "1000px", width: "100%", textAlign: "center" }}>
+      <Container style={{ width: "100%", textAlign: "center" }}>
         <div
           style={{
             display: "grid",
@@ -186,7 +187,7 @@ const Footer = () => {
           Since 1999 - Trademark registered number 822024 by the Intellectual
           Property Office
         </Typography>
-      </div>
+      </Container>
     </div>
   );
 };
