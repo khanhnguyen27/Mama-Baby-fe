@@ -31,6 +31,7 @@ import {
 import { allOrderApi, orderByYearApi } from "../../api/OrderAPI";
 import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
 import { allStoreApi, StoreByMonthApi } from "../../api/StoreAPI";
+import { allUserApi, userByYearApi } from "../../api/UserAPI";
 
 export default function AdminHome() {
   window.document.title = "AdminHome";
@@ -40,17 +41,21 @@ export default function AdminHome() {
   const [orders, setOrders] = useState([]);
   const [stores, setStores] = useState([]);
   const [refunds, setRefunds] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [BarChartData, setBarChartData] = useState([]);
   const [LineChartData, setLineChartData] = useState([]);
+  const [AccountLineChartData, setAccountLineChartData] = useState([]);
   const [inProgressData, setInProgressData] = useState(0);
   const [completeData, setCompleteData] = useState(0);
   const [inProgressCount, setInProgressCount] = useState(0);
   const [completedCount, setCompleteCount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalRefund, setTotalRefund] = useState(0);
-  const [yearsList, setYearsList] = useState([]);
+  const [yearsListOrder, setYearsListOrder] = useState([]);
+  const [YearsListAccount, setYearsListAccount] = useState([]);
   const [monthsList, setMonthsList] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYearOrder, setSelectedYearOrder] = useState(new Date().getFullYear());
+  const [selectedYearAccount, setSelectedYearAccount] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);;
   const [minYear, setMinYear] = useState(new Date().getFullYear() - 15);
   const [maxYear, setMaxYear] = useState(new Date().getFullYear());
@@ -84,6 +89,11 @@ export default function AdminHome() {
       setRefunds(prevRefunds => [...prevRefunds, newRefunds]);
     });
 
+    socket.on("accountsUpdate", (newAccounts) => {
+      console.log("Received accounts update:", newAccounts);
+      setAccounts(prevAccounts => [...prevAccounts, newAccounts]);
+    });
+
     socket.on("storesUpdate", (newStores) => {
       console.log("Received store update:", newStores);
       setStores(prevStores => [...prevStores, newStores]);
@@ -108,6 +118,7 @@ export default function AdminHome() {
       const orderRes = await allOrderApi();
       const storeRes = await allStoreApi();
       const refundRes = await allRefundApi();
+      const accountRes = await allUserApi();
 
       setOrders(orderRes.data.data || []);
       console.log("orderRes", orderRes)
@@ -115,6 +126,8 @@ export default function AdminHome() {
       console.log("storeRes", storeRes)
       setRefunds(refundRes.data.data.refunds || []);
       console.log("refundRes", refundRes)
+      setAccounts(accountRes.data.data || []);
+      console.log("accountRes", accountRes)
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -125,16 +138,30 @@ export default function AdminHome() {
   useEffect(() => {
     const fetchYears = async () => {
       const years = await fetchYearsFromDatabase(orders);
-      setYearsList(years);
+      setYearsListOrder(years);
       console.log("Years list:", years);
 
-      if (years.length > 0 && !years.includes(selectedYear)) {
-        setSelectedYear(years[0]);
+      if (years.length > 0 && !years.includes(selectedYearOrder)) {
+        setSelectedYearOrder(years[0]);
       }
     };
 
     fetchYears();
   }, [orders]);
+
+  useEffect(() => {
+    const fetchYears = async () => {
+      const years = await fetchYearsAccountFromDatabase(accounts);
+      setYearsListAccount(years);
+      console.log("Years list:", years);
+
+      if (years.length > 0 && !years.includes(selectedYearAccount)) {
+        setSelectedYearAccount(years[0]);
+      }
+    };
+
+    fetchYears();
+  }, [accounts]);
 
   useEffect(() => {
     const fetchMonths = async () => {
@@ -154,14 +181,21 @@ export default function AdminHome() {
   }, []);
 
   useEffect(() => {
-    if (selectedYear !== null) {
-      handleBarChartData(selectedYear);
+    if (selectedYearOrder !== null) {
+      handleBarChartData(selectedYearOrder);
     }
-  }, [selectedYear, orders, refunds]);
+  }, [selectedYearOrder, orders, refunds]);
+
+  useEffect(() => {
+    if (selectedYearAccount !== null) {
+      handleAccountLineChartData(selectedYearAccount);
+    }
+  }, [selectedYearAccount, accounts]);
 
   useEffect(() => {
     calculatePercentage(selectedMonth);
   }, [selectedMonth, stores]);
+
 
   useEffect(() => {
     handleLineChartData();
@@ -173,6 +207,25 @@ export default function AdminHome() {
 
       ordersData.forEach((order) => {
         const date = new Date(order.order_date);
+        const year = date.getFullYear();
+        yearsSet.add(year);
+      });
+
+      const yearsArray = Array.from(yearsSet).sort();
+      console.log("Years fetched:", yearsArray);
+      return yearsArray;
+    } catch (error) {
+      console.error("Error fetching years:", error);
+      return [];
+    }
+  };
+
+  const fetchYearsAccountFromDatabase = async (accountsData) => {
+    try {
+      const yearsSet = new Set();
+
+      accountsData.forEach((account) => {
+        const date = new Date(account.create_at);
         const year = date.getFullYear();
         yearsSet.add(year);
       });
@@ -204,9 +257,15 @@ export default function AdminHome() {
   };
 
   const handleYearChange = (event) => {
-    const selectedYear = parseInt(event.target.value);
-    setSelectedYear(selectedYear);
-    console.log("selectedYear", selectedYear);
+    const selectedYearOrder = parseInt(event.target.value);
+    setSelectedYearOrder(selectedYearOrder);
+    console.log("selectedYearOrder", selectedYearOrder);
+  };
+
+  const handleYearAccountChange = (event) => {
+    const selectedYearAccount = parseInt(event.target.value);
+    setSelectedYearAccount(selectedYearAccount);
+    console.log("selectedYearAccount", selectedYearAccount);
   };
 
   const handleMonthChange = (event) => {
@@ -215,7 +274,7 @@ export default function AdminHome() {
     console.log("selectedMonth", selectedMonth);
   };
 
-  const handleBarChartData = async (year = selectedYear) => {
+  const handleBarChartData = async (year = selectedYearOrder) => {
     setLoading(true);
 
     try {
@@ -300,6 +359,41 @@ export default function AdminHome() {
       console.error("Error fetching order and refund data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAccountLineChartData = async (year = selectedYearAccount) => {
+    try {
+      let accountRes;
+
+      if (year) {
+        accountRes = await userByYearApi(year);
+      }
+
+      console.log("accountRes:", accountRes);
+
+      const accountsData = accountRes?.data?.data || [];
+      console.log("accountsData:", accountsData);
+
+      const monthlyData = Array(12).fill(0);
+
+      accountsData.forEach((account) => {
+        const date = new Date(account.create_at);
+        const month = date.getMonth(); // 0-indexed, Jan is 0, Dec is 11
+        monthlyData[month]++;
+      });
+
+      const lineChartData = monthlyData.map((Account, index) => ({
+        month: index + 1, // Convert to 1-indexed month
+        Account,
+      }));
+
+      console.log("lineChartData:", lineChartData);
+
+      setAccountLineChartData(lineChartData);
+
+    } catch (error) {
+      console.error("Error handling Account line chart data:", error);
     }
   };
 
@@ -492,9 +586,17 @@ export default function AdminHome() {
     Refund: 'Refund (VND)',
   };
 
+  const keyToLabelAccount = {
+    Account: 'Account',
+  };
+
   const colors = {
     Revenue: '#228B22',
     Refund: 'rgb(2, 178, 175)',
+  };
+
+  const colorsAccount = {
+    Account: 'rgb(2, 178, 175)',
   };
 
   const stackStrategy = {
@@ -502,9 +604,19 @@ export default function AdminHome() {
     area: true,
   };
 
+  const stackStrategyAccount = {
+    area: false,
+  };
+
   const customize = {
     height: 400,
     legend: { hidden: false },
+    margin: { top: 5 },
+  };
+
+  const customizeAccount = {
+    height: 400,
+    legend: { hidden: true },
     margin: { top: 5 },
   };
 
@@ -523,7 +635,7 @@ export default function AdminHome() {
           onClose={handleMenuClose}
         >
           <MenuItem onClick={handleExportCSV}>
-            <CSVLink data={csvData} headers={headers} filename={`Overall Milk Profit in year ${selectedYear}.csv`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <CSVLink data={csvData} headers={headers} filename={`Overall Milk Profit in year ${selectedYearOrder}.csv`} style={{ textDecoration: 'none', color: 'inherit' }}>
               Export CSV
             </CSVLink>
           </MenuItem>
@@ -596,7 +708,7 @@ export default function AdminHome() {
                   >
                     <InputLabel htmlFor="year-select" shrink style={{ fontWeight: "bold", color: "#E9967A" }} >Year</InputLabel>
                     <Select
-                      value={selectedYear}
+                      value={selectedYearOrder}
                       onChange={handleYearChange}
                       label="Year"
                       inputProps={{
@@ -605,7 +717,7 @@ export default function AdminHome() {
                       }}
                       displayEmpty
                     >
-                      {yearsList.map((year) => (
+                      {yearsListOrder.map((year) => (
                         <MenuItem key={year} value={year}>
                           {year}
                         </MenuItem>
@@ -621,6 +733,35 @@ export default function AdminHome() {
                     { dataKey: 'Revenue', label: 'Revenue', valueFormatter: (value) => valueFormatter(value) + " VND", color: '#228B22' },
                     { dataKey: 'Refund', label: 'Refund', valueFormatter: (value) => valueFormatter(value) + " VND", color: "rgb(2, 178, 175)" }
                   ]} valueFormatter
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={10} md={10}>
+            <Card>
+              <CardContent style={{ height: "420px", display: "flex" }}>
+                <LineChart
+                  xAxis={[
+                    {
+                      fontWeight: 'bold',
+                      label: 'Month',
+                      dataKey: 'month',
+                      valueFormatter: (month) => month.toString(), // Assuming months are in number format 1-12
+                      min: 1, // January
+                      max: 12, // December
+                    },
+                  ]}
+                  yAxis={[{ valueFormatter: (value) => value.toString() }]}
+                  series={Object.keys(keyToLabelAccount).map((key) => ({
+                    dataKey: key,
+                    label: keyToLabelAccount[key],
+                    color: colorsAccount[key],
+                    showMark: false,
+                    valueFormatter,
+                    ...stackStrategyAccount,
+                  }))}
+                  dataset={AccountLineChartData}
+                  {...customizeAccount}
                 />
               </CardContent>
             </Card>

@@ -34,9 +34,9 @@ export const orderByStoreIdApi = (storeId) => {
   });
 };
 
-export const orderByYearApi = async (selectedYear) => {
+export const orderByYearApi = async (selectedOrderYear) => {
   try {
-    const response = await axiosJWT.get(`${URL_ORDER}/findByYear?year=${selectedYear}`);
+    const response = await axiosJWT.get(`${URL_ORDER}/findByYear?year=${selectedOrderYear}`);
     return response;
   } catch (error) {
     throw new Error(`Error fetching orders: ${error.message}`);
