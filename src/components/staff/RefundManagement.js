@@ -1012,7 +1012,7 @@ export default function OrdersManagement() {
                     </Box>
                 </Modal>
             </Container>
-            <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail}>
+            <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail} maxWidth= "md">
                 <DialogTitle
                     sx={{
                         fontSize: "2rem",
