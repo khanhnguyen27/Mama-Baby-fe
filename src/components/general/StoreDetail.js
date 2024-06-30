@@ -727,7 +727,7 @@ export default function Products() {
                       e.target.src =
                         "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                     }}
-                    style={{ width: "64px", height: "64px" }}
+                    // style={{ width: "64px", height: "64px" }}
                   />
                   <Typography
                     variant="subtitle1"

@@ -32,6 +32,8 @@ import { allOrderApi, orderByYearApi } from "../../api/OrderAPI";
 import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
 import { allStoreApi, StoreByMonthApi } from "../../api/StoreAPI";
 import { allUserApi, userByYearApi } from "../../api/UserAPI";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export default function AdminHome() {
   window.document.title = "AdminHome";
@@ -42,6 +44,8 @@ export default function AdminHome() {
   const [stores, setStores] = useState([]);
   const [refunds, setRefunds] = useState([]);
   const [accounts, setAccounts] = useState([]);
+  const [userMap, setUserMap] = useState({});
+  const [months, setMonths] = useState([]);
   const [BarChartData, setBarChartData] = useState([]);
   const [LineChartData, setLineChartData] = useState([]);
   const [AccountLineChartData, setAccountLineChartData] = useState([]);
@@ -132,13 +136,33 @@ export default function AdminHome() {
       console.log("refundRes", refundRes);
       setAccounts(accountRes.data.data || []);
       console.log("accountRes", accountRes);
+      const userRes = await allUserApi();
+
+      const ordersData = orderRes.data.data || [];
+      const userData = userRes?.data?.data || [];
+      const userMap = userData.reduce((x, item) => {
+        x[item.id] = [item.full_name, item.phone_number, item.address];
+        return x;
+      }, {});
+      setUserMap(userMap);
+
+      // Group months available
+      const uniqueMonths = new Set();
+      ordersData.forEach(order => {
+        const orderDate = new Date(order.order_date);
+        console.log("Thang mang tren:", order.order_date);
+        const month = orderDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
+        const year = orderDate.getFullYear();
+        uniqueMonths.add(`${month}-${year}`);
+      });
+      setMonths(Array.from(uniqueMonths));
+      console.log("Thang ơ tren:", Array.from(uniqueMonths));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     const fetchYears = async () => {
       const years = await fetchYearsFromDatabase(orders);
@@ -413,10 +437,230 @@ export default function AdminHome() {
     setAnchorEl(null);
   };
 
+  //Export report revenue, refund
+
+  const sortedMonths = months.sort((a, b) => {
+    const [monthA, yearA] = a.split('-').map(Number);
+    const [monthB, yearB] = b.split('-').map(Number);
+
+    // Tạo đối tượng Date từ tháng và năm
+    const dateA = new Date(yearA, monthA - 1); // Trừ 1 vì tháng trong Date bắt đầu từ 0
+    const dateB = new Date(yearB, monthB - 1);
+
+    return dateB - dateA; // Sắp xếp từ mới nhất đến cũ nhất
+  });
+
+  const calculateMonthlyData = (storeId, month, year) => {
+    let revenue = 0;
+    let refund = 0;
+
+    orders.forEach(order => {
+      const orderDate = new Date(order.order_date);
+      const orderMonth = orderDate.getMonth() + 1;
+      const orderYear = orderDate.getFullYear();
+
+      if (order.store_id === storeId && orderMonth === month && orderYear === year) {
+        revenue += order.final_amount; // Giả sử final_amount là doanh thu
+      }
+    });
+
+    refunds.forEach(refundItem => {
+      const refundDate = new Date(refundItem.create_date);
+      const refundMonth = refundDate.getMonth() + 1;
+      const refundYear = refundDate.getFullYear();
+
+      if (refundItem.store_id === storeId && refundMonth === month && refundYear === year) {
+        refund += refundItem.amount;
+      }
+    });
+
+    return { revenue, refund };
+  };
+
   const handleExportCSV = () => {
-    // Logic to export CSV
-    // You can use react-csv to handle CSV export
-    console.log("Exporting CSV...");
+    setMonths(sortedMonths);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sheet1');
+
+    // Define styles
+    const borderStyle = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+
+    const headerStyle = {
+      font: { bold: true, color: { argb: 'FFFFFFFF' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } },
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      border: borderStyle
+    };
+
+    const monthStyle = {
+      font: { bold: true, color: { argb: 'FF000000' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFD700' } },
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      border: borderStyle
+    };
+
+    const headerRevenueStyle = {
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF009442' } },
+      border: borderStyle
+    };
+
+    const headerRefundStyle = {
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB85708' } },
+      border: borderStyle
+    };
+
+    const revenueStyle = {
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } },
+      border: borderStyle
+    };
+
+    const refundStyle = {
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFA07A' } },
+      border: borderStyle
+    };
+
+    const infoStoreStyle1 = {
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEECE1' } },
+      border: borderStyle
+    };
+
+    const infoStoreStyle2 = {
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD6D0B7' } },
+      border: borderStyle
+    };
+
+    const totalRowStyle = {
+      font: { bold: true },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } },
+      border: borderStyle
+    };
+
+    // Add headers
+    const headerRow1 = ["No.", "Store name", "Store phone", "Store address", "Owner full name", "Owner phone", "Owner address"];
+    const headerRow2 = ["", "", "", "", "", "", ""];
+
+    sortedMonths.forEach(monthYear => {
+      const [month, year] = monthYear.split('-');
+      headerRow1.push(`${month}-${year}`, "");
+      headerRow2.push("Revenue (VND)", "Refund (VND)");
+    });
+
+    worksheet.addRow(headerRow1);
+    worksheet.addRow(headerRow2);
+
+    // Style header rows
+    worksheet.getRow(1).eachCell((cell) => { cell.style = headerStyle; });
+    worksheet.getRow(2).eachCell((cell) => { cell.style = headerStyle; });
+
+    for (let i = 0; i < sortedMonths.length; i++) {
+      // Style month cells
+      const cell1 = worksheet.getCell(`${String.fromCharCode(72 + 2 * i)}1`);
+      cell1.style = { ...cell1.style, ...monthStyle };
+
+      // Style revenue cells
+      const cell2 = worksheet.getCell(`${String.fromCharCode(72 + 2 * i)}2`);
+      cell2.style = { ...cell2.style, ...headerRevenueStyle };
+
+      // Style refund cells
+      const cell3 = worksheet.getCell(`${String.fromCharCode(72 + 2 * i + 1)}2`);
+      cell3.style = { ...cell2.style, ...headerRefundStyle };
+    }
+
+    // Add data rows
+    stores.forEach((store, index) => {
+      const row = [
+        index + 1,
+        store.name_store,
+        store.phone,
+        store.address,
+        userMap[store.user_id][0],
+        userMap[store.user_id][1],
+        userMap[store.user_id][2],
+      ];
+
+      sortedMonths.forEach(monthYear => {
+        const [month, year] = monthYear.split('-');
+        const { revenue, refund } = calculateMonthlyData(store.id, parseInt(month), parseInt(year));
+        row.push(revenue, refund);
+      });
+
+      worksheet.addRow(row);
+    });
+
+    // Style all cells
+    for (let row = 1; row <= worksheet.rowCount; row++) {
+      for (let col = 1; col <= worksheet.columnCount; col++) {
+        const cell = worksheet.getCell(row, col);
+        if (row > 2) {
+          if (col < 8) {
+            if (row % 2 === 0) {
+              cell.style = { ...cell.style, ...infoStoreStyle2 };
+            } else {
+              cell.style = { ...cell.style, ...infoStoreStyle1 };
+            }
+          } else if (col % 2 === 0) {
+            cell.style = { ...cell.style, ...revenueStyle };
+          } else {
+            cell.style = { ...cell.style, ...refundStyle };
+          }
+        }
+      }
+    }
+
+    // Add total row
+    const totalRow = ["", "", "", "", "TOTAL MONTHLY AMOUNT:", "", ""];
+    sortedMonths.forEach((_, index) => {
+      const revenueCol = worksheet.getColumn(8 + 2 * index).letter;
+      const refundCol = worksheet.getColumn(9 + 2 * index).letter;
+      totalRow.push({ formula: `SUM(${revenueCol}3:${revenueCol}${stores.length + 2})` });
+      totalRow.push({ formula: `SUM(${refundCol}3:${refundCol}${stores.length + 2})` });
+    });
+    const totalRowNumber = worksheet.addRow(totalRow).number;
+
+    // Style total row
+    worksheet.getRow(totalRowNumber).eachCell((cell) => { cell.style = totalRowStyle; });
+
+    // Set column widths
+    const columnWidths = [5, 20, 15, 30, 20, 15, 30];
+    for (let i = 8; i <= worksheet.columnCount; i++) {
+      columnWidths.push(15);
+    }
+    worksheet.columns.forEach((column, index) => {
+      column.width = columnWidths[index];
+    });
+
+    // Merge cells
+    worksheet.mergeCells('A1:A2');
+    worksheet.mergeCells('B1:B2');
+    worksheet.mergeCells('C1:C2');
+    worksheet.mergeCells('D1:D2');
+    worksheet.mergeCells('E1:E2');
+    worksheet.mergeCells('F1:F2');
+    worksheet.mergeCells('G1:G2');
+    worksheet.mergeCells(`E${totalRowNumber}:G${totalRowNumber}`);
+
+    sortedMonths.forEach((_, index) => {
+      const col = 8 + 2 * index;
+      worksheet.mergeCells(1, col, 1, col + 1);
+    });
+
+    // Set number format for revenue and refund columns
+    for (let col = 8; col <= worksheet.columnCount; col++) {
+      worksheet.getColumn(col).numFmt = '#,##0';
+    }
+
+    // Generate Excel file
+    workbook.xlsx.writeBuffer().then(buffer => {
+      saveAs(new Blob([buffer]), 'Report_revenue_refund_store_monthly.xlsx');
+    }).catch(err => {
+      console.error('Error writing Excel file:', err);
+    });
   };
 
   const handleExportPDF = async () => {
@@ -633,7 +877,7 @@ export default function AdminHome() {
   };
 
   return (
-    <Container>
+    <Container id="dashboard">
       <Paper
         elevation={3}
         sx={{
@@ -670,15 +914,8 @@ export default function AdminHome() {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleExportCSV}>
-            <CSVLink
-              data={csvData}
-              headers={headers}
-              filename={`Overall Milk Profit in year ${selectedYearOrder}.csv`}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Export CSV
-            </CSVLink>
+          <MenuItem onClick={() => { handleExportCSV(); handleMenuClose(); }}>
+            Export Report
           </MenuItem>
           <MenuItem
             onClick={() => {
