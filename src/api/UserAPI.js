@@ -7,6 +7,7 @@ const URL_USERDETAIL = `http://localhost:8080/mamababy/users/details`;
 const URL_ACTIVE = `http://localhost:8080/mamababy/users/admin`;
 const URL_ACTIVESTORE = `http://localhost:8080/mamababy/users/admin`;
 // const URL_LOGOUT = `http://localhost:8080/mamababy/users/logout`;
+const URL_ACCOUNT = `http://localhost:8080/mamababy/users`;
 
 export const allUserApi = (params) => {
   return axiosJWT.get(URL_USER, {
@@ -84,3 +85,12 @@ export const updateRollUserApi = (
 //     },
 //   });
 // };
+
+export const userByYearApi = async (selectedAccountYear) => {
+  try {
+    const response = await axiosJWT.get(`${URL_ACCOUNT}/findByYear?year=${selectedAccountYear}`);
+    return response;
+  } catch (error) {
+    throw new Error(`Error fetching orders: ${error.message}`);
+  }
+};
