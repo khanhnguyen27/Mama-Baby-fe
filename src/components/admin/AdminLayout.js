@@ -75,7 +75,7 @@ export default function AdminLayout() {
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("username");
-    toast.success("Logout Successfully");
+    toast.success("Logout Successfully", { autoClose: 1000 });
     setTimeout(() => {
       navigate("/");
       console.log("Logout successfully");

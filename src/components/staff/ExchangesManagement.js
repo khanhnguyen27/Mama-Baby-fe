@@ -79,7 +79,7 @@ export default function ExchangeManagement() {
         await Promise.all([
           exchangeByStoreIdApi(storeId),
           allOrderDetailApi(),
-          allProductApi({ limit: 1000}),
+          allProductApi({ limit: 1000 }),
           allUserApi(),
         ]);
 
@@ -149,7 +149,7 @@ export default function ExchangeManagement() {
       });
       return;
     }
-    if (e.target.value === "PROCESSED") {
+    if (e.target.value === "ACCEPT" || e.target.value === "REFUSE") {
       setSelectedExchange(item);
       setOpen(true);
     }
@@ -607,7 +607,7 @@ export default function ExchangeManagement() {
                             PROCESSING
                           </MenuItem>
                           <MenuItem
-                            value={"PROCESSED"}
+                            value={"ACCEPT"}
                             sx={{
                               color: "black",
                               fontSize: "16px",
@@ -627,7 +627,30 @@ export default function ExchangeManagement() {
                               },
                             }}
                           >
-                            PROCESSED
+                            ACCEPT
+                          </MenuItem>
+                          <MenuItem
+                            value={"REFUSE"}
+                            sx={{
+                              color: "black",
+                              fontSize: "16px",
+                              transition:
+                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                              "&:hover": {
+                                backgroundColor: "#fff4fc",
+                                color: "#ff469e",
+                              },
+                              "&.Mui-selected": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                "&:hover": {
+                                  backgroundColor: "#fff4fc",
+                                  color: "#ff469e",
+                                },
+                              },
+                            }}
+                          >
+                            REFUSE
                           </MenuItem>
                         </Select>
                         <Modal
@@ -660,7 +683,7 @@ export default function ExchangeManagement() {
                             </Typography>
                             <Typography sx={{ mt: 2 }}>
                               Are you sure you want to update the status of
-                              exchange to PROCESSED? (This cannot be undone and
+                              exchange? (This cannot be undone and
                               changed back to the previous status)
                             </Typography>
                             <Box

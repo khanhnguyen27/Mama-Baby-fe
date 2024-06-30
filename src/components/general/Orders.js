@@ -36,9 +36,9 @@ import { Close, ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
-import { addExchangeApi } from "../../api/ExchangeAPI";
+import { addExchangeApi, exchangeByUserIdApi } from "../../api/ExchangeAPI";
 import { allStoreApi } from "../../api/StoreAPI";
-import { addRefundApi } from "../../api/RefundAPI";
+import { addRefundApi, refundByUserIdApi } from "../../api/RefundAPI";
 
 export default function Orders() {
   window.document.title = "Your Orders";
@@ -62,6 +62,8 @@ export default function Orders() {
   const [brandMap, setBrandMap] = useState({});
   const [categoryMap, setCategoryMap] = useState({});
   const [voucherMap, setVoucherMap] = useState({});
+  const [exchange, setExchange] = useState([]);
+  const [refund, setRefund] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [open, setOpen] = useState(false);
@@ -69,6 +71,7 @@ export default function Orders() {
   const [selectedFinalAmount, setSelectedFinalAmount] = useState(null);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
   const [selectedStoreId, setSelectedStoreId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [openExchange, setOpenExchange] = useState(false);
   const [openRefund, setOpenRefund] = useState(false);
   const [description, setDescription] = useState("");
@@ -92,6 +95,8 @@ export default function Orders() {
         brandRes,
         categoryRes,
         voucherRes,
+        exchangeRes,
+        refundRes,
       ] = await Promise.all([
         orderByUserIdApi(userId),
         allProductApi({ limit: 1000 }),
@@ -99,6 +104,8 @@ export default function Orders() {
         allBrandApi(),
         allCategorytApi(),
         allVoucherApi(),
+        exchangeByUserIdApi(userId),
+        refundByUserIdApi(userId),
       ]);
       const orderData = orderRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
@@ -106,6 +113,8 @@ export default function Orders() {
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
+      const exchangeData = exchangeRes?.data?.data || [];
+      const refundData = refundRes?.data?.data || [];
 
       const categorizedOrders = {
         UNPAID: [],
@@ -131,6 +140,9 @@ export default function Orders() {
       //   categorizedOrders[status].reverse();
       // }
       setOrdersByStatus(categorizedOrders);
+
+      setExchange(exchangeData);
+      setRefund(refundData);
 
       const productMap = productData.reduce((x, item) => {
         x[item.id] = [
@@ -226,8 +238,8 @@ export default function Orders() {
           autoClose: 1500,
         });
         setTimeout(() => {
-          // window.location.replace(res.data?.data?.payment_url);
-          window.open(res.data?.data?.payment_url);
+          window.location.replace(res.data?.data?.payment_url);
+          // window.open(res.data?.data?.payment_url);
         }, 1500);
         handleClose();
       })
@@ -274,7 +286,7 @@ export default function Orders() {
   //     .catch((error) => console.log(error));
   // };
 
-  const handleCancel = (orderId, newStatus) => {
+  const handleCancel = (orderId, newStatus, order) => {
     changeStatusOrderApi(orderId, newStatus)
       .then((res) => {
         console.log(res.data);
@@ -282,6 +294,56 @@ export default function Orders() {
           autoClose: 1500,
         });
         updateOrderStatus(orderId, newStatus);
+      })
+      .then(() => {
+        if (order.payment_method === "VNPAY") {
+          const description = "Refund because cancelled pre-paid order";
+          const orderId = order.id;
+          const status = "PROCESSING";
+          const storeId = order.store_id;
+          const userId = order.user_id;
+          const amount = order.final_amount;
+          // order.order_detail_list.reduce((total, selectedItem) => {
+          //   const difference = order.final_amount - total;
+          //   const itemAmount = selectedItem.unit_price * selectedItem.quantity;
+          //   return total + Math.min(difference, itemAmount);
+          // }, 0);
+          const cartItemsRefund = order.order_detail_list
+            .filter((item) => item.product_id)
+            .map((item) => ({
+              product_id: item.product_id,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              amount: item.quantity * item.unit_price,
+            }));
+
+          console.log(
+            description,
+            status,
+            amount,
+            storeId,
+            userId,
+            orderId,
+            cartItemsRefund
+          );
+          addRefundApi(
+            description,
+            status,
+            amount,
+            storeId,
+            userId,
+            orderId,
+            cartItemsRefund
+          )
+            .then((res) => {
+              console.log(res.data);
+              setSelectedItems([]);
+              fetchData();
+            })
+            .catch((error) => {
+              console.error("Failed to send refund request:", error);
+            });
+        }
       })
       .catch((error) => console.log(error));
   };
@@ -325,6 +387,7 @@ export default function Orders() {
     setLoading(true);
     setTimeout(() => {
       navigate("/orders");
+      fetchData();
       setLoading(false);
     }, 1500);
   };
@@ -353,17 +416,14 @@ export default function Orders() {
     }
     toast.success("Your order is now added to cart", { autoClose: 1000 });
     handleClose();
-    // setTimeout(() => {
-    //   navigate("/cart");
-    // }, 1500);
   };
 
-  // const handleOpen = () => setOpen(true);
-  const handleOpen = (orderId, finalAmount, orderDetails, storeId) => {
+  const handleOpen = (orderId, finalAmount, orderDetails, storeId, order) => {
     setSelectedOrderId(orderId);
     setSelectedFinalAmount(finalAmount);
     setSelectedOrderDetails(orderDetails);
     setSelectedStoreId(storeId);
+    setSelectedOrder(order);
     setOpen(true);
   };
 
@@ -473,6 +533,7 @@ export default function Orders() {
         toast.success("Request sent successfully", { autoClose: 1000 });
         setSelectedItems([]);
         handleCloseExchange();
+        fetchData();
       })
       .catch((error) => {
         toast.error("Failed to send request!");
@@ -531,6 +592,7 @@ export default function Orders() {
         toast.success("Request sent successfully", { autoClose: 1000 });
         setSelectedItems([]);
         handleCloseRefund();
+        fetchData();
       })
       .catch((error) => {
         toast.error("Failed to send request!");
@@ -1360,7 +1422,7 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={() => handleOpen(item.id)}
+                          onClick={() => handleOpen(item.id, "", "", "", item)}
                         >
                           CANCEL ORDER
                         </Button>
@@ -1422,7 +1484,11 @@ export default function Orders() {
                                   },
                                 }}
                                 onClick={() =>
-                                  handleCancel(selectedOrderId, "CANCELLED")
+                                  handleCancel(
+                                    selectedOrderId,
+                                    "CANCELLED",
+                                    selectedOrder
+                                  )
                                 }
                               >
                                 Yes
@@ -1690,31 +1756,34 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
-                        {item.payment_method === "VNPAY" && (
-                          <Button
-                            variant="contained"
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "10px",
-                              fontSize: 16,
-                              fontWeight: "bold",
-                              my: 2,
-                              mx: 1,
-                              transition:
-                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid white",
-                              },
-                            }}
-                            onClick={() => handleOpenRefund(item.id)}
-                          >
-                            REFUND
-                          </Button>
-                        )}
+                        {item.payment_method === "VNPAY" &&
+                          !refund.some(
+                            (refundItem) => refundItem.order_id === item.id
+                          ) && (
+                            <Button
+                              variant="contained"
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "10px",
+                                fontSize: 16,
+                                fontWeight: "bold",
+                                my: 2,
+                                mx: 1,
+                                transition:
+                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  border: "1px solid white",
+                                },
+                              }}
+                              onClick={() => handleOpenRefund(item.id)}
+                            >
+                              REFUND
+                            </Button>
+                          )}
                         {item.id === selectedOrderId && (
                           <Modal
                             open={openRefund}
@@ -2546,29 +2615,33 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
-                        <Button
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "10px",
-                            fontSize: 16,
-                            fontWeight: "bold",
-                            my: 2,
-                            mx: 1,
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
-                          }}
-                          onClick={() => handleOpenExchange(item.id)}
-                        >
-                          EXCHANGE
-                        </Button>
+                        {!exchange.some(
+                          (exchangeItem) => exchangeItem.order_id === item.id
+                        ) && (
+                          <Button
+                            variant="contained"
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "10px",
+                              fontSize: 16,
+                              fontWeight: "bold",
+                              my: 2,
+                              mx: 1,
+                              transition:
+                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                border: "1px solid white",
+                              },
+                            }}
+                            onClick={() => handleOpenExchange(item.id)}
+                          >
+                            EXCHANGE
+                          </Button>
+                        )}
                         {item.id === selectedOrderId && (
                           <Modal
                             open={openExchange}
@@ -3266,29 +3339,33 @@ export default function Orders() {
                             </Box>
                           </Modal>
                         )}
-                        <Button
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "10px",
-                            fontSize: 16,
-                            fontWeight: "bold",
-                            my: 2,
-                            mx: 1,
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
-                          }}
-                          onClick={() => handleOpenRefund(item.id)}
-                        >
-                          REFUND
-                        </Button>
+                        {!refund.some(
+                          (refundItem) => refundItem.order_id === item.id
+                        ) && (
+                          <Button
+                            variant="contained"
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "10px",
+                              fontSize: 16,
+                              fontWeight: "bold",
+                              my: 2,
+                              mx: 1,
+                              transition:
+                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                border: "1px solid white",
+                              },
+                            }}
+                            onClick={() => handleOpenRefund(item.id)}
+                          >
+                            REFUND
+                          </Button>
+                        )}
                         {item.id === selectedOrderId && (
                           <Modal
                             open={openRefund}

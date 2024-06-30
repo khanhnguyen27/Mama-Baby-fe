@@ -376,13 +376,13 @@ export default function Cart() {
                   autoClose: 1000,
                 });
                 setTimeout(() => {
-                  // window.location.replace(res.data?.data?.payment_url);
                   const productIdsToRemove = cartItems2.map(
                     (item) => item.product_id
                   );
                   dispatch(removeFromCart(productIdsToRemove));
+                  window.location.replace(res.data?.data?.payment_url);
                   handleClose();
-                  window.open(res.data?.data?.payment_url);
+                  // window.open(res.data?.data?.payment_url);
                   setSelectedStore("");
                   setSelectedStoreId("");
                 }, 500);
