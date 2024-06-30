@@ -41,6 +41,7 @@ import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
+import { format, parseISO } from 'date-fns';
 
 export default function Articles() {
   const navigate = useNavigate();
@@ -265,6 +266,16 @@ export default function Articles() {
       }));
     }
   }, [selectedArticle]);
+
+  const formatDateTime = (dateTime) => {
+    try {
+        const parsedDate = parseISO(dateTime);
+        return format(parsedDate, "dd-MM-yyyy");
+    } catch (error) {
+        console.error("Invalid date format:", dateTime, error);
+        return "Invalid date";
+    }
+};
 
   return (
     <div
@@ -499,7 +510,7 @@ export default function Articles() {
                             display="block"
                             gutterBottom
                           >
-                            Created at: {item.created_at}
+                            Created at: {formatDateTime(item.created_at)}
                           </Typography>
                           <Typography
                             variant="caption"
