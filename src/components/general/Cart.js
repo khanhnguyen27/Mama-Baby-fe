@@ -38,6 +38,7 @@ import { makePaymentApi } from "../../api/VNPayAPI";
 import { createOrderApi } from "../../api/OrderAPI";
 import { jwtDecode } from "jwt-decode";
 import { profileUserApi } from "../../api/UserAPI";
+import { allActiveByUserApi } from "../../api/ActiveAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 export default function Cart() {
   window.document.title = "Cart";
@@ -45,6 +46,7 @@ export default function Cart() {
   const [open, setOpen] = useState(false);
   const [userInfo, setUserInfo] = useState([]);
   const [store, setStore] = useState([]);
+  const [active, setActive] = useState({});
   const [storeMap, setStoreMap] = useState({});
   const [selectedStore, setSelectedStore] = useState("");
   const [selectedStoreId, setSelectedStoreId] = useState("");
@@ -65,6 +67,22 @@ export default function Cart() {
   const [typeWholeSale, setTypeWholeSale] = useState(false);
   const typeWHOLESALE = "WHOLESALE";
 
+  const accessToken = localStorage.getItem("accessToken");
+
+  var userId = 0;
+  if (accessToken && typeof accessToken === "string") {
+    try {
+      const decodedAccessToken = jwtDecode(accessToken);
+      userId = decodedAccessToken.UserID;
+    } catch (error) {
+      console.error("Failed to decode token:", error);
+      // Xử lý lỗi nếu cần thiết
+    }
+  } else {
+    console.warn("Invalid token specified: must be a string");
+    // Xử lý trường hợp token không hợp lệ nếu cần thiết
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -76,16 +94,19 @@ export default function Cart() {
 
   const fetchData = async () => {
     try {
-      const [storeRes, voucherRes] = await Promise.all([
+      const [storeRes, voucherRes, activeRes] = await Promise.all([
         allStoreApi(),
         allVoucherApi({ store_id: selectedStoreId }),
+        allActiveByUserApi(userId),
       ]);
 
       const storeData = storeRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
+      const activeData = activeRes?.data?.data || [];
 
       setStore(storeData);
       setVoucher(voucherData);
+      setActive(activeData);
 
       const storeMap = storeData.stores.reduce((x, item) => {
         x[item.id] = item.name_store;
@@ -859,32 +880,45 @@ export default function Cart() {
                                     >
                                       -
                                     </MenuItem>
-                                    {voucher.map((item) => (
-                                      <MenuItem
-                                        key={item.id}
-                                        value={item.discount_value}
-                                        sx={{
-                                          color: "black",
-                                          fontSize: "18px",
-                                          transition:
-                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                          "&:hover": {
-                                            backgroundColor: "#fff4fc",
-                                            color: "#ff469e",
-                                          },
-                                          "&.Mui-selected": {
-                                            backgroundColor: "#ff469e",
-                                            color: "white",
-                                            "&:hover": {
-                                              backgroundColor: "#fff4fc",
-                                              color: "#ff469e",
-                                            },
-                                          },
-                                        }}
-                                      >
-                                        {item.code}
-                                      </MenuItem>
-                                    ))}
+                                    {typeWholeSale
+                                      ? voucher
+                                          .filter(
+                                            (item) =>
+                                              !active.some(
+                                                (activeItem) =>
+                                                  activeItem.userId ===
+                                                    userId &&
+                                                  activeItem.voucherId ===
+                                                    item.id
+                                              )
+                                          )
+                                          .map((item) => (
+                                            <MenuItem
+                                              key={item.id}
+                                              value={item.discount_value}
+                                              sx={{
+                                                color: "black",
+                                                fontSize: "18px",
+                                                transition:
+                                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                "&:hover": {
+                                                  backgroundColor: "#fff4fc",
+                                                  color: "#ff469e",
+                                                },
+                                                "&.Mui-selected": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                },
+                                              }}
+                                            >
+                                              {item.code}
+                                            </MenuItem>
+                                          ))
+                                      : null}
                                   </Select>
                                 </Box>
                               </Grid>
@@ -1181,7 +1215,7 @@ export default function Cart() {
                                     </Box>
                                   ) : null}
 
-                                  {typeGift ? (
+                                  {typeGift && userId !== 0 ? (
                                     <Box
                                       sx={{
                                         display: "flex",
@@ -1202,20 +1236,14 @@ export default function Cart() {
                                           alignItems: "center",
                                         }}
                                       >
-                                        {userInfo.accumulated_points}
-                                        <MonetizationOnIcon
-                                          variant="h6"
-                                          sx={{
-                                            marginLeft: "4px",
-                                            color: "gray",
-                                            fontSize: 24,
-                                          }}
-                                        />
+                                        {formatCurrencyPoint(
+                                          userInfo.accumulated_points
+                                        )}
                                       </Box>
                                     </Box>
                                   ) : null}
 
-                                  {typeGift ? (
+                                  {typeGift && userId !== 0 ? (
                                     <Box
                                       sx={{
                                         display: "flex",
@@ -1241,7 +1269,7 @@ export default function Cart() {
                                             getFinalPoint()
                                             ? userInfo.accumulated_points -
                                                 getFinalPoint()
-                                            : 0
+                                            : userInfo.accumulated_points
                                         )}
                                       </Box>
                                     </Box>

@@ -564,6 +564,7 @@ export default function OrdersManagement() {
                                     }}
                                   >
                                     <CardMedia
+                                      component="img"
                                       sx={{
                                         width: "70px",
                                         height: "70px",
@@ -839,6 +840,22 @@ export default function OrdersManagement() {
                           </span>
                           <span>- {formatCurrency(item.total_discount)}</span>
                         </Box>
+                        {item.total_point > 0 ? (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              opacity: 0.7,
+                              margin: "6px 0",
+                            }}
+                          >
+                            <span>
+                              Points used:{" "}
+                              <span style={{ fontSize: "1.05rem" }}> </span>
+                            </span>
+                            {formatCurrencyPoint(item.total_point)}
+                          </Box>
+                        ) : null}
                         <Box
                           sx={{
                             display: "flex",

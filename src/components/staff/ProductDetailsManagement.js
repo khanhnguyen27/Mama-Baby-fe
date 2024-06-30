@@ -126,6 +126,7 @@ export default function ProductDetailsManagement() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     ] = description.split("|");
@@ -136,6 +137,7 @@ export default function ProductDetailsManagement() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     };
@@ -493,62 +495,98 @@ export default function ProductDetailsManagement() {
         </Typography>
         <TableContainer
           component={Paper}
-          sx={{ boxShadow: 3, borderRadius: 2 }}
+          sx={{ boxShadow: 3, borderRadius: 2, overflow: "hidden" }}
         >
           <Table>
             <TableBody>
               <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+                sx={{
+                  "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                }}
               >
                 <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    fontWeight: "bold",
+                    borderBottom: "1px solid #ffb3d9",
+                  }}
                 >
                   Weight
                 </TableCell>
                 <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    width: "75%",
+                    borderBottom: "1px solid #ffb3d9",
+                    color: "#333",
+                  }}
                 >
                   {details.weight} {details.unit}
                 </TableCell>
               </TableRow>
               <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+                sx={{
+                  "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                }}
               >
                 <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    fontWeight: "bold",
+                    borderBottom: "1px solid #ffb3d9",
+                  }}
                 >
                   Brand Origin
                 </TableCell>
                 <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    width: "75%",
+                    borderBottom: "1px solid #ffb3d9",
+                    color: "#333",
+                  }}
                 >
                   {details.brandOrigin}
                 </TableCell>
               </TableRow>
               <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+                sx={{
+                  "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                }}
               >
                 <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    fontWeight: "bold",
+                    borderBottom: "1px solid #ffb3d9",
+                  }}
                 >
                   Manufactured At
                 </TableCell>
                 <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    width: "75%",
+                    borderBottom: "1px solid #ffb3d9",
+                    color: "#333",
+                  }}
                 >
                   {details.manufacturedAt}
                 </TableCell>
               </TableRow>
               <TableRow
-                sx={{ "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" } }}
+                sx={{
+                  "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                }}
               >
                 <TableCell
-                  sx={{ fontWeight: "bold", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    fontWeight: "bold",
+                    borderBottom: "1px solid #ffb3d9",
+                  }}
                 >
                   Manufacturer
                 </TableCell>
                 <TableCell
-                  sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                  sx={{
+                    width: "75%",
+                    borderBottom: "1px solid #ffb3d9",
+                    color: "#333",
+                  }}
                 >
                   {details.manufacturer}
                 </TableCell>
@@ -557,40 +595,71 @@ export default function ProductDetailsManagement() {
                 <>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Usage Instructions
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.usageInstructions}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Storage Instructions
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.storageInstructions}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow
+                    sx={{
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ffb3d9",
+                      }}
+                    >
+                      Ingredient
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
+                    >
+                      {details.ingredient}
                     </TableCell>
                   </TableRow>
                 </>
@@ -831,11 +900,13 @@ export default function ProductDetailsManagement() {
                           value={item.rating}
                           readOnly
                           sx={{
-                            mb: 2,
-                            color: item.status ? "#ff469e" : "#aaa",
+                            "& .MuiRating-iconFilled": {
+                              color: item.status ? "#ff469e" : "#aaa",
+                            },
                           }}
                         />
                       </Box>
+
                       <Typography variant="body1">{item.comment}</Typography>
                     </Grid>
                   </Grid>
@@ -849,6 +920,7 @@ export default function ProductDetailsManagement() {
                         position: "absolute",
                         top: "10px",
                         right: "10px",
+                        color: "#ff469e",
                       }}
                     >
                       <MoreVertIcon />
@@ -863,6 +935,23 @@ export default function ProductDetailsManagement() {
                       keepMounted
                       open={Boolean(anchorEl && anchorEl.id === item.id)}
                       onClose={handleMenuClose}
+                      MenuListProps={{
+                        elevation: 3,
+                        sx: {
+                          "& .MuiMenuItem-root": {
+                            transition:
+                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                            "&:hover": {
+                              backgroundColor: "#ffebf2",
+                              color: "#ff469e",
+                            },
+                            "&:active": {
+                              backgroundColor: "#ffc1e3",
+                              color: "#ff469e",
+                            },
+                          },
+                        },
+                      }}
                     >
                       <MenuItem onClick={() => handleLockComment(item)}>
                         {item.status ? "Lock Comment" : "Unlock Comment"}

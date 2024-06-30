@@ -78,6 +78,7 @@ export default function ProductDetails() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     ] = description.split("|");
@@ -88,6 +89,7 @@ export default function ProductDetails() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     };
@@ -611,7 +613,7 @@ export default function ProductDetails() {
                   // backgroundImage:
                   //   "linear-gradient(45deg, #FAD0C4 30%, #FFD1DC 90%)",
                   backgroundImage:
-                    "linear-gradient(45deg, #FCE4EC 30%, #FFF3E0 90%)",
+                    "linear-gradient(45deg, #FCE4EC 50%, #FCE4EB 50%)",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -670,8 +672,8 @@ export default function ProductDetails() {
                     variant="outlined"
                     sx={{
                       marginRight: "8px",
-                      borderColor: "#FFC107",
-                      color: "#FFC107",
+                      borderColor: "#ff469e",
+                      color: "#ff469e",
                       padding: "8px 16px",
                       display: "flex",
                       alignItems: "center",
@@ -681,8 +683,8 @@ export default function ProductDetails() {
                         "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
                       "&:hover": {
                         transform: "scale(1.1)",
-                        borderColor: "#FFB300",
-                        color: "#FFB300",
+                        borderColor: "#ff469e",
+                        color: "#ff469e",
                       },
                     }}
                     onClick={() => (
@@ -700,7 +702,7 @@ export default function ProductDetails() {
                     <ShopIcon
                       sx={{
                         marginRight: "4px",
-                        color: "#FFC107",
+                        color: "#ff469e",
                         verticalAlign: "middle",
                       }}
                     />
@@ -792,82 +794,98 @@ export default function ProductDetails() {
             </Typography>
             <TableContainer
               component={Paper}
-              sx={{ boxShadow: 3, borderRadius: 2 }}
+              sx={{ boxShadow: 3, borderRadius: 2, overflow: "hidden" }}
             >
               <Table>
                 <TableBody>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Weight
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.weight} {details.unit}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Brand Origin
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.brandOrigin}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Manufactured At
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.manufacturedAt}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Manufacturer
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.manufacturer}
                     </TableCell>
@@ -876,40 +894,71 @@ export default function ProductDetails() {
                     <>
                       <TableRow
                         sx={{
-                          "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                          "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                         }}
                       >
                         <TableCell
                           sx={{
                             fontWeight: "bold",
-                            borderBottom: "1px solid #ddd",
+                            borderBottom: "1px solid #ffb3d9",
                           }}
                         >
                           Usage Instructions
                         </TableCell>
                         <TableCell
-                          sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                          sx={{
+                            width: "75%",
+                            borderBottom: "1px solid #ffb3d9",
+                            color: "#333",
+                          }}
                         >
                           {details.usageInstructions}
                         </TableCell>
                       </TableRow>
                       <TableRow
                         sx={{
-                          "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                          "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                         }}
                       >
                         <TableCell
                           sx={{
                             fontWeight: "bold",
-                            borderBottom: "1px solid #ddd",
+                            borderBottom: "1px solid #ffb3d9",
                           }}
                         >
                           Storage Instructions
                         </TableCell>
                         <TableCell
-                          sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                          sx={{
+                            width: "75%",
+                            borderBottom: "1px solid #ffb3d9",
+                            color: "#333",
+                          }}
                         >
                           {details.storageInstructions}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow
+                        sx={{
+                          "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                        }}
+                      >
+                        <TableCell
+                          sx={{
+                            fontWeight: "bold",
+                            borderBottom: "1px solid #ffb3d9",
+                          }}
+                        >
+                          Ingredient
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            width: "75%",
+                            borderBottom: "1px solid #ffb3d9",
+                            color: "#333",
+                          }}
+                        >
+                          {details.ingredient}
                         </TableCell>
                       </TableRow>
                     </>

@@ -1,5 +1,4 @@
-
-import axiosJWT from './ConfigAxiosInterceptor';
+import axiosJWT from "./ConfigAxiosInterceptor";
 
 const URL_CATEGORY = `http://localhost:8080/mamababy/categories`;
 
@@ -10,7 +9,7 @@ export const allCategorytApi = (params) => {
 };
 
 export const allCategoryAdminApi = (params) => {
-  return axiosJWT.get((`${URL_CATEGORY}/admin`), {
+  return axiosJWT.get(`${URL_CATEGORY}/admin`, {
     params: params,
   });
 };
@@ -24,14 +23,9 @@ export const addCategoryApi = async (categoryData) => {
   }
 };
 
-export const updateCategoryApi = (
-  id,
-  name,
-  isActive
-) => {
+export const updateCategoryApi = (id, name, isActive) => {
   return axiosJWT.put(`${URL_CATEGORY}/${id}`, {
-
     name: name,
-    is_active: isActive
+    is_active: isActive,
   });
 };
