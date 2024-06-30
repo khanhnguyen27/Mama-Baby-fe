@@ -112,6 +112,7 @@ export default function CommentHistory() {
                     backgroundColor: "#fff",
                     borderRadius: 2,
                     boxShadow: 3,
+                    cursor: "pointer",
                     "&:hover": {
                       backgroundColor: "#f0f0f0",
                     },
@@ -203,7 +204,9 @@ export default function CommentHistory() {
                                 color="textSecondary"
                                 sx={{ marginBottom: 1 }}
                               >
-                                {item.name}
+                                {item.name.length > 30
+                                  ? `${item.name.substring(0, 30)}...`
+                                  : item.name}
                               </Typography>
                               <CardMedia
                                 component="img"

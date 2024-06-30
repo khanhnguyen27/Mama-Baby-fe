@@ -19,6 +19,7 @@ import {
   DialogContent,
   DialogActions,
   InputAdornment,
+  Box,
 } from "@mui/material";
 import {
   Card,
@@ -131,9 +132,16 @@ export default function Articles() {
   };
 
   const handleAddArticle = () => {
-    // Kiểm tra các trường không được rỗng
-    if (!header || !content || !linkProduct || !image.file) {
+    if (!header || !content || !image.file) {
       toast.warn("Please fill in all fields and select a file.");
+      return;
+    }
+
+    const isDuplicateHeader = article?.articles?.some(
+      (article) => article.header === header
+    );
+    if (isDuplicateHeader) {
+      toast.error("Article with this name already exists.");
       return;
     }
 
@@ -171,12 +179,7 @@ export default function Articles() {
   };
 
   const handleUpdate = () => {
-    // Kiểm tra các trường không được rỗng
-    if (
-      !selectedArticle.header ||
-      !selectedArticle.content ||
-      !selectedArticle.link_product
-    ) {
+    if (!selectedArticle.header || !selectedArticle.content) {
       toast.warn("Please fill in all fields and select a file.");
       return;
     }
@@ -431,6 +434,7 @@ export default function Articles() {
                           borderRadius: "16px",
                           boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                           backgroundColor: "white",
+                          cursor: "pointer",
                           transition: "border 0.2s, box-shadow 0.2s",
                           "&:hover": {
                             border: "1px solid #ff469e",
@@ -438,23 +442,36 @@ export default function Articles() {
                           },
                         }}
                       >
-                        <CardMedia
-                          component="img"
-                          height="120"
-                          image={
-                            item.link_image &&
-                            item.link_image.includes("Article_")
-                              ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
-                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                          }
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src =
-                              "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
                           }}
-                          alt={item.header}
-                          onClick={() => handleOpen(item)}
-                        />
+                        >
+                          <CardMedia
+                            component="img"
+                            image={
+                              item.link_image &&
+                              item.link_image.includes("Article_")
+                                ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
+                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                            }
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                            }}
+                            alt={item.header}
+                            onClick={() => handleOpen(item)}
+                            style={{
+                              width: "250px",
+                              height: "140px",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </Box>
+
                         <CardContent onClick={() => handleOpen(item)}>
                           <Typography
                             variant="subtitle1"
@@ -556,8 +573,29 @@ export default function Articles() {
         </Grid>
       </Container>
 
-      <Dialog open={openAddArticle} onClose={handleCloseAddArticle}>
-        <DialogTitle>Add Article</DialogTitle>
+      <Dialog
+        open={openAddArticle}
+        onClose={handleCloseAddArticle}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          style: {
+            borderRadius: 20, // Adjust border radius as per your requirement
+            boxShadow: "0px 4px 8px #ff469e", // Add boxShadow for a raised effect
+          },
+        }}
+      >
+        <DialogTitle
+          style={{
+            fontFamily: "Roboto",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#333",
+            textAlign: "center",
+          }}
+        >
+          Add Article
+        </DialogTitle>
         <DialogContent>
           <TextField
             label="Header"
@@ -572,7 +610,7 @@ export default function Articles() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             multiline
-            rows={4}
+            rows={10}
             fullWidth
             margin="normal"
           />
@@ -666,8 +704,29 @@ export default function Articles() {
       </Dialog>
 
       {selectedArticle && (
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Article information</DialogTitle>
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: 20, // Adjust border radius as per your requirement
+              boxShadow: "0px 4px 8px #ff469e", // Add boxShadow for a raised effect
+            },
+          }}
+        >
+          <DialogTitle
+            style={{
+              fontFamily: "Roboto",
+              fontSize: "24px",
+              fontWeight: "bold",
+              color: "#333",
+              textAlign: "center",
+            }}
+          >
+            Article information
+          </DialogTitle>
           <DialogContent>
             <TextField
               label="Header"
@@ -681,7 +740,7 @@ export default function Articles() {
               value={selectedArticle?.content}
               onChange={(e) => handleChange("content", e.target.value)}
               multiline
-              rows={4}
+              rows={10}
               fullWidth
               margin="normal"
             />

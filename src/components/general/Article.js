@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
 export default function HomePage() {
+  const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [article, setArticle] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
@@ -160,9 +161,25 @@ export default function HomePage() {
         <Grid item xs={12} md={15}>
           <Grid container spacing={3}>
             {article?.articles?.map((item, index) => (
-              <Grid item xs={40} sm={5} md={4} key={index}>
+              <Grid
+                item
+                xs={40}
+                sm={5}
+                md={4}
+                key={index}
+                onClick={() => {
+                  navigate(
+                    `/article/${item.header.toLowerCase().replace(/\s/g, "-")}`,
+                    { state: { articleId: item.id } }
+                  );
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
                 <Tooltip
-                  title={item.content}
+                  title={item.header}
                   enterDelay={500}
                   leaveDelay={50}
                   placement="right-start"
@@ -197,21 +214,36 @@ export default function HomePage() {
                       },
                     }}
                   >
-                    <CardMedia
-                      component="img"
-                      image={
-                        item.link_image && item.link_image.includes("Article_")
-                          ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
-                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                      }
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
                       }}
-                      alt={item.content}
-                      sx={{ width: "64px", height: "64px", margin: "auto" }}
-                    />
+                    >
+                      <CardMedia
+                        component="img"
+                        image={
+                          item.link_image &&
+                          item.link_image.includes("Article_")
+                            ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
+                            : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                        }
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                        }}
+                        alt={item.header}
+                        style={{
+                          width: "250px",
+                          height: "140px",
+                          objectFit: "contain",
+                          borderRadius: "12px",
+                        }}
+                      />
+                    </Box>
+
                     <CardContent>
                       <Typography
                         variant="subtitle1"
@@ -230,15 +262,17 @@ export default function HomePage() {
                           maxHeight: "2.4rem",
                         }}
                       >
-                        {item.content.length > 40
-                          ? `${item.content.substring(0, 40)}...`
-                          : item.content}
+                        {item.header.length > 40
+                          ? `${item.header.substring(0, 40)}...`
+                          : item.header}
                       </Typography>
                       <Typography
                         variant="body2"
                         sx={{ color: "gray", textAlign: "left" }}
                       >
-                        ${item.header}
+                        {item.content.length > 100
+                          ? `${item.content.substring(0, 100)}...`
+                          : item.content}
                       </Typography>
                     </CardContent>
                   </Card>

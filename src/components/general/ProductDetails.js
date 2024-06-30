@@ -108,17 +108,15 @@ export default function ProductDetails() {
       username = decodedAccessToken.FullName;
     } catch (error) {
       console.error("Failed to decode token:", error);
-      // Xử lý lỗi nếu cần thiết
     }
   } else {
     console.warn("Invalid token specified: must be a string");
-    // Xử lý trường hợp token không hợp lệ nếu cần thiết
   }
 
   const [ratingArr, setRatingArr] = useState([0, 0, 0, 0, 0]);
 
-  const avatarUrl = "https://via.placeholder.com/150"; // Replace with actual avatar URL
-  const dateTime = format(new Date(), "Ppp"); // Formatted current date and time
+  const avatarUrl = "https://via.placeholder.com/150";
+  const dateTime = format(new Date(), "Ppp");
 
   const handleMenuClick = (event, item) => {
     setAnchorEl({ element: event.currentTarget, id: item.id });
@@ -208,6 +206,7 @@ export default function ProductDetails() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     ] = description.split("|");
@@ -218,6 +217,7 @@ export default function ProductDetails() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     };
@@ -438,37 +438,6 @@ export default function ProductDetails() {
     );
   };
 
-  // const Rating = ({ value }) => {
-  //   if (value < 1 || value > 5) {
-  //     return <div>Invalid rating value</div>;
-  //   }
-
-  //   const filledStars = Math.floor(value);
-  //   const emptyStars = 5 - filledStars;
-
-  //   return (
-  //     <div className="rating">
-  //       {[...Array(filledStars)].map((_, index) => (
-  //         <span
-  //           key={index}
-  //           className="star"
-  //           style={{ color: "#FFD700", fontSize: "24px", marginRight: "5px" }}
-  //         >
-  //           ★
-  //         </span>
-  //       ))}
-  //       {[...Array(emptyStars)].map((_, index) => (
-  //         <span
-  //           key={index}
-  //           className="star"
-  //           style={{ color: "lightgray", fontSize: "24px", marginRight: "5px" }}
-  //         >
-  //           ★
-  //         </span>
-  //       ))}
-  //     </div>
-  //   );
-  // };
   const handleShowMore = () => {
     setVisibleComments((prevVisibleComments) => prevVisibleComments + 5);
   };
@@ -881,7 +850,7 @@ export default function ProductDetails() {
                   // backgroundImage:
                   //   "linear-gradient(45deg, #FAD0C4 30%, #FFD1DC 90%)",
                   backgroundImage:
-                    "linear-gradient(45deg, #FCE4EC 30%, #FFF3E0 90%)",
+                    "linear-gradient(45deg, #FCE4EC 50%, #FCE4EB 50%)",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -940,8 +909,8 @@ export default function ProductDetails() {
                     variant="outlined"
                     sx={{
                       marginRight: "8px",
-                      borderColor: "#FFC107",
-                      color: "#FFC107",
+                      borderColor: "#ff469e",
+                      color: "#ff469e",
                       padding: "8px 16px",
                       display: "flex",
                       alignItems: "center",
@@ -951,8 +920,8 @@ export default function ProductDetails() {
                         "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
                       "&:hover": {
                         transform: "scale(1.1)",
-                        borderColor: "#FFB300",
-                        color: "#FFB300",
+                        borderColor: "#ff469e",
+                        color: "#ff469e",
                       },
                     }}
                     onClick={() => (
@@ -970,7 +939,7 @@ export default function ProductDetails() {
                     <ShopIcon
                       sx={{
                         marginRight: "4px",
-                        color: "#FFC107",
+                        color: "#ff469e",
                         verticalAlign: "middle",
                       }}
                     />
@@ -1062,82 +1031,98 @@ export default function ProductDetails() {
             </Typography>
             <TableContainer
               component={Paper}
-              sx={{ boxShadow: 3, borderRadius: 2 }}
+              sx={{ boxShadow: 3, borderRadius: 2, overflow: "hidden" }}
             >
               <Table>
                 <TableBody>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Weight
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.weight} {details.unit}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Brand Origin
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.brandOrigin}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Manufactured At
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.manufacturedAt}
                     </TableCell>
                   </TableRow>
                   <TableRow
                     sx={{
-                      "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                      "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                     }}
                   >
                     <TableCell
                       sx={{
                         fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
+                        borderBottom: "1px solid #ffb3d9",
                       }}
                     >
                       Manufacturer
                     </TableCell>
                     <TableCell
-                      sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                      sx={{
+                        width: "75%",
+                        borderBottom: "1px solid #ffb3d9",
+                        color: "#333",
+                      }}
                     >
                       {details.manufacturer}
                     </TableCell>
@@ -1146,40 +1131,71 @@ export default function ProductDetails() {
                     <>
                       <TableRow
                         sx={{
-                          "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                          "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                         }}
                       >
                         <TableCell
                           sx={{
                             fontWeight: "bold",
-                            borderBottom: "1px solid #ddd",
+                            borderBottom: "1px solid #ffb3d9",
                           }}
                         >
                           Usage Instructions
                         </TableCell>
                         <TableCell
-                          sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                          sx={{
+                            width: "75%",
+                            borderBottom: "1px solid #ffb3d9",
+                            color: "#333",
+                          }}
                         >
                           {details.usageInstructions}
                         </TableCell>
                       </TableRow>
                       <TableRow
                         sx={{
-                          "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
+                          "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
                         }}
                       >
                         <TableCell
                           sx={{
                             fontWeight: "bold",
-                            borderBottom: "1px solid #ddd",
+                            borderBottom: "1px solid #ffb3d9",
                           }}
                         >
                           Storage Instructions
                         </TableCell>
                         <TableCell
-                          sx={{ width: "75%", borderBottom: "1px solid #ddd" }}
+                          sx={{
+                            width: "75%",
+                            borderBottom: "1px solid #ffb3d9",
+                            color: "#333",
+                          }}
                         >
                           {details.storageInstructions}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow
+                        sx={{
+                          "&:nth-of-type(odd)": { backgroundColor: "#fff4fc" },
+                        }}
+                      >
+                        <TableCell
+                          sx={{
+                            fontWeight: "bold",
+                            borderBottom: "1px solid #ffb3d9",
+                          }}
+                        >
+                          Ingredient
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            width: "75%",
+                            borderBottom: "1px solid #ffb3d9",
+                            color: "#333",
+                          }}
+                        >
+                          {details.ingredient}
                         </TableCell>
                       </TableRow>
                     </>
@@ -1187,6 +1203,7 @@ export default function ProductDetails() {
                 </TableBody>
               </Table>
             </TableContainer>
+
             <Box sx={{ display: "flex", justifyContent: "end", mt: 2 }}>
               <Button
                 variant="contained"
@@ -1383,8 +1400,8 @@ export default function ProductDetails() {
                   component="form"
                   sx={{
                     borderRadius: 2,
-                    boxShadow: 10,
-                    backgroundColor: "#f0f0f0",
+                    boxShadow: 3,
+                    backgroundColor: "#f9f9f9",
                     padding: 2,
                     mb: 4,
                     position: "relative",
@@ -1393,7 +1410,6 @@ export default function ProductDetails() {
                   <Grid container alignItems="center" spacing={2} mb={2}>
                     <Grid item>
                       <Avatar>
-                        {" "}
                         <PersonIcon
                           sx={{
                             ml: 1,
@@ -1403,7 +1419,7 @@ export default function ProductDetails() {
                             color: "inherit",
                           }}
                         />
-                      </Avatar>{" "}
+                      </Avatar>
                     </Grid>
                     <Grid item>
                       <Typography variant="h6">{username}</Typography>
@@ -1416,7 +1432,15 @@ export default function ProductDetails() {
                     name="star-rating"
                     value={rating}
                     onChange={(event, newValue) => setRating(newValue)}
-                    sx={{ mb: 2, color: "#ff469e" }}
+                    sx={{
+                      mb: 2,
+                      "& .MuiRating-iconFilled": {
+                        color: "#ff469e",
+                      },
+                      "& .MuiRating-iconHover": {
+                        color: "#ff69b4",
+                      },
+                    }}
                   />
                   <TextField
                     fullWidth
@@ -1431,12 +1455,25 @@ export default function ProductDetails() {
                       endAdornment: (
                         <IconButton
                           aria-label="submit comment"
-                          sx={{ p: "10px" }}
+                          sx={{ p: "10px", color: "#ff469e" }}
                           onClick={handleComment}
                         >
                           <Send />
                         </IconButton>
                       ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "#ff469e",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#ff69b4",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#ff469e",
+                        },
+                      },
                     }}
                   />
                   <Box
@@ -1521,6 +1558,7 @@ export default function ProductDetails() {
                               position: "absolute",
                               top: "10px",
                               right: "10px",
+                              color: "#ff469e",
                             }}
                           >
                             <MoreVertIcon />
@@ -1535,6 +1573,23 @@ export default function ProductDetails() {
                             keepMounted
                             open={Boolean(anchorEl && anchorEl.id === item.id)}
                             onClose={handleMenuClose}
+                            MenuListProps={{
+                              elevation: 3,
+                              sx: {
+                                "& .MuiMenuItem-root": {
+                                  transition:
+                                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                  "&:hover": {
+                                    backgroundColor: "#ffebf2",
+                                    color: "#ff469e",
+                                  },
+                                  "&:active": {
+                                    backgroundColor: "#ffc1e3",
+                                    color: "#ff469e",
+                                  },
+                                },
+                              },
+                            }}
                           >
                             <MenuItem
                               onClick={() => handleOpenEditComment(item)}
@@ -1556,6 +1611,7 @@ export default function ProductDetails() {
                 No comments available.
               </Typography>
             )}
+
             {visibleComments < comment?.length && (
               <Box
                 sx={{
@@ -1596,7 +1652,6 @@ export default function ProductDetails() {
               <Grid container alignItems="center" spacing={2} mb={2}>
                 <Grid item>
                   <Avatar>
-                    {" "}
                     <PersonIcon
                       sx={{
                         ml: 1,
@@ -1606,7 +1661,7 @@ export default function ProductDetails() {
                         color: "inherit",
                       }}
                     />
-                  </Avatar>{" "}
+                  </Avatar>
                 </Grid>
                 <Grid item>
                   <Typography variant="h6">
@@ -1640,7 +1695,23 @@ export default function ProductDetails() {
                 variant="outlined"
                 value={selectedComment?.comment}
                 onChange={(e) => handleChange("comment", e.target.value)}
-                sx={{ mt: 2 }}
+                sx={{
+                  mt: 2,
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ff469e",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ff69b4",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ff469e",
+                    },
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#ff469e",
+                  },
+                }}
               />
               <Button
                 variant="contained"

@@ -15,6 +15,12 @@ export const getArticlesByStoreIdApi = (params) => {
   });
 };
 
+export const getArticlesNoPageApi = (params) => {
+  return axiosJWT.get(`${URL_ARTICLE}/no_page`, {
+    params: params,
+  });
+};
+
 // import {allArticleApi } from "../../api/ArticleAPI";
 // const [article, setArticle] = useState([]);
 

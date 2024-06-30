@@ -35,6 +35,7 @@ export const addProductApi = (
   remain,
   status,
   description,
+  expiryDate,
   type,
   brandId,
   categoryId,
@@ -50,6 +51,7 @@ export const addProductApi = (
   formData.append("remain", remain);
   formData.append("status", status);
   formData.append("description", description);
+  formData.append("expiryDate", expiryDate);
   formData.append("imageUrl", "");
   formData.append("type", type);
   formData.append("brandId", brandId);
@@ -78,6 +80,7 @@ export const updateProductApi = (
   remain,
   status,
   description,
+  expiryDate,
   type,
   brandId,
   categoryId,
@@ -94,6 +97,7 @@ export const updateProductApi = (
   formData.append("remain", remain);
   formData.append("status", status);
   formData.append("description", description);
+  formData.append("expiryDate", expiryDate);
   formData.append("imageUrl", "");
   formData.append("type", type);
   formData.append("brandId", brandId);

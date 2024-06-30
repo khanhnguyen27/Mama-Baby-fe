@@ -15,6 +15,7 @@ import {
   Badge,
   Card,
   CardContent,
+  CardMedia,
 } from "@mui/material";
 import Carousel from "react-material-ui-carousel";
 import ArrowRight from "@mui/icons-material/ArrowRight";
@@ -1292,7 +1293,7 @@ export default function HomePage() {
             </IconButton>
           </Box>
         </Box>
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -1456,6 +1457,207 @@ export default function HomePage() {
                   transform: "scale(1.15)",
                   background: "white",
                   boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              <ArrowRight />
+            </IconButton>
+          </Box>
+        </Box> */}
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            borderRadius: "16px",
+            background: "white",
+            padding: "1rem",
+            marginTop: "3rem",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Articles
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#ff469e",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => {
+                navigate("/article");
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
+              }}
+            >
+              See more articles
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              borderRadius: "16px",
+              background: "white",
+            }}
+          >
+            <IconButton
+              onClick={scrollLeft6}
+              size="small"
+              sx={{
+                position: "absolute",
+                left: -10,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
+                  "& svg": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              <ArrowLeft />
+            </IconButton>
+            <Box
+              ref={listRef6}
+              sx={{
+                display: "flex",
+                overflowX: "hidden",
+                scrollBehavior: "smooth",
+                width: "100%",
+                padding: "0px 8px",
+              }}
+            >
+              {article?.articles?.map((item, index) => (
+                <Box
+                  key={index}
+                  onClick={() => {
+                    navigate(
+                      `/article/${item.header
+                        .toLowerCase()
+                        .replace(/\s/g, "-")}`,
+                      { state: { articleId: item.id } }
+                    );
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                  sx={{
+                    minWidth: 300,
+                    padding: 2,
+                    textAlign: "center",
+                    border: "1px solid #f5f7fd",
+                    borderRadius: "16px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    marginRight: 2,
+                    backgroundColor: "white",
+                    transition: "border 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      border: "1px solid #ff496e",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={
+                        item.link_image && item.link_image.includes("Article_")
+                          ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
+                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                      }
+                      onError={(e) => {
+                        e.target.src =
+                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                      }}
+                      alt={item.header}
+                      style={{
+                        width: "250px",
+                        height: "140px",
+                        objectFit: "contain",
+                        borderRadius: "12px",
+                      }}
+                    />
+                  </Box>
+
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: "bold",
+                      marginTop: "0.75rem",
+                      textAlign: "left",
+                      whiteSpace: "normal",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      maxWidth: "100%",
+                      lineHeight: "1.2rem",
+                      maxHeight: "2.4rem",
+                    }}
+                  >
+                    {item.header.length > 40
+                      ? `${item.header.substring(0, 40)}...`
+                      : item.header}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "gray", textAlign: "left" }}
+                  >
+                    {item.content.length > 100
+                      ? `${item.content.substring(0, 100)}...`
+                      : item.content}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+            <IconButton
+              onClick={scrollRight6}
+              size="small"
+              sx={{
+                position: "absolute",
+                right: -10,
+                zIndex: 1,
+                backgroundColor: "white",
+                color: "#ff469e",
+                border: "1px solid #ff469e",
+                boxShadow: "1px 1px 1px rgba(0, 0, 0, 0.16)",
+                transition: "0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.15)",
+                  background: "white",
+                  boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.24)",
                   "& svg": {
                     transform: "scale(1.1)",
                   },

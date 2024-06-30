@@ -208,8 +208,18 @@ export default function Orders() {
 
   const handleCheckout = () => {
     const bankCode = "VNBANK";
-    console.log(selectedFinalAmount, bankCode, selectedOrderId, selectedStoreId);
-    makePaymentApi(selectedFinalAmount, bankCode, selectedOrderId, selectedStoreId)
+    console.log(
+      selectedFinalAmount,
+      bankCode,
+      selectedOrderId,
+      selectedStoreId
+    );
+    makePaymentApi(
+      selectedFinalAmount,
+      bankCode,
+      selectedOrderId,
+      selectedStoreId
+    )
       .then((res) => {
         console.log(res.data);
         toast.success("Now moving to payment page!", {
@@ -353,14 +363,14 @@ export default function Orders() {
     setSelectedOrderId(orderId);
     setSelectedFinalAmount(finalAmount);
     setSelectedOrderDetails(orderDetails);
-    setSelectedStoreId(storeId)
+    setSelectedStoreId(storeId);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedOrderId(null);
-    setSelectedStoreId(null)
+    setSelectedStoreId(null);
   };
 
   const handleOpenExchange = (orderId) => {
@@ -1220,7 +1230,14 @@ export default function Orders() {
                               border: "1px solid white",
                             },
                           }}
-                          onClick={() => handleOpen(item.id, item.final_amount, "", item.store_id)}
+                          onClick={() =>
+                            handleOpen(
+                              item.id,
+                              item.final_amount,
+                              "",
+                              item.store_id
+                            )
+                          }
                         >
                           COMPLETE PAYMENT
                         </Button>
@@ -2692,8 +2709,9 @@ export default function Orders() {
                                       },
                                     }}
                                   >
-                                    {item.order_detail_list.map(
-                                      (detail, index) => (
+                                    {item.order_detail_list
+                                      .filter((item) => item.unit_price > 0)
+                                      .map((detail, index) => (
                                         <div
                                           key={index}
                                           style={{
@@ -2702,6 +2720,7 @@ export default function Orders() {
                                           }}
                                         >
                                           <CardMedia
+                                            component="img"
                                             sx={{
                                               width: "70px",
                                               height: "70px",
@@ -3160,8 +3179,7 @@ export default function Orders() {
                                             </Box>
                                           </CardContent>
                                         </div>
-                                      )
-                                    )}
+                                      ))}
                                   </Box>
                                 </Card>
                                 <Box
@@ -3345,7 +3363,7 @@ export default function Orders() {
                                     multiline
                                     rows={3}
                                     fullWidth
-                                    placeholder="Input your reason of exchange. E.g: This product is not good"
+                                    placeholder="Input your reason of refund. E.g: This product is not good"
                                     size="small"
                                     variant="outlined"
                                     value={description}
@@ -3411,8 +3429,9 @@ export default function Orders() {
                                       },
                                     }}
                                   >
-                                    {item.order_detail_list.map(
-                                      (detail, index) => (
+                                    {item.order_detail_list
+                                      .filter((item) => item.unit_price > 0)
+                                      .map((detail, index) => (
                                         <div
                                           key={index}
                                           style={{
@@ -3421,6 +3440,7 @@ export default function Orders() {
                                           }}
                                         >
                                           <CardMedia
+                                            component="img"
                                             sx={{
                                               width: "70px",
                                               height: "70px",
@@ -3890,8 +3910,7 @@ export default function Orders() {
                                             </Box>
                                           </CardContent>
                                         </div>
-                                      )
-                                    )}
+                                      ))}
                                   </Box>
                                 </Card>
                                 <Box

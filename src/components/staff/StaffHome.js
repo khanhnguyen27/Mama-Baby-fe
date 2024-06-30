@@ -5,6 +5,7 @@ import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import { format, parseISO } from "date-fns";
 import {
   allProductApi,
   addProductApi,
@@ -420,8 +421,13 @@ export default function StaffHome() {
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState("g");
   const [manufacturer, setManufacturer] = useState("");
+  const [ingredient, setIngredient] = useState("");
   const [usageInstructions, setUsageInstructions] = useState("");
   const [storageInstructions, setStorageInstructions] = useState("");
+  const [expiryDate, setExpiryDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const today = new Date().toISOString().split("T")[0];
 
   const handleUnitChange = (e) => {
     setUnit(e.target.value);
@@ -450,6 +456,7 @@ export default function StaffHome() {
       !brandOrigin ||
       !manufacturedAt ||
       !manufacturer ||
+      !ingredient ||
       !usageInstructions ||
       !storageInstructions
     ) {
@@ -502,7 +509,16 @@ export default function StaffHome() {
       toast.error("The weight must be greater than 0.");
       return;
     }
-    const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${usageInstructions}|${storageInstructions}`;
+
+    const isDuplicateName = product?.products?.some(
+      (product) => product.name === name
+    );
+    if (isDuplicateName) {
+      toast.error("Product with this name already exists.");
+      return;
+    }
+
+    const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${ingredient}|${usageInstructions}|${storageInstructions}`;
     setDescription(fullDescription);
     addProductApi(
       image.file,
@@ -512,6 +528,7 @@ export default function StaffHome() {
       remain,
       status,
       description,
+      expiryDate,
       type,
       brandId,
       categoryId,
@@ -541,6 +558,7 @@ export default function StaffHome() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     ] = description.split("|");
@@ -551,6 +569,7 @@ export default function StaffHome() {
       brandOrigin,
       manufacturedAt,
       manufacturer,
+      ingredient,
       usageInstructions,
       storageInstructions,
     };
@@ -569,6 +588,7 @@ export default function StaffHome() {
     setBrandOrigin(details.brandOrigin);
     setManufacturedAt(details.manufacturedAt);
     setManufacturer(details.manufacturer);
+    setIngredient(details.ingredient);
     setUsageInstructions(details.usageInstructions);
     setStorageInstructions(details.storageInstructions);
     setOpen(true);
@@ -577,9 +597,22 @@ export default function StaffHome() {
   const handleClose = () => {
     setOpen(false);
     setSelectedProduct(null);
+    setWeight(null);
+    setBrandOrigin(null);
+    setManufacturedAt(null);
+    setManufacturer(null);
+    setIngredient(null);
+    setUsageInstructions(null);
+    setStorageInstructions(null);
   };
 
   const handleChange = (field, value) => {
+    // if (field === "expiryDate") {
+    //   const formattedDate = format(parseISO(value), "yyyy-MM-dd");
+    //   setSelectedProduct({ ...selectedProduct, [field]: formattedDate });
+    // } else {
+    //   setSelectedProduct({ ...selectedProduct, [field]: value });
+    // }
     setSelectedProduct((prevProduct) => ({
       ...prevProduct,
       [field]: value,
@@ -587,6 +620,7 @@ export default function StaffHome() {
   };
 
   const handleUpdate = () => {
+    debugger;
     if (
       !selectedProduct.name ||
       !selectedProduct.price ||
@@ -597,6 +631,7 @@ export default function StaffHome() {
       !brandOrigin ||
       !manufacturedAt ||
       !manufacturer ||
+      !ingredient ||
       !usageInstructions ||
       !storageInstructions
     ) {
@@ -655,9 +690,21 @@ export default function StaffHome() {
       toast.error("The weight must be greater than 0.");
       return;
     }
-    const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${usageInstructions}|${storageInstructions}`;
+
+    const isDuplicateName = product?.products?.some(
+      (product) =>
+        product.name === selectedProduct.name &&
+        product.id !== selectedProduct.id
+    );
+    if (isDuplicateName) {
+      toast.error("Product with this name already exists.");
+      return;
+    }
+
+    const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${ingredient}|${usageInstructions}|${storageInstructions}`;
     setDescription(fullDescription);
     selectedProduct.description = fullDescription;
+    console.log(selectedProduct.expiryDate);
 
     //Xử lý cập nhật sản phẩm
     updateProductApi(
@@ -669,6 +716,7 @@ export default function StaffHome() {
       selectedProduct.remain,
       selectedProduct.status,
       selectedProduct.description,
+      selectedProduct.expiryDate,
       selectedProduct.type,
       selectedProduct.brand_id,
       selectedProduct.category_id,
@@ -704,24 +752,6 @@ export default function StaffHome() {
         //   console.error("Error message:", error.message);
         // }
       });
-
-    //debug
-    // if (!selectedProduct) return;
-    // console.log("Product details:", {
-    //   image: image.file,
-    //   imageUrl: image.url,
-    //   id: selectedProduct.id,
-    //   name: selectedProduct.name,
-    //   price: selectedProduct.price,
-    //   point: selectedProduct.point,
-    //   description: selectedProduct.description,
-    //   status: selectedProduct.status,
-    //   type: selectedProduct.type,
-    //   category_id: selectedProduct.category_id,
-    //   brand_id: selectedProduct.brand_id,
-    //   age_id: selectedProduct.age_id,
-    //   is_active: selectedProduct.is_active,
-    // });
   };
 
   const handleImage = (e) => {
@@ -1543,6 +1573,7 @@ export default function StaffHome() {
                             width: "64px",
                             height: "64px",
                             margin: "auto",
+                            cursor: "pointer",
                           }}
                           // onClick={() =>
                           //   navigate(
@@ -1583,6 +1614,7 @@ export default function StaffHome() {
                               })
                             )
                           }
+                          sx={{ cursor: "pointer" }}
                         >
                           <Typography
                             variant="subtitle1"
@@ -1792,13 +1824,34 @@ export default function StaffHome() {
         </DialogTitle>
 
         <DialogContent>
-          <TextField
-            label="Product Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
+          <Grid container spacing={2} margin={"normal"}>
+            <Grid item xs={9}>
+              <TextField
+                label="Product Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                fullWidth
+                margin="normal"
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                label="Expiry Date"
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                inputProps={{
+                  min: today, // Chỉ cho phép chọn ngày từ hôm nay trở đi
+                }}
+              />
+            </Grid>
+          </Grid>
+
           <Grid container spacing={2} margin={"normal"}>
             <Grid item xs={4}>
               <TextField
@@ -1991,6 +2044,16 @@ export default function StaffHome() {
             fullWidth
             margin="normal"
           />
+
+          <TextField
+            label="Ingredient"
+            value={ingredient}
+            onChange={(e) => setIngredient(e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+            margin="normal"
+          />
           <TextField
             label="Usage Instructions"
             value={usageInstructions}
@@ -2141,13 +2204,41 @@ export default function StaffHome() {
               fullWidth
               margin="normal"
             /> */}
-            <TextField
-              label="Product Name"
-              value={selectedProduct?.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              fullWidth
-              margin="normal"
-            />
+            <Grid container spacing={2} margin={"normal"}>
+              <Grid item xs={9}>
+                <TextField
+                  label="Product Name"
+                  value={selectedProduct?.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  fullWidth
+                  margin="normal"
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <TextField
+                  label="Expiry Date"
+                  type="date"
+                  value={
+                    selectedProduct?.expiryDate
+                      ? format(
+                          parseISO(selectedProduct.expiryDate),
+                          "yyyy-MM-dd"
+                        )
+                      : ""
+                  }
+                  onChange={(e) => handleChange("expiryDate", e.target.value)}
+                  fullWidth
+                  margin="normal"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{
+                    min: today,
+                  }}
+                />
+              </Grid>
+            </Grid>
+
             <Grid container spacing={2} margin={"normal"}>
               <Grid item xs={4}>
                 <TextField
@@ -2341,6 +2432,16 @@ export default function StaffHome() {
               label="Manufacturer"
               value={manufacturer}
               onChange={(e) => setManufacturer(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+
+            <TextField
+              label="Ingredient"
+              value={ingredient}
+              onChange={(e) => setIngredient(e.target.value)}
+              multiline
+              rows={4}
               fullWidth
               margin="normal"
             />
