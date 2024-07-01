@@ -22,12 +22,19 @@ import Edit from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
 import Voucher from '@mui/icons-material/ConfirmationNumber';
 import Refund from '@mui/icons-material/CurrencyExchange';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+
 const drawerWidth = 260;
 const itemList = [
   {
     label: "Products",
-    Icon: Dashboard,
+    Icon: Inventory2Icon,
     href: "products",
+  },
+  {
+    label: "Dashboard",
+    Icon: Dashboard,
+    href: "dashboard",
   },
   {
     label: "Exchanges",
@@ -53,11 +60,6 @@ const itemList = [
     label: "Refunds",
     Icon: Refund,
     href: "refunds",
-  },
-  {
-    label: "Dashboard",
-    Icon: Dashboard,
-    href: "dashboard",
   },
 ];
 
@@ -223,7 +225,7 @@ export default function StaffLayout() {
         sx={{
           flexGrow: 1,
           backgroundColor: "#f5f7fd",
-          height: "100vh",
+          height: "100%",
           minWidth: 650,
         }}
       >
