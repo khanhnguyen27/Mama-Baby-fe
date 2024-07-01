@@ -19,8 +19,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import ProductSearch from "./ProductSearch";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
-import { selectCartAmount } from "../../redux/CartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { clearCart, selectCartAmount } from "../../redux/CartSlice";
 import { ListAlt, RequestPage } from "@mui/icons-material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
@@ -33,11 +33,13 @@ const Navigation = () => {
   const [openLogoutMenu, setOpenLogoutMenu] = useState(false);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const cartAmount = useSelector(selectCartAmount);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("username");
+    dispatch(clearCart());
     toast.success("Logout Successfully", { autoClose: 1000 });
     setIsLoggedIn(false);
     setOpenLogoutMenu(false);

@@ -580,7 +580,7 @@ export default function RequestStore() {
                             width: "70%",
                           }}
                         >
-                          <span style={{ opacity: 0.7 }}>User Name:</span>
+                          <span style={{ opacity: 0.7 }}>Username:</span>
                           <span style={{ fontWeight: "600" }}>
                             {userMap[item.user_id][0]}
                           </span>
