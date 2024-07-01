@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
+import { KeyboardCapslock } from "@mui/icons-material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
-import { CSVLink } from "react-csv";
-import jsPDF from "jspdf";
+import { saveAs } from 'file-saver';
 import html2canvas from "html2canvas";
+import ExcelJS from 'exceljs';
+import jsPDF from "jspdf";
 import io from "socket.io-client";
 import {
   Menu,
@@ -32,8 +33,7 @@ import { allOrderApi, orderByYearApi } from "../../api/OrderAPI";
 import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
 import { allStoreApi, StoreByMonthApi } from "../../api/StoreAPI";
 import { allUserApi, userByYearApi } from "../../api/UserAPI";
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import { allStatusOrderApi } from "../../api/OrderAPI";
 
 export default function AdminHome() {
   window.document.title = "AdminHome";
@@ -58,16 +58,18 @@ export default function AdminHome() {
   const [yearsListOrder, setYearsListOrder] = useState([]);
   const [YearsListAccount, setYearsListAccount] = useState([]);
   const [monthsList, setMonthsList] = useState([]);
-  const [selectedYearOrder, setSelectedYearOrder] = useState(
-    new Date().getFullYear()
-  );
-  const [selectedYearAccount, setSelectedYearAccount] = useState(
-    new Date().getFullYear()
-  );
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYearOrder, setSelectedYearOrder] = useState(new Date().getFullYear());
+  const [selectedYearAccount, setSelectedYearAccount] = useState(new Date().getFullYear());
   const [minYear, setMinYear] = useState(new Date().getFullYear() - 15);
   const [maxYear, setMaxYear] = useState(new Date().getFullYear());
+  const [totalAccountYear, setTotalAccountYear] = useState(0);
+  const [currentMonthAccount, setCurrentMonthAccount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -136,8 +138,8 @@ export default function AdminHome() {
       console.log("refundRes", refundRes);
       setAccounts(accountRes.data.data || []);
       console.log("accountRes", accountRes);
-      const userRes = await allUserApi();
 
+      const userRes = await allUserApi();
       const ordersData = orderRes.data.data || [];
       const userData = userRes?.data?.data || [];
       const userMap = userData.reduce((x, item) => {
@@ -150,24 +152,25 @@ export default function AdminHome() {
       const uniqueMonths = new Set();
       ordersData.forEach(order => {
         const orderDate = new Date(order.order_date);
-        console.log("Thang mang tren:", order.order_date);
+        console.log("orderDate:", order.order_date);
         const month = orderDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
         const year = orderDate.getFullYear();
         uniqueMonths.add(`${month}-${year}`);
       });
       setMonths(Array.from(uniqueMonths));
-      console.log("Thang ơ tren:", Array.from(uniqueMonths));
+      console.log("Month Unique:", Array.from(uniqueMonths));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchYears = async () => {
-      const years = await fetchYearsFromDatabase(orders);
+      const years = await fetchYearsOrderFromDatabase(orders);
       setYearsListOrder(years);
-      console.log("Years list:", years);
+      console.log("Years list Order:", years);
 
       if (years.length > 0 && !years.includes(selectedYearOrder)) {
         setSelectedYearOrder(years[0]);
@@ -181,7 +184,7 @@ export default function AdminHome() {
     const fetchYears = async () => {
       const years = await fetchYearsAccountFromDatabase(accounts);
       setYearsListAccount(years);
-      console.log("Years list:", years);
+      console.log("Years list Account:", years);
 
       if (years.length > 0 && !years.includes(selectedYearAccount)) {
         setSelectedYearAccount(years[0]);
@@ -205,10 +208,6 @@ export default function AdminHome() {
   }, [stores]);
 
   useEffect(() => {
-    fetchMinMaxYears();
-  }, []);
-
-  useEffect(() => {
     if (selectedYearOrder !== null) {
       handleBarChartData(selectedYearOrder);
     }
@@ -216,7 +215,7 @@ export default function AdminHome() {
 
   useEffect(() => {
     if (selectedYearAccount !== null) {
-      handleAccountLineChartData(selectedYearAccount);
+      handleLineAccountData(selectedYearAccount);
     }
   }, [selectedYearAccount, accounts]);
 
@@ -225,10 +224,14 @@ export default function AdminHome() {
   }, [selectedMonth, stores]);
 
   useEffect(() => {
-    handleLineChartData();
+    fetchMinMaxYears();
+  }, []);
+
+  useEffect(() => {
+    handleLineOrderData();
   }, [orders, refunds]);
 
-  const fetchYearsFromDatabase = async (ordersData) => {
+  const fetchYearsOrderFromDatabase = async (ordersData) => {
     try {
       const yearsSet = new Set();
 
@@ -283,7 +286,7 @@ export default function AdminHome() {
     }
   };
 
-  const handleYearChange = (event) => {
+  const handleYearOrderChange = (event) => {
     const selectedYearOrder = parseInt(event.target.value);
     setSelectedYearOrder(selectedYearOrder);
     console.log("selectedYearOrder", selectedYearOrder);
@@ -301,134 +304,6 @@ export default function AdminHome() {
     console.log("selectedMonth", selectedMonth);
   };
 
-  const handleBarChartData = async (year = selectedYearOrder) => {
-    setLoading(true);
-
-    try {
-      let orderRes, refundRes;
-
-      if (year) {
-        orderRes = await orderByYearApi(year);
-        refundRes = await refundByYearApi(year);
-      }
-
-      console.log("orderRes:", orderRes);
-      console.log("refundRes:", refundRes);
-
-      const ordersData = orderRes?.data?.data || [];
-      const refundsData = refundRes?.data?.data || [];
-
-      const monthlyData = {
-        Jan: { Revenue: 0, Refund: 0 },
-        Feb: { Revenue: 0, Refund: 0 },
-        Mar: { Revenue: 0, Refund: 0 },
-        Apr: { Revenue: 0, Refund: 0 },
-        May: { Revenue: 0, Refund: 0 },
-        Jun: { Revenue: 0, Refund: 0 },
-        Jul: { Revenue: 0, Refund: 0 },
-        Aug: { Revenue: 0, Refund: 0 },
-        Sep: { Revenue: 0, Refund: 0 },
-        Oct: { Revenue: 0, Refund: 0 },
-        Nov: { Revenue: 0, Refund: 0 },
-        Dec: { Revenue: 0, Refund: 0 },
-      };
-
-      let totalRev = 0;
-      let totalRef = 0;
-
-      const monthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
-
-      ordersData.forEach((order) => {
-        if (order.type.toUpperCase() === "ORDER") {
-          const date = new Date(order.order_date);
-          const month = monthNames[date.getMonth()];
-          monthlyData[month].Revenue += order.final_amount || 0;
-          totalRev += order.final_amount || 0;
-        }
-      });
-
-      refundsData.forEach((refund) => {
-        const date = new Date(refund.create_date);
-        const month = monthNames[date.getMonth()];
-        monthlyData[month].Refund += refund.amount || 0;
-        totalRef += refund.amount || 0;
-      });
-
-      const BarData = Object.keys(monthlyData).map((month) => ({
-        month,
-        Revenue: monthlyData[month].Revenue,
-        Refund: monthlyData[month].Refund,
-      }));
-
-      setBarChartData(BarData);
-      setTotalRevenue(totalRev);
-      setTotalRefund(totalRef);
-
-      console.log("ordersData", ordersData);
-      console.log("refundsData", refundsData);
-      console.log("totalRev", totalRev);
-      console.log("totalRef", totalRef);
-      console.log("BarData:", BarData);
-    } catch (error) {
-      console.error("Error fetching order and refund data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAccountLineChartData = async (year = selectedYearAccount) => {
-    try {
-      let accountRes;
-
-      if (year) {
-        accountRes = await userByYearApi(year);
-      }
-
-      console.log("accountRes:", accountRes);
-
-      const accountsData = accountRes?.data?.data || [];
-      console.log("accountsData:", accountsData);
-
-      const monthlyData = Array(12).fill(0);
-
-      accountsData.forEach((account) => {
-        const date = new Date(account.create_at);
-        const month = date.getMonth(); // 0-indexed, Jan is 0, Dec is 11
-        monthlyData[month]++;
-      });
-
-      const lineChartData = monthlyData.map((Account, index) => ({
-        month: index + 1, // Convert to 1-indexed month
-        Account,
-      }));
-
-      console.log("lineChartData:", lineChartData);
-
-      setAccountLineChartData(lineChartData);
-    } catch (error) {
-      console.error("Error handling Account line chart data:", error);
-    }
-  };
-
-  const headers = [
-    { label: "Month", key: "month" },
-    { label: "Revenue", key: "Revenue" },
-    { label: "Refund", key: "Refund" },
-  ];
-
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -438,7 +313,6 @@ export default function AdminHome() {
   };
 
   //Export report revenue, refund
-
   const sortedMonths = months.sort((a, b) => {
     const [monthA, yearA] = a.split('-').map(Number);
     const [monthB, yearB] = b.split('-').map(Number);
@@ -666,35 +540,140 @@ export default function AdminHome() {
   const handleExportPDF = async () => {
     const input = document.getElementById("dashboard");
     if (input) {
-      const canvas = await html2canvas(input);
+      const canvas = await html2canvas(input, { scale: 2 });
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
-      const imgWidth = 190;
-      const pageHeight = 290;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
       let heightLeft = imgHeight;
-      let position = 25;
+      let position = 10;
 
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
 
-      while (heightLeft >= 0) {
+      while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
       }
 
-      pdf.save("Dashboard.pdf");
+      pdf.save('Dashboard.pdf');
     } else {
-      console.error("Element not found: #Dashboard");
+      console.error("Element not found: #dashboard");
     }
   };
-  const csvData = BarChartData.map((item) => ({
-    month: item.month,
-    Revenue: item.Revenue,
-    Refund: item.Refund,
-  }));
+
+  const handleBarChartData = async (year = selectedYearOrder) => {
+    setLoading(true);
+
+    try {
+      let orderRes, refundRes, statusOrderRes;
+
+      if (year) {
+        orderRes = await orderByYearApi(year);
+        refundRes = await refundByYearApi(year);
+        statusOrderRes = await allStatusOrderApi();
+      }
+
+      console.log("orderRes:", orderRes);
+      console.log("refundRes:", refundRes);
+      console.log("statusOrderRes:", statusOrderRes);
+
+      const ordersData = orderRes?.data?.data || [];
+      const refundsData = refundRes?.data?.data || [];
+      const statusOrders = statusOrderRes?.data?.data || [];
+
+      const orderIdsWithCancelStatus = statusOrders
+        .filter(statusOrder => statusOrder.status.toUpperCase() === "CANCELLED")
+        .map(statusOrder => statusOrder.order_id);
+
+      console.log("orderIdsWithCancelStatus:", orderIdsWithCancelStatus);
+
+      const monthlyData = {
+        Jan: { Revenue: 0, Refund: 0 },
+        Feb: { Revenue: 0, Refund: 0 },
+        Mar: { Revenue: 0, Refund: 0 },
+        Apr: { Revenue: 0, Refund: 0 },
+        May: { Revenue: 0, Refund: 0 },
+        Jun: { Revenue: 0, Refund: 0 },
+        Jul: { Revenue: 0, Refund: 0 },
+        Aug: { Revenue: 0, Refund: 0 },
+        Sep: { Revenue: 0, Refund: 0 },
+        Oct: { Revenue: 0, Refund: 0 },
+        Nov: { Revenue: 0, Refund: 0 },
+        Dec: { Revenue: 0, Refund: 0 },
+      };
+
+      let totalRev = 0;
+      let totalRef = 0;
+
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      ordersData.forEach((order) => {
+        if (order.type.toUpperCase() === "ORDER") {
+          if (
+            !(order.payment_method.toUpperCase() === "COD" &&
+              orderIdsWithCancelStatus.includes(order.id))
+          ) {
+            const date = new Date(order.order_date);
+            const month = monthNames[date.getMonth()];
+            monthlyData[month].Revenue += order.final_amount || 0;
+            totalRev += order.final_amount || 0;
+          }
+        }
+      });
+
+      refundsData.forEach((refund) => {
+        const date = new Date(refund.create_date);
+        const month = monthNames[date.getMonth()];
+        monthlyData[month].Refund += refund.amount || 0;
+        totalRef += refund.amount || 0;
+      });
+
+      const BarData = Object.keys(monthlyData).map((month) => ({
+        month,
+        Revenue: monthlyData[month].Revenue,
+        Refund: monthlyData[month].Refund,
+      }));
+
+      setBarChartData(BarData);
+      setTotalRevenue(totalRev);
+      setTotalRefund(totalRef);
+
+      console.log("ordersData", ordersData);
+      console.log("refundsData", refundsData);
+      console.log("totalRev", totalRev);
+      console.log("totalRef", totalRef);
+      console.log("BarData:", BarData);
+    } catch (error) {
+      console.error("Error fetching order and refund data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const calculatePercentage = async (month = selectedMonth) => {
     setLoading(true);
@@ -759,18 +738,83 @@ export default function AdminHome() {
     }
   };
 
-  const currentYear = new Date().getFullYear();
-
   const data = [
     { value: inProgressData, label: "Processing", color: "#FFBB28" },
     { value: completeData, label: "Approved", color: "#00C49F" },
   ];
 
-  const handlePieChartClick = () => {
-    navigate("/admin/requeststore");
+  const handleLineAccountData = async (year = selectedYearAccount) => {
+    try {
+      let accountRes;
+
+      if (year) {
+        accountRes = await userByYearApi(year);
+      }
+
+      console.log("accountRes:", accountRes);
+
+      const accountsData = accountRes?.data?.data || [];
+      console.log("accountsData:", accountsData);
+
+      const totalAccountsYear = accountsData.reduce((sum, account) => {
+        if (account.role_id !== 3) {
+          return sum + 1;
+        }
+        return sum;
+      }, 0);
+      setTotalAccountYear(totalAccountsYear);
+
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
+
+      const currentMonthAccounts = accountsData.reduce((sum, account) => {
+        const accountDate = new Date(account.create_at);
+        const accountMonth = accountDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
+        if (accountMonth === currentMonth && account.role_id !== 3) {
+          return sum + 1;
+        }
+        return sum;
+      }, 0);
+      setCurrentMonthAccount(currentMonthAccounts);
+
+      const monthlyData = Array(12).fill(0);
+
+      accountsData.forEach((account) => {
+        const accountDate = new Date(account.create_at);
+        const month = accountDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
+        if (account.role_id !== 3) {
+          monthlyData[month]++;
+        }
+      });
+
+      const lineChartData = monthlyData.map((Account, index) => ({
+        month: index + 1,
+        Account,
+      }));
+
+      console.log("lineChartData:", lineChartData);
+
+      setAccountLineChartData(lineChartData);
+
+    } catch (error) {
+      console.error("Error handling Account line chart data:", error);
+    }
   };
 
-  const handleLineChartData = async () => {
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const xAxisConfig = [
+    {
+      fontWeight: 'bold',
+      label: 'Month',
+      dataKey: 'month',
+      valueFormatter: (month) => monthNames[month - 1], // Convert month number to month name
+      min: 1, // January
+      max: 12, // December
+    },
+  ];
+
+  const handleLineOrderData = async () => {
     try {
       const yearlyRevenue = orders.reduce((acc, order) => {
         const date = new Date(order.order_date);
@@ -826,18 +870,51 @@ export default function AdminHome() {
   };
 
   const valueFormatter = (value) => {
-    if (value >= 1_000_000_000) {
+    if (value >= 10_000_000_000) {
+      return `${(value / 10_000_000_000).toFixed(0)} Bil`;
+    } else if (value >= 1_000_000_000) {
       return `${(value / 1_000_000_000).toFixed(1)} Bil`;
+    } else if (value >= 10_000_000) {
+      return `${(value / 10_000_000).toFixed(0)} Mil`;
     } else if (value >= 1_000_000) {
       return `${(value / 1_000_000).toFixed(1)} Mil`;
+    } else if (value >= 10_000) {
+      return `${(value / 10_000).toFixed(0)} K`;
     } else if (value >= 1_000) {
-      return `${(value / 1_000).toFixed(1)}K`;
+      return `${(value / 1_000).toFixed(1)} K`;
     } else {
       return value;
     }
   };
 
-  const keyToLabel = {
+  const FormatMonthNames = (monthNumber) => {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+
+    return months[monthNumber - 1];
+  };
+
+  const handleStorePieClick = () => {
+    navigate("/admin/requeststore");
+  };
+
+  const handleAcountLineClick = () => {
+    navigate("/admin/accounts");
+  };
+
+  const keyToLabelOrder = {
     Revenue: "Revenue (VND)",
     Refund: "Refund (VND)",
   };
@@ -846,16 +923,16 @@ export default function AdminHome() {
     Account: "Account",
   };
 
-  const colors = {
+  const colorsOrder = {
     Revenue: "#228B22",
     Refund: "rgb(2, 178, 175)",
   };
 
   const colorsAccount = {
-    Account: "rgb(2, 178, 175)",
+    Account: "#008080",
   };
 
-  const stackStrategy = {
+  const stackStrategyOrder = {
     stack: "total",
     area: true,
   };
@@ -864,16 +941,18 @@ export default function AdminHome() {
     area: false,
   };
 
-  const customize = {
+  const customizeOrder = {
     height: 400,
-    legend: { hidden: false },
-    margin: { top: 5 },
+    legend: {
+      hidden: false,
+    },
   };
 
   const customizeAccount = {
     height: 400,
-    legend: { hidden: true },
-    margin: { top: 5 },
+    legend: {
+      hidden: false,
+    },
   };
 
   return (
@@ -914,7 +993,12 @@ export default function AdminHome() {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={() => { handleExportCSV(); handleMenuClose(); }}>
+          <MenuItem
+            onClick={() => {
+              handleExportCSV();
+              handleMenuClose();
+            }}
+          >
             Export Report
           </MenuItem>
           <MenuItem
@@ -935,6 +1019,7 @@ export default function AdminHome() {
                     <Typography
                       variant="body1"
                       style={{
+                        fontSize: "18px",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -969,6 +1054,7 @@ export default function AdminHome() {
                     <Typography
                       variant="body1"
                       style={{
+                        fontSize: "18px",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1030,7 +1116,7 @@ export default function AdminHome() {
                     style={{
                       width: 90,
                       position: "absolute",
-                      top: 22,
+                      top: 28,
                       left: 250,
                     }}
                   >
@@ -1043,7 +1129,7 @@ export default function AdminHome() {
                     </InputLabel>
                     <Select
                       value={selectedYearOrder}
-                      onChange={handleYearChange}
+                      onChange={handleYearOrderChange}
                       label="Year"
                       inputProps={{
                         name: "Year",
@@ -1074,47 +1160,18 @@ export default function AdminHome() {
                   series={[
                     {
                       dataKey: "Revenue",
-                      label: "Revenue",
+                      label: "Revenue (VND)",
                       valueFormatter: (value) => valueFormatter(value) + " VND",
                       color: "#228B22",
                     },
                     {
                       dataKey: "Refund",
-                      label: "Refund",
+                      label: "Refund (VND)",
                       valueFormatter: (value) => valueFormatter(value) + " VND",
                       color: "rgb(2, 178, 175)",
                     },
                   ]}
                   valueFormatter
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={10} md={10}>
-            <Card>
-              <CardContent style={{ height: "420px", display: "flex" }}>
-                <LineChart
-                  xAxis={[
-                    {
-                      fontWeight: "bold",
-                      label: "Month",
-                      dataKey: "month",
-                      valueFormatter: (month) => month.toString(), // Assuming months are in number format 1-12
-                      min: 1, // January
-                      max: 12, // December
-                    },
-                  ]}
-                  yAxis={[{ valueFormatter: (value) => value.toString() }]}
-                  series={Object.keys(keyToLabelAccount).map((key) => ({
-                    dataKey: key,
-                    label: keyToLabelAccount[key],
-                    color: colorsAccount[key],
-                    showMark: false,
-                    valueFormatter,
-                    ...stackStrategyAccount,
-                  }))}
-                  dataset={AccountLineChartData}
-                  {...customizeAccount}
                 />
               </CardContent>
             </Card>
@@ -1134,11 +1191,11 @@ export default function AdminHome() {
                       paddingBottom: "20px",
                       "&:hover": {
                         cursor: "pointer",
-                        color: "#DAA520",
+                        color: "#E9967A",
                       },
                     }}
                     variant="h6"
-                    onClick={handlePieChartClick}
+                    onClick={handleStorePieClick}
                   >
                     Monthly Stores Status {currentYear}
                   </Typography>
@@ -1146,14 +1203,14 @@ export default function AdminHome() {
                     variant="outlined"
                     style={{
                       width: 120,
-                      marginTop: 5,
-                      marginLeft: 78,
+                      marginTop: 10,
+                      marginLeft: 74,
                     }}
                   >
                     <InputLabel
                       htmlFor="month-select"
                       shrink
-                      style={{ fontWeight: "bold", color: "#DAA520" }}
+                      style={{ fontWeight: "bold", color: "#E9967A" }}
                     >
                       Month
                     </InputLabel>
@@ -1238,7 +1295,9 @@ export default function AdminHome() {
                           fontSize: "40px",
                         }}
                       >
-                        <span>{valueFormatter(inProgressCount)}</span>
+                        <span style={{ color: "#696969" }}>
+                          {valueFormatter(inProgressCount)}
+                        </span>
                       </Typography>
                     </Grid>
                   </CardContent>
@@ -1266,13 +1325,161 @@ export default function AdminHome() {
                           fontSize: "40px",
                         }}
                       >
-                        <span>{valueFormatter(completedCount)}</span>
+                        <span style={{ color: "#696969" }}>
+                          {valueFormatter(completedCount)}
+                        </span>
                       </Typography>
                     </Grid>
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
+          </Grid>
+          <Grid item xs={3} md={3}>
+            <Grid container spacing={2} direction="column">
+              <Grid item xs={12} md={12}>
+                <Card>
+                  <CardContent style={{ height: "242px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontSize: "19px",
+                          fontWeight: "bold",
+                          color: "#E9967A",
+                          marginBottom: "20px",
+                          paddingBottom: "20px",
+                        }}
+                      >
+                        Total Accounts in {currentYear}
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "30px",
+                          paddingRight: "10px",
+                          fontSize: "45px",
+                        }}
+                      >
+                        <span style={{ color: "#696969" }}>
+                          {valueFormatter(totalAccountYear)}
+                        </span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <Card>
+                  <CardContent style={{ height: "241px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontSize: "19px",
+                          fontWeight: "bold",
+                          color: "#E9967A",
+                          marginBottom: "20px",
+                          paddingBottom: "20px",
+                        }}
+                      >
+                        Total Accounts in {FormatMonthNames(currentMonth)}
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "30px",
+                          paddingRight: "10px",
+                          fontSize: "45px",
+                        }}
+                      >
+                        <span style={{ color: "#696969" }}>
+                          {valueFormatter(currentMonthAccount)}
+                        </span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={9} md={9}>
+            <Card>
+              <CardContent style={{
+                height: "500px",
+                display: "flex",
+                flexDirection: "column",
+              }}>
+                <Typography
+                  sx={{
+                    fontSize: "26px",
+                    fontWeight: "bold",
+                    color: "#ff469e",
+                    marginBottom: "20px",
+                    paddingBottom: "20px",
+                    "&:hover": {
+                      cursor: "pointer",
+                      color: "#E9967A",
+                    },
+                  }}
+                  variant="h6"
+                  onClick={handleAcountLineClick}
+                >
+                  Yearly Account Analysis
+                </Typography>
+                <FormControl
+                  variant="outlined"
+                  style={{
+                    width: 90,
+                    position: "absolute",
+                    top: 1040,
+                    left: 610,
+                  }}
+                >
+                  <InputLabel
+                    htmlFor="year-select"
+                    shrink
+                    style={{ fontWeight: "bold", color: "#E9967A" }}
+                  >
+                    Year
+                  </InputLabel>
+                  <Select
+                    value={selectedYearAccount}
+                    onChange={handleYearAccountChange}
+                    label="Year"
+                    inputProps={{
+                      name: "Year",
+                      id: "year-select",
+                    }}
+                    displayEmpty
+                  >
+                    {YearsListAccount.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <LineChart
+                  xAxis={
+                    xAxisConfig
+                  }
+                  yAxis={[{ valueFormatter: (value) => value.toString() }]}
+                  series={Object.keys(keyToLabelAccount).map((key) => ({
+                    dataKey: key,
+                    label: keyToLabelAccount[key],
+                    color: colorsAccount[key],
+                    showMark: false,
+                    valueFormatter,
+                    ...stackStrategyAccount,
+                  }))}
+                  dataset={AccountLineChartData}
+                  {...customizeAccount}
+                />
+              </CardContent>
+            </Card>
           </Grid>
           <Grid item xs={12} md={12}>
             <Card>
@@ -1308,49 +1515,51 @@ export default function AdminHome() {
                     },
                   ]}
                   yAxis={[{ valueFormatter }]}
-                  series={Object.keys(keyToLabel).map((key) => ({
+                  series={Object.keys(keyToLabelOrder).map((key) => ({
                     dataKey: key,
-                    label: keyToLabel[key],
-                    color: colors[key],
+                    label: keyToLabelOrder[key],
+                    color: colorsOrder[key],
                     showMark: false,
                     valueFormatter,
-                    ...stackStrategy,
+                    ...stackStrategyOrder,
                   }))}
                   dataset={LineChartData}
-                  {...customize}
+                  {...customizeOrder}
                 />
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </Paper>
-      {visible && (
-        <IconButton
-          size="large"
-          sx={{
-            position: "fixed",
-            right: 25,
-            bottom: 25,
-            border: "1px solid #ff469e",
-            backgroundColor: "#fff4fc",
-            color: "#ff469e",
-            transition:
-              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-            "&:hover": {
-              backgroundColor: "#ff469e",
-              color: "white",
-            },
-          }}
-          onClick={() =>
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-          }
-        >
-          <KeyboardCapslock />
-        </IconButton>
-      )}
-    </Container>
+      {
+        visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 25,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
+        )
+      }
+    </Container >
   );
 }
