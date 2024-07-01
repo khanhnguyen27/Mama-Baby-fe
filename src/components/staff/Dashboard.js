@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { useNavigate } from 'react-router-dom';
-import io from "socket.io-client";
+import { useNavigate } from "react-router-dom";
 import {
   IconButton,
   MenuItem,
@@ -15,102 +11,74 @@ import {
   Typography,
   Card,
   CardContent,
-  Paper
+  Paper,
 } from "@mui/material";
+import { Bar, Pie } from "react-chartjs-2";
 import {
-  BarChart,
-  PieChart,
-  pieArcLabelClasses,
-  LineChart
-} from "@mui/x-charts";
-import { allOrderApi, orderByYearApi } from "../../api/OrderAPI";
-import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
-import { allStoreApi, StoreByMonthApi } from "../../api/StoreAPI";
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+} from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { allOrderApi } from "../../api/OrderAPI";
+import { allRefundApi } from "../../api/RefundAPI";
+import { allExchangeApi } from "../../api/ExchangeAPI";
+
+// Register the required components with ChartJS
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  ChartDataLabels
+);
 
 export default function Dashboard() {
   window.document.title = "Dashboard";
   const navigate = useNavigate();
-  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
-  const [stores, setStores] = useState([]);
   const [refunds, setRefunds] = useState([]);
-  const [BarChartData, setBarChartData] = useState([]);
-  const [LineChartData, setLineChartData] = useState([]);
-  const [cancelData, setCancelData] = useState(0);
-  const [inProgressData, setInProgressData] = useState(0);
-  const [completeData, setCompleteData] = useState(0);
-  const [cancelledCount, setCancelledCount] = useState(0);
-  const [inProgressCount, setInProgressCount] = useState(0);
-  const [completedCount, setCompleteCount] = useState(0);
+  const [exchanges, setExchanges] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [orderCompletedData, setOrderCompletedData] = useState(0);
+  const [refundData, setRefundData] = useState(0);
+  const [exchangeData, setExchangeData] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
+  const [refundCount, setRefundCount] = useState(0);
+  const [exchangeCount, setExchangeCount] = useState(0);
+  const [orderTotalAmount, setOrderTotalAmount] = useState(0);
+  const [refundTotalAmount, setRefundTotalAmount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
-  const [totalRefund, setTotalRefund] = useState(0);
-  const [yearsList, setYearsList] = useState([]);
-  const [monthsList, setMonthsList] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);;
-  const [minYear, setMinYear] = useState(new Date().getFullYear() - 15);
-  const [maxYear, setMaxYear] = useState(new Date().getFullYear());
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      setVisible(scrollY > 70);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-
-    const socket = io("http://localhost:3000");
-
-    socket.on("connect", () => {
-      console.log("Connected to server");
-    });
-
-    socket.on("ordersUpdate", (newOrders) => {
-      console.log("Received orders update:", newOrders);
-      setOrders(prevOrders => [...prevOrders, newOrders]);
-    });
-
-    socket.on("refundsUpdate", (newRefunds) => {
-      console.log("Received refunds update:", newRefunds);
-      setRefunds(prevRefunds => [...prevRefunds, newRefunds]);
-    });
-
-    socket.on("storesUpdate", (newStores) => {
-      console.log("Received store update:", newStores);
-      setStores(prevStores => [...prevStores, newStores]);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-
-    socket.on("error", (error) => {
-      console.error("Socket error:", error);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  const [yearlyData, setYearlyData] = useState({});
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const orderRes = await allOrderApi();
-      const storeRes = await allStoreApi();
+      const exchangeRes = await allExchangeApi();
       const refundRes = await allRefundApi();
 
+      console.log("Orders:", orderRes.data.data);
+      console.log("Exchanges:", exchangeRes.data.data);
+      console.log("Refunds:", refundRes.data.data);
+      calculateYearlyData(
+        orderRes.data.data || [],
+        refundRes.data.data.refunds || []
+      );
+
       setOrders(orderRes.data.data || []);
-      console.log("orderRes", orderRes)
-      setStores(storeRes.data.data.stores || []);
-      console.log("storeRes", storeRes)
+      setExchanges(exchangeRes.data.data.exchanges || []);
       setRefunds(refundRes.data.data.refunds || []);
-      console.log("refundRes", refundRes)
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -119,226 +87,123 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    const fetchYears = async () => {
-      const years = await fetchYearsFromDatabase(orders);
-      setYearsList(years);
-      console.log("Years list:", years);
+    fetchData();
+    calculatePercentage(selectedMonth, selectedYear);
+  }, [selectedMonth, selectedYear]);
 
-      if (years.length > 0 && !years.includes(selectedYear)) {
-        setSelectedYear(years[0]);
-      }
-    };
-
-    fetchYears();
-  }, [orders]);
-
-  useEffect(() => {
-    const fetchMonths = async () => {
-      const months = await fetchMonthsFromDatabase(stores);
-      setMonthsList(months);
-
-      if (months.length > 0 && !months.includes(selectedMonth)) {
-        setSelectedMonth(months[0]);
-      }
-    };
-
-    fetchMonths();
-  }, [stores]);
-
-  useEffect(() => {
-    fetchMinMaxYears();
-  }, []);
-
-  useEffect(() => {
-    if (selectedYear !== null) {
-      handleBarChartData(selectedYear);
-    }
-  }, [selectedYear, orders, refunds]);
-
-  useEffect(() => {
-    calculatePercentage(selectedMonth);
-  }, [selectedMonth, stores]);
-
-  useEffect(() => {
-    handleLineChartData();
-  }, [orders, refunds]);
-
-  const fetchYearsFromDatabase = async (ordersData) => {
-    try {
-      const yearsSet = new Set();
-
-      ordersData.forEach((order) => {
-        const date = new Date(order.order_date);
-        const year = date.getFullYear();
-        yearsSet.add(year);
-      });
-
-      const yearsArray = Array.from(yearsSet).sort();
-      console.log("Years fetched:", yearsArray);
-      return yearsArray;
-    } catch (error) {
-      console.error("Error fetching years:", error);
-      return [];
-    }
-  };
-
-  const fetchMonthsFromDatabase = async (storesData) => {
-    try {
-      const monthsSet = new Set();
-
-      storesData.forEach((store) => {
-        const date = new Date(store.request_date);
-        const month = date.getMonth() + 1;
-        monthsSet.add(month);
-      });
-
-      return Array.from(monthsSet).sort((a, b) => a - b);
-    } catch (error) {
-      console.error("Error fetching months:", error);
-      return [];
-    }
+  const handleMonthChange = (event) => {
+    const selectedMonth = parseInt(event.target.value);
+    setSelectedMonth(selectedMonth);
+    calculatePercentage(selectedMonth, selectedYear);
   };
 
   const handleYearChange = (event) => {
     const selectedYear = parseInt(event.target.value);
     setSelectedYear(selectedYear);
-    console.log("selectedYear", selectedYear);
+    calculatePercentage(selectedMonth, selectedYear);
+  };
+  const calculateYearlyData = (ordersData, refundsData) => {
+    const data = {};
+    ordersData.forEach((order) => {
+      const isCompleted = order.status_order_list.some(
+        (status) => status.status === "COMPLETED"
+      );
+      if (isCompleted) {
+        const year = new Date(order.order_date).getFullYear();
+        if (!data[year]) data[year] = { orders: 0, refunds: 0 };
+        data[year].orders += order.final_amount || 0;
+      }
+    });
+    refundsData.forEach((refund) => {
+      const year = new Date(refund.create_date).getFullYear();
+      if (!data[year]) data[year] = { orders: 0, refunds: 0 };
+      data[year].refunds += refund.amount || 0;
+    });
+    setYearlyData(data);
   };
 
-  const handleMonthChange = (event) => {
-    const selectedMonth = parseInt(event.target.value);
-    setSelectedMonth(selectedMonth);
-    console.log("selectedMonth", selectedMonth);
-  };
-
-  const handleBarChartData = async (year = selectedYear) => {
+  const calculatePercentage = async (
+    month = selectedMonth,
+    year = selectedYear
+  ) => {
     setLoading(true);
     try {
-      let orderRes, refundRes;
+      const orderRes = await allOrderApi();
+      const exchangeRes = await allExchangeApi();
+      const refundRes = await allRefundApi();
 
-      if (year) {
-        orderRes = await orderByYearApi(year);
-        refundRes = await refundByYearApi(year);
-      }
+      const ordersData = (orderRes.data.data || []).filter(
+        (order) =>
+          new Date(order.order_date).getMonth() + 1 === month &&
+          new Date(order.order_date).getFullYear() === year
+      );
 
-      console.log("orderRes:", orderRes);
-      console.log("refundRes:", refundRes);
+      const exchangesData = (exchangeRes.data.data.exchanges || []).filter(
+        (exchange) =>
+          new Date(exchange.create_date).getMonth() + 1 === month &&
+          new Date(exchange.create_date).getFullYear() === year
+      );
 
-      const ordersData = orderRes?.data?.data || [];
-      const refundsData = refundRes?.data?.data || [];
+      const refundsData = (refundRes.data.data.refunds || []).filter(
+        (refund) =>
+          new Date(refund.create_date).getMonth() + 1 === month &&
+          new Date(refund.create_date).getFullYear() === year
+      );
 
-      const monthlyData = {
-        Jan: { Revenue: 0, Refund: 0 },
-        Feb: { Revenue: 0, Refund: 0 },
-        Mar: { Revenue: 0, Refund: 0 },
-        Apr: { Revenue: 0, Refund: 0 },
-        May: { Revenue: 0, Refund: 0 },
-        Jun: { Revenue: 0, Refund: 0 },
-        Jul: { Revenue: 0, Refund: 0 },
-        Aug: { Revenue: 0, Refund: 0 },
-        Sep: { Revenue: 0, Refund: 0 },
-        Oct: { Revenue: 0, Refund: 0 },
-        Nov: { Revenue: 0, Refund: 0 },
-        Dec: { Revenue: 0, Refund: 0 },
-      };
+      const completedOrders = ordersData.filter((order) =>
+        order.status_order_list.some((status) => status.status === "COMPLETED")
+      );
 
-      let totalRev = 0;
-      let totalRef = 0;
-
-      ordersData.forEach((order) => {
-        const date = new Date(order.order_date);
-        const month = date.toLocaleString("default", { month: "short" });
-        monthlyData[month].Revenue += order.amount || 0; // Ensure amount exists and is a number
-        totalRev += order.amount || 0; // Accumulate total revenue
-      });
-
-      refundsData.forEach((refund) => {
-        const date = new Date(refund.create_date);
-        const month = date.toLocaleString("default", { month: "short" });
-        monthlyData[month].Refund += refund.amount || 0;
-        totalRef += refund.amount || 0;
-      });
-
-      const BarData = Object.keys(monthlyData).map((month) => ({
-        month,
-        Revenue: monthlyData[month].Revenue,
-        Refund: monthlyData[month].Refund,
-      }));
-
-      setBarChartData(BarData);
-      setTotalRevenue(totalRev);
-      setTotalRefund(totalRef);
-
-      console.log("ordersData", ordersData);
-      console.log("refundsData", refundsData);
-      console.log("totalRev", totalRev);
-      console.log("totalRef", totalRef);
-      console.log("BarData:", BarData);
-    } catch (error) {
-      console.error("Error fetching order and refund data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculatePercentage = async (month = selectedMonth) => {
-    setLoading(true);
-    try {
-      if (!Array.isArray(stores) || stores.length === 0) {
-        setCancelData(0);
-        setCompleteData(0);
-        setInProgressData(0);
-        return;
-      }
-
-      let storeMonth;
-
-      if (month) {
-        storeMonth = await StoreByMonthApi(month);
-      }
-
-      console.log("storeMonth:", storeMonth);
-
-      const storeData = storeMonth?.data?.data || [];
-
-      let cancelledCount = 0;
-      let completedCount = 0;
-      let inProgressCount = 0;
-
-      storeData.forEach((store) => {
-        switch (store.status.trim().toUpperCase()) {
-          case "REFUSE":
-            cancelledCount++;
-            break;
-          case "APPROVED":
-            completedCount++;
-            break;
-          case "PROCESSING":
-            inProgressCount++;
-            break;
-          default:
-            break;
-        }
-      });
-
-      const totalCount = cancelledCount + completedCount + inProgressCount;
+      const totalCount =
+        completedOrders.length + exchangesData.length + refundsData.length;
 
       if (totalCount > 0) {
-        const cancelPercentage = ((cancelledCount / totalCount) * 100).toFixed(2);
-        const completePercentage = ((completedCount / totalCount) * 100).toFixed(2);
-        const inProgressPercentage = ((inProgressCount / totalCount) * 100).toFixed(2);
+        const refundPercentage = (
+          (refundsData.length / totalCount) *
+          100
+        ).toFixed(2);
+        const orderPercentage = (
+          (completedOrders.length / totalCount) *
+          100
+        ).toFixed(2);
+        const exchangePercentage = (
+          (exchangesData.length / totalCount) *
+          100
+        ).toFixed(2);
 
-        setCancelledCount(cancelledCount);
-        setCompleteCount(completedCount);
-        setInProgressCount(inProgressCount);
+        setOrderCompletedData(orderPercentage);
+        setRefundData(refundPercentage);
+        setExchangeData(exchangePercentage);
 
-        setCancelData(parseFloat(cancelPercentage));
-        setCompleteData(parseFloat(completePercentage));
-        setInProgressData(parseFloat(inProgressPercentage));
+        setOrderCount(completedOrders.length);
+        setRefundCount(refundsData.length);
+        setExchangeCount(exchangesData.length);
+
+        const orderTotalAmount = completedOrders.reduce(
+          (sum, order) => sum + (order.final_amount || 0),
+          0
+        );
+        const refundTotalAmount = refundsData.reduce(
+          (sum, refund) => sum + (refund.amount || 0),
+          0
+        );
+        const totalRevenue = orderTotalAmount - refundTotalAmount;
+
+        setOrderTotalAmount(orderTotalAmount);
+        setRefundTotalAmount(refundTotalAmount);
+        setTotalRevenue(totalRevenue);
       } else {
-        setCancelData(0);
-        setCompleteData(0);
-        setInProgressData(0);
+        setOrderCompletedData(0);
+        setRefundData(0);
+        setExchangeData(0);
+
+        setOrderCount(0);
+        setRefundCount(0);
+        setExchangeCount(0);
+
+        setOrderTotalAmount(0);
+        setRefundTotalAmount(0);
+        setTotalRevenue(0);
       }
     } catch (error) {
       console.error("Error fetching order and refund data:", error);
@@ -348,319 +213,309 @@ export default function Dashboard() {
   };
 
   const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear - i);
+  const pieData = {
+    labels: ["Completed", "Refund", "Exchange"],
+    datasets: [
+      {
+        data: [
+          Number(orderCompletedData),
+          Number(refundData),
+          Number(exchangeData),
+        ],
+        backgroundColor: ["#FFBB28", "#FF8042", "#00C49F"],
+        borderColor: ["#FFBB28", "#FF8042", "#00C49F"],
+        borderWidth: 1,
+      },
+    ],
+  };
 
-  const data = [
-    { value: cancelData, label: 'Refuse', color: '#FF8042' },
-    { value: inProgressData, label: 'Processing', color: '#FFBB28' },
-    { value: completeData, label: 'Approved', color: '#00C49F' },
-  ];
+  const pieOptions = {
+    plugins: {
+      datalabels: {
+        formatter: (value, ctx) => {
+          let sum = 0;
+          let dataArr = ctx.chart.data.datasets[0].data;
+          dataArr.forEach((data) => {
+            sum += data;
+          });
+          let percentage = ((value / sum) * 100).toFixed(2) + "%";
+          return percentage;
+        },
+        color: "#fff",
+        font: {
+          weight: "bold",
+          size: 16,
+        },
+      },
+    },
+  };
+
+  const barData = {
+    labels: ["Order Completed", "Refund"],
+    datasets: [
+      {
+        label: "Amount",
+        data: [orderTotalAmount, refundTotalAmount],
+        backgroundColor: ["#FFBB28", "#FF8042"],
+        borderColor: ["#FFBB28", "#FF8042"],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const barOptions = {
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+  const yearlyBarData = {
+    labels: Object.keys(yearlyData),
+    datasets: [
+      {
+        label: "Order Completed",
+        data: Object.values(yearlyData).map((data) => data.orders),
+        backgroundColor: "#FFBB28",
+        borderColor: "#FFBB28",
+        borderWidth: 1,
+      },
+      {
+        label: "Refund",
+        data: Object.values(yearlyData).map((data) => data.refunds),
+        backgroundColor: "#FF8042",
+        borderColor: "#FF8042",
+        borderWidth: 1,
+      },
+    ],
+  };
+  const yearlyBarOptions = {
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
 
   const handlePieChartClick = () => {
-    navigate('/admin/requeststore');
-  };
-
-  const handleLineChartData = async () => {
-    try {
-      const yearlyRevenue = orders.reduce((acc, order) => {
-        const date = new Date(order.order_date);
-        const year = date.getFullYear();
-        if (!acc[year]) {
-          acc[year] = 0;
-        }
-        acc[year] += order.amount;
-        return acc;
-      }, {});
-
-      const yearlyRefund = refunds.reduce((acc, refund) => {
-        const date = new Date(refund.create_date);
-        const year = date.getFullYear();
-        if (!acc[year]) {
-          acc[year] = 0;
-        }
-        acc[year] += refund.amount;
-        return acc;
-      }, {});
-
-      const years = Object.keys(yearlyRevenue).concat(Object.keys(yearlyRefund));
-      const uniqueYears = Array.from(new Set(years)).sort();
-
-      const LineData = uniqueYears.map((year) => ({
-        year,
-        label: year.toString(),
-        Revenue: yearlyRevenue[year] || 0,
-        Refund: yearlyRefund[year] || 0,
-      }));
-
-      setLineChartData(LineData);
-    } catch (error) {
-      console.error("Error handling line chart data:", error);
-    }
-  };
-
-  const fetchMinMaxYears = async () => {
-    try {
-      const orderRes = await orderByYearApi();
-      const ordersData = orderRes.data.data || [];
-      const years = ordersData.map((order) => new Date(order.order_date).getFullYear());
-      const min = Math.min(...years);
-      setMinYear(min);
-      setMaxYear(min + 15);
-    } catch (error) {
-      console.error("Error fetching min and max years:", error);
-    }
-  };
-
-  const valueFormatter = (value) => {
-    if (value >= 1_000_000_000) {
-      return `${(value / 1_000_000_000).toFixed(1)}bil`;
-    } else if (value >= 1_000_000) {
-      return `${(value / 1_000_000).toFixed(1)}mil`;
-    } else if (value >= 1_000) {
-      return `${(value / 1_000).toFixed(1)}k`;
-    } else {
-      return value;
-    }
-  };
-
-  const keyToLabel = {
-    Revenue: 'Revenue (VND)',
-    Refund: 'Refund (VND)',
-  };
-
-  const colors = {
-    Revenue: '#228B22',
-    Refund: 'rgb(2, 178, 175)',
-  };
-
-  const stackStrategy = {
-    stack: 'total',
-    area: true,
-  };
-
-  const customize = {
-    height: 400,
-    legend: { hidden: false },
-    margin: { top: 5 },
+    navigate("/staff/orders");
   };
 
   return (
-    <Container>
-      <Paper elevation={3} sx={{ position: "sticky", marginTop: "20px", padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
-        <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
+    <Container
+      sx={{
+        backgroundColor: "#white",
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          position: "sticky",
+          marginTop: "20px",
+          padding: "16px",
+          border: "1px solid #ff469e",
+          borderRadius: "10px",
+          backgroundColor: "white",
+        }}
+      >
+        <Typography
+          sx={{
+            padding: "8px",
+            background: "#ff469e",
+            color: "white",
+            fontWeight: "bold",
+            fontSize: "18px",
+            borderRadius: "4px",
+            textAlign: "center",
+            marginBottom: "16px",
+          }}
+        >
           Dashboard
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={3}>
-            <Grid container spacing={2} direction="column">
-              <Grid item xs={12} md={12}>
-                <Card>
-                  <CardContent style={{ height: "242px" }}>
-                    <Typography variant="body1" style={{ fontWeight: "bold", color: "#E9967A", marginBottom: "20px", paddingBottom: "20px" }}>
-                      Total Revenue Year (VND)
-                    </Typography>
-                    <Typography
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "30px",
-                        paddingRight: "10px",
-                        fontSize: "45px"
-                      }}
-                    >
-                      <ArrowDropUpIcon fontSize="medium" style={{ fontSize: "35px", color: "#228B22" }} />
-                      <span style={{ color: "#228B22" }}>{valueFormatter(totalRevenue)}</span>
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <Card>
-                  <CardContent style={{ height: "243px" }}>
-                    <Typography variant="body1" style={{ fontWeight: "bold", color: "#E9967A", marginBottom: "20px", paddingBottom: "20px" }}>
-                      Total Refund Year (VND)
-                    </Typography>
-                    <Typography
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "30px",
-                        paddingRight: "10px",
-                        fontSize: "45px"
-                      }}
-                    >
-                      <ArrowDropDownIcon fontSize="medium" style={{ fontSize: "35px", color: "rgb(2, 178, 175)", marginTop: "30px" }} />
-                      <span style={{ color: "rgb(2, 178, 175)" }}>{valueFormatter(totalRefund)}</span>
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+            <FormControl fullWidth>
+              <InputLabel>Month</InputLabel>
+              <Select
+                value={selectedMonth}
+                label="Month"
+                onChange={handleMonthChange}
+              >
+                {Array.from({ length: 12 }, (_, index) => (
+                  <MenuItem key={index + 1} value={index + 1}>
+                    {new Date(0, index).toLocaleString("en-US", {
+                      month: "long",
+                    })}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
-          <Grid item xs={9} md={9} sx={{ position: 'relative' }}>
-            <Card>
-              <CardContent style={{ height: "500px", display: "flex", flexDirection: "column" }}>
-                <Grid>
-                  <Typography variant="h6" style={{ fontSize: "25px", fontWeight: "bold", color: "#ff469e", marginBottom: "20px", paddingBottom: "20px" }}>
-                    Overall Milk Profit
-                  </Typography>
-                  <FormControl
-                    variant="outlined"
-                    style={{
-                      width: 90,
-                      position: 'absolute',
-                      top: 22,
-                      left: 250,
-                    }}
-                  >
-                    <InputLabel htmlFor="year-select" shrink style={{ fontWeight: "bold", color: "#E9967A" }} >Year</InputLabel>
-                    <Select
-                      value={selectedYear}
-                      onChange={handleYearChange}
-                      label="Year"
-                      inputProps={{
-                        name: "Year",
-                        id: "year-select",
-                      }}
-                      displayEmpty
-                    >
-                      {yearsList.map((year) => (
-                        <MenuItem key={year} value={year}>
-                          {year}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <BarChart
-                  dataset={BarChartData}
-                  yAxis={[{ fontWeight: "bold", paddingBottom: "20px", valueFormatter }]}
-                  xAxis={[{ scaleType: 'band', dataKey: 'month', label: 'Month' }]}
-                  series={[
-                    { dataKey: 'Revenue', label: 'Revenue', valueFormatter: (value) => valueFormatter(value) + " VND", color: '#228B22' },
-                    { dataKey: 'Refund', label: 'Refund', valueFormatter: (value) => valueFormatter(value) + " VND", color: "rgb(2, 178, 175)" }
-                  ]} valueFormatter
-                />
-              </CardContent>
-            </Card>
+          <Grid item xs={3}>
+            <FormControl fullWidth>
+              <InputLabel>Year</InputLabel>
+              <Select
+                value={selectedYear}
+                label="Year"
+                onChange={handleYearChange}
+              >
+                {yearOptions.map((year) => (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
-          <Grid item xs={10} md={10}>
-            <Card>
-              <CardContent style={{ height: "420px", display: "flex" }}>
-                <Grid marginTop={"90px"}>
-                  <Typography variant="h6" style={{ fontSize: "25px", fontWeight: "bold", color: "#ff469e", textAlign: "center", paddingTop: "10px", paddingLeft: "25px", paddingBottom: "20px" }}>
-                    Monthly Stores Status
-                    <span style={{ color: "#D2B48C" }}> {currentYear}</span>
-                  </Typography>
-                  <FormControl
-                    variant="outlined"
-                    style={{
-                      width: 120,
-                      marginTop: 5,
-                      marginLeft: 78,
-                    }}
-                  >
-                    <InputLabel htmlFor="month-select" shrink style={{ fontWeight: "bold", color: "#D2B48C" }}>Month</InputLabel>
-                    <Select
-                      value={selectedMonth}
-                      onChange={handleMonthChange}
-                      label="Month"
-                      inputProps={{
-                        name: "Month",
-                        id: "month-select",
-                      }}
-                      displayEmpty
-                    >
-                      {monthsList.map((month) => (
-                        <MenuItem key={month} value={month}>
-                          {new Date(currentYear, month - 1).toLocaleString('en-US', {
-                            month: 'long',
-                          })}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <PieChart
-                  series={[
-                    {
-                      arcLabel: (item) => `${item.value}%`,
-                      arcLabelMinAngle: 45,
-                      data,
-                      highlightScope: { faded: 'global', highlighted: 'item' },
-                      faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
-                    },
-                  ]}
-                  sx={{
-                    [`& .${pieArcLabelClasses.root}`]: {
-                      fill: 'white',
-                      fontWeight: 'bold',
-                    },
-                  }}
-                />
 
+          <Grid item xs={8}>
+            <Card sx={{ marginLeft: "25px",
+              boxShadow: 5,
+             }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  style={{
+                    fontSize: "25px",
+                    fontWeight: "bold",
+                    color: "#ff469e",
+                    textAlign: "center",
+                    paddingTop: "10px",
+                  }}
+                >
+                  Orders
+                </Typography>
+                <Grid container justifyContent="center">
+                  <Pie
+                    data={pieData}
+                    options={{
+                      plugins: {
+                        legend: {
+                          display: true,
+                          position: "right",
+                        },
+                        datalabels: {
+                          formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.forEach((data) => {
+                              sum += data;
+                            });
+                            let percentage =
+                              ((value / sum) * 100).toFixed(2) + "%";
+                            return percentage;
+                          },
+                          color: "#fff",
+                          font: {
+                            weight: "bold",
+                            size: 16,
+                          },
+                        },
+                      },
+                      elements: {
+                        arc: {
+                          borderWidth: 0,
+                        },
+                      },
+                    }}
+                    width={400}
+                    height={300}
+                  />
+                </Grid>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={2} md={2}>
+          <Grid item xs={4}>
             <Grid container spacing={2} direction="column">
-              <Grid item xs={12} md={12}>
-                <Card onClick={handlePieChartClick} sx={{ ":hover": { backgroundColor: '#FFFAF0' } }}>
+              <Grid item xs={12}>
+                <Card
+                  onClick={handlePieChartClick}
+                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                >
                   <CardContent style={{ height: "129px" }}>
                     <Grid>
-                      <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#FF8042' }}>
-                        Refuse
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#FFBB28",
+                        }}
+                      >
+                        Order Completed
                       </Typography>
                       <Typography
                         style={{
                           display: "flex",
                           justifyContent: "center",
                           paddingTop: "10px",
-                          fontSize: "30px"
+                          fontSize: "30px",
                         }}
                       >
-                        <span>{valueFormatter(cancelledCount)}</span>
+                        <span>{orderCount}</span>
                       </Typography>
                     </Grid>
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={12} md={12}>
-                <Card onClick={handlePieChartClick} sx={{ ":hover": { backgroundColor: '#FFFAF0' } }}>
-                  <CardContent style={{ height: "130px" }}>
+              <Grid item xs={12}>
+                <Card
+                  onClick={handlePieChartClick}
+                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                >
+                  <CardContent style={{ height: "129px" }}>
                     <Grid>
-                      <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#FFBB28'}}>
-                        Processing
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#FF8042",
+                        }}
+                      >
+                        Refund
                       </Typography>
                       <Typography
                         style={{
                           display: "flex",
                           justifyContent: "center",
                           paddingTop: "10px",
-                          fontSize: "30px"
+                          fontSize: "30px",
                         }}
                       >
-                        <span>{valueFormatter(inProgressCount)}</span>
+                        <span>{refundCount}</span>
                       </Typography>
                     </Grid>
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={12} md={12}>
-                <Card onClick={handlePieChartClick} sx={{ ":hover": { backgroundColor: '#FFFAF0' } }}>
-                  <CardContent style={{ height: "130px" }}>
+              <Grid item xs={12}>
+                <Card
+                  onClick={handlePieChartClick}
+                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                >
+                  <CardContent style={{ height: "129px" }}>
                     <Grid>
-                      <Typography variant="body1" style={{ fontWeight: "bold", fontSize: "20px", color: '#00C49F' }}>
-                        Approved
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#00C49F",
+                        }}
+                      >
+                        Exchange
                       </Typography>
                       <Typography
                         style={{
                           display: "flex",
                           justifyContent: "center",
                           paddingTop: "10px",
-                          fontSize: "30px"
+                          fontSize: "30px",
                         }}
                       >
-                        <span>{valueFormatter(completedCount)}</span>
+                        <span>{exchangeCount}</span>
                       </Typography>
                     </Grid>
                   </CardContent>
@@ -668,64 +523,149 @@ export default function Dashboard() {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} md={12}>
+        </Grid>
+
+        {/* Financial Summary */}
+        <Grid container spacing={2} sx={{ marginTop: "20px" }}>
+          <Grid item xs={8}>
             <Card>
-              <CardContent style={{ height: "500px", display: "flex", flexDirection: "column" }}>
-                <Typography variant="h6" style={{ fontSize: "25px", fontWeight: "bold", textAlign: "center", color: "#ff469e", marginBottom: "40px", marginLeft: "10px" }}>Profit Milk Each Year</Typography>
-                <LineChart
-                  xAxis={[
-                    {
-                      fontWeight: "bold", label: 'Year',
-                      dataKey: 'year',
-                      valueFormatter: (year) => year.toString(),
-                      min: minYear,
-                      max: maxYear,
-                    },
-                  ]}
-                  yAxis={[{ valueFormatter }]}
-                  series={Object.keys(keyToLabel).map((key) => ({
-                    dataKey: key,
-                    label: keyToLabel[key],
-                    color: colors[key],
-                    showMark: false,
-                    valueFormatter,
-                    ...stackStrategy,
-                  }))}
-                  dataset={LineChartData}
-                  {...customize}
-                />
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  style={{
+                    fontSize: "25px",
+                    fontWeight: "bold",
+                    color: "#ff469e",
+                    textAlign: "center",
+                    paddingTop: "10px",
+                  }}
+                >
+                  Financial Summary
+                </Typography>
+                <Grid container justifyContent="center">
+                  <Bar
+                    data={barData}
+                    options={barOptions}
+                    width={400}
+                    height={300}
+                  />
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* New Financial Cards on the right */}
+          <Grid item xs={4}>
+            <Grid container spacing={2} direction="column">
+              <Grid item xs={12}>
+                <Card sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}>
+                  <CardContent style={{ height: "129px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#FFBB28",
+                        }}
+                      >
+                        Order Completed Amount
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "10px",
+                          fontSize: "30px",
+                        }}
+                      >
+                        <span>
+                          {orderTotalAmount.toLocaleString("vi-VN")} VND
+                        </span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12}>
+                <Card sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}>
+                  <CardContent style={{ height: "129px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#FF8042",
+                        }}
+                      >
+                        Refund Amount
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "10px",
+                          fontSize: "30px",
+                        }}
+                      >
+                        <span>
+                          {refundTotalAmount.toLocaleString("vi-VN")} VND
+                        </span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12}>
+                <Card sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}>
+                  <CardContent style={{ height: "129px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#ff469e",
+                        }}
+                      >
+                        Total Revenue
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "10px",
+                          fontSize: "30px",
+                        }}
+                      >
+                        <span>{totalRevenue.toLocaleString("vi-VN")} VND</span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  style={{
+                    textAlign: "center",
+                    color: "#ff469e",
+                    fontSize: "25px",
+                  }}
+                >
+                  Yearly Data
+                </Typography>
+                <Bar data={yearlyBarData} options={yearlyBarOptions} />
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </Paper>
-      {visible && (
-        <IconButton
-          size="large"
-          sx={{
-            position: "fixed",
-            right: 25,
-            bottom: 25,
-            border: "1px solid #ff469e",
-            backgroundColor: "#fff4fc",
-            color: "#ff469e",
-            transition:
-              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-            "&:hover": {
-              backgroundColor: "#ff469e",
-              color: "white",
-            },
-          }}
-          onClick={() =>
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-          }
-        >
-          <KeyboardCapslock />
-        </IconButton>
-      )}
     </Container>
   );
 }

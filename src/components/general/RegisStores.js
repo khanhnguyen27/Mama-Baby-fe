@@ -478,7 +478,7 @@ const RegistStore = () => {
                     },
                   }}
                 >
-                  Regis
+                  Regist Store
                 </Button>
                 <div
                   style={{
