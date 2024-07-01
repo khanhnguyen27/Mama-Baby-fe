@@ -420,7 +420,7 @@ export default function ProductDetails() {
     // }
     toast.info(`${product.name} x ${quantity} was added to cart`, {
       position: "top-right",
-      autoClose: 2500,
+      autoClose: 1500,
     });
     dispatch(
       addToCart({

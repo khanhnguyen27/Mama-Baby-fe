@@ -409,6 +409,8 @@ export default function Orders() {
               name: res?.data?.data.name,
               price: res?.data?.data.price,
               store_id: res?.data?.data.store_id,
+              point: res?.data?.data.point,
+              type: res?.data?.data.type
             },
             quantity: item.quantity,
           })
@@ -1756,7 +1758,7 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
-                        {item.payment_method === "VNPAY" &&
+                        {/* {item.payment_method === "VNPAY" &&
                           !refund.some(
                             (refundItem) => refundItem.order_id === item.id
                           ) && (
@@ -2453,18 +2455,6 @@ export default function Orders() {
                                           0
                                         )
                                       )}
-                                      {/* {formatCurrency(
-                                        selectedItems.reduce(
-                                          (total, selectedItem) => {
-                                            return (
-                                              Math.min(total +
-                                              selectedItem.unit_price *
-                                                selectedItem.quantity
-                                            ), item.final_amount);
-                                          },
-                                          0
-                                        )
-                                      )}{" "} */}
                                     </span>
                                   </Box>
                                   <Button
@@ -2494,7 +2484,7 @@ export default function Orders() {
                               </Box>
                             </Box>
                           </Modal>
-                        )}
+                        )} */}
                       </Grid>
                     )}
                     {item.status_order_list[item.status_order_list.length - 1]
@@ -2615,9 +2605,11 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
-                        {!exchange.some(
+                        {(!exchange.some(
                           (exchangeItem) => exchangeItem.order_id === item.id
-                        ) && (
+                        ) && !refund.some(
+                          (refundItem) => refundItem.order_id === item.id
+                        )) && (
                           <Button
                             variant="contained"
                             sx={{
@@ -3339,9 +3331,11 @@ export default function Orders() {
                             </Box>
                           </Modal>
                         )}
-                        {!refund.some(
+                        {(!exchange.some(
+                          (exchangeItem) => exchangeItem.order_id === item.id
+                        ) && !refund.some(
                           (refundItem) => refundItem.order_id === item.id
-                        ) && (
+                        )) && (
                           <Button
                             variant="contained"
                             sx={{
