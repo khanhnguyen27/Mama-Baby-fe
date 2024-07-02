@@ -361,7 +361,7 @@ const RegistStore = () => {
                     fontWeight: "700",
                   }}
                 >
-                  Giay phep kinh doanh <span style={{ color: "red" }}>*</span>
+                  Select The License <span style={{ color: "red" }}>*</span>
                 </Typography>
                 <input
                   type="file"

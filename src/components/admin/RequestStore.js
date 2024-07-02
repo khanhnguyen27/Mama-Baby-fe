@@ -515,6 +515,13 @@ export default function RequestStore() {
                     onClose={handleCloseLicense}
                     maxWidth="md"
                     fullWidth
+                    slotProps={{
+                      backdrop: {
+                        style: {
+                          backgroundColor: "rgba(0, 0, 0, 0.1)",
+                        },
+                      },
+                    }}
                     PaperProps={{
                       style: {
                         borderRadius: 20, // Adjust border radius as per your requirement
@@ -600,6 +607,33 @@ export default function RequestStore() {
                       </Box>
                     </Typography>
                   </Grid>
+                  {item.status === "APPROVED" && (
+                    <Grid item xs={12} sx={{ textAlign: "right" }}>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          borderRadius: "10px",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          my: 2,
+                          mx: 1,
+                          transition:
+                            "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            border: "1px solid white",
+                          },
+                        }}
+                        onClick={() => handleOpenLicense(item.license_url)}
+                      >
+                        See The License
+                      </Button>
+                    </Grid>
+                  )}
                   {item.status === "PROCESSING" && (
                     <Grid item xs={12} sx={{ textAlign: "right" }}>
                       <Button
