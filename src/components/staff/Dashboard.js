@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import {
   IconButton,
   MenuItem,
@@ -36,6 +36,8 @@ import { refundByStoreIdApi } from "../../api/RefundAPI";
 import { exchangeByStoreIdApi } from "../../api/ExchangeAPI";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import { allProductApi } from "../../api/ProductAPI";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 // Register the required components with ChartJS
 ChartJS.register(
@@ -75,6 +77,7 @@ export default function Dashboard() {
   const userId = decodedAccessToken.UserID;
   const [store, setStore] = useState(null);
   const [productMap, setProductMap] = useState({});
+  const [yearOptions, setYearOptions] = useState([]);
 
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -102,21 +105,33 @@ export default function Dashboard() {
       console.log("Orders:", orderRes.data.data);
       console.log("Exchanges:", exchangeRes.data.data);
       console.log("Refunds:", refundRes.data.data);
-      calculateYearlyData(
-        orderRes.data.data || [],
-        refundRes.data.data || []
-      );
+      const ordersData = orderRes.data.data || [];
+      const refundsData = refundRes.data.data.refunds || [];
 
-      setOrders(orderRes.data.data || []);
-      setExchanges(exchangeRes.data.data || []);
-      setRefunds(refundRes.data.data || []);
+      calculateYearlyData(ordersData, refundsData);
+      calculateMonthlyData(ordersData, refundsData, selectedYear);
+
+      setOrders(ordersData);
+      setExchanges(exchangeRes.data.data.exchanges || []);
+      setRefunds(refundsData);
+
+      const years = [
+        ...new Set(
+          ordersData.map((order) => new Date(order.order_date).getFullYear())
+        ),
+      ];
+      setYearOptions(years);
+      if (!years.includes(selectedYear)) {
+        setSelectedYear(years[0] || new Date().getFullYear());
+      }
 
       const productData = productRes?.data?.data?.products || [];
-      setProductMap(productData.reduce((x, item) => {
-        x[item.id] = [item.name, item.description];
-        return x;
-      }, {}));
-
+      setProductMap(
+        productData.reduce((x, item) => {
+          x[item.id] = [item.name, item.description];
+          return x;
+        }, {})
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -141,6 +156,7 @@ export default function Dashboard() {
     const selectedYear = parseInt(event.target.value);
     setSelectedYear(selectedYear);
     calculatePercentage(selectedMonth, selectedYear);
+    calculateMonthlyData(orders, refunds, selectedYear);
   };
 
   const calculateYearlyData = (ordersData, refundsData) => {
@@ -163,7 +179,35 @@ export default function Dashboard() {
     setYearlyData(data);
   };
 
-  const calculatePercentage = async (month = selectedMonth, year = selectedYear) => {
+  const calculateMonthlyData = (ordersData, refundsData, year) => {
+    const data = {};
+    for (let i = 0; i < 12; i++) {
+      data[i] = { orders: 0, refunds: 0 };
+    }
+    ordersData.forEach((order) => {
+      const isCompleted = order.status_order_list.some(
+        (status) => status.status === "COMPLETED"
+      );
+      const orderYear = new Date(order.order_date).getFullYear();
+      const orderMonth = new Date(order.order_date).getMonth();
+      if (isCompleted && orderYear === year) {
+        data[orderMonth].orders += order.final_amount || 0;
+      }
+    });
+    refundsData.forEach((refund) => {
+      const refundYear = new Date(refund.create_date).getFullYear();
+      const refundMonth = new Date(refund.create_date).getMonth();
+      if (refundYear === year) {
+        data[refundMonth].refunds += refund.amount || 0;
+      }
+    });
+    setMonthlyData(data);
+  };
+
+  const calculatePercentage = async (
+    month = selectedMonth,
+    year = selectedYear
+  ) => {
     if (!storeId) return;
     setLoading(true);
     try {
@@ -197,9 +241,18 @@ export default function Dashboard() {
         completedOrders.length + exchangesData.length + refundsData.length;
 
       if (totalCount > 0) {
-        const refundPercentage = ((refundsData.length / totalCount) * 100).toFixed(2);
-        const orderPercentage = ((completedOrders.length / totalCount) * 100).toFixed(2);
-        const exchangePercentage = ((exchangesData.length / totalCount) * 100).toFixed(2);
+        const refundPercentage = (
+          (refundsData.length / totalCount) *
+          100
+        ).toFixed(2);
+        const orderPercentage = (
+          (completedOrders.length / totalCount) *
+          100
+        ).toFixed(2);
+        const exchangePercentage = (
+          (exchangesData.length / totalCount) *
+          100
+        ).toFixed(2);
 
         setOrderCompletedData(orderPercentage);
         setRefundData(refundPercentage);
@@ -243,7 +296,7 @@ export default function Dashboard() {
   };
 
   const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear - i);
+
   const pieData = {
     labels: ["Completed", "Refund", "Exchange"],
     datasets: [
@@ -328,6 +381,42 @@ export default function Dashboard() {
     },
   };
 
+  const handleExportPDF = async () => {
+    const input = document.getElementById("dashboard");
+    if (input) {
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      let heightLeft = imgHeight;
+      let position = 10;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save("Dashboard.pdf");
+    } else {
+      console.error("Element not found: #dashboard");
+    }
+  };
+
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -341,7 +430,7 @@ export default function Dashboard() {
 
   function extractMonths(data, dateField) {
     const uniqueMonths = new Set();
-    data.forEach(item => {
+    data.forEach((item) => {
       const date = new Date(item[dateField]);
       const month = date.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
       const year = date.getFullYear();
@@ -352,31 +441,77 @@ export default function Dashboard() {
 
   // Hàm nhóm các tháng từ nhiều danh sách dữ liệu
   function groupMonths(orders, refunds, exchanges) {
-    const orderMonths = extractMonths(orders, 'order_date');
-    const refundMonths = extractMonths(refunds, 'create_date');
-    const exchangeMonths = extractMonths(exchanges, 'create_date'); // Giả sử 'create_date' cũng dùng cho exchanges
+    const orderMonths = extractMonths(orders, "order_date");
+    const refundMonths = extractMonths(refunds, "create_date");
+    const exchangeMonths = extractMonths(exchanges, "create_date"); // Giả sử 'create_date' cũng dùng cho exchanges
 
-    const allMonths = new Set([...orderMonths, ...refundMonths, ...exchangeMonths]);
+    const allMonths = new Set([
+      ...orderMonths,
+      ...refundMonths,
+      ...exchangeMonths,
+    ]);
     return Array.from(allMonths).sort((a, b) => {
-      const [monthA, yearA] = a.split('-').map(Number);
-      const [monthB, yearB] = b.split('-').map(Number);
+      const [monthA, yearA] = a.split("-").map(Number);
+      const [monthB, yearB] = b.split("-").map(Number);
       return yearB - yearA || monthB - monthA;
     });
   }
   const months = groupMonths(orders, refunds, exchanges);
 
-  const addDataToWorksheet1 = (worksheet, orders, refunds, exchanges, months) => {
-
+  const addDataToWorksheet1 = (
+    worksheet,
+    orders,
+    refunds,
+    exchanges,
+    months
+  ) => {
     const headerRow1 = [
-      "Order", "", "", "", "", "", "", "", "", "",
-      "", "Exchange", "", "", "",
-      "", "Refund", "", "", "", "", "",
+      "Order",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Exchange",
+      "",
+      "",
+      "",
+      "",
+      "Refund",
+      "",
+      "",
+      "",
+      "",
+      "",
     ];
 
     const headerRow2 = [
-      "Month", "Order Id", "Customer Name", "Phone", "Shipping Address", "Order Date", "Total Amount (VND)", "Discount (VND)", "Final Amount (VND)", "Payment Method",
-      "", "Exchange Id", "Description", "Create Date", "Exchange of Order Id",
-      "", "Refund Id", "Description", "Create Date", "Amount", "Refund of Order Id"
+      "Month",
+      "Order Id",
+      "Customer Name",
+      "Phone",
+      "Shipping Address",
+      "Order Date",
+      "Total Amount (VND)",
+      "Discount (VND)",
+      "Final Amount (VND)",
+      "Payment Method",
+      "",
+      "Exchange Id",
+      "Description",
+      "Create Date",
+      "Exchange of Order Id",
+      "",
+      "Refund Id",
+      "Description",
+      "Create Date",
+      "Amount",
+      "Refund of Order Id",
     ];
 
     worksheet.addRow(headerRow1);
@@ -387,27 +522,43 @@ export default function Dashboard() {
 
     let currentRow = 3; // Starting row index (accounting for header rows)
 
-    months.forEach(month => {
+    months.forEach((month) => {
       // Filter and sort data by month
-      const monthOrders = orders.filter(order => {
-        const orderDate = new Date(order.order_date);
-        const monthYear = `${orderDate.getMonth() + 1}-${orderDate.getFullYear()}`;
-        return monthYear === month;
-      }).sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
+      const monthOrders = orders
+        .filter((order) => {
+          const orderDate = new Date(order.order_date);
+          const monthYear = `${
+            orderDate.getMonth() + 1
+          }-${orderDate.getFullYear()}`;
+          return monthYear === month;
+        })
+        .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
 
-      const monthRefunds = refunds.filter(refund => {
-        const refundDate = new Date(refund.create_date);
-        const monthYear = `${refundDate.getMonth() + 1}-${refundDate.getFullYear()}`;
-        return monthYear === month;
-      }).sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
+      const monthRefunds = refunds
+        .filter((refund) => {
+          const refundDate = new Date(refund.create_date);
+          const monthYear = `${
+            refundDate.getMonth() + 1
+          }-${refundDate.getFullYear()}`;
+          return monthYear === month;
+        })
+        .sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
 
-      const monthExchanges = exchanges.filter(exchange => {
-        const exchangeDate = new Date(exchange.create_date);
-        const monthYear = `${exchangeDate.getMonth() + 1}-${exchangeDate.getFullYear()}`;
-        return monthYear === month;
-      }).sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
+      const monthExchanges = exchanges
+        .filter((exchange) => {
+          const exchangeDate = new Date(exchange.create_date);
+          const monthYear = `${
+            exchangeDate.getMonth() + 1
+          }-${exchangeDate.getFullYear()}`;
+          return monthYear === month;
+        })
+        .sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
 
-      const maxRows = Math.max(monthOrders.length, monthRefunds.length, monthExchanges.length);
+      const maxRows = Math.max(
+        monthOrders.length,
+        monthRefunds.length,
+        monthExchanges.length
+      );
 
       for (let i = 0; i < maxRows; i++) {
         const order = monthOrders[i] || {};
@@ -415,10 +566,27 @@ export default function Dashboard() {
         const exchange = monthExchanges[i] || {};
 
         worksheet.addRow([
-          month, order.id || "", order.full_name || "", order.phone_number || "", order.shipping_address || "",
-          order.order_date || "", order.amount || "", order.total_discount || "", order.final_amount || "", order.payment_method || "",
-          "", exchange.id || "", exchange.description || "", exchange.create_date || "", exchange.order_id || "",
-          "", refund.id || "", refund.description || "", refund.create_date || "", refund.amount || "", refund.order_id || ""
+          month,
+          order.id || "",
+          order.full_name || "",
+          order.phone_number || "",
+          order.shipping_address || "",
+          order.order_date || "",
+          order.amount || "",
+          order.total_discount || "",
+          order.final_amount || "",
+          order.payment_method || "",
+          "",
+          exchange.id || "",
+          exchange.description || "",
+          exchange.create_date || "",
+          exchange.order_id || "",
+          "",
+          refund.id || "",
+          refund.description || "",
+          refund.create_date || "",
+          refund.amount || "",
+          refund.order_id || "",
         ]);
 
         if (order.id) {
@@ -437,9 +605,12 @@ export default function Dashboard() {
         const targetRow = orderRowMap.get(exchangeOrderId);
         exchangeOrderIdCell.value = {
           text: exchangeOrderId,
-          hyperlink: `#Sheet1!B${targetRow}` // Link to the order ID cell in the corresponding row
+          hyperlink: `#Sheet1!B${targetRow}`, // Link to the order ID cell in the corresponding row
         };
-        exchangeOrderIdCell.font = { color: { argb: 'FF0000FF' }, underline: true };
+        exchangeOrderIdCell.font = {
+          color: { argb: "FF0000FF" },
+          underline: true,
+        };
       }
 
       const refundOrderIdCell = row.getCell(21); // Refund of Order Id column
@@ -448,74 +619,125 @@ export default function Dashboard() {
         const targetRow = orderRowMap.get(refundOrderId);
         refundOrderIdCell.value = {
           text: refundOrderId,
-          hyperlink: `#Sheet1!B${targetRow}` // Link to the order ID cell in the corresponding row
+          hyperlink: `#Sheet1!B${targetRow}`, // Link to the order ID cell in the corresponding row
         };
-        refundOrderIdCell.font = { color: { argb: 'FF0000FF' }, underline: true };
+        refundOrderIdCell.font = {
+          color: { argb: "FF0000FF" },
+          underline: true,
+        };
       }
     });
   };
 
-  const addOrderDetailsToWorksheet = (worksheet2, orders, exchanges, refunds, worksheet1) => {
+  const addOrderDetailsToWorksheet = (
+    worksheet2,
+    orders,
+    exchanges,
+    refunds,
+    worksheet1
+  ) => {
     // Create a map to keep track of order row indices
     const orderRowMap = new Map();
 
     const headerRow1 = [
-      "Order", "", "", "", "", "", "",
-      "Exchange", "", "", "", "",
-      "Refund", "", "", "", ""
+      "Order",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Exchange",
+      "",
+      "",
+      "",
+      "",
+      "Refund",
+      "",
+      "",
+      "",
+      "",
     ];
-    const headerRow2 = ["Order Id", "Product Name", "Description", "Quantity", "Price", "Point", "",
-      "Exchange Id", "Product Name", "Quantity", "Exchange of Order Id", "",
-      "Refund Id", "Product Name", "Quantity", "Price", "Refund of Order Id",
+    const headerRow2 = [
+      "Order Id",
+      "Product Name",
+      "Description",
+      "Quantity",
+      "Price",
+      "Point",
+      "",
+      "Exchange Id",
+      "Product Name",
+      "Quantity",
+      "Exchange of Order Id",
+      "",
+      "Refund Id",
+      "Product Name",
+      "Quantity",
+      "Price",
+      "Refund of Order Id",
     ];
     worksheet2.addRow(headerRow1);
     worksheet2.addRow(headerRow2);
 
-    orders.sort((a, b) => new Date(b.order_date) - new Date(a.order_date)).forEach(order => {
-      const orderDetails = order.order_detail_list;
-      const exchangeDetails = exchanges.find(exchange => exchange.order_id === order.id)?.exchange_detail_list || [];
-      const refundDetails = refunds.find(refund => refund.order_id === order.id)?.refund_detail_list || [];
+    orders
+      .sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
+      .forEach((order) => {
+        const orderDetails = order.order_detail_list;
+        const exchangeDetails =
+          exchanges.find((exchange) => exchange.order_id === order.id)
+            ?.exchange_detail_list || [];
+        const refundDetails =
+          refunds.find((refund) => refund.order_id === order.id)
+            ?.refund_detail_list || [];
 
-      const maxDetailsRows = Math.max(orderDetails.length, exchangeDetails.length, refundDetails.length);
+        const maxDetailsRows = Math.max(
+          orderDetails.length,
+          exchangeDetails.length,
+          refundDetails.length
+        );
 
-      let currentRow = worksheet2.rowCount + 1; // Starting row index (accounting for header rows)
+        let currentRow = worksheet2.rowCount + 1; // Starting row index (accounting for header rows)
 
-      for (let i = 0; i < maxDetailsRows; i++) {
-        const orderDetail = orderDetails[i] || {};
-        const exchangeDetail = exchangeDetails[i] || {};
-        const refundDetail = refundDetails[i] || {};
+        for (let i = 0; i < maxDetailsRows; i++) {
+          const orderDetail = orderDetails[i] || {};
+          const exchangeDetail = exchangeDetails[i] || {};
+          const refundDetail = refundDetails[i] || {};
 
-        const orderProduct = productMap[orderDetail.product_id] || ["", ""];
-        const exchangeProduct = productMap[exchangeDetail.product_id] || ["", ""];
-        const refundProduct = productMap[refundDetail.product_id] || ["", ""];
+          const orderProduct = productMap[orderDetail.product_id] || ["", ""];
+          const exchangeProduct = productMap[exchangeDetail.product_id] || [
+            "",
+            "",
+          ];
+          const refundProduct = productMap[refundDetail.product_id] || ["", ""];
 
-        worksheet2.addRow([
-          order.id,
-          orderProduct[0] || "",
-          orderProduct[1] || "",
-          orderDetail.quantity || "",
-          orderDetail.unit_price || "",
-          orderDetail.point || "",
-          "",
-          exchangeDetail.id || "",
-          exchangeProduct[0] || "",
-          exchangeDetail.quantity || "",
-          exchangeDetail.id ? order.id : "",
-          "",
-          refundDetail.id || "",
-          refundProduct[0] || "",
-          refundDetail.quantity || "",
-          refundDetail.unit_price || "",
-          refundDetail.id ? order.id : "",
-        ]);
+          worksheet2.addRow([
+            order.id,
+            orderProduct[0] || "",
+            orderProduct[1] || "",
+            orderDetail.quantity || "",
+            orderDetail.unit_price || "",
+            orderDetail.point || "",
+            "",
+            exchangeDetail.id || "",
+            exchangeProduct[0] || "",
+            exchangeDetail.quantity || "",
+            exchangeDetail.id ? order.id : "",
+            "",
+            refundDetail.id || "",
+            refundProduct[0] || "",
+            refundDetail.quantity || "",
+            refundDetail.unit_price || "",
+            refundDetail.id ? order.id : "",
+          ]);
 
-        if (order.id) {
-          orderRowMap.set(order.id, currentRow);
+          if (order.id) {
+            orderRowMap.set(order.id, currentRow);
+          }
+
+          currentRow++;
         }
-
-        currentRow++;
-      }
-    });
+      });
 
     // Add hyperlinks for order, exchange, and refund order IDs
     worksheet1.eachRow((row, rowNumber) => {
@@ -524,105 +746,140 @@ export default function Dashboard() {
       if (orderId && orderRowMap.has(orderId)) {
         orderIdCell.value = {
           text: orderId,
-          hyperlink: `#Sheet2!A${orderRowMap.get(orderId)}` // Link to the order ID cell in the corresponding row in Sheet2
+          hyperlink: `#Sheet2!A${orderRowMap.get(orderId)}`, // Link to the order ID cell in the corresponding row in Sheet2
         };
-        orderIdCell.font = { color: { argb: 'FF0000FF' }, underline: true };
+        orderIdCell.font = { color: { argb: "FF0000FF" }, underline: true };
       }
     });
   };
 
   const groupProductSalesByMonth = (orders) => {
     const productSales = {};
-  
-    orders.forEach(order => {
-      const orderMonth = new Date(order.order_date).toISOString().substring(0, 7); // YYYY-MM
-  
-      order.order_detail_list.forEach(detail => {
+
+    orders.forEach((order) => {
+      const orderMonth = new Date(order.order_date)
+        .toISOString()
+        .substring(0, 7); // YYYY-MM
+
+      order.order_detail_list.forEach((detail) => {
         const productId = detail.product_id;
         const productName = productMap[productId][0];
         const productDescription = productMap[productId][1];
         const totalAmount = detail.unit_price * detail.quantity;
-  
+
         if (!productSales[productId]) {
           productSales[productId] = {
             name: productName,
             description: productDescription,
-            monthlySales: {}
+            monthlySales: {},
           };
         }
-  
+
         if (!productSales[productId].monthlySales[orderMonth]) {
-          productSales[productId].monthlySales[orderMonth] = { quantity: 0, totalAmount: 0 };
+          productSales[productId].monthlySales[orderMonth] = {
+            quantity: 0,
+            totalAmount: 0,
+          };
         }
-  
-        productSales[productId].monthlySales[orderMonth].quantity += detail.quantity;
-        productSales[productId].monthlySales[orderMonth].totalAmount += totalAmount;
+
+        productSales[productId].monthlySales[orderMonth].quantity +=
+          detail.quantity;
+        productSales[productId].monthlySales[orderMonth].totalAmount +=
+          totalAmount;
       });
     });
-  
+
     return productSales;
   };
-  
+
   const addProductSalesToWorksheet = (worksheet, productSales) => {
-    const headerRow = ["Month", "Product Id", "Product Name", "Description", "Quantity Sold", "Average price (VND)", "Total Revenue (VND)"];
+    const headerRow = [
+      "Month",
+      "Product Id",
+      "Product Name",
+      "Description",
+      "Quantity Sold",
+      "Average price (VND)",
+      "Total Revenue (VND)",
+    ];
     worksheet.addRow(headerRow);
-  
-    const sortedProductSales = Object.keys(productSales).flatMap(productId => {
-      const product = productSales[productId];
-      const productName = product.name;
-      const productDescription = product.description;
-  
-      return Object.keys(product.monthlySales).map(month => ({
-        month,
-        productId,
-        productName,
-        productDescription,
-        quantitySold: product.monthlySales[month].quantity,
-        totalAmount: product.monthlySales[month].totalAmount
-      }));
-    }).sort((a, b) => new Date(b.month) - new Date(a.month));
-  
-    sortedProductSales.forEach(sale => {
+
+    const sortedProductSales = Object.keys(productSales)
+      .flatMap((productId) => {
+        const product = productSales[productId];
+        const productName = product.name;
+        const productDescription = product.description;
+
+        return Object.keys(product.monthlySales).map((month) => ({
+          month,
+          productId,
+          productName,
+          productDescription,
+          quantitySold: product.monthlySales[month].quantity,
+          totalAmount: product.monthlySales[month].totalAmount,
+        }));
+      })
+      .sort((a, b) => new Date(b.month) - new Date(a.month));
+
+    sortedProductSales.forEach((sale) => {
       const averagePrice = sale.totalAmount / sale.quantitySold;
-      worksheet.addRow([sale.month, sale.productId, sale.productName, sale.productDescription, sale.quantitySold, averagePrice, sale.totalAmount]);
+      worksheet.addRow([
+        sale.month,
+        sale.productId,
+        sale.productName,
+        sale.productDescription,
+        sale.quantitySold,
+        averagePrice,
+        sale.totalAmount,
+      ]);
     });
   };
-  
+
   const handleExportReport = () => {
     if (!orders || !refunds || !exchanges) {
-      console.error('Orders, refunds, or exchanges data is not available.');
+      console.error("Orders, refunds, or exchanges data is not available.");
       return;
     }
-  
+
     const workbook = new ExcelJS.Workbook();
-    const worksheet1 = workbook.addWorksheet('Sheet1');
-    const worksheet2 = workbook.addWorksheet('Sheet2');
-    const worksheet3 = workbook.addWorksheet('Sheet3');
-  
+    const worksheet1 = workbook.addWorksheet("Sheet1");
+    const worksheet2 = workbook.addWorksheet("Sheet2");
+    const worksheet3 = workbook.addWorksheet("Sheet3");
+
     // Nhóm orders theo tháng
     const months = groupMonths(orders, refunds, exchanges);
-  
+
     // Thêm dữ liệu vào worksheet1
     addDataToWorksheet1(worksheet1, orders, refunds, exchanges, months);
-  
+
     // Thêm dữ liệu vào worksheet2
-    addOrderDetailsToWorksheet(worksheet2, orders, refunds, exchanges, worksheet1);
-  
+    addOrderDetailsToWorksheet(
+      worksheet2,
+      orders,
+      refunds,
+      exchanges,
+      worksheet1
+    );
+
     // Nhóm dữ liệu bán hàng theo sản phẩm và tháng
     const productSales = groupProductSalesByMonth(orders);
-  
+
     // Thêm dữ liệu vào worksheet3
     addProductSalesToWorksheet(worksheet3, productSales);
-  
-    workbook.xlsx.writeBuffer().then(buffer => {
-      saveAs(new Blob([buffer]), 'Report_order_refund_store_monthly.xlsx');
-    }).catch(err => {
-      console.error('Error writing Excel file:', err);
-    });
+
+    workbook.xlsx
+      .writeBuffer()
+      .then((buffer) => {
+        saveAs(new Blob([buffer]), "Report_order_refund_store_monthly.xlsx");
+      })
+      .catch((err) => {
+        console.error("Error writing Excel file:", err);
+      });
   };
 
   return (
     <Container
+      id="dashboard"
       sx={{
         backgroundColor: "#white",
       }}
@@ -671,6 +928,14 @@ export default function Dashboard() {
           >
             Export Report
           </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleExportPDF();
+              handleMenuClose();
+            }}
+          >
+            Export PDF
+          </MenuItem>
         </Menu>
         <Grid container spacing={2}>
           <Grid item xs={3}>
@@ -709,10 +974,12 @@ export default function Dashboard() {
           </Grid>
 
           <Grid item xs={8}>
-            <Card sx={{
-              marginLeft: "25px",
-              boxShadow: 5,
-            }}>
+            <Card
+              sx={{
+                marginLeft: "25px",
+                boxShadow: 5,
+              }}
+            >
               <CardContent>
                 <Typography
                   variant="h6"
