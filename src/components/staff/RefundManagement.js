@@ -25,6 +25,13 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
+    TableCell,
+    TableBody,
+    TableRow,
+    Paper,
+    TableContainer,
+    TableHead,
+    Table
 } from "@mui/material";
 import { refundByStoreIdApi, updateRefundApi } from "../../api/RefundAPI";
 import { allProductApi } from "../../api/ProductAPI";
@@ -235,7 +242,7 @@ export default function OrdersManagement() {
     const formatDateTime = (dateTime) => {
         try {
             const parsedDate = parseISO(dateTime);
-            return format(parsedDate, "HH:mm:ss dd-MM-yyyy");
+            return format(parsedDate, "HH:mm dd-MM-yyyy");
         } catch (error) {
             console.error("Invalid date format:", dateTime, error);
             return "Invalid date";
@@ -718,7 +725,7 @@ export default function OrdersManagement() {
                                                 </span>
                                             </Box>
                                         </Typography>
-                                        {(item.status !== 'ACCEPT' && item.status !== 'REFUSE') &&(
+                                        {(item.status !== 'ACCEPT' && item.status !== 'REFUSE') && (
                                             <Box sx={{ textAlign: 'right' }}>
                                                 <Button
                                                     variant="contained"
@@ -757,8 +764,8 @@ export default function OrdersManagement() {
                                                     REFUSE REFUND
                                                 </Button>
                                             </Box>
-                                            
-                                            
+
+
                                         )}
                                     </Grid>
                                 </Grid>
@@ -780,35 +787,35 @@ export default function OrdersManagement() {
                             opacity: 0.9,
                             borderRadius: "20px",
                             "& .MuiPaginationItem-root": {
-                              backgroundColor: "white",
-                              borderRadius: "20px",
-                              border: "1px solid black",
-                              boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
-                              mx: 1,
-                              transition:
-                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                              "&:hover": {
-                                backgroundColor: "#fff4fc",
-                                color: "#ff469e",
-                                border: "1px solid #ff469e",
-                              },
-                              "&.Mui-selected": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid #ff469e",
+                                backgroundColor: "white",
+                                borderRadius: "20px",
+                                border: "1px solid black",
+                                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+                                mx: 1,
+                                transition:
+                                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
                                 "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                  border: "1px solid #ff469e",
+                                    backgroundColor: "#fff4fc",
+                                    color: "#ff469e",
+                                    border: "1px solid #ff469e",
                                 },
-                              },
-                              fontSize: "1.25rem",
+                                "&.Mui-selected": {
+                                    backgroundColor: "#ff469e",
+                                    color: "white",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                        backgroundColor: "#fff4fc",
+                                        color: "#ff469e",
+                                        border: "1px solid #ff469e",
+                                    },
+                                },
+                                fontSize: "1.25rem",
                             },
                             "& .MuiPaginationItem-ellipsis": {
-                              mt: 2,
-                              fontSize: "1.25rem",
+                                mt: 2,
+                                fontSize: "1.25rem",
                             },
-                          }}
+                        }}
                     />
                 </Box>
                 {visible && (
@@ -1012,7 +1019,7 @@ export default function OrdersManagement() {
                     </Box>
                 </Modal>
             </Container>
-            <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail} maxWidth= "md">
+            <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail}>
                 <DialogTitle
                     sx={{
                         fontSize: "2rem",
@@ -1028,30 +1035,45 @@ export default function OrdersManagement() {
                         <Box>
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
-                                    <Typography variant="h6"
+                                    <Box
                                         sx={{
-                                            fontSize: "1.25rem",
-                                            color: "#ff469e",
-                                            fontWeight: "bold",
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
                                         }}
                                     >
-                                        Order ID: {selectedOrder.id}
-                                    </Typography>
+                                        <Grid item xs={6}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontSize: "1.25rem",
+                                                    color: "#ff469e",
+                                                    fontWeight: "bold",
+                                                }}
+                                            >
+                                                Order ID: {selectedOrder.id}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography
+                                                sx={{
+                                                    fontSize: "1rem",
+                                                    color: "#00000",
+                                                    fontWeight: "bold",
+                                                }}>
+                                                Order Date: {formatDateTime(selectedOrder.order_date)}
+                                            </Typography>
+                                        </Grid>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography>Full name: {selectedOrder.full_name}</Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography>Phone: {selectedOrder.phone_number}</Typography>
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                     <Typography>Shipping Address: {selectedOrder.shipping_address}</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography>Order Date: {formatDateTime(selectedOrder.order_date)}</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography>Amount: {formatCurrency(selectedOrder.amount)}</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography>Total Discount: {formatCurrency(selectedOrder.total_discount)}</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography>Final Amount: {formatCurrency(selectedOrder.final_amount)}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
                                     <Typography>Payment Method: {selectedOrder.payment_method}</Typography>
@@ -1062,43 +1084,90 @@ export default function OrdersManagement() {
                                             fontSize: "1.25rem",
                                             color: "#ff469e",
                                             fontWeight: "bold",
+                                            marginBottom: 2,
                                         }}
                                     >
                                         Order Details:
                                     </Typography>
-                                    <List>
-                                        {selectedOrder.order_detail_list.map((detail) => (
-                                            <ListItem key={detail.id}>
-                                                <ListItemText
-                                                    primary={`Product Name: ${productMap[detail.product_id][0]}`}
-                                                    secondary={`Quantity: ${detail.quantity}, Unit Price: ${formatCurrency(detail.unit_price)}, Amount Price: ${formatCurrency(detail.amount_price)}`}
-                                                />
-                                            </ListItem>
-                                        ))}
-                                    </List>
+                                    <TableContainer component={Paper}>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Product Name</TableCell>
+                                                    <TableCell align="right">Unit Price</TableCell>
+                                                    <TableCell align="right">Quantity</TableCell>
+                                                    <TableCell align="right">Amount</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {selectedOrder.order_detail_list.map((detail) => (
+                                                    <TableRow key={detail.id}>
+                                                        <TableCell component="th" scope="row">
+                                                            {productMap[detail.product_id][0]}
+                                                        </TableCell>
+                                                        <TableCell align="right">{formatCurrency(detail.unit_price)}</TableCell>
+                                                        <TableCell align="right">{detail.quantity}</TableCell>
+                                                        <TableCell align="right">{formatCurrency(detail.amount_price)}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={6}>  </Grid>
+                                <Grid item xs={6}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'flex-end',
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                                            <Typography sx={{ fontSize: "1rem" }}>Total Amount:</Typography>
+                                            <Typography>{formatCurrency(selectedOrder.amount)}</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                                            <Typography sx={{ fontSize: "1rem" }}>Total Discount:</Typography>
+                                            <Typography>- {formatCurrency(selectedOrder.total_discount)}</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                                            <Typography sx={{ fontWeight: 'bold', fontSize: "1rem" }}>Final Amount:</Typography>
+                                            <Typography sx={{ fontWeight: 'bold', color: 'red' }}>{formatCurrency(selectedOrder.final_amount)}</Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                                <Box sx={{ width: '100%' }}>
                                     <Typography
                                         sx={{
                                             fontSize: "1.25rem",
                                             color: "#ff469e",
                                             fontWeight: "bold",
+                                            marginTop: 2,
+                                            marginBottom: 2,
                                         }}
-                                    >Status History:
+                                    >
+                                        Order Status:
                                     </Typography>
-                                    <Grid container spacing={2}>
-                                        {selectedOrder.status_order_list.map((status, index) => (
-                                            <Grid item xs={6} key={index}>
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary={`Status: ${status.status}`}
-                                                        secondary={`Date: ${formatDateTime(status.date)}`}
-                                                    />
-                                                </ListItem>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                </Grid>
+                                    <TableContainer component={Paper} sx={{ width: '80%' , marginLeft: 8}}>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Date</TableCell>
+                                                    <TableCell>Status</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {selectedOrder.status_order_list.map((status, index) => (
+                                                    <TableRow key={index}>
+                                                        <TableCell>{formatDateTime(status.date)}</TableCell>
+                                                        <TableCell>{status.status}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Box>
                             </Grid>
                         </Box>
                     )}
