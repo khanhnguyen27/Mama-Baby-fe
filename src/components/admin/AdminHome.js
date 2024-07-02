@@ -31,7 +31,7 @@ import {
 } from "@mui/x-charts";
 import { allOrderApi, orderByYearApi } from "../../api/OrderAPI";
 import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
-import { allStoreApi, StoreByMonthApi } from "../../api/StoreAPI";
+import { allStoreByAdminApi, StoreByMonthApi } from "../../api/StoreAPI";
 import { allUserApi, userByYearApi } from "../../api/UserAPI";
 import { allStatusOrderApi } from "../../api/OrderAPI";
 
@@ -126,7 +126,7 @@ export default function AdminHome() {
     setLoading(true);
     try {
       const orderRes = await allOrderApi();
-      const storeRes = await allStoreApi();
+      const storeRes = await allStoreByAdminApi();
       const refundRes = await allRefundApi();
       const accountRes = await allUserApi();
 
@@ -141,6 +141,7 @@ export default function AdminHome() {
 
       const userRes = await allUserApi();
       const ordersData = orderRes.data.data || [];
+      const refundData = refundRes.data.data.refunds || [];
       const userData = userRes?.data?.data || [];
       const userMap = userData.reduce((x, item) => {
         x[item.id] = [item.full_name, item.phone_number, item.address];
@@ -150,12 +151,24 @@ export default function AdminHome() {
 
       // Group months available
       const uniqueMonths = new Set();
+      // Xử lý dữ liệu đơn hàng
+      console.log("order data: ", ordersData)
       ordersData.forEach(order => {
         const orderDate = new Date(order.order_date);
-        console.log("orderDate:", order.order_date);
         const month = orderDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
         const year = orderDate.getFullYear();
         uniqueMonths.add(`${month}-${year}`);
+        console.log(`Order Date: ${order.order_date}, Month-Year: ${month}-${year}`);
+      });
+
+      // Xử lý dữ liệu hoàn tiền
+      console.log("refund data: ", refundData)
+      refundData.forEach(refundItem => {
+        const refundDate = new Date(refundItem.create_date);
+        const month = refundDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
+        const year = refundDate.getFullYear();
+        uniqueMonths.add(`${month}-${year}`);
+        console.log(`Refund Date: ${refundItem.create_date}, Month-Year: ${month}-${year}`);
       });
       setMonths(Array.from(uniqueMonths));
       console.log("Month Unique:", Array.from(uniqueMonths));
@@ -324,6 +337,9 @@ export default function AdminHome() {
     return dateB - dateA; // Sắp xếp từ mới nhất đến cũ nhất
   });
 
+  // Lọc danh sách các store có trạng thái "APPROVED"
+  const approvedStores = stores.filter(store => store.status === 'APPROVED');
+
   const calculateMonthlyData = (storeId, month, year) => {
     let revenue = 0;
     let refund = 0;
@@ -334,7 +350,10 @@ export default function AdminHome() {
       const orderYear = orderDate.getFullYear();
 
       if (order.store_id === storeId && orderMonth === month && orderYear === year) {
-        revenue += order.final_amount; // Giả sử final_amount là doanh thu
+        if (order.status_order_list.some(status => status.status === "COMPLETED") ||
+          (order.payment_method === "VNPAY" && order.status_order_list.some(status => status.status === "CANCELLED"))) {
+          revenue += order.final_amount; // Giả sử final_amount là doanh thu
+        }
       }
     });
 
@@ -344,7 +363,9 @@ export default function AdminHome() {
       const refundYear = refundDate.getFullYear();
 
       if (refundItem.store_id === storeId && refundMonth === month && refundYear === year) {
-        refund += refundItem.amount;
+        if (refundItem.status == "ACCEPT") {
+          refund += refundItem.amount;
+        }
       }
     });
 
@@ -366,36 +387,36 @@ export default function AdminHome() {
     };
 
     const headerStyle = {
-      font: { bold: true, color: { argb: 'FFFFFFFF' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } },
+      font: { bold: true, color: { argb: 'FF000000' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8CCE4' } },
       alignment: { horizontal: 'center', vertical: 'middle' },
       border: borderStyle
     };
 
     const monthStyle = {
       font: { bold: true, color: { argb: 'FF000000' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFD700' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8CCE4' } },
       alignment: { horizontal: 'center', vertical: 'middle' },
       border: borderStyle
     };
 
     const headerRevenueStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF009442' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC4D79B' } },
       border: borderStyle
     };
 
     const headerRefundStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB85708' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFABF8F' } },
       border: borderStyle
     };
 
     const revenueStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBF1DE' } },
       border: borderStyle
     };
 
     const refundStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFA07A' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDE9D9' } },
       border: borderStyle
     };
 
@@ -411,7 +432,7 @@ export default function AdminHome() {
 
     const totalRowStyle = {
       font: { bold: true },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE57D' } },
       border: borderStyle
     };
 
@@ -447,7 +468,7 @@ export default function AdminHome() {
     }
 
     // Add data rows
-    stores.forEach((store, index) => {
+    approvedStores.forEach((store, index) => {
       const row = [
         index + 1,
         store.name_store,
@@ -492,8 +513,8 @@ export default function AdminHome() {
     sortedMonths.forEach((_, index) => {
       const revenueCol = worksheet.getColumn(8 + 2 * index).letter;
       const refundCol = worksheet.getColumn(9 + 2 * index).letter;
-      totalRow.push({ formula: `SUM(${revenueCol}3:${revenueCol}${stores.length + 2})` });
-      totalRow.push({ formula: `SUM(${refundCol}3:${refundCol}${stores.length + 2})` });
+      totalRow.push({ formula: `SUM(${revenueCol}3:${revenueCol}${approvedStores.length + 2})` });
+      totalRow.push({ formula: `SUM(${refundCol}3:${refundCol}${approvedStores.length + 2})` });
     });
     const totalRowNumber = worksheet.addRow(totalRow).number;
 
