@@ -42,7 +42,7 @@ import Requests from "./components/general/Requests";
 import Dashboard from "./components/staff/Dashboard";
 import { useEffect } from "react";
 const applyScrollbarStyles = () => {
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.innerHTML = `
     ::-webkit-scrollbar {
       width: 0.7rem;
@@ -65,7 +65,7 @@ const applyScrollbarStyles = () => {
   document.head.appendChild(style);
 };
 
-function App () {
+function App() {
   useEffect(() => {
     applyScrollbarStyles();
   }, []);
@@ -93,7 +93,7 @@ function App () {
         <Route path="/profile" element={<Profile />} />
         <Route path="/regisstore" element={<RegisStores />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/article" element={<Article />} />
+        <Route path="/articles" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
         <Route path="/requests" element={<Requests />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>

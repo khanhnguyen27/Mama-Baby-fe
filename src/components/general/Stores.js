@@ -16,6 +16,8 @@ import {
   Tooltip,
   Typography,
   Pagination,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import { KeyboardCapslock } from "@mui/icons-material";
 
@@ -24,7 +26,7 @@ export default function HomePage() {
   const [visible, setVisible] = useState(false);
   const [store, setStore] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9; // Số lượng cửa hàng trên mỗi trang
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +52,9 @@ export default function HomePage() {
 
   const fetchData = async () => {
     try {
-      const storeRes = await allStoreApi();
+      const storeRes = await allStoreApi({
+        page: currentPage - 1,
+      });
       setStore(storeRes?.data?.data || []);
     } catch (err) {
       console.log(err);
@@ -58,19 +62,139 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     fetchData();
-  }, []);
+  }, [currentPage]);
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Tính toán số trang và các cửa hàng hiển thị trên trang hiện tại
-  const totalPages = Math.ceil((store?.stores?.length || 0) / itemsPerPage);
-  const currentStores = store?.stores?.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  ) || [];
+  if (loading) {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    return (
+      <Container>
+        <Grid item xs={12}>
+          <Carousel
+            PrevIcon={<ArrowLeft />}
+            NextIcon={<ArrowRight />}
+            height="240px"
+            animation="slide"
+            duration={500}
+            navButtonsProps={{
+              style: {
+                backgroundColor: "white",
+                color: "#ff469e",
+              },
+            }}
+            sx={{
+              border: "1px solid #ddd",
+              borderRadius: "16px",
+              position: "relative",
+              marginBottom: "2rem",
+              overflow: "hidden",
+            }}
+            indicatorContainerProps={{
+              style: {
+                position: "absolute",
+                bottom: "10px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 99,
+              },
+            }}
+            indicatorIconButtonProps={{
+              style: {
+                color: "whitesmoke",
+                backgroundColor: "black",
+                borderRadius: "50%",
+                width: "12px",
+                height: "12px",
+                margin: "0 4px",
+              },
+            }}
+            activeIndicatorIconButtonProps={{
+              style: {
+                color: "#ff469e",
+                backgroundColor: "#ff469e",
+                border: "1px solid white",
+                borderRadius: "8px",
+                width: "28px",
+                height: "12px",
+              },
+            }}
+          >
+            {items.map((item, i) => (
+              <div
+                onClick={() => navigate("/article")}
+                key={i}
+                style={{
+                  padding: 20,
+                  textAlign: "center",
+                  backgroundImage: `url(${item.image})`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  height: "200px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  color: "white",
+                  borderRadius: "16px",
+                  cursor: "pointer",
+                }}
+              ></div>
+            ))}
+          </Carousel>
+        </Grid>
+        <Container sx={{ my: 4 }}>
+          <Breadcrumbs separator=">" sx={{ color: "black" }}>
+            <Link
+              to="/"
+              style={{
+                textDecoration: "none",
+              }}
+            >
+              <Typography
+                sx={{
+                  color: "black",
+                  transition: "color 0.2s ease-in-out",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Home
+              </Typography>
+            </Link>
+            <Typography
+              sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+            >
+              Store List
+            </Typography>
+          </Breadcrumbs>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100vh",
+              maxWidth: "100vw",
+              mt: -20,
+            }}
+          >
+            <CircularProgress sx={{ color: "#ff469e" }} size={100} />
+          </Box>
+        </Container>
+      </Container>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: "#f5f7fd" }}>
@@ -182,7 +306,7 @@ export default function HomePage() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Grid container spacing={3}>
-              {currentStores.map((item, index) => (
+              {store?.stores?.map((item, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <Tooltip
                     title={item.name_store}
@@ -267,35 +391,88 @@ export default function HomePage() {
           </Grid>
         </Grid>
 
-        <Grid container justifyContent="center" sx={{ mt: 4 }}>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Pagination
-            count={totalPages}
+            count={store.totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
+            showFirstButton={store.totalPages !== 1}
+            showLastButton={store.totalPages !== 1}
+            hidePrevButton={currentPage === 1}
+            hideNextButton={currentPage === store.totalPages}
             size="large"
             sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "2.5rem",
+              width: "70%",
+              p: 1,
+              opacity: 0.9,
+              borderRadius: "20px",
               "& .MuiPaginationItem-root": {
-                border: "1px solid #f5f7fd",
-                borderRadius: "16px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                transition: "border 0.2s, box-shadow 0.2s",
+                backgroundColor: "white",
+                borderRadius: "20px",
+                border: "1px solid black",
+                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+                mx: 1,
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
                 "&:hover": {
-                  border: "1px solid #ff469e",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                  backgroundColor: "white",
+                  backgroundColor: "#fff4fc",
                   color: "#ff469e",
+                  border: "1px solid #ff469e",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    border: "1px solid #ff469e",
+                  },
+                },
+                fontSize: "1.25rem",
+              },
+              "& .MuiPaginationItem-ellipsis": {
+                mt: 1.25,
+                fontSize: "1.25rem",
+              },
+            }}
+            componentsProps={{
+              previous: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
                 },
               },
-              "& .Mui-selected": {
-                border: "1px solid #ff469e",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                backgroundColor: "white !important",
-                color: "#ff469e !important",
+              next: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
               },
             }}
           />
-        </Grid>
+        </Box>
 
         {visible && (
           <IconButton
@@ -307,7 +484,8 @@ export default function HomePage() {
               border: "1px solid #ff469e",
               backgroundColor: "#fff4fc",
               color: "#ff469e",
-              transition: "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
               "&:hover": {
                 backgroundColor: "#ff469e",
                 color: "white",

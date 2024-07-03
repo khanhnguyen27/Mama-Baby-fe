@@ -28,7 +28,7 @@ export const addArticleApi = (
   file,
   header,
   content,
-  link_product,
+  product_recom,
   store_id,
   status
 ) => {
@@ -36,7 +36,7 @@ export const addArticleApi = (
   formData.append("files", file);
   formData.append("header", header);
   formData.append("content", content);
-  formData.append("link_product", link_product);
+  formData.append("product_recom", product_recom);
   formData.append("link_image", "");
   formData.append("store_id", store_id);
   formData.append("status", status);
@@ -53,7 +53,7 @@ export const updateArticleApi = (id, articleData, file) => {
   formData.append("files", file);
   formData.append("header", articleData.header);
   formData.append("content", articleData.content);
-  formData.append("link_product", articleData.link_product);
+  formData.append("product_recom", articleData.product_recom);
   formData.append("link_image", articleData.link_image);
   formData.append("store_id", articleData.store_id);
   formData.append("status", articleData.status);
