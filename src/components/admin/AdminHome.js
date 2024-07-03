@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { KeyboardCapslock } from "@mui/icons-material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import MenuIcon from "@mui/icons-material/Menu";
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import { useNavigate } from "react-router-dom";
 import { saveAs } from 'file-saver';
 import html2canvas from "html2canvas";
@@ -10,6 +10,7 @@ import ExcelJS from 'exceljs';
 import jsPDF from "jspdf";
 import io from "socket.io-client";
 import {
+  Box,
   Menu,
   IconButton,
   MenuItem,
@@ -47,7 +48,7 @@ export default function AdminHome() {
   const [userMap, setUserMap] = useState({});
   const [months, setMonths] = useState([]);
   const [BarChartData, setBarChartData] = useState([]);
-  const [LineChartData, setLineChartData] = useState([]);
+  const [ReLineChartData, setReLineChartData] = useState([]);
   const [AccountLineChartData, setAccountLineChartData] = useState([]);
   const [inProgressData, setInProgressData] = useState(0);
   const [completeData, setCompleteData] = useState(0);
@@ -64,7 +65,8 @@ export default function AdminHome() {
   const [minYear, setMinYear] = useState(new Date().getFullYear() - 15);
   const [maxYear, setMaxYear] = useState(new Date().getFullYear());
   const [totalAccountYear, setTotalAccountYear] = useState(0);
-  const [currentMonthAccount, setCurrentMonthAccount] = useState(0);
+  // const [currentMonthAccount, setCurrentMonthAccount] = useState(0);
+  const [totalAccounts, setTotalAccounts] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const currentDate = new Date();
@@ -227,14 +229,18 @@ export default function AdminHome() {
   }, [selectedYearOrder, orders, refunds]);
 
   useEffect(() => {
+    calculatePercentage(selectedMonth);
+  }, [selectedMonth, stores]);
+
+  useEffect(() => {
     if (selectedYearAccount !== null) {
       handleLineAccountData(selectedYearAccount);
     }
   }, [selectedYearAccount, accounts]);
 
   useEffect(() => {
-    calculatePercentage(selectedMonth);
-  }, [selectedMonth, stores]);
+    calculateTotalAccounts(accounts);
+  }, [accounts]);
 
   useEffect(() => {
     fetchMinMaxYears();
@@ -576,16 +582,15 @@ export default function AdminHome() {
       const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
       let heightLeft = imgHeight;
-      let position = 10;
+      let position = 15;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
+      while (heightLeft >= 0) {
+        if (position !== 15) {
+          pdf.addPage(); // Add a new page only if it's not the first page
+        }
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pdfHeight;
+        position -= pdfHeight;
       }
 
       pdf.save('Dashboard.pdf');
@@ -618,7 +623,12 @@ export default function AdminHome() {
         .filter(statusOrder => statusOrder.status.toUpperCase() === "CANCELLED")
         .map(statusOrder => statusOrder.order_id);
 
-      console.log("orderIdsWithCancelStatus:", orderIdsWithCancelStatus);
+      const orderIdsWithCompleteStatus = statusOrders
+        .filter(statusOrder => statusOrder.status.toUpperCase() === "COMPLETED")
+        .map(statusOrder => statusOrder.order_id);
+
+      console.log("BarOrderIdsWithCancelStatus:", orderIdsWithCancelStatus);
+      console.log("BarOrderIdsWithCompleteStatus:", orderIdsWithCompleteStatus);
 
       const monthlyData = {
         Jan: { Revenue: 0, Refund: 0 },
@@ -659,19 +669,25 @@ export default function AdminHome() {
             !(order.payment_method.toUpperCase() === "COD" &&
               orderIdsWithCancelStatus.includes(order.id))
           ) {
-            const date = new Date(order.order_date);
-            const month = monthNames[date.getMonth()];
-            monthlyData[month].Revenue += order.final_amount || 0;
-            totalRev += order.final_amount || 0;
+            if (
+              (orderIdsWithCompleteStatus.includes(order.id))
+            ) {
+              const date = new Date(order.order_date);
+              const month = monthNames[date.getMonth()];
+              monthlyData[month].Revenue += order.final_amount || 0;
+              totalRev += order.final_amount || 0;
+            }
           }
         }
       });
 
       refundsData.forEach((refund) => {
-        const date = new Date(refund.create_date);
-        const month = monthNames[date.getMonth()];
-        monthlyData[month].Refund += refund.amount || 0;
-        totalRef += refund.amount || 0;
+        if (refund.status.toUpperCase() === "ACCEPT") {
+          const date = new Date(refund.create_date);
+          const month = monthNames[date.getMonth()];
+          monthlyData[month].Refund += refund.amount || 0;
+          totalRef += refund.amount || 0;
+        }
       });
 
       const BarData = Object.keys(monthlyData).map((month) => ({
@@ -764,6 +780,19 @@ export default function AdminHome() {
     { value: completeData, label: "Approved", color: "#00C49F" },
   ];
 
+  const calculateTotalAccounts = (accounts) => {
+    if (accounts && Array.isArray(accounts)) {
+
+      const filteredAccounts = accounts.filter(account => account.role_id.id !== 3);
+
+      const total = filteredAccounts.length;
+
+      setTotalAccounts(total);
+    } else {
+      setTotalAccounts(0);
+    }
+  };
+
   const handleLineAccountData = async (year = selectedYearAccount) => {
     try {
       let accountRes;
@@ -778,25 +807,25 @@ export default function AdminHome() {
       console.log("accountsData:", accountsData);
 
       const totalAccountsYear = accountsData.reduce((sum, account) => {
-        if (account.role_id !== 3) {
+        if (account.role_id.id !== 3) {
           return sum + 1;
         }
         return sum;
       }, 0);
       setTotalAccountYear(totalAccountsYear);
 
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
+      // const currentDate = new Date();
+      // const currentMonth = currentDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
 
-      const currentMonthAccounts = accountsData.reduce((sum, account) => {
-        const accountDate = new Date(account.create_at);
-        const accountMonth = accountDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
-        if (accountMonth === currentMonth && account.role_id !== 3) {
-          return sum + 1;
-        }
-        return sum;
-      }, 0);
-      setCurrentMonthAccount(currentMonthAccounts);
+      // const currentMonthAccounts = accountsData.reduce((sum, account) => {
+      //   const accountDate = new Date(account.create_at);
+      //   const accountMonth = accountDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
+      //   if (accountMonth === currentMonth && account.role_id.id !== 3) {
+      //     return sum + 1;
+      //   }
+      //   return sum;
+      // }, 0);
+      // setCurrentMonthAccount(currentMonthAccounts);
 
       const monthlyData = Array(12).fill(0);
 
@@ -808,14 +837,14 @@ export default function AdminHome() {
         }
       });
 
-      const lineChartData = monthlyData.map((Account, index) => ({
+      const lineChartAccountsData = monthlyData.map((Account, index) => ({
         month: index + 1,
         Account,
       }));
 
-      console.log("lineChartData:", lineChartData);
+      console.log("lineChartAccountsData:", lineChartAccountsData);
 
-      setAccountLineChartData(lineChartData);
+      setAccountLineChartData(lineChartAccountsData);
 
     } catch (error) {
       console.error("Error handling Account line chart data:", error);
@@ -835,46 +864,6 @@ export default function AdminHome() {
     },
   ];
 
-  const handleLineOrderData = async () => {
-    try {
-      const yearlyRevenue = orders.reduce((acc, order) => {
-        const date = new Date(order.order_date);
-        const year = date.getFullYear();
-        if (!acc[year]) {
-          acc[year] = 0;
-        }
-        acc[year] += order.amount;
-        return acc;
-      }, {});
-
-      const yearlyRefund = refunds.reduce((acc, refund) => {
-        const date = new Date(refund.create_date);
-        const year = date.getFullYear();
-        if (!acc[year]) {
-          acc[year] = 0;
-        }
-        acc[year] += refund.amount;
-        return acc;
-      }, {});
-
-      const years = Object.keys(yearlyRevenue).concat(
-        Object.keys(yearlyRefund)
-      );
-      const uniqueYears = Array.from(new Set(years)).sort();
-
-      const LineData = uniqueYears.map((year) => ({
-        year,
-        label: year.toString(),
-        Revenue: yearlyRevenue[year] || 0,
-        Refund: yearlyRefund[year] || 0,
-      }));
-
-      setLineChartData(LineData);
-    } catch (error) {
-      console.error("Error handling line chart data:", error);
-    }
-  };
-
   const fetchMinMaxYears = async () => {
     try {
       const orderRes = await orderByYearApi();
@@ -890,17 +879,80 @@ export default function AdminHome() {
     }
   };
 
+  const handleLineOrderData = async () => {
+    try {
+      const statusOrderRes = await allStatusOrderApi();
+
+      console.log("statusOrderRes:", statusOrderRes);
+
+      const statusOrders = statusOrderRes?.data?.data || [];
+
+      const orderIdsWithCancelStatus = statusOrders
+        .filter(statusOrder => statusOrder.status.toUpperCase() === "CANCELLED")
+        .map(statusOrder => statusOrder.order_id);
+
+      const orderIdsWithCompleteStatus = statusOrders
+        .filter(statusOrder => statusOrder.status.toUpperCase() === "COMPLETED")
+        .map(statusOrder => statusOrder.order_id);
+
+      console.log("LineOrderIdsWithCancelStatus:", orderIdsWithCancelStatus);
+      console.log("LineOrderIdsWithCompleteStatus:", orderIdsWithCompleteStatus);
+
+      const yearlyRevenue = orders.reduce((acc, order) => {
+        if (order.type.toUpperCase() === "ORDER" &&
+          !(order.payment_method.toUpperCase() === "COD" &&
+            orderIdsWithCancelStatus.includes(order.id))) {
+          if (orderIdsWithCompleteStatus.includes(order.id)) {
+            const date = new Date(order.order_date);
+            const year = date.getFullYear();
+            acc[year] = (acc[year] || 0) + order.final_amount;
+          }
+        }
+        return acc;
+      }, {});
+
+      const yearlyRefund = refunds.reduce((acc, refund) => {
+        if (refund.status.toUpperCase() === "ACCEPT") {
+          const date = new Date(refund.create_date);
+          const year = date.getFullYear();
+          acc[year] = (acc[year] || 0) + refund.amount;
+        }
+        return acc;
+      }, {});
+
+      const years = [...new Set([...Object.keys(yearlyRevenue), ...Object.keys(yearlyRefund)])].sort();
+
+      const LineChartReData = years.map(year => ({
+        year,
+        label: year.toString(),
+        Revenue: yearlyRevenue[year] || 0,
+        Refund: yearlyRefund[year] || 0,
+      }));
+
+      console.log("LineChartReData:", LineChartReData);
+      setReLineChartData(LineChartReData);
+    } catch (error) {
+      console.error("Error handling line chart data:", error);
+    }
+  };
+
   const valueFormatter = (value) => {
-    if (value >= 10_000_000_000) {
-      return `${(value / 10_000_000_000).toFixed(0)} Bil`;
-    } else if (value >= 1_000_000_000) {
+    if (value >= 1_000_000_000) {
+      return `${(value / 1_000_000_000).toFixed(0)} Bil`;
+    } else if (value >= 1_000_000) {
+      return `${(value / 1_000_000).toFixed(0)} Mil`;
+    } else if (value >= 1_000) {
+      return `${(value / 1_000).toFixed(0)} K`;
+    } else {
+      return value;
+    }
+  };
+
+  const FormatNumber = (value) => {
+    if (value >= 1_000_000_000) {
       return `${(value / 1_000_000_000).toFixed(1)} Bil`;
-    } else if (value >= 10_000_000) {
-      return `${(value / 10_000_000).toFixed(0)} Mil`;
     } else if (value >= 1_000_000) {
       return `${(value / 1_000_000).toFixed(1)} Mil`;
-    } else if (value >= 10_000) {
-      return `${(value / 10_000).toFixed(0)} K`;
     } else if (value >= 1_000) {
       return `${(value / 1_000).toFixed(1)} K`;
     } else {
@@ -974,68 +1026,80 @@ export default function AdminHome() {
     legend: {
       hidden: false,
     },
+    flexDirection: "column",
   };
 
   return (
-    <Container id="dashboard">
+    <Container id="dashboard" >
       <Paper
         elevation={3}
         sx={{
           position: "sticky",
           marginTop: "20px",
+          marginBottom: "20px",
           padding: "16px",
           border: "1px solid #ff469e",
           borderRadius: "10px",
           backgroundColor: "white",
         }}
       >
-        <Typography
+        <Box
           sx={{
-            padding: "8px",
-            background: "#ff469e",
-            color: "white",
-            fontWeight: "bold",
-            fontSize: "18px",
-            borderRadius: "4px",
-            textAlign: "center",
-            marginBottom: "16px",
+            display: 'flex',
+            alignItems: 'center',
+            background: '#ff469e',
+            borderRadius: '4px',
+            marginBottom: '16px',
           }}
         >
-          Dashboard
-        </Typography>
-        <IconButton
-          style={{ position: "absolute", top: 18, right: 15, color: "white" }}
-          onClick={handleMenuClick}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem
-            onClick={() => {
-              handleExportCSV();
-              handleMenuClose();
+          <Typography
+            sx={{
+              color: 'white',
+              padding: '8px',
+              fontWeight: 'bold',
+              fontSize: '18px',
+              textAlign: 'center',
+              flexGrow: 1,
             }}
           >
-            Export Report
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleExportPDF();
-              handleMenuClose();
+            Dashboard
+          </Typography>
+          <IconButton
+            style={{
+              color: 'white',
             }}
+            onClick={handleMenuClick}
           >
-            Export PDF
-          </MenuItem>
-        </Menu>
+            <SummarizeIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem
+              onClick={() => {
+                handleExportCSV();
+                handleMenuClose();
+              }}
+            >
+              Export Report
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleExportPDF();
+                handleMenuClose();
+              }}
+            >
+              Export PDF
+            </MenuItem>
+          </Menu>
+        </Box>
         <Grid container spacing={2}>
           <Grid item xs={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card>
+                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
                   <CardContent style={{ height: "242px" }}>
                     <Typography
                       variant="body1"
@@ -1063,14 +1127,14 @@ export default function AdminHome() {
                         style={{ fontSize: "35px", color: "#228B22" }}
                       />
                       <span style={{ color: "#228B22" }}>
-                        {valueFormatter(totalRevenue)}
+                        {FormatNumber(totalRevenue)}
                       </span>
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
               <Grid item xs={12} md={12}>
-                <Card>
+                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
                   <CardContent style={{ height: "243px" }}>
                     <Typography
                       variant="body1"
@@ -1102,7 +1166,7 @@ export default function AdminHome() {
                         }}
                       />
                       <span style={{ color: "rgb(2, 178, 175)" }}>
-                        {valueFormatter(totalRefund)}
+                        {FormatNumber(totalRefund)}
                       </span>
                     </Typography>
                   </CardContent>
@@ -1111,7 +1175,7 @@ export default function AdminHome() {
             </Grid>
           </Grid>
           <Grid item xs={9} md={9} sx={{ position: "relative" }}>
-            <Card>
+            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent
                 style={{
                   height: "500px",
@@ -1119,7 +1183,7 @@ export default function AdminHome() {
                   flexDirection: "column",
                 }}
               >
-                <Grid>
+                <div style={{ display: "flex", gap: "20px" }}>
                   <Typography
                     variant="h6"
                     style={{
@@ -1136,15 +1200,12 @@ export default function AdminHome() {
                     variant="outlined"
                     style={{
                       width: 90,
-                      position: "absolute",
-                      top: 28,
-                      left: 250,
                     }}
                   >
                     <InputLabel
                       htmlFor="year-select"
                       shrink
-                      style={{ fontWeight: "bold", color: "#E9967A" }}
+                      style={{ fontWeight: 'bold', color: '#E9967A' }}
                     >
                       Year
                     </InputLabel>
@@ -1153,8 +1214,8 @@ export default function AdminHome() {
                       onChange={handleYearOrderChange}
                       label="Year"
                       inputProps={{
-                        name: "Year",
-                        id: "year-select",
+                        name: 'Year',
+                        id: 'year-select',
                       }}
                       displayEmpty
                     >
@@ -1165,7 +1226,7 @@ export default function AdminHome() {
                       ))}
                     </Select>
                   </FormControl>
-                </Grid>
+                </div>
                 <BarChart
                   dataset={BarChartData}
                   yAxis={[
@@ -1182,23 +1243,22 @@ export default function AdminHome() {
                     {
                       dataKey: "Revenue",
                       label: "Revenue (VND)",
-                      valueFormatter: (value) => valueFormatter(value) + " VND",
+                      FormatNumber: (value) => FormatNumber(value) + " VND",
                       color: "#228B22",
                     },
                     {
                       dataKey: "Refund",
                       label: "Refund (VND)",
-                      valueFormatter: (value) => valueFormatter(value) + " VND",
+                      FormatNumber: (value) => FormatNumber(value) + " VND",
                       color: "rgb(2, 178, 175)",
                     },
                   ]}
-                  valueFormatter
                 />
               </CardContent>
-            </Card>
+            </Card >
           </Grid>
-          <Grid item xs={10} md={10}>
-            <Card>
+          <Grid item xs={9} md={9}>
+            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent style={{ height: "420px", display: "flex" }}>
                 <Grid marginTop={"90px"}>
                   <Typography
@@ -1225,7 +1285,7 @@ export default function AdminHome() {
                     style={{
                       width: 120,
                       marginTop: 10,
-                      marginLeft: 74,
+                      marginLeft: 75,
                     }}
                   >
                     <InputLabel
@@ -1292,10 +1352,10 @@ export default function AdminHome() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={2} md={2}>
+          <Grid item xs={3} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card>
+                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
                   <CardContent style={{ height: "202px" }}>
                     <Grid>
                       <Typography
@@ -1317,7 +1377,7 @@ export default function AdminHome() {
                         }}
                       >
                         <span style={{ color: "#696969" }}>
-                          {valueFormatter(inProgressCount)}
+                          {FormatNumber(inProgressCount)}
                         </span>
                       </Typography>
                     </Grid>
@@ -1325,7 +1385,7 @@ export default function AdminHome() {
                 </Card>
               </Grid>
               <Grid item xs={12} md={12}>
-                <Card>
+                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
                   <CardContent style={{ height: "201px" }}>
                     <Grid>
                       <Typography
@@ -1347,7 +1407,7 @@ export default function AdminHome() {
                         }}
                       >
                         <span style={{ color: "#696969" }}>
-                          {valueFormatter(completedCount)}
+                          {FormatNumber(completedCount)}
                         </span>
                       </Typography>
                     </Grid>
@@ -1359,7 +1419,40 @@ export default function AdminHome() {
           <Grid item xs={3} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card>
+                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                  <CardContent style={{ height: "243px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontSize: "19px",
+                          fontWeight: "bold",
+                          color: "#E9967A",
+                          marginBottom: "20px",
+                          paddingBottom: "20px",
+                        }}
+                      >
+                        Total Accounts Year
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "30px",
+                          paddingRight: "10px",
+                          fontSize: "45px",
+                        }}
+                      >
+                        <span style={{ color: "#696969" }}>
+                          {FormatNumber(totalAccountYear)}
+                        </span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
                   <CardContent style={{ height: "242px" }}>
                     <Grid>
                       <Typography
@@ -1372,7 +1465,7 @@ export default function AdminHome() {
                           paddingBottom: "20px",
                         }}
                       >
-                        Total Accounts in {currentYear}
+                        Overall Total Accounts
                       </Typography>
                       <Typography
                         style={{
@@ -1384,40 +1477,7 @@ export default function AdminHome() {
                         }}
                       >
                         <span style={{ color: "#696969" }}>
-                          {valueFormatter(totalAccountYear)}
-                        </span>
-                      </Typography>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={12}>
-                <Card>
-                  <CardContent style={{ height: "241px" }}>
-                    <Grid>
-                      <Typography
-                        variant="body1"
-                        style={{
-                          fontSize: "19px",
-                          fontWeight: "bold",
-                          color: "#E9967A",
-                          marginBottom: "20px",
-                          paddingBottom: "20px",
-                        }}
-                      >
-                        Total Accounts in {FormatMonthNames(currentMonth)}
-                      </Typography>
-                      <Typography
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          paddingTop: "30px",
-                          paddingRight: "10px",
-                          fontSize: "45px",
-                        }}
-                      >
-                        <span style={{ color: "#696969" }}>
-                          {valueFormatter(currentMonthAccount)}
+                          {FormatNumber(totalAccounts)}
                         </span>
                       </Typography>
                     </Grid>
@@ -1427,62 +1487,62 @@ export default function AdminHome() {
             </Grid>
           </Grid>
           <Grid item xs={9} md={9}>
-            <Card>
+            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent style={{
                 height: "500px",
                 display: "flex",
                 flexDirection: "column",
               }}>
-                <Typography
-                  sx={{
-                    fontSize: "26px",
-                    fontWeight: "bold",
-                    color: "#ff469e",
-                    marginBottom: "20px",
-                    paddingBottom: "20px",
-                    "&:hover": {
-                      cursor: "pointer",
-                      color: "#E9967A",
-                    },
-                  }}
-                  variant="h6"
-                  onClick={handleAcountLineClick}
-                >
-                  Yearly Account Analysis
-                </Typography>
-                <FormControl
-                  variant="outlined"
-                  style={{
-                    width: 90,
-                    position: "absolute",
-                    top: 1040,
-                    left: 610,
-                  }}
-                >
-                  <InputLabel
-                    htmlFor="year-select"
-                    shrink
-                    style={{ fontWeight: "bold", color: "#E9967A" }}
-                  >
-                    Year
-                  </InputLabel>
-                  <Select
-                    value={selectedYearAccount}
-                    onChange={handleYearAccountChange}
-                    label="Year"
-                    inputProps={{
-                      name: "Year",
-                      id: "year-select",
+                <div style={{ display: "flex", gap: "20px" }}>
+                  <Typography
+                    sx={{
+                      fontSize: "26px",
+                      fontWeight: "bold",
+                      color: "#ff469e",
+                      marginBottom: "20px",
+                      paddingBottom: "20px",
+                      "&:hover": {
+                        cursor: "pointer",
+                        color: "#E9967A",
+                      },
                     }}
-                    displayEmpty
+                    variant="h6"
+                    onClick={handleAcountLineClick}
                   >
-                    {YearsListAccount.map((year) => (
-                      <MenuItem key={year} value={year}>
-                        {year}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    Yearly Account Analysis
+                  </Typography>
+                  <FormControl
+                    variant="outlined"
+                    style={{
+                      width: 90,
+                      position: "relative",
+                    }}
+                  >
+                    <InputLabel
+                      htmlFor="year-select"
+                      shrink
+                      style={{ fontWeight: "bold", color: "#E9967A" }}
+                    >
+                      Year
+                    </InputLabel>
+                    <Select
+                      value={selectedYearAccount}
+                      onChange={handleYearAccountChange}
+                      label="Year"
+                      inputProps={{
+                        name: "Year",
+                        id: "year-select",
+                      }}
+                      displayEmpty
+                    >
+                      {YearsListAccount.map((year) => (
+                        <MenuItem key={year} value={year}>
+                          {year}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
                 <LineChart
                   xAxis={
                     xAxisConfig
@@ -1493,7 +1553,7 @@ export default function AdminHome() {
                     label: keyToLabelAccount[key],
                     color: colorsAccount[key],
                     showMark: false,
-                    valueFormatter,
+                    FormatNumber,
                     ...stackStrategyAccount,
                   }))}
                   dataset={AccountLineChartData}
@@ -1503,12 +1563,13 @@ export default function AdminHome() {
             </Card>
           </Grid>
           <Grid item xs={12} md={12}>
-            <Card>
+            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent
                 style={{
                   height: "500px",
                   display: "flex",
                   flexDirection: "column",
+                  marginTop: "50px",
                 }}
               >
                 <Typography
@@ -1518,8 +1579,8 @@ export default function AdminHome() {
                     fontWeight: "bold",
                     textAlign: "center",
                     color: "#ff469e",
-                    marginBottom: "40px",
-                    marginLeft: "10px",
+                    marginTop: "10px",
+                    marginRight: "20px",
                   }}
                 >
                   Profit Milk Each Year
@@ -1541,10 +1602,10 @@ export default function AdminHome() {
                     label: keyToLabelOrder[key],
                     color: colorsOrder[key],
                     showMark: false,
-                    valueFormatter,
+                    FormatNumber,
                     ...stackStrategyOrder,
                   }))}
-                  dataset={LineChartData}
+                  dataset={ReLineChartData}
                   {...customizeOrder}
                 />
               </CardContent>
