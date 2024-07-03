@@ -145,16 +145,17 @@ export default function OrdersManagement() {
     const handleAcceptRefund = async () => {
         if (selectedRefundId) {
             const selectedRefund = refund.find(item => item.id === selectedRefundId);
+            console.log("slect",selectedRefund)
             if (selectedRefund) {
                 try {
                     await updateRefundApi(
                         selectedRefund.id,
                         selectedRefund.description,
-                        selectedRefund.storeId,
-                        selectedRefund.userId,
-                        selectedRefund.orderId,
+                        selectedRefund.store_id,
+                        selectedRefund.user_id,
+                        selectedRefund.order_id,
                         'ACCEPT',
-                        selectedRefund.cartItemsRefund
+                        selectedRefund.refund_detail_list
                     );
                     toast.success("Refund updated successfully!");
                     fetchData();
