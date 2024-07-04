@@ -7,7 +7,6 @@ import { allCategorytApi } from "../../api/CategoryAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { format, parseISO } from "date-fns";
 import {
-  allProductApi,
   addProductApi,
   updateProductApi,
   allProductByStoreApi,
@@ -31,7 +30,6 @@ import {
   Tooltip,
   Typography,
   Box,
-  Breadcrumbs,
   Card,
   CardContent,
   CardMedia,
@@ -44,14 +42,19 @@ import {
   IconButton,
   Radio,
   RadioGroup,
+  Pagination,
 } from "@mui/material";
-import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
+import {
+  ClearAll,
+  KeyboardCapslock,
+  Close,
+  CheckCircle,
+  Cancel,
+} from "@mui/icons-material";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
-import { Pagination, PaginationItem } from "@mui/material";
-import { CheckCircle, Cancel } from "@mui/icons-material";
 
 export default function StaffHome() {
   const navigate = useNavigate();
@@ -353,15 +356,7 @@ export default function StaffHome() {
       setLoading(false);
     }, 1000);
     fetchData(1);
-  }, [
-    keyword,
-    ageFilter,
-    brandFilter,
-    categoryFilter,
-    storeId,
-    currentPage,
-    sortPrice,
-  ]);
+  }, [ageFilter, brandFilter, categoryFilter, storeId, currentPage, sortPrice]);
 
   const onPageChange = (page) => {
     fetchData(page);
@@ -370,7 +365,28 @@ export default function StaffHome() {
 
   //find product
   const handleSearch = () => {
-    fetchData();
+    setLoading(true);
+    if (keyword.length > 0 && keyword.length < 2) {
+      setLoading(false);
+      return;
+    }
+    if (keyword === "") {
+      setTimeout(() => {
+        setLoading(false);
+        fetchData();
+      }, 2000);
+      return;
+    }
+    setTimeout(() => {
+      setLoading(false);
+      fetchData();
+    }, 2000);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -840,46 +856,61 @@ export default function StaffHome() {
                   size="small"
                   variant="outlined"
                   value={keyword}
+                  onKeyDown={handleKeyDown}
                   onChange={(e) => setKeyword(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch();
-                    }
-                  }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Button
-                          sx={{
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                            height: "40px",
-                            marginRight: "0.6px",
-                            borderRadius: "5px",
-                            boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                            transition: "0.2s ease-in-out",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              opacity: 0.8,
-                              color: "white",
-                              boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
-                            },
-                            "&:active": {
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              boxShadow:
-                                "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
-                            },
-                          }}
-                        >
-                          <SearchIcon
-                            sx={{
-                              color: "inherit",
-                              cursor: "pointer",
-                              fontSize: "35px",
-                            }}
+                        {loading ? (
+                          <CircularProgress
+                            sx={{ color: "#ff469e", mx: 2 }}
+                            size={24}
                           />
-                        </Button>
+                        ) : (
+                          <>
+                            {keyword && (
+                              <IconButton
+                                onClick={() => setKeyword("")}
+                                size="small"
+                              >
+                                <Close fontSize="small" />
+                              </IconButton>
+                            )}
+                            <Button
+                              onClick={handleSearch}
+                              sx={{
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                height: "40px",
+                                marginRight: "0.6px",
+                                borderRadius: "5px",
+                                boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                                transition: "0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  opacity: 0.8,
+                                  color: "white",
+                                  boxShadow:
+                                    "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                                },
+                                "&:active": {
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  boxShadow:
+                                    "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                                },
+                              }}
+                            >
+                              <SearchIcon
+                                sx={{
+                                  color: "inherit",
+                                  cursor: "pointer",
+                                  fontSize: "35px",
+                                }}
+                              />
+                            </Button>
+                          </>
+                        )}
                       </InputAdornment>
                     ),
                     sx: {
@@ -1280,46 +1311,60 @@ export default function StaffHome() {
                 size="small"
                 variant="outlined"
                 value={keyword}
+                onKeyDown={handleKeyDown}
                 onChange={(e) => setKeyword(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Button
-                        sx={{
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          height: "40px",
-                          marginRight: "0.6px",
-                          borderRadius: "5px",
-                          boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                          transition: "0.2s ease-in-out",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            opacity: 0.8,
-                            color: "white",
-                            boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
-                          },
-                          "&:active": {
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            boxShadow:
-                              "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
-                          },
-                        }}
-                      >
-                        <SearchIcon
-                          sx={{
-                            color: "inherit",
-                            cursor: "pointer",
-                            fontSize: "35px",
-                          }}
+                      {loading ? (
+                        <CircularProgress
+                          sx={{ color: "#ff469e", mx: 2 }}
+                          size={24}
                         />
-                      </Button>
+                      ) : (
+                        <>
+                          {keyword && (
+                            <IconButton
+                              onClick={() => setKeyword("")}
+                              size="small"
+                            >
+                              <Close fontSize="small" />
+                            </IconButton>
+                          )}
+                          <Button
+                            onClick={handleSearch}
+                            sx={{
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              height: "40px",
+                              marginRight: "0.6px",
+                              borderRadius: "5px",
+                              boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                              transition: "0.2s ease-in-out",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                opacity: 0.8,
+                                color: "white",
+                                boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                              },
+                              "&:active": {
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                boxShadow:
+                                  "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                              },
+                            }}
+                          >
+                            <SearchIcon
+                              sx={{
+                                color: "inherit",
+                                cursor: "pointer",
+                                fontSize: "35px",
+                              }}
+                            />
+                          </Button>
+                        </>
+                      )}
                     </InputAdornment>
                   ),
                   sx: {

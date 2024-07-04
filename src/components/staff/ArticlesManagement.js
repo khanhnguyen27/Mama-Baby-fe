@@ -9,7 +9,7 @@ import {
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
-import { Close } from "@mui/icons-material";
+import { Close, HelpOutline as HelpOutlineIcon } from "@mui/icons-material";
 import {
   TextField,
   Select,
@@ -556,9 +556,11 @@ export default function Articles() {
               />
             </LocalizationProvider>
             {/* Custom button or icon */}
-            <IconButton>
-              <DateRangeIcon />
-            </IconButton>
+            <Tooltip title="You need to select both start and end dates to filter. Selecting only one will not work.">
+              <IconButton>
+                <DateRangeIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Container>
         <Box
@@ -733,9 +735,11 @@ export default function Articles() {
             />
           </LocalizationProvider>
           {/* Custom button or icon */}
-          <IconButton>
-            <DateRangeIcon />
-          </IconButton>
+          <Tooltip title="You need to select both start and end dates to filter. Selecting only one will not work.">
+            <IconButton>
+              <DateRangeIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Container>
       <Container>
@@ -1045,6 +1049,16 @@ export default function Articles() {
             fullWidth
             margin="normal"
           />
+          {/* <TextField
+            label="Product recommendation"
+            value={productRecom ? productRecom.name : ""}
+            onClick={handleOpenProductRecom}
+            fullWidth
+            margin="normal"
+            InputProps={{
+              readOnly: true,
+            }}
+          /> */}
           <TextField
             label="Product recommendation"
             value={productRecom ? productRecom.name : ""}
@@ -1053,6 +1067,15 @@ export default function Articles() {
             margin="normal"
             InputProps={{
               readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip title="You can select a product to recommend to customers in the article from the store. If you don't want to select, leave it blank.">
+                    <IconButton>
+                      <HelpOutlineIcon />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              ),
             }}
           />
           <input
@@ -1190,9 +1213,17 @@ export default function Articles() {
               margin="normal"
               InputProps={{
                 readOnly: true,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip title="You can select a product to recommend to customers in the article from the store. If you don't want to select, leave it blank.">
+                      <IconButton>
+                        <HelpOutlineIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </InputAdornment>
+                ),
               }}
             />
-
             <TextField
               label="Created At"
               value={new Date(selectedArticle?.created_at).toLocaleDateString()}
