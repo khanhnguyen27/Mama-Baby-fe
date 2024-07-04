@@ -33,21 +33,23 @@ const itemList = [
   },
 
   {
-    label: "Accounts",
-    Icon: AccountCircleIcon,
-    href: "accounts",
-  },
-  {
     label: "Request Stores",
     Icon: ShoppingBagIcon,
     href: "requeststore",
   },
-  
+
+  {
+    label: "Accounts",
+    Icon: AccountCircleIcon,
+    href: "accounts",
+  },
+
   {
     label: "Stores",
     Icon: Shop,
     href: "stores",
   },
+
   {
     label: "Categories",
     Icon: CategoryIcon,

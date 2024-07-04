@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
-import 'react-toastify/dist/ReactToastify.css';
-import { useLocation } from "react-router-dom";
+import { KeyboardCapslock } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import {
   Container,
@@ -34,11 +32,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import 'react-toastify/dist/ReactToastify.css';
 import { allAgeAdminApi, addAgeApi, updateAgeApi } from "../../api/AgeAPI";
 
 export default function AgeManagement() {
   window.document.title = "AgeManagement";
-  const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [ages, setAges] = useState([]);
@@ -49,6 +47,7 @@ export default function AgeManagement() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newAgeName, setNewAgeName] = useState("");
   const [openUpdateAge, setOpenUpdateAge] = useState(false);
+  const [sortingStatus, setSortingStatus] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,7 +62,15 @@ export default function AgeManagement() {
     setLoading(true);
     try {
       const ageRes = await allAgeAdminApi();
-      setAges(ageRes.data.data || []);
+      let sortedAges = ageRes.data.data || [];
+
+      if (sortingStatus === "active") {
+        sortedAges = sortedAges.filter((age) => age.active);
+      } else if (sortingStatus === "inactive") {
+        sortedAges = sortedAges.filter((age) => !age.active);
+      }
+
+      setAges(sortedAges);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -73,7 +80,7 @@ export default function AgeManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [sortingStatus])
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
@@ -100,6 +107,11 @@ export default function AgeManagement() {
 
   const handleInputChange = (event) => {
     setNewAgeName(event.target.value);
+  };
+
+  const handleSortingStatus = (event) => {
+    setSortingStatus(event.target.value);
+    setPage(0);
   };
 
   const handleAddAge = async () => {
@@ -142,26 +154,31 @@ export default function AgeManagement() {
 
   const handleEdit = async () => {
     const trimmedRangeAge = selectedAges.rangeAge.trim();
-    const { id, originalName } = selectedAges;
 
-    // Check if the name has changed
-    const nameChanged = originalName.toLowerCase() !== trimmedRangeAge.toLowerCase();
-
-    // Check if the trimmed age range name already exists (only if the name has changed)
-    if (nameChanged && ages.some((age) => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase() && age.id !== id)) {
-      toast.error("RangeAge name already exists");
+    if (ages.some(age => age.name.toLowerCase() === trimmedRangeAge.toLowerCase() && age.id !== selectedAges.id)) {
+      toast.error('Brand name already exists');
       return;
     }
 
-    try {
-      await updateAgeApi(id, trimmedRangeAge, selectedAges.active);
-      toast.success("RangeAge updated successfully!");
-      fetchData(); // Refresh data after update
-      setOpenUpdateAge(false); // Close update dialog
-    } catch (error) {
-      console.error("Error updating RangeAge:", error);
-      toast.error("Failed to update RangeAge. Please try again later.");
+    if (!selectedAges) {
+      console.error("No RangeAge selected for editing.");
+      return;
     }
+
+    updateAgeApi(
+      selectedAges.id,
+      trimmedRangeAge,
+      selectedAges.active,
+    )
+      .then(() => {
+        fetchData(); // Refresh rangeAge list
+        closeUpdate();
+        toast.success("RangeAge updated successfully!");
+      })
+      .catch((error) => {
+        console.error("Error updating brand:", error);
+        toast.error("Failed to update brand. Please try again later.");
+      });
   };
 
   const filteredAges = ages.filter((item) =>
@@ -175,20 +192,45 @@ export default function AgeManagement() {
   return (
     <div>
       <Container>
-        <Paper elevation={4} sx={{ position: "sticky", marginTop: "20px",  padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
-          <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-            Manage Ages
+        <Paper elevation={3}
+          sx={{
+            position: "sticky",
+            marginTop: "20px",
+            marginBottom: "20px",
+            padding: "16px",
+            border: "1px solid #ff469e",
+            borderRadius: "10px",
+            backgroundColor: "white",
+          }}
+        >
+          <Typography
+            sx={{
+              padding: "13px",
+              background: "#ff469e",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "20px",
+              borderRadius: "4px",
+              textAlign: "center",
+              marginBottom: "16px"
+            }}>
+            Ages Management
           </Typography>
-          <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
-            <Grid item xs={12} md={3}>
+          <Grid
+            container spacing={2}
+            alignItems="center"
+            sx={{ marginBottom: "16px" }}
+          >
+            <Grid item xs={4} md={4}>
               <TextField
                 value={searchKeyword}
                 onChange={handleSearchChange}
-                placeholder="Search By RangeAge!"
+                placeholder="Search By Range Age"
                 variant="outlined"
                 size="small"
                 fullWidth
                 InputProps={{
+                  style: { padding: "8px" },
                   startAdornment: (
                     <InputAdornment position="start">
                       <IconButton>
@@ -199,7 +241,10 @@ export default function AgeManagement() {
                   endAdornment: (
                     <InputAdornment position="end">
                       {searchKeyword && (
-                        <IconButton onClick={() => setSearchKeyword("")} size="small">
+                        <IconButton
+                          onClick={() => setSearchKeyword("")}
+                          size="small"
+                        >
                           <CloseIcon fontSize="small" />
                         </IconButton>
                       )}
@@ -208,13 +253,39 @@ export default function AgeManagement() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={9} style={{ textAlign: "right" }}>
+            <Grid item xs={4} md={3}>
+              <FormControl sx={{ width: "170px" }}>
+                <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                  Sorting Status
+                </InputLabel>
+                <Select
+                  labelId="sorting-status-label"
+                  id="sorting-status-select"
+                  size="medium"
+                  value={sortingStatus}
+                  onChange={handleSortingStatus}
+                  label="Sorting Status"
+                >
+                  <MenuItem value="">Sort by Default</MenuItem>
+                  <MenuItem value="active">Sort by Active</MenuItem>
+                  <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={1} md={3}></Grid>
+            <Grid item xs={3} md={2}>
               <Button
                 variant="contained"
                 size="medium"
                 onClick={handleOpenAddDialog}
                 startIcon={<AddIcon />}
-                style={{ backgroundColor: "white", color: "black" }}
+                style={{
+                  color: "black",
+                  height: "56px",
+                  border: "1px solid #ff469e",
+                  borderRadius: "10px",
+                  backgroundColor: "white",
+                }}
               >
                 Add New Range Age
               </Button>
@@ -232,7 +303,7 @@ export default function AgeManagement() {
                     <TableRow>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Range Age</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Active</TableCell>
+                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -268,9 +339,9 @@ export default function AgeManagement() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 sx={{
-                  borderTop: "1px solid #ddd",
                   justifyContent: "flex-end",
                   backgroundColor: "f1f1f1",
+                  marginRight: "40px"
                 }}
                 labelRowsPerPage="Rows:"
                 labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
@@ -316,7 +387,7 @@ export default function AgeManagement() {
                 onChange={(e) => handleChange("rangeAge", e.target.value)}
               />
               <FormControl fullWidth margin="normal">
-                <InputLabel htmlFor="active-select">Active</InputLabel>
+                <InputLabel htmlFor="active-select">Status</InputLabel>
                 <Select
                   value={selectedAges.active}
                   onChange={(e) => handleChange("active", e.target.value)}
@@ -347,7 +418,7 @@ export default function AgeManagement() {
             sx={{
               position: "fixed",
               right: 25,
-              bottom: 75,
+              bottom: 25,
               border: "1px solid #ff469e",
               backgroundColor: "#fff4fc",
               color: "#ff469e",
@@ -369,6 +440,6 @@ export default function AgeManagement() {
           </IconButton>
         )}
       </Container>
-    </div>
+    </div >
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { KeyboardCapslock } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import {
   Container,
@@ -24,17 +24,20 @@ import {
   Button,
   NativeSelect,
   InputLabel,
+  MenuItem,
+  Select
 } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import 'react-toastify/dist/ReactToastify.css';
 import { allUserApi, updateAccountApi } from "../../api/UserAPI";
 
 export default function AccountManagement() {
   window.document.title = "Account Management";
-  const { state } = useLocation();
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -42,21 +45,43 @@ export default function AccountManagement() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [openUpdateAccount, setOpenUpdateAccount] = useState(false);
+  const [sortingStatus, setSortingStatus] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const userRes = await allUserApi();
-      setUsers(userRes?.data?.data || []);
+      let sortedUsers = userRes?.data?.data || [];
+      if (sortingStatus === "active") {
+        sortedUsers = sortedUsers.filter((user) => user.isActive);
+      } else if (sortingStatus === "inactive") {
+        sortedUsers = sortedUsers.filter((user) => !user.isActive);
+      }
+
+      setUsers(sortedUsers);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [sortingStatus]);
+
+  const handleSortingStatus = (event) => {
+    setSortingStatus(event.target.value);
+    setPage(0);
   };
 
   const handleSearchChange = (event) => {
@@ -106,12 +131,10 @@ export default function AccountManagement() {
       isActive,
       selectedAccount.role_id.id
     )
-      .then((response) => {
-        toast.success("Account updated successfully!");
-        // Reload the page to keep the current search keyword
-        //window.location.reload();
+      .then(() => {
         fetchData();
         closeUpdate();
+        toast.success("Account updated successfully!");
       })
       .catch((error) => {
         console.error("Error updating account:", error);
@@ -135,11 +158,11 @@ export default function AccountManagement() {
   return (
     <div>
       <Container>
-        <Paper
-          elevation={4}
+        <Paper elevation={3}
           sx={{
             position: "sticky",
-            top: "80px",
+            marginTop: "20px",
+            marginBottom: "20px",
             padding: "16px",
             border: "1px solid #ff469e",
             borderRadius: "10px",
@@ -148,33 +171,32 @@ export default function AccountManagement() {
         >
           <Typography
             sx={{
-              padding: "8px",
+              padding: "13px",
               background: "#ff469e",
               color: "white",
               fontWeight: "bold",
-              fontSize: "18px",
+              fontSize: "20px",
               borderRadius: "4px",
               textAlign: "center",
-              marginBottom: "16px",
-            }}
-          >
-            Manage Accounts
+              marginBottom: "16px"
+            }}>
+            Accounts Management
           </Typography>
           <Grid
-            container
-            spacing={3}
+            container spacing={2}
             alignItems="center"
             sx={{ marginBottom: "16px" }}
           >
-            <Grid item xs={12} md={3}>
+            <Grid item xs={4} md={4}>
               <TextField
                 value={searchKeyword}
                 onChange={handleSearchChange}
-                placeholder="Search By Name!"
+                placeholder="Search By User Name"
                 variant="outlined"
                 size="small"
                 fullWidth
                 InputProps={{
+                  style: { padding: "8px" },
                   startAdornment: (
                     <InputAdornment position="start">
                       <IconButton>
@@ -196,6 +218,25 @@ export default function AccountManagement() {
                   ),
                 }}
               />
+            </Grid>
+            <Grid item xs={4} md={3}>
+              <FormControl sx={{ width: "170px" }}>
+                <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                  Sorting Status
+                </InputLabel>
+                <Select
+                  labelId="sorting-status-label"
+                  id="sorting-status-select"
+                  size="medium"
+                  value={sortingStatus}
+                  onChange={handleSortingStatus}
+                  label="Sorting Status"
+                >
+                  <MenuItem value="">Sort by Default</MenuItem>
+                  <MenuItem value="active">Sort by Active</MenuItem>
+                  <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
           {loading ? (
@@ -314,9 +355,9 @@ export default function AccountManagement() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 sx={{
-                  borderTop: "1px solid #ddd",
                   justifyContent: "flex-end",
-                  backgroundColor: "#f1f1f1",
+                  backgroundColor: "f1f1f1",
+                  marginRight: "40px"
                 }}
                 labelRowsPerPage="Rows:"
                 labelDisplayedRows={({ from, to, count }) =>
@@ -339,23 +380,20 @@ export default function AccountManagement() {
                 margin="normal"
                 onChange={(e) => handleChange("username", e.target.value)}
               />
-              <FormControl fullWidth>
-                <InputLabel variant="standard" htmlFor="uncontrolled-native">
-                  Choose Status
-                </InputLabel>
-                <NativeSelect
-                  defaultValue={selectedAccount.isActive ? "true" : "false"}
+              <FormControl fullWidth margin="normal">
+                <InputLabel htmlFor="active-select">Status</InputLabel>
+                <Select
+                  value={selectedAccount.isActive}
+                  onChange={(e) => handleChange("isActive", e.target.value)}
+                  label="Active"
                   inputProps={{
                     name: "isActive",
-                    id: "uncontrolled-native",
+                    id: "active-select",
                   }}
-                  onChange={(e) =>
-                    handleChange("isActive", e.target.value === "true")
-                  }
                 >
-                  <option value={"true"}>Active</option>
-                  <option value={"false"}>Inactive</option>
-                </NativeSelect>
+                  <MenuItem value={true}>Yes</MenuItem>
+                  <MenuItem value={false}>No</MenuItem>
+                </Select>
               </FormControl>
             </DialogContent>
             <DialogActions>
@@ -367,6 +405,33 @@ export default function AccountManagement() {
               </Button>
             </DialogActions>
           </Dialog>
+        )}
+        {visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 25,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
         )}
       </Container>
     </div>

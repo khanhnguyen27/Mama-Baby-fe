@@ -1055,9 +1055,9 @@ export default function AdminHome() {
           <Typography
             sx={{
               color: 'white',
-              padding: '8px',
+              padding: '13px',
               fontWeight: 'bold',
-              fontSize: '18px',
+              fontSize: '20px',
               textAlign: 'center',
               flexGrow: 1,
             }}
@@ -1067,6 +1067,7 @@ export default function AdminHome() {
           <IconButton
             style={{
               color: 'white',
+              Size: 'medium',
             }}
             onClick={handleMenuClick}
           >
@@ -1096,7 +1097,7 @@ export default function AdminHome() {
           </Menu>
         </Box>
         <Grid container spacing={2}>
-          <Grid item xs={3}>
+          <Grid item xs={4} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
                 <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
@@ -1104,7 +1105,7 @@ export default function AdminHome() {
                     <Typography
                       variant="body1"
                       style={{
-                        fontSize: "18px",
+                        fontSize: "16px",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1119,7 +1120,7 @@ export default function AdminHome() {
                         justifyContent: "center",
                         paddingTop: "30px",
                         paddingRight: "10px",
-                        fontSize: "45px",
+                        fontSize: "40px",
                       }}
                     >
                       <ArrowDropUpIcon
@@ -1139,7 +1140,7 @@ export default function AdminHome() {
                     <Typography
                       variant="body1"
                       style={{
-                        fontSize: "18px",
+                        fontSize: "16px",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1154,7 +1155,7 @@ export default function AdminHome() {
                         justifyContent: "center",
                         paddingTop: "30px",
                         paddingRight: "10px",
-                        fontSize: "45px",
+                        fontSize: "40px",
                       }}
                     >
                       <ArrowDropDownIcon
@@ -1174,7 +1175,7 @@ export default function AdminHome() {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={9} md={9} sx={{ position: "relative" }}>
+          <Grid item xs={8} md={9}>
             <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent
                 style={{
@@ -1257,7 +1258,7 @@ export default function AdminHome() {
               </CardContent>
             </Card >
           </Grid>
-          <Grid item xs={9} md={9}>
+          <Grid item xs={8} md={9}>
             <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent style={{ height: "420px", display: "flex" }}>
                 <Grid marginTop={"90px"}>
@@ -1285,7 +1286,7 @@ export default function AdminHome() {
                     style={{
                       width: 120,
                       marginTop: 10,
-                      marginLeft: 75,
+                      marginLeft: 73,
                     }}
                   >
                     <InputLabel
@@ -1352,7 +1353,7 @@ export default function AdminHome() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={3} md={3}>
+          <Grid item xs={4} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
                 <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
@@ -1416,7 +1417,7 @@ export default function AdminHome() {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={3} md={3}>
+          <Grid item xs={4} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
                 <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
@@ -1425,7 +1426,7 @@ export default function AdminHome() {
                       <Typography
                         variant="body1"
                         style={{
-                          fontSize: "19px",
+                          fontSize: "17px",
                           fontWeight: "bold",
                           color: "#E9967A",
                           marginBottom: "20px",
@@ -1440,7 +1441,7 @@ export default function AdminHome() {
                           justifyContent: "center",
                           paddingTop: "30px",
                           paddingRight: "10px",
-                          fontSize: "45px",
+                          fontSize: "40px",
                         }}
                       >
                         <span style={{ color: "#696969" }}>
@@ -1458,7 +1459,7 @@ export default function AdminHome() {
                       <Typography
                         variant="body1"
                         style={{
-                          fontSize: "19px",
+                          fontSize: "17px",
                           fontWeight: "bold",
                           color: "#E9967A",
                           marginBottom: "20px",
@@ -1473,7 +1474,7 @@ export default function AdminHome() {
                           justifyContent: "center",
                           paddingTop: "30px",
                           paddingRight: "10px",
-                          fontSize: "45px",
+                          fontSize: "40px",
                         }}
                       >
                         <span style={{ color: "#696969" }}>
@@ -1486,7 +1487,7 @@ export default function AdminHome() {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={9} md={9}>
+          <Grid item xs={8} md={9}>
             <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
               <CardContent style={{
                 height: "500px",

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
-import 'react-toastify/dist/ReactToastify.css';
-import { useLocation } from "react-router-dom";
+import { KeyboardCapslock } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import {
   Container,
@@ -27,18 +25,18 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  FormControl
 } from "@mui/material";
-import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import 'react-toastify/dist/ReactToastify.css';
 import { allBrandAdminApi, addBrandApi, updateBrandApi } from "../../api/BrandAPI";
 
 export default function BrandManagement() {
   window.document.title = "Brand Management";
-  const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [brands, setBrands] = useState([]);
@@ -49,6 +47,7 @@ export default function BrandManagement() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newBrandName, setNewBrandName] = useState("");
   const [openUpdateBrand, setOpenUpdateBrand] = useState(false);
+  const [sortingStatus, setSortingStatus] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,7 +62,16 @@ export default function BrandManagement() {
     setLoading(true);
     try {
       const brandRes = await allBrandAdminApi();
-      setBrands(brandRes.data.data || []);
+      let sortedBrands = brandRes.data.data || [];
+
+      // Sorting logic based on sortingStatus state
+      if (sortingStatus === "active") {
+        sortedBrands = sortedBrands.filter((brand) => brand.active);
+      } else if (sortingStatus === "inactive") {
+        sortedBrands = sortedBrands.filter((brand) => !brand.active);
+      }
+
+      setBrands(sortedBrands);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -73,7 +81,7 @@ export default function BrandManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [sortingStatus])
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
@@ -100,6 +108,11 @@ export default function BrandManagement() {
 
   const handleInputChange = (event) => {
     setNewBrandName(event.target.value);
+  };
+
+  const handleSortingStatus = (event) => {
+    setSortingStatus(event.target.value);
+    setPage(0);
   };
 
   const handleAddBrand = async () => {
@@ -156,10 +169,10 @@ export default function BrandManagement() {
       trimmedBrandName,
       selectedBrand.active,
     )
-      .then((response) => {
+      .then(() => {
+        fetchData(); // Refresh brand list
+        closeUpdate();
         toast.success("Brand updated successfully!");
-        // Reload the page to keep the current search keyword
-        window.location.reload();
       })
       .catch((error) => {
         console.error("Error updating brand:", error);
@@ -178,20 +191,46 @@ export default function BrandManagement() {
   return (
     <div>
       <Container>
-        <Paper elevation={4} sx={{ position: "sticky", marginTop: "20px",  padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
-          <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-            Manage Brands
+        <Paper
+          elevation={3}
+          sx={{
+            position: "sticky",
+            marginTop: "20px",
+            marginBottom: "20px",
+            padding: "16px",
+            border: "1px solid #ff469e",
+            borderRadius: "10px",
+            backgroundColor: "white",
+          }}
+        >
+          <Typography
+            sx={{
+              padding: "13px",
+              background: "#ff469e",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "20px",
+              borderRadius: "4px",
+              textAlign: "center",
+              marginBottom: "16px"
+            }}>
+            Brands Management
           </Typography>
-          <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
-            <Grid item xs={12} md={3}>
+          <Grid
+            container spacing={2}
+            alignItems="center"
+            sx={{ marginBottom: "16px" }}
+          >
+            <Grid item xs={4} md={4}>
               <TextField
                 value={searchKeyword}
                 onChange={handleSearchChange}
-                placeholder="Search By Name!"
+                placeholder="Search By Brand Name"
                 variant="outlined"
                 size="small"
                 fullWidth
                 InputProps={{
+                  style: { padding: "8px" },
                   startAdornment: (
                     <InputAdornment position="start">
                       <IconButton>
@@ -202,7 +241,10 @@ export default function BrandManagement() {
                   endAdornment: (
                     <InputAdornment position="end">
                       {searchKeyword && (
-                        <IconButton onClick={() => setSearchKeyword("")} size="small">
+                        <IconButton
+                          onClick={() => setSearchKeyword("")}
+                          size="small"
+                        >
                           <CloseIcon fontSize="small" />
                         </IconButton>
                       )}
@@ -211,13 +253,39 @@ export default function BrandManagement() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={9} style={{ textAlign: "right" }}>
+            <Grid item xs={4} md={3}>
+              <FormControl sx={{ width: "170px" }}>
+                <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                  Sorting Status
+                </InputLabel>
+                <Select
+                  labelId="sorting-status-label"
+                  id="sorting-status-select"
+                  size="medium"
+                  value={sortingStatus}
+                  onChange={handleSortingStatus}
+                  label="Sorting Status"
+                >
+                  <MenuItem value="">Sort by Default</MenuItem>
+                  <MenuItem value="active">Sort by Active</MenuItem>
+                  <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={1} md={3}></Grid>
+            <Grid item xs={3} md={2}>
               <Button
                 variant="contained"
                 size="medium"
                 onClick={handleOpenAddDialog}
                 startIcon={<AddIcon />}
-                style={{ backgroundColor: "white", color: "black" }}
+                style={{
+                  color: "black",
+                  height: "56px",
+                  border: "1px solid #ff469e",
+                  borderRadius: "10px",
+                  backgroundColor: "white",
+                }}
               >
                 Add New Brand
               </Button>
@@ -235,7 +303,7 @@ export default function BrandManagement() {
                     <TableRow>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Brand Name</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Active</TableCell>
+                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -271,9 +339,9 @@ export default function BrandManagement() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 sx={{
-                  borderTop: "1px solid #ddd",
                   justifyContent: "flex-end",
                   backgroundColor: "f1f1f1",
+                  marginRight: "40px"
                 }}
                 labelRowsPerPage="Rows:"
                 labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
@@ -319,7 +387,7 @@ export default function BrandManagement() {
                 onChange={(e) => handleChange("name", e.target.value)}
               />
               <FormControl fullWidth margin="normal">
-                <InputLabel htmlFor="active-select">Active</InputLabel>
+                <InputLabel htmlFor="active-select">Status</InputLabel>
                 <Select
                   value={selectedBrand.active}
                   onChange={(e) => handleChange("active", e.target.value)}
@@ -350,7 +418,7 @@ export default function BrandManagement() {
             sx={{
               position: "fixed",
               right: 25,
-              bottom: 75,
+              bottom: 25,
               border: "1px solid #ff469e",
               backgroundColor: "#fff4fc",
               color: "#ff469e",
