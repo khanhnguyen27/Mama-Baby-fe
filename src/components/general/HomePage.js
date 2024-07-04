@@ -1520,7 +1520,7 @@ export default function HomePage() {
                 fontWeight: "bold",
               }}
               onClick={() => {
-                navigate("/article");
+                navigate("/articles");
                 window.scrollTo({
                   top: 0,
                   behavior: "smooth",

@@ -12,12 +12,17 @@ import {
   Avatar,
   Breadcrumbs,
   CardHeader,
+  CircularProgress,
+  Tooltip,
+  Fade,
+  CardMedia,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { articleByIdApi, getArticlesNoPageApi } from "../../api/ArticleAPI";
+import { allProductCHApi } from "../../api/ProductAPI";
 import { storeByIdApi } from "../../api/StoreAPI";
-import PersonIcon from "@mui/icons-material/Person";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function ArticleDetail() {
   const navigate = useNavigate();
@@ -27,18 +32,29 @@ export default function ArticleDetail() {
   const [store, setStore] = useState(null);
   const [relatedArticles, setRelatedArticles] = useState([]);
   const articleId = state?.articleId;
+  const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState([]);
 
   const fetchData = async () => {
     try {
-      const [articleRes, allArticleRes] = await Promise.all([
+      const [articleRes, allArticleRes, productRes] = await Promise.all([
         articleByIdApi(articleId),
         getArticlesNoPageApi(),
+        allProductCHApi({
+          type: "WHOLESALE",
+        }),
       ]);
 
       const articleData = articleRes?.data?.data || {};
       const allArticleData = allArticleRes?.data?.data?.articles || {};
+      const productData = productRes?.data?.data.products || [];
       setAllArticle(allArticleData);
       setArticle(articleData);
+
+      const filterProduct = productData.filter(
+        (product) => product.id === articleData.product_recom
+      );
+      setProduct(filterProduct[0]);
 
       const storeId = articleData.store_id;
       storeByIdApi(storeId)
@@ -68,31 +84,131 @@ export default function ArticleDetail() {
     if (articleId) {
       fetchData();
     }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
   }, [articleId]);
 
-  if (!article) {
+  if (loading) {
+    window.scrollTo({ top: 0, behavior: "instant" });
     return (
-      <Container
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          height: "100vh",
-          animation: "fadeIn 10s ease-in",
-          margin: "auto",
-        }}
-      >
-        <Typography variant="h6">Loading...</Typography>
+      <Container sx={{ mb: 2 }}>
+        <Grid sx={{ my: 4 }}>
+          <Breadcrumbs separator=">" sx={{ color: "black" }}>
+            <Link
+              to="/"
+              style={{
+                textDecoration: "none",
+              }}
+            >
+              <Typography
+                sx={{
+                  color: "black",
+                  transition: "color 0.2s ease-in-out",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Home
+              </Typography>
+            </Link>
+            <Link
+              to="/articles"
+              style={{
+                textDecoration: "none",
+              }}
+            >
+              <Typography
+                sx={{
+                  color: "black",
+                  transition: "color 0.2s ease-in-out",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Articles
+              </Typography>
+            </Link>
+          </Breadcrumbs>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100vh",
+              maxWidth: "100vw",
+            }}
+          >
+            <CircularProgress sx={{ color: "#ff469e" }} size={100} />
+          </Box>
+        </Grid>
       </Container>
     );
   }
 
   // Chia nội dung thành các đoạn
-  const paragraphs = article.content.split("\n");
+  const paragraphs = article?.content.split("\n");
 
   return (
     <Container sx={{ mb: 2 }}>
+      <Grid sx={{ my: 4 }}>
+        <Breadcrumbs separator=">" sx={{ color: "black" }}>
+          <Link
+            to="/"
+            style={{
+              textDecoration: "none",
+            }}
+          >
+            <Typography
+              sx={{
+                color: "black",
+                transition: "color 0.2s ease-in-out",
+                fontSize: 20,
+                fontWeight: "bold",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Home
+            </Typography>
+          </Link>
+          <Link
+            to="/articles"
+            style={{
+              textDecoration: "none",
+            }}
+          >
+            <Typography
+              sx={{
+                color: "black",
+                transition: "color 0.2s ease-in-out",
+                fontSize: 20,
+                fontWeight: "bold",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Articles
+            </Typography>
+          </Link>
+          <Typography
+            sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+          >
+            {article?.header.length > 30
+              ? `${article?.header.substring(0, 30)}...`
+              : article?.header}
+          </Typography>
+        </Breadcrumbs>
+      </Grid>
       <Box
         sx={{
           backgroundColor: "#ff69b4",
@@ -105,7 +221,7 @@ export default function ArticleDetail() {
           marginBottom: 2,
         }}
       >
-        <Typography variant="h4">{article.header}</Typography>
+        <Typography variant="h4">{article?.header}</Typography>
       </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
@@ -157,7 +273,7 @@ export default function ArticleDetail() {
                   {store?.name_store}
                 </Typography>
               }
-              subheader={new Date(article.created_at).toLocaleDateString()}
+              subheader={new Date(article?.created_at).toLocaleDateString()}
             />
             <CardContent>
               <Box
@@ -169,15 +285,15 @@ export default function ArticleDetail() {
               >
                 <img
                   src={
-                    article.link_image.includes("Article_")
-                      ? `http://localhost:8080/mamababy/article/images/${article.link_image}`
+                    article?.link_image.includes("Article_")
+                      ? `http://localhost:8080/mamababy/article/images/${article?.link_image}`
                       : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                   }
                   onError={(e) => {
                     e.target.src =
                       "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                   }}
-                  alt={article.header}
+                  alt={article?.header}
                   style={{
                     width: "600px",
                     height: "400px",
@@ -189,7 +305,7 @@ export default function ArticleDetail() {
 
               <Typography variant="body1" mt={5}>
                 {/* Nội dung bài báo ở đây */}
-                {paragraphs.map((paragraph, index) => (
+                {paragraphs?.map((paragraph, index) => (
                   <React.Fragment key={index}>
                     <Typography
                       variant="body1"
@@ -224,7 +340,7 @@ export default function ArticleDetail() {
               <CardContent>
                 <Typography variant="h6">Related Articles</Typography>
                 <Box mt={2}>
-                  {relatedArticles.map((relatedArticle) => (
+                  {relatedArticles?.map((relatedArticle) => (
                     <Card
                       sx={{
                         mb: 2,
@@ -283,13 +399,94 @@ export default function ArticleDetail() {
               }}
             >
               <CardContent>
-                <Typography variant="h6">Advertisement</Typography>
-                <Box mt={2} textAlign="center">
-                  <img
-                    src="https://via.placeholder.com/300x200" // Thay bằng link hình ảnh quảng cáo của bạn
-                    alt="Advertisement"
-                    style={{ width: "100%", borderRadius: "10px" }}
-                  />
+                <Typography variant="h6">Product Recommendation</Typography>
+                <Box
+                  mt={2}
+                  textAlign="center"
+                  sx={{
+                    padding: "10px",
+                    position: "relative",
+                    minHeight: "150px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Tooltip
+                    title={product?.name}
+                    enterDelay={500}
+                    leaveDelay={50}
+                    placement="right-start"
+                    TransitionComponent={Fade}
+                    TransitionProps={{ timeout: 250 }}
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: "white",
+                          boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                          color: "black",
+                          borderRadius: "8px",
+                          border: "1px solid black",
+                          fontSize: "12px",
+                        },
+                      },
+                    }}
+                  >
+                    <img
+                      src={
+                        product?.image_url &&
+                        product?.image_url.includes("Product_")
+                          ? `http://localhost:8080/mamababy/products/images/${product?.image_url}`
+                          : "https://cdni.iconscout.com/illustration/premium/thumb/sorry-item-not-found-3328225-2809510.png?f=webp"
+                      }
+                      onError={(e) => {
+                        e.target.src =
+                          "https://cdni.iconscout.com/illustration/premium/thumb/sorry-item-not-found-3328225-2809510.png?f=webp";
+                      }}
+                      alt={product?.name}
+                      style={{
+                        width: "300px",
+                        height: "200px",
+                        objectFit: "contain",
+                        cursor: "pointer",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                      }}
+                      onClick={() => {
+                        if (!product) {
+                          toast.warn(
+                            "Sorry, the product is currently not available."
+                          );
+                        } else {
+                          navigate(
+                            `/products/${product.name
+                              .toLowerCase()
+                              .replace(/\s/g, "-")}`,
+                            { state: { productId: product.id } },
+                            window.scrollTo({
+                              top: 0,
+                              behavior: "smooth",
+                            })
+                          );
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.05)";
+                        e.currentTarget.style.boxShadow =
+                          "0px 4px 8px rgba(0, 0, 0, 0.2)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                      onMouseDown={(e) => {
+                        e.currentTarget.style.transform = "scale(0.95)";
+                      }}
+                      onMouseUp={(e) => {
+                        e.currentTarget.style.transform = "scale(1.05)";
+                      }}
+                    />
+                  </Tooltip>
                 </Box>
               </CardContent>
             </Card>

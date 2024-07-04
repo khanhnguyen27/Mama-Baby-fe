@@ -156,14 +156,6 @@ export default function ProductDetails() {
   };
 
   const handleEditComment = async () => {
-    // Logic để sửa bình luận
-    // console.log(selectedComment?.id);
-    // console.log(selectedComment?.product_id);
-    // console.log(selectedComment?.rating);
-    // console.log(selectedComment?.comment);
-    // console.log(userId);
-    // console.log(selectedComment?.date);
-
     if (selectedComment?.rating === 0) {
       toast.warn("Please select a rating.");
       return;

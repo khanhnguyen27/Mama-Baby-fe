@@ -7,16 +7,13 @@ import { allCategorytApi } from "../../api/CategoryAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { format, parseISO } from "date-fns";
 import {
-  allProductApi,
   addProductApi,
   updateProductApi,
   allProductByStoreApi,
 } from "../../api/ProductAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
-import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
-import ProductSearch from "../Navigation/ProductSearch";
 import {
   TextField,
   Select,
@@ -28,12 +25,12 @@ import {
   DialogActions,
   InputAdornment,
   Autocomplete,
-} from "@mui/material";
-import {
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
   Box,
-  Breadcrumbs,
   Card,
-  CardActions,
   CardContent,
   CardMedia,
   CircularProgress,
@@ -44,20 +41,20 @@ import {
   Grid,
   IconButton,
   Radio,
-  Tooltip,
-  Typography,
   RadioGroup,
-  Badge,
+  Pagination,
 } from "@mui/material";
-import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
-import Cart from "@mui/icons-material/ShoppingCart";
-import { useDispatch } from "react-redux";
-import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
+import {
+  ClearAll,
+  KeyboardCapslock,
+  Close,
+  CheckCircle,
+  Cancel,
+} from "@mui/icons-material";
+import { storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
-import { Pagination, PaginationItem } from "@mui/material";
-import { CheckCircle, Cancel } from "@mui/icons-material";
 
 export default function StaffHome() {
   const navigate = useNavigate();
@@ -77,13 +74,12 @@ export default function StaffHome() {
   const [brandFilter, setBrandFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [storeName, setStoreName] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+  const [currentPage, setCurrentPage] = useState(1);
   const typeWHOLESALE = "WHOLESALE";
   const typeGIFT = "GIFT";
   const statusInStock = "IN STOCK";
   const statusComingSoon = "COMING SOON";
+  const [sortPrice, setSortPrice] = useState("");
 
   const countries = [
     "Afghanistan",
@@ -305,7 +301,7 @@ export default function StaffHome() {
   }, []);
 
   const storeId = store.id;
-  const fetchData = async (page) => {
+  const fetchData = async () => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
         allAgeApi(),
@@ -313,11 +309,12 @@ export default function StaffHome() {
         allCategorytApi(),
         allProductByStoreApi({
           keyword: keyword,
+          sort_price: sortPrice,
           category_id: categoryFilter,
           brand_id: brandFilter,
           age_id: ageFilter,
           store_id: storeId,
-          page: page - 1, // API thường sử dụng 0-based index cho trang
+          page: currentPage - 1,
         }),
       ]);
 
@@ -325,14 +322,11 @@ export default function StaffHome() {
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
-      const totalPages = productRes?.data?.data?.totalPages || 1; // Giả sử API trả về tổng số trang
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
       setProduct(productData);
-      setTotalPages(totalPages);
-      setCurrentPage(page); // Cập nhật trang hiện tại
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -357,11 +351,12 @@ export default function StaffHome() {
   };
 
   useEffect(() => {
+    setLoading(true);
     setTimeout(() => {
       setLoading(false);
     }, 1000);
     fetchData(1);
-  }, [keyword, ageFilter, brandFilter, categoryFilter, storeId]);
+  }, [ageFilter, brandFilter, categoryFilter, storeId, currentPage, sortPrice]);
 
   const onPageChange = (page) => {
     fetchData(page);
@@ -370,7 +365,28 @@ export default function StaffHome() {
 
   //find product
   const handleSearch = () => {
-    fetchData();
+    setLoading(true);
+    if (keyword.length > 0 && keyword.length < 2) {
+      setLoading(false);
+      return;
+    }
+    if (keyword === "") {
+      setTimeout(() => {
+        setLoading(false);
+        fetchData();
+      }, 2000);
+      return;
+    }
+    setTimeout(() => {
+      setLoading(false);
+      fetchData();
+    }, 2000);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -460,8 +476,6 @@ export default function StaffHome() {
       !usageInstructions ||
       !storageInstructions
     ) {
-      // Nếu có ít nhất một trường dữ liệu bị thiếu
-      // Hiển thị thông báo lỗi cho người dùng
       toast.warn("Please fill in all required fields.");
       return;
     } else if (status !== statusComingSoon && remain <= 0) {
@@ -537,16 +551,12 @@ export default function StaffHome() {
       isActive
     )
       .then((response) => {
-        // Xử lý kết quả trả về từ API
-        // Đóng dialog thêm sản phẩm
         fetchData(currentPage);
         handleCloseAddProduct();
         toast.success("Product added successfully!");
       })
       .catch((error) => {
-        // Xử lý lỗi từ API
         console.error("Error adding product:", error);
-        // Hiển thị thông báo lỗi cho người dùng
         toast.error("Failed to add product. Please try again later.");
       });
   };
@@ -607,12 +617,6 @@ export default function StaffHome() {
   };
 
   const handleChange = (field, value) => {
-    // if (field === "expiryDate") {
-    //   const formattedDate = format(parseISO(value), "yyyy-MM-dd");
-    //   setSelectedProduct({ ...selectedProduct, [field]: formattedDate });
-    // } else {
-    //   setSelectedProduct({ ...selectedProduct, [field]: value });
-    // }
     setSelectedProduct((prevProduct) => ({
       ...prevProduct,
       [field]: value,
@@ -635,8 +639,6 @@ export default function StaffHome() {
       !usageInstructions ||
       !storageInstructions
     ) {
-      // Nếu có ít nhất một trường dữ liệu bị thiếu
-      // Hiển thị thông báo lỗi cho người dùng
       toast.warn("Please fill in all required fields.");
       return;
     } else if (
@@ -706,7 +708,7 @@ export default function StaffHome() {
     selectedProduct.description = fullDescription;
     console.log(selectedProduct.expiryDate);
 
-    //Xử lý cập nhật sản phẩm
+    //Handle product updates
     updateProductApi(
       image.file || "",
       selectedProduct.id,
@@ -725,8 +727,8 @@ export default function StaffHome() {
       selectedProduct.is_active
     )
       .then((response) => {
-        // Xử lý kết quả trả về từ API
-        // Đóng dialog cập nhật sản phẩm
+        // Process results returned from the API
+        // Close the product update dialog
         fetchData(currentPage);
         handleClose();
         toast.success("Product updated successfully!");
@@ -740,15 +742,12 @@ export default function StaffHome() {
           toast.error("Failed to update product. Please try again later.");
         }
         // if (error.response) {
-        //   // Server trả về một mã trạng thái không nằm trong phạm vi 2xx
         //   console.error("Error response data:", error.response.data);
         //   console.error("Error response status:", error.response.status);
         //   console.error("Error response headers:", error.response.headers);
         // } else if (error.request) {
-        //   // Yêu cầu đã được thực hiện nhưng không nhận được phản hồi
         //   console.error("Error request:", error.request);
         // } else {
-        //   // Một cái gì đó đã xảy ra trong việc thiết lập yêu cầu mà kích hoạt lỗi
         //   console.error("Error message:", error.message);
         // }
       });
@@ -807,20 +806,26 @@ export default function StaffHome() {
   // }, [selectedProduct]);
 
   // const handleChangeImage = (file) => {
-  //   // Kiểm tra xem có file nào được chọn không
   //   if (file) {
-  //     // Đọc dữ liệu của file ảnh
   //     const reader = new FileReader();
   //     reader.readAsDataURL(file);
-  //     // Khi đọc dữ liệu thành công
   //     reader.onload = () => {
-  //       // Lưu đường dẫn của file ảnh vào trạng thái của ứng dụng
   //       setSelectedImage(reader.result);
-  //       // Gọi hàm handleChange để cập nhật giá trị của trường 'image_url'
   //       handleChange("image_url", reader.result);
   //     };
   //   }
   // };
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSortChange = (e, sortPrice) => {
+    if (sortPrice !== null) {
+      setSortPrice(sortPrice);
+    }
+  };
 
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -851,46 +856,61 @@ export default function StaffHome() {
                   size="small"
                   variant="outlined"
                   value={keyword}
+                  onKeyDown={handleKeyDown}
                   onChange={(e) => setKeyword(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch();
-                    }
-                  }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Button
-                          sx={{
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                            height: "40px",
-                            marginRight: "0.6px",
-                            borderRadius: "5px",
-                            boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                            transition: "0.2s ease-in-out",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              opacity: 0.8,
-                              color: "white",
-                              boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
-                            },
-                            "&:active": {
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              boxShadow:
-                                "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
-                            },
-                          }}
-                        >
-                          <SearchIcon
-                            sx={{
-                              color: "inherit",
-                              cursor: "pointer",
-                              fontSize: "35px",
-                            }}
+                        {loading ? (
+                          <CircularProgress
+                            sx={{ color: "#ff469e", mx: 2 }}
+                            size={24}
                           />
-                        </Button>
+                        ) : (
+                          <>
+                            {keyword && (
+                              <IconButton
+                                onClick={() => setKeyword("")}
+                                size="small"
+                              >
+                                <Close fontSize="small" />
+                              </IconButton>
+                            )}
+                            <Button
+                              onClick={handleSearch}
+                              sx={{
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                height: "40px",
+                                marginRight: "0.6px",
+                                borderRadius: "5px",
+                                boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                                transition: "0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  opacity: 0.8,
+                                  color: "white",
+                                  boxShadow:
+                                    "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                                },
+                                "&:active": {
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  boxShadow:
+                                    "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                                },
+                              }}
+                            >
+                              <SearchIcon
+                                sx={{
+                                  color: "inherit",
+                                  cursor: "pointer",
+                                  fontSize: "35px",
+                                }}
+                              />
+                            </Button>
+                          </>
+                        )}
                       </InputAdornment>
                     ),
                     sx: {
@@ -1145,6 +1165,109 @@ export default function StaffHome() {
               </Box>
             </Grid>
 
+            <Grid item sm={12} md={9}>
+              <Container sx={{ my: 4 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "end",
+                    alignItems: "center",
+                  }}
+                >
+                  <ToggleButtonGroup
+                    value={sortPrice}
+                    exclusive
+                    onChange={handleSortChange}
+                    variant="outlined"
+                    sx={{
+                      mt: 0.5,
+                      height: "40px",
+                      "& .MuiToggleButton-root": {
+                        color: "black",
+                        border: "1px solid #ff469e",
+                        fontSize: "1rem",
+                        transition:
+                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                        "&:hover": {
+                          backgroundColor: "#fff4fc",
+                          color: "#ff469e",
+                        },
+                        "&.Mui-selected": {
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                          fontWeight: "600",
+                          "&:hover": {
+                            backgroundColor: "#fff4fc",
+                            color: "#ff469e",
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <ToggleButton
+                      value=""
+                      sx={{
+                        backgroundColor: "white",
+                        color: "#ff469e",
+                        borderRadius: "20px",
+                        fontSize: "1rem",
+                        boxShadow: "none",
+                        transition:
+                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                        border: "1px solid #ff469e",
+                        "&:hover": {
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      All
+                    </ToggleButton>
+                    <ToggleButton
+                      value="ASC"
+                      sx={{
+                        backgroundColor: "white",
+                        color: "#ff469e",
+                        borderLeft: "1px solid #ff469e",
+                        borderRight: "1px solid #ff469e",
+                        fontSize: "1rem",
+                        boxShadow: "none",
+                        transition:
+                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                        border: "1px solid #ff469e",
+                        "&:hover": {
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      Low - High
+                    </ToggleButton>
+                    <ToggleButton
+                      value="DESC"
+                      sx={{
+                        backgroundColor: "white",
+                        color: "#ff469e",
+                        borderRadius: "20px",
+                        fontSize: "1rem",
+                        boxShadow: "none",
+                        transition:
+                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                        border: "1px solid #ff469e",
+                        "&:hover": {
+                          backgroundColor: "#ff469e",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      High - Low
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              </Container>
+            </Grid>
+
             {/* Loading Spinner */}
             <Grid item sm={12} md={9}>
               <Box
@@ -1188,46 +1311,60 @@ export default function StaffHome() {
                 size="small"
                 variant="outlined"
                 value={keyword}
+                onKeyDown={handleKeyDown}
                 onChange={(e) => setKeyword(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Button
-                        sx={{
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          height: "40px",
-                          marginRight: "0.6px",
-                          borderRadius: "5px",
-                          boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                          transition: "0.2s ease-in-out",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            opacity: 0.8,
-                            color: "white",
-                            boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
-                          },
-                          "&:active": {
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            boxShadow:
-                              "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
-                          },
-                        }}
-                      >
-                        <SearchIcon
-                          sx={{
-                            color: "inherit",
-                            cursor: "pointer",
-                            fontSize: "35px",
-                          }}
+                      {loading ? (
+                        <CircularProgress
+                          sx={{ color: "#ff469e", mx: 2 }}
+                          size={24}
                         />
-                      </Button>
+                      ) : (
+                        <>
+                          {keyword && (
+                            <IconButton
+                              onClick={() => setKeyword("")}
+                              size="small"
+                            >
+                              <Close fontSize="small" />
+                            </IconButton>
+                          )}
+                          <Button
+                            onClick={handleSearch}
+                            sx={{
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              height: "40px",
+                              marginRight: "0.6px",
+                              borderRadius: "5px",
+                              boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                              transition: "0.2s ease-in-out",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                opacity: 0.8,
+                                color: "white",
+                                boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                              },
+                              "&:active": {
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                boxShadow:
+                                  "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                              },
+                            }}
+                          >
+                            <SearchIcon
+                              sx={{
+                                color: "inherit",
+                                cursor: "pointer",
+                                fontSize: "35px",
+                              }}
+                            />
+                          </Button>
+                        </>
+                      )}
                     </InputAdornment>
                   ),
                   sx: {
@@ -1490,6 +1627,106 @@ export default function StaffHome() {
 
           {/* List Products */}
           <Grid item sm={12} md={9}>
+            <Container sx={{ my: 4 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "end",
+                  alignItems: "center",
+                }}
+              >
+                <ToggleButtonGroup
+                  value={sortPrice}
+                  exclusive
+                  onChange={handleSortChange}
+                  variant="outlined"
+                  sx={{
+                    mt: 0.5,
+                    height: "40px",
+                    "& .MuiToggleButton-root": {
+                      color: "black",
+                      border: "1px solid #ff469e",
+                      fontSize: "1rem",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      "&:hover": {
+                        backgroundColor: "#fff4fc",
+                        color: "#ff469e",
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        fontWeight: "600",
+                        "&:hover": {
+                          backgroundColor: "#fff4fc",
+                          color: "#ff469e",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <ToggleButton
+                    value=""
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "20px",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    All
+                  </ToggleButton>
+                  <ToggleButton
+                    value="ASC"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderLeft: "1px solid #ff469e",
+                      borderRight: "1px solid #ff469e",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    Low - High
+                  </ToggleButton>
+                  <ToggleButton
+                    value="DESC"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "20px",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    High - Low
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+            </Container>
             <Grid container spacing={3}>
               {product?.products?.length === 0 ? (
                 <Grid item xs={12}>
@@ -1740,6 +1977,88 @@ export default function StaffHome() {
             </Grid>
           </Grid>
         </Grid>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pagination
+            count={product.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            showFirstButton={product.totalPages !== 1}
+            showLastButton={product.totalPages !== 1}
+            hidePrevButton={currentPage === 1}
+            hideNextButton={currentPage === product.totalPages}
+            size="large"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "2.5rem",
+              width: "70%",
+              p: 1,
+              opacity: 0.9,
+              borderRadius: "20px",
+              "& .MuiPaginationItem-root": {
+                backgroundColor: "white",
+                borderRadius: "20px",
+                border: "1px solid black",
+                boxShadow: "0px 2px 3px rgba(0, 0, 0.16, 0.5)",
+                mx: 1,
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#fff4fc",
+                  color: "#ff469e",
+                  border: "1px solid #ff469e",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    border: "1px solid #ff469e",
+                  },
+                },
+                fontSize: "1.25rem",
+              },
+              "& .MuiPaginationItem-ellipsis": {
+                mt: 1.25,
+                fontSize: "1.25rem",
+              },
+            }}
+            componentsProps={{
+              previous: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+              next: {
+                sx: {
+                  fontSize: "1.5rem",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
         {visible && (
           <IconButton
             size="large"
@@ -1767,36 +2086,6 @@ export default function StaffHome() {
             <KeyboardCapslock />
           </IconButton>
         )}
-      </Container>
-
-      <Container>
-        <Grid
-          container
-          justifyContent="center"
-          spacing={3}
-          sx={{ marginTop: 4 }}
-        >
-          <nav aria-label="Page navigation">
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={(event, page) => onPageChange(page)}
-              renderItem={(item) => (
-                <PaginationItem
-                  component="a"
-                  href="#"
-                  {...item}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onPageChange(item.page);
-                  }}
-                />
-              )}
-              siblingCount={1}
-              boundaryCount={1}
-            />
-          </nav>
-        </Grid>
       </Container>
 
       <Dialog
@@ -2280,7 +2569,6 @@ export default function StaffHome() {
                     onChange={(e) => handleChange("status", e.target.value)}
                   >
                     <MenuItem value={statusInStock}>IN STOCK</MenuItem>
-                    <MenuItem value="OUT OF STOCK">OUT OF STOCK</MenuItem>
                     <MenuItem value={statusComingSoon}>COMING SOON</MenuItem>
                   </Select>
                 </FormControl>

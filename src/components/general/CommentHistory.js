@@ -11,6 +11,7 @@ import {
   Rating,
   Avatar,
   CardMedia,
+  CircularProgress,
 } from "@mui/material";
 import { Close, KeyboardCapslock } from "@mui/icons-material";
 import { redirect, useNavigate } from "react-router-dom";
@@ -29,7 +30,7 @@ export default function CommentHistory() {
   const [visibleComments, setVisibleComments] = useState(5);
   const accessToken = localStorage.getItem("accessToken");
   const isComment = comment?.length;
-
+  const [loading, setLoading] = useState(false);
   var userName = "";
   var userId = 0;
   if (accessToken && typeof accessToken === "string") {
@@ -39,11 +40,9 @@ export default function CommentHistory() {
       userName = decodedAccessToken.FullName;
     } catch (error) {
       console.error("Failed to decode token:", error);
-      // Xử lý lỗi nếu cần thiết
     }
   } else {
     console.warn("Invalid token specified: must be a string");
-    // Xử lý trường hợp token không hợp lệ nếu cần thiết
   }
 
   useEffect(() => {
@@ -55,7 +54,6 @@ export default function CommentHistory() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  console.log(product);
   const fetchData = async () => {
     try {
       const [commentRes, productRes] = await Promise.all([
@@ -76,12 +74,54 @@ export default function CommentHistory() {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     fetchData();
   }, [userId]);
 
   const handleShowMore = () => {
     setVisibleComments((prevVisibleComments) => prevVisibleComments + 5);
   };
+
+  if (loading) {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    return (
+      <div
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f5f7fd",
+          padding: "20px",
+        }}
+      >
+        <Container sx={{ my: 4 }}>
+          <Typography
+            sx={{
+              fontSize: "2.25rem",
+              color: "#ff469e",
+              fontWeight: "bold",
+              textAlign: "left",
+            }}
+          >
+            Comment History{" "}
+          </Typography>
+          <Box
+            sx={{
+              backgroundColor: "#f5f7fd",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            <CircularProgress sx={{ color: "#ff469e" }} size={90} />
+          </Box>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div

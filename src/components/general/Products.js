@@ -57,6 +57,7 @@ export default function Products() {
   const dispatch = useDispatch();
   const keyword = state?.keyword;
   const typeWHOLESALE = "WHOLESALE";
+  console.log(product);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -201,7 +202,7 @@ export default function Products() {
               display: "flex",
               flexDirection: "row",
               justifyContent: "space-between",
-              alignItems: "center"
+              alignItems: "center",
             }}
           >
             <Breadcrumbs separator=">" sx={{ color: "black" }}>
@@ -555,7 +556,7 @@ export default function Products() {
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
           <Breadcrumbs separator=">" sx={{ color: "black" }}>
