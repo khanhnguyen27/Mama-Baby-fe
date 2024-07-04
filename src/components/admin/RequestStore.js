@@ -20,7 +20,6 @@ import {
   Grid,
   Divider,
   IconButton,
-  Pagination,
   Dialog,
   InputLabel,
   FormControl,
@@ -49,15 +48,12 @@ export default function RequestStore() {
   const [storeMap, setStoreMap] = useState([]);
   const [userMap, setUserMap] = useState();
   const [actionType, setActionType] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [openLicense, setOpenLicense] = useState(false);
   const [image, setImage] = useState({
     file: null,
     url: "",
   });
   const [selectedLicense, setSelectedLicense] = useState(null);
-
-  const itemsPerPage = 9;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,7 +68,9 @@ export default function RequestStore() {
   const fetchData = async () => {
     try {
       const [storeRes, userRes] = await Promise.all([
-        allStoreByAdminApi({}),
+        allStoreByAdminApi({
+          limit:1000,
+        }),
         allUserApi(),
       ]);
 
@@ -138,9 +136,6 @@ export default function RequestStore() {
       setLoading(false);
     }, 1000);
   };
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
 
   const handleAccept = () => {
     if (selectedStoreId === null) return;
@@ -184,9 +179,8 @@ export default function RequestStore() {
     const [address, description, phone, status, nameStore, isActive, userId] =
       selectedStore;
 
-    handleApproveUserStatus(userId, 1); // Assuming roleId remains 1 when rejected
+    handleApproveUserStatus(userId, 1); 
 
-    // Call deleteStoreApi to remove the rejected store from the system
     deleteStoreApi(selectedStoreId)
       .then(() => {
         toast.success("Store deleted successfully!");
@@ -198,7 +192,7 @@ export default function RequestStore() {
       })
       .catch((error) => {
         console.log("Error deleting store:", error);
-        setLoading(false); // Handle loading state accordingly
+        setLoading(false); 
       });
 
     handleClose();
@@ -218,7 +212,6 @@ export default function RequestStore() {
           break;
         }
       }
-
       if (updatedStore) {
         updatedStore.status = newStatus;
         updatedRequest[newStatus] = [
@@ -226,7 +219,6 @@ export default function RequestStore() {
           ...updatedRequest[newStatus],
         ];
       }
-
       return updatedRequest;
     });
   };
@@ -240,7 +232,7 @@ export default function RequestStore() {
           full_name: selectedUser[1],
           address: selectedUser[2],
           phone_number: selectedUser[3],
-          status: true, // Ensure this is a Boolean
+          status: true, 
           roleId: newRoleId,
         });
 
@@ -249,8 +241,8 @@ export default function RequestStore() {
           selectedUser[1], // full_name
           selectedUser[2], // address
           selectedUser[3], // phone_number
-          true, // Assuming true represents the approved status
-          newRoleId // New roleId for user
+          true, 
+          newRoleId 
         );
         toast.success("User role and status updated successfully!");
         window.location.reload();
@@ -269,7 +261,6 @@ export default function RequestStore() {
 
   const handleCloseLicense = () => {
     setOpenLicense(false);
-    setSelectedLicense(null);
   };
 
   const handleOpen = (type, storeId) => {
@@ -288,13 +279,7 @@ export default function RequestStore() {
     setSelectedUserId(null);
   };
 
-  const totalPages = Math.ceil((storeMap?.stores?.length || 0) / itemsPerPage);
-  const currentStores =
-    storeMap?.stores?.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    ) || [];
-  console.log();
+
 
   return (
     <div
@@ -399,21 +384,6 @@ export default function RequestStore() {
                       Request No. {item.id}{" "}
                     </Typography>
                   </Grid>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      mb: "10px",
-                      fontWeight: "bold",
-                      backgroundColor: "#ff469e",
-                      borderRadius: "0 4px 4px 0",
-                      padding: "5px 10px",
-                      color: "white",
-                      marginTop: "0px",
-                      marginLeft: "auto",
-                    }}
-                  >
-                    {item.status}{" "}
-                  </Typography>
                 </Grid>
 
                 <Grid container spacing={2}>
@@ -529,21 +499,21 @@ export default function RequestStore() {
                       },
                     }}
                   >
-                    <FormControl fullWidth margin="normal">
+                    {/* <FormControl fullWidth margin="normal">
                       <div
                         style={{
                           border: "1px solid #ccc",
                           padding: "10px",
                           textAlign: "center",
                         }}
-                      >
+                      > */}
                         <img
-                          src={`${environment.apiBaseUrl}/stores/images/${selectedLicense}`}
+                          src={`${environment.apiBaseUrl}/stores/license/${selectedLicense}`}
                           alt="Selected"
-                          style={{ width: "100%", marginTop: "16px" }}
+                          style={{ width: "100%" }}
                         />
-                      </div>
-                    </FormControl>
+                      {/* </div>
+                    </FormControl> */}
                   </Dialog>
 
                   <Grid item xs={12} md={5}>
@@ -601,39 +571,13 @@ export default function RequestStore() {
                         >
                           <span style={{ opacity: 0.7 }}>Phone:</span>
                           <span style={{ fontWeight: "600" }}>
-                            {userMap[item.user_id][1]}
+                            {userMap[item.user_id][3]}
                           </span>
                         </Box>
                       </Box>
                     </Typography>
                   </Grid>
-                  {item.status === "APPROVED" && (
-                    <Grid item xs={12} sx={{ textAlign: "right" }}>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          backgroundColor: "white",
-                          color: "#ff469e",
-                          borderRadius: "10px",
-                          fontSize: 16,
-                          fontWeight: "bold",
-                          my: 2,
-                          mx: 1,
-                          transition:
-                            "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                          border: "1px solid #ff469e",
-                          "&:hover": {
-                            backgroundColor: "#ff469e",
-                            color: "white",
-                            border: "1px solid white",
-                          },
-                        }}
-                        onClick={() => handleOpenLicense(item.license_url)}
-                      >
-                        See The License
-                      </Button>
-                    </Grid>
-                  )}
+
                   {item.status === "PROCESSING" && (
                     <Grid item xs={12} sx={{ textAlign: "right" }}>
                       <Button
@@ -821,6 +765,33 @@ export default function RequestStore() {
                       </Modal>
                     </Grid>
                   )}
+                  {item.status === "APPROVED" && (
+                    <Grid item xs={12} sx={{ textAlign: "right" }}>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "white",
+                          color: "#ff469e",
+                          borderRadius: "10px",
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          my: 2,
+                          mx: 1,
+                          transition:
+                            "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                          border: "1px solid #ff469e",
+                          "&:hover": {
+                            backgroundColor: "#ff469e",
+                            color: "white",
+                            border: "1px solid white",
+                          },
+                        }}
+                        onClick={() => handleOpenLicense(item.license_url)}
+                      >
+                        See The License
+                      </Button>
+                    </Grid>
+                  )}
                 </Grid>
               </Card>
             ))
@@ -834,35 +805,6 @@ export default function RequestStore() {
             }}
           ></Box>
         </Box>
-        <Grid container justifyContent="center" sx={{ mt: 4 }}>
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
-            sx={{
-              "& .MuiPaginationItem-root": {
-                border: "1px solid #f5f7fd",
-                borderRadius: "16px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                transition: "border 0.2s, box-shadow 0.2s",
-                "&:hover": {
-                  border: "1px solid #ff469e",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                  backgroundColor: "white",
-                  color: "#ff469e",
-                },
-              },
-              "& .Mui-selected": {
-                border: "1px solid #ff469e",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                backgroundColor: "white !important",
-                color: "#ff469e !important",
-              },
-            }}
-          />
-        </Grid>
         {visible && (
           <IconButton
             size="large"
