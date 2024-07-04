@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { KeyboardCapslock } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import {
   Container,
@@ -25,21 +25,18 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  NativeSelect,
-  ListItem,
-  ListItemText,
 } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
-import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import 'react-toastify/dist/ReactToastify.css';
 import { allStoreByAdminApi, requestStoreApi } from "../../api/StoreAPI";
 
 export default function StoreManagement() {
   window.document.title = "Store Management";
-  const { state } = useLocation();
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stores, setStores] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -47,21 +44,44 @@ export default function StoreManagement() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedStore, setSelectedStore] = useState(null);
   const [openUpdatestore, setOpenUpdateStore] = useState(false);
+  const [sortingStatus, setSortingStatus] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const StoreRes = await allStoreByAdminApi();
-      setStores(StoreRes?.data?.data?.stores || []);
+
+      let sortedStores = StoreRes?.data?.data?.stores || [];
+      if (sortingStatus === "active") {
+        sortedStores = sortedStores.filter((store) => store.is_active);
+      } else if (sortingStatus === "inactive") {
+        sortedStores = sortedStores.filter((store) => !store.is_active);
+      }
+
+      setStores(sortedStores);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [sortingStatus]);
+
+  const handleSortingStatus = (event) => {
+    setSortingStatus(event.target.value);
+    setPage(0);
   };
 
   const handleSearchChange = (event) => {
@@ -121,10 +141,11 @@ export default function StoreManagement() {
       is_active,
       user_id
     )
-      .then((response) => {
+      .then(() => {
+        fetchData();
+        closeUpdate();
         toast.success("Store updated successfully!");
-        window.location.reload();
-    })
+      })
       .catch((error) => {
         console.error("Error updating store:", error);
         toast.error("Failed to update store. Please try again later.");
@@ -143,11 +164,11 @@ export default function StoreManagement() {
   return (
     <div>
       <Container>
-        <Paper
-          elevation={4}
+        <Paper elevation={3}
           sx={{
             position: "sticky",
-            top: "80px",
+            marginTop: "20px",
+            marginBottom: "20px",
             padding: "16px",
             border: "1px solid #ff469e",
             borderRadius: "10px",
@@ -156,33 +177,33 @@ export default function StoreManagement() {
         >
           <Typography
             sx={{
-              padding: "8px",
+              padding: "13px",
               background: "#ff469e",
               color: "white",
               fontWeight: "bold",
-              fontSize: "18px",
+              fontSize: "20px",
               borderRadius: "4px",
               textAlign: "center",
-              marginBottom: "16px",
+              marginBottom: "16px"
             }}
           >
-            Store Manage
+            Stores Management
           </Typography>
           <Grid
-            container
-            spacing={3}
+            container spacing={2}
             alignItems="center"
             sx={{ marginBottom: "16px" }}
           >
-            <Grid item xs={12} md={3}>
+            <Grid item xs={4} md={4}>
               <TextField
                 value={searchKeyword}
                 onChange={handleSearchChange}
-                placeholder="Search By Name!"
+                placeholder="Search By Store Name"
                 variant="outlined"
                 size="small"
                 fullWidth
                 InputProps={{
+                  style: { padding: "8px" },
                   startAdornment: (
                     <InputAdornment position="start">
                       <IconButton>
@@ -204,6 +225,25 @@ export default function StoreManagement() {
                   ),
                 }}
               />
+            </Grid>
+            <Grid item xs={4} md={3}>
+              <FormControl sx={{ width: "170px" }}>
+                <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                  Sorting Status
+                </InputLabel>
+                <Select
+                  labelId="sorting-status-label"
+                  id="sorting-status-select"
+                  size="medium"
+                  value={sortingStatus}
+                  onChange={handleSortingStatus}
+                  label="Sorting Status"
+                >
+                  <MenuItem value="">Sort by Default</MenuItem>
+                  <MenuItem value="active">Sort by Active</MenuItem>
+                  <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
           {loading ? (
@@ -307,9 +347,9 @@ export default function StoreManagement() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 sx={{
-                  borderTop: "1px solid #ddd",
                   justifyContent: "flex-end",
                   backgroundColor: "f1f1f1",
+                  marginRight: "40px"
                 }}
                 labelRowsPerPage="Rows:"
                 labelDisplayedRows={({ from, to, count }) =>
@@ -332,23 +372,20 @@ export default function StoreManagement() {
                 margin="normal"
                 onChange={(e) => handleChange("name", e.target.value)}
               />
-              <FormControl fullWidth>
-                <InputLabel variant="standard" htmlFor="uncontrolled-native">
-                  Choose Status
-                </InputLabel>
-                <NativeSelect
-                  value={selectedStore.is_active} // Use value instead of defaultValue
-                  onChange={(e) =>
-                    handleChange("is_active", e.target.value === "true")
-                  } // Convert string to boolean
+              <FormControl fullWidth margin="normal">
+                <InputLabel htmlFor="active-select">Status</InputLabel>
+                <Select
+                  value={selectedStore.is_active}
+                  onChange={(e) => handleChange("is_active", e.target.value)}
+                  label="Active"
                   inputProps={{
                     name: "is_active",
-                    id: "uncontrolled-native",
+                    id: "active-select",
                   }}
                 >
-                  <option value={"true"}>Active</option>
-                  <option value={"false"}>Inactive</option>
-                </NativeSelect>
+                  <MenuItem value={true}>Yes</MenuItem>
+                  <MenuItem value={false}>No</MenuItem>
+                </Select>
               </FormControl>
             </DialogContent>
             <DialogActions>
@@ -360,6 +397,33 @@ export default function StoreManagement() {
               </Button>
             </DialogActions>
           </Dialog>
+        )}
+        {visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 25,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
         )}
       </Container>
     </div>

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
-import 'react-toastify/dist/ReactToastify.css';
-import { useLocation } from "react-router-dom";
+import { KeyboardCapslock } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import {
   Container,
@@ -34,11 +32,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import 'react-toastify/dist/ReactToastify.css';
 import { allCategoryAdminApi, addCategoryApi, updateCategoryApi } from "../../api/CategoryAPI";
 
 export default function CategoryManagement() {
   window.document.title = "Category Management";
-  const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -49,6 +47,7 @@ export default function CategoryManagement() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [openUpdateCategory, setOpenUpdateCategory] = useState(false);
+  const [sortingStatus, setSortingStatus] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,7 +62,14 @@ export default function CategoryManagement() {
     setLoading(true);
     try {
       const categoryRes = await allCategoryAdminApi();
-      setCategories(categoryRes.data.data || []);
+      let sortedCategory = categoryRes.data.data || [];
+      if (sortingStatus === "active") {
+        sortedCategory = sortedCategory.filter((category) => category.active);
+      } else if (sortingStatus === "inactive") {
+        sortedCategory = sortedCategory.filter((category) => !category.active);
+      }
+
+      setCategories(sortedCategory);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -73,7 +79,7 @@ export default function CategoryManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [sortingStatus]);
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
@@ -100,6 +106,11 @@ export default function CategoryManagement() {
 
   const handleInputChange = (event) => {
     setNewCategoryName(event.target.value);
+  };
+
+  const handleSortingStatus = (event) => {
+    setSortingStatus(event.target.value);
+    setPage(0);
   };
 
   const handleAddCategory = async () => {
@@ -156,10 +167,10 @@ export default function CategoryManagement() {
       trimmedCategoryName,
       selectedCategory.active,
     )
-      .then((response) => {
+      .then(() => {
+        fetchData(); // Refresh category list
+        closeUpdate();
         toast.success("Category updated successfully!");
-        // Reload the page to keep the current search keyword
-        window.location.reload();
       })
       .catch((error) => {
         console.error("Error updating category:", error);
@@ -178,20 +189,45 @@ export default function CategoryManagement() {
   return (
     <div>
       <Container>
-        <Paper elevation={4} sx={{ position: "sticky", marginTop: "20px",  padding: "16px", border: "1px solid #ff469e", borderRadius: "10px", backgroundColor: "white" }}>
-          <Typography sx={{ padding: "8px", background: "#ff469e", color: "white", fontWeight: "bold", fontSize: "18px", borderRadius: "4px", textAlign: "center", marginBottom: "16px" }}>
-            Manage Categories
+        <Paper elevation={3}
+          sx={{
+            position: "sticky",
+            marginTop: "20px",
+            marginBottom: "20px",
+            padding: "16px",
+            border: "1px solid #ff469e",
+            borderRadius: "10px",
+            backgroundColor: "white",
+          }}
+        >
+          <Typography
+            sx={{
+              padding: "13px",
+              background: "#ff469e",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "20px",
+              borderRadius: "4px",
+              textAlign: "center",
+              marginBottom: "16px"
+            }}>
+            Categories Management
           </Typography>
-          <Grid container spacing={3} alignItems="center" sx={{ marginBottom: "16px" }}>
-            <Grid item xs={12} md={3}>
+          <Grid
+            container spacing={2}
+            alignItems="center"
+            sx={{ marginBottom: "16px" }}
+          >
+            <Grid item xs={4} md={4}>
               <TextField
                 value={searchKeyword}
                 onChange={handleSearchChange}
-                placeholder="Search By Name!"
+                placeholder="Search By Category Name"
                 variant="outlined"
                 size="small"
                 fullWidth
                 InputProps={{
+                  style: { padding: "8px" },
                   startAdornment: (
                     <InputAdornment position="start">
                       <IconButton>
@@ -202,7 +238,10 @@ export default function CategoryManagement() {
                   endAdornment: (
                     <InputAdornment position="end">
                       {searchKeyword && (
-                        <IconButton onClick={() => setSearchKeyword("")} size="small">
+                        <IconButton
+                          onClick={() => setSearchKeyword("")}
+                          size="small"
+                        >
                           <CloseIcon fontSize="small" />
                         </IconButton>
                       )}
@@ -211,13 +250,39 @@ export default function CategoryManagement() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={9} style={{ textAlign: "right" }}>
+            <Grid item xs={4} md={3}>
+              <FormControl sx={{ width: "170px" }}>
+                <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                  Sorting Status
+                </InputLabel>
+                <Select
+                  labelId="sorting-status-label"
+                  id="sorting-status-select"
+                  size="medium"
+                  value={sortingStatus}
+                  onChange={handleSortingStatus}
+                  label="Sorting Status"
+                >
+                  <MenuItem value="">Sort by Default</MenuItem>
+                  <MenuItem value="active">Sort by Active</MenuItem>
+                  <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={1} md={3}></Grid>
+            <Grid item xs={3} md={2}>
               <Button
                 variant="contained"
                 size="medium"
                 onClick={handleOpenAddDialog}
                 startIcon={<AddIcon />}
-                style={{ backgroundColor: "white", color: "black" }}
+                style={{
+                  color: "black",
+                  height: "56px",
+                  border: "1px solid #ff469e",
+                  borderRadius: "10px",
+                  backgroundColor: "white",
+                }}
               >
                 Add New Category
               </Button>
@@ -235,7 +300,7 @@ export default function CategoryManagement() {
                     <TableRow>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Category Name</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Active</TableCell>
+                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -271,9 +336,9 @@ export default function CategoryManagement() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 sx={{
-                  borderTop: "1px solid #ddd",
                   justifyContent: "flex-end",
                   backgroundColor: "f1f1f1",
+                  marginRight: "40px"
                 }}
                 labelRowsPerPage="Rows:"
                 labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
@@ -319,7 +384,7 @@ export default function CategoryManagement() {
                 onChange={(e) => handleChange("name", e.target.value)}
               />
               <FormControl fullWidth margin="normal">
-                <InputLabel htmlFor="active-select">Active</InputLabel>
+                <InputLabel htmlFor="active-select">Status</InputLabel>
                 <Select
                   value={selectedCategory.active}
                   onChange={(e) => handleChange("active", e.target.value)}
@@ -350,7 +415,7 @@ export default function CategoryManagement() {
             sx={{
               position: "fixed",
               right: 25,
-              bottom: 75,
+              bottom: 25,
               border: "1px solid #ff469e",
               backgroundColor: "#fff4fc",
               color: "#ff469e",

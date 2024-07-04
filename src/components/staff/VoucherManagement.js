@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Button from "@mui/material/Button";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
+import { KeyboardCapslock } from "@mui/icons-material";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 import moment from "moment";
 import {
   Container,
@@ -17,8 +16,6 @@ import {
   TableBody,
   IconButton,
   Tooltip,
-} from "@mui/material";
-import {
   TextField,
   Select,
   MenuItem,
@@ -28,18 +25,22 @@ import {
   DialogContent,
   DialogActions,
   TablePagination,
-  InputAdornment,
+  InputAdornment
 } from "@mui/material";
-import { getVoucherByStoreIdApi, updateVoucherApi, addVoucherApi } from "../../api/VoucherAPI";
 import { storeByUserIdApi } from "../../api/StoreAPI";
-import { jwtDecode } from "jwt-decode";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import FormControl from "@mui/material/FormControl";
-import { toast } from "react-toastify";
+import Button from "@mui/material/Button";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
+import 'react-toastify/dist/ReactToastify.css';
+import { getVoucherByStoreIdApi, updateVoucherApi, addVoucherApi } from "../../api/VoucherAPI";
 
 export default function Vouchers() {
   window.document.title = "Vouchers";
+  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [vouchers, setVouchers] = useState([]);
   const [openUpdateVoucher, setOpenUpdateVoucher] = useState(false);
@@ -48,15 +49,26 @@ export default function Vouchers() {
   const [store, setStore] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortingStatus, setSortingStatus] = useState(null);
 
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
 
   useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
     const fetchStoreData = async () => {
       try {
         const res = await storeByUserIdApi(userId);
+
         setStore(res?.data?.data);
       } catch (err) {
         console.log(err);
@@ -83,7 +95,17 @@ export default function Vouchers() {
     setLoading(true);
     try {
       const voucherRes = await getVoucherByStoreIdApi(storeId);
-      setVouchers(voucherRes.data.data || []);
+
+      let sortedVouchers = voucherRes.data.data || [];
+
+      // Sorting logic based on sortingStatus state
+      if (sortingStatus === "active") {
+        sortedVouchers = sortedVouchers.filter((voucher) => voucher.active);
+      } else if (sortingStatus === "inactive") {
+        sortedVouchers = sortedVouchers.filter((voucher) => !voucher.active);
+      }
+
+      setVouchers(sortedVouchers);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -95,7 +117,7 @@ export default function Vouchers() {
     if (storeId) {
       fetchData();
     }
-  }, [storeId]);
+  }, [storeId, sortingStatus]);
 
   const openUpdate = (item) => {
     setOpenUpdateVoucher(true);
@@ -105,6 +127,11 @@ export default function Vouchers() {
   const closeUpdate = () => {
     setOpenUpdateVoucher(false);
     setSelectedVoucher(null);
+  };
+
+  const handleSortingStatus = (event) => {
+    setSortingStatus(event.target.value);
+    setPage(0);
   };
 
   const handleChange = (field, value) => {
@@ -208,11 +235,13 @@ export default function Vouchers() {
       storeId,
       isActive
     )
-      .then((response) => {
+      .then(() => {
+        // Fetch vouchers again to update the list
+
+        fetchData();
         handleCloseAddVoucher();
         toast.success("Voucher added successfully!");
-        // Fetch vouchers again to update the list
-        fetchData();
+        setPage(0);
       })
       .catch((error) => {
         console.error("Error adding voucher:", error);
@@ -222,35 +251,50 @@ export default function Vouchers() {
 
   return (
     <div>
-      <Container style={{ marginTop: "40px", backgroundColor: "#f5f7fd" }}>
+      <Container>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Paper elevation={4} sx={{ padding: "16px", borderRadius: "10px" }}>
+            <Paper elevation={3}
+              sx={{
+                position: "sticky",
+                marginTop: "20px",
+                marginBottom: "20px",
+                padding: "16px",
+                border: "1px solid #ff469e",
+                borderRadius: "10px",
+                backgroundColor: "white",
+              }}
+            >
               <Typography
                 sx={{
-                  padding: "8px",
+                  padding: "13px",
                   background: "#ff469e",
                   color: "white",
                   fontWeight: "bold",
-                  fontSize: "18px",
+                  fontSize: "20px",
                   borderRadius: "4px",
                   textAlign: "center",
-                  marginBottom: "16px",
+                  marginBottom: "16px"
                 }}
               >
-                Vouchers
+                Vouchers Management
               </Typography>
 
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+              <Grid
+                container spacing={2}
+                alignItems="center"
+                sx={{ marginBottom: "16px" }}
+              >
+                <Grid item xs={4} md={4}>
                   <TextField
                     value={searchKeyword}
                     onChange={handleSearchChange}
-                    placeholder="Search Vouchers By Code!"
+                    placeholder="Search By Voucher Code!"
                     variant="outlined"
                     size="small"
                     fullWidth
                     InputProps={{
+                      style: { padding: "8px" },
                       startAdornment: (
                         <InputAdornment position="start">
                           <IconButton>
@@ -270,7 +314,27 @@ export default function Vouchers() {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6} container justifyContent="flex-end">
+                <Grid item xs={4} md={3}>
+                  <FormControl sx={{ width: "170px" }}>
+                    <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                      Sorting Status
+                    </InputLabel>
+                    <Select
+                      labelId="sorting-status-label"
+                      id="sorting-status-select"
+                      size="medium"
+                      value={sortingStatus}
+                      onChange={handleSortingStatus}
+                      label="Sorting Status"
+                    >
+                      <MenuItem value="">Sort by Default</MenuItem>
+                      <MenuItem value="active">Sort by Active</MenuItem>
+                      <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={1} md={3}></Grid>
+                <Grid item xs={3} md={2} container justifyContent="flex-end">
                   <Tooltip title="Add New Voucher">
                     <Button
                       style={{ backgroundColor: "white", color: "black" }}
@@ -296,7 +360,7 @@ export default function Vouchers() {
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Discount Value</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Description</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>End Date</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Active</TableCell>
+                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
                       <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Action</TableCell>
                     </TableRow>
                   </TableHead>
@@ -341,6 +405,33 @@ export default function Vouchers() {
             </Paper>
           </Grid>
         </Grid>
+        {visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 25,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
+        )}
       </Container>
 
       {/* Dialog for Update Voucher */}
