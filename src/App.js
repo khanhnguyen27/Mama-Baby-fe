@@ -1,8 +1,9 @@
-import Navigation from "./components/Navigation/Navigation";
-import Footer from "./components/Footer/Footer";
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Navigation from "./components/Navigation/Navigation";
+import Footer from "./components/Footer/Footer";
 import SignIn from "./components/general/SignIn";
 import Introduction from "./components/general/Introduction";
 import Promotion from "./components/general/Promotion";
@@ -40,7 +41,9 @@ import ProductGiftDetails from "./components/general/ProductGiftDetails";
 import ProductGift from "./components/general/ProductGift";
 import Requests from "./components/general/Requests";
 import Dashboard from "./components/staff/Dashboard";
-import { useEffect } from "react";
+import SuccessPayment from "./components/general/SuccessPayment";
+import FailedPayment from "./components/general/FailedPayment";
+
 const applyScrollbarStyles = () => {
   const style = document.createElement("style");
   style.innerHTML = `
@@ -69,6 +72,7 @@ function App() {
   useEffect(() => {
     applyScrollbarStyles();
   }, []);
+
   return (
     <div className="App">
       <Navigation />
@@ -81,14 +85,13 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/productgift" element={<ProductGift />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="/productgiftdetail/:productId" element={<ProductGiftDetails />} />
         <Route path="/article/:articleId" element={<ArticleDetails />} />
-        <Route
-          path="/productgiftdetail/:productId"
-          element={<ProductGiftDetails />}
-        />
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/successPayment" element={<SuccessPayment />} />
+        <Route path="/failedPayment" element={<FailedPayment />} />
         <Route path="/history/comment" element={<CommentHistory />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/regisstore" element={<RegisStores />} />
@@ -97,12 +100,9 @@ function App() {
         <Route path="/stores/:article_id" element={<Article />} />
         <Route path="/requests" element={<Requests />} />
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
-          <Route
-            path="/products/staff/:productId"
-            element={<ProductDetailsManagement />}
-          />
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<Navigate to={"/staff/products"} />} />
+            <Route path="products/:productId" element={<ProductDetailsManagement />} />
             <Route path="profile" element={<Profile />} />
             <Route path="products" element={<StaffHome />} />
             <Route path="exchanges" element={<ExchangesManagement />} />

@@ -1827,7 +1827,7 @@ export default function StaffHome() {
                           //onClick={() => handleOpen(item)}
                           onClick={() =>
                             navigate(
-                              `/products/staff/${item.name
+                              `/staff/products/${item.name
                                 .toLowerCase()
                                 .replace(/\s/g, "-")}`,
                               { state: { productId: item.id } },
@@ -1841,7 +1841,7 @@ export default function StaffHome() {
                         <CardContent
                           onClick={() =>
                             navigate(
-                              `/products/staff/${item.name
+                              `/staff/products/${item.name
                                 .toLowerCase()
                                 .replace(/\s/g, "-")}`,
                               { state: { productId: item.id } },

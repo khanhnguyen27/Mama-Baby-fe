@@ -25,6 +25,8 @@ import {
   FormControlLabel,
   Checkbox,
   ButtonGroup,
+  Tooltip,
+  Fade,
 } from "@mui/material";
 import { makePaymentApi } from "../../api/VNPayAPI";
 import { toast } from "react-toastify";
@@ -32,7 +34,7 @@ import { allProductApi, productByIdApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
-import { Close, ExpandMore, KeyboardCapslock } from "@mui/icons-material";
+import { Close, ExpandMore, Info, KeyboardCapslock } from "@mui/icons-material";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
@@ -55,7 +57,7 @@ export default function Orders() {
     DELIVERING: [],
     COMPLETED: [],
     CANCELLED: [],
-    RETURNED: [],
+    // RETURNED: [],
   });
   const [productMap, setProductMap] = useState({});
   const [storeMap, setStoreMap] = useState({});
@@ -65,7 +67,7 @@ export default function Orders() {
   const [exchange, setExchange] = useState([]);
   const [refund, setRefund] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
   const [open, setOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedFinalAmount, setSelectedFinalAmount] = useState(null);
@@ -123,7 +125,7 @@ export default function Orders() {
         DELIVERING: [],
         COMPLETED: [],
         CANCELLED: [],
-        RETURNED: [],
+        // RETURNED: [],
       };
 
       orderData.forEach((order) => {
@@ -410,7 +412,7 @@ export default function Orders() {
               price: res?.data?.data.price,
               store_id: res?.data?.data.store_id,
               point: res?.data?.data.point,
-              type: res?.data?.data.type
+              type: res?.data?.data.type,
             },
             quantity: item.quantity,
           })
@@ -701,13 +703,51 @@ export default function Orders() {
                     boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
                   }}
                 >
-                  {/* <>{console.log(item.id)}</> */}
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: "10px", fontWeight: "bold" }}
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    Order No. {item.id}{" "}
-                  </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ mb: "10px", fontWeight: "bold" }}
+                    >
+                      Order No. {item.id}{" "}
+                    </Typography>
+                    {item?.status_order_list[item.status_order_list.length - 1]
+                      ?.status === "COMPLETED" && (
+                      <Tooltip
+                        title="An order can only be submitted for one exchange or refund request at a time."
+                        enterDelay={300}
+                        leaveDelay={100}
+                        placement="left"
+                        TransitionComponent={Fade}
+                        TransitionProps={{ timeout: 250 }}
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "#fff4fc",
+                              boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                              color: "#ff469e",
+                              borderRadius: "8px",
+                              border: "1px solid #ff469e",
+                              fontSize: "1rem",
+                            },
+                          },
+                        }}
+                      >
+                        <IconButton
+                          sx={{
+                            p: 0,
+                            mb: 1,
+                            color: "black",
+                            opacity: 0.3,
+                            "&:hover": { color: "#ff469e", opacity: 0.9 },
+                          }}
+                        >
+                          <Info sx={{ fontSize: "2rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
                   <Divider sx={{ mb: "16px" }} />
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
@@ -724,6 +764,91 @@ export default function Orders() {
                         </span>
                       </Typography>
                     </Grid>
+                    {item?.status_order_list[item.status_order_list.length - 1]
+                      ?.status === "DELIVERING" && (
+                      <Grid item xs={12} md={6}>
+                        <Typography
+                          sx={{
+                            mb: "5px",
+                            fontWeight: "medium",
+                            fontSize: "1.25rem",
+                          }}
+                        >
+                          Delivery Date:{" "}
+                          <span style={{ fontWeight: "600" }}>
+                            {
+                              item.status_order_list[
+                                item.status_order_list.length - 1
+                              ].date
+                            }
+                          </span>
+                        </Typography>
+                      </Grid>
+                    )}
+                    {item?.status_order_list[item.status_order_list.length - 1]
+                      ?.status === "CANCELLED" && (
+                      <Grid item xs={12} md={6}>
+                        <Typography
+                          sx={{
+                            mb: "5px",
+                            fontWeight: "medium",
+                            fontSize: "1.25rem",
+                          }}
+                        >
+                          Cancelled Date:{" "}
+                          <span style={{ fontWeight: "600" }}>
+                            {
+                              item.status_order_list[
+                                item.status_order_list.length - 1
+                              ].date
+                            }
+                          </span>
+                        </Typography>
+                      </Grid>
+                    )}
+                    {item?.status_order_list[item.status_order_list.length - 2]
+                      ?.status === "DELIVERING" &&
+                      item?.status_order_list[item.status_order_list.length - 1]
+                        ?.status === "COMPLETED" && (
+                        <>
+                          <Grid item xs={12} md={6}>
+                            <Typography
+                              sx={{
+                                mb: "5px",
+                                fontWeight: "medium",
+                                fontSize: "1.25rem",
+                              }}
+                            >
+                              Delivery Date:{" "}
+                              <span style={{ fontWeight: "600" }}>
+                                {
+                                  item.status_order_list[
+                                    item.status_order_list.length - 1
+                                  ].date
+                                }
+                              </span>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <Typography
+                              sx={{
+                                mb: "5px",
+                                fontWeight: "medium",
+                                fontSize: "1.25rem",
+                              }}
+                            >
+                              Received Date:{" "}
+                              <span style={{ fontWeight: "600" }}>
+                                {
+                                  item.status_order_list[
+                                    item.status_order_list.length - 1
+                                  ].date
+                                }
+                              </span>
+                            </Typography>
+                          </Grid>
+                        </>
+                      )}
                     <Grid item xs={12} md={6}>
                       <Typography
                         sx={{
@@ -1758,733 +1883,6 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
-                        {/* {item.payment_method === "VNPAY" &&
-                          !refund.some(
-                            (refundItem) => refundItem.order_id === item.id
-                          ) && (
-                            <Button
-                              variant="contained"
-                              sx={{
-                                backgroundColor: "white",
-                                color: "#ff469e",
-                                borderRadius: "10px",
-                                fontSize: 16,
-                                fontWeight: "bold",
-                                my: 2,
-                                mx: 1,
-                                transition:
-                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                border: "1px solid #ff469e",
-                                "&:hover": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  border: "1px solid white",
-                                },
-                              }}
-                              onClick={() => handleOpenRefund(item.id)}
-                            >
-                              REFUND
-                            </Button>
-                          )}
-                        {item.id === selectedOrderId && (
-                          <Modal
-                            open={openRefund}
-                            onClose={handleCloseRefund}
-                            slotProps={{
-                              backdrop: {
-                                style: {
-                                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                                },
-                              },
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translate(-50%, -50%)",
-                                width: 1080,
-                                borderRadius: "20px",
-                                backgroundColor: "#fff4fc",
-                                border: "2px solid #ff469e",
-                                boxShadow: 10,
-                                p: 4,
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <Typography
-                                  variant="h6"
-                                  component="h2"
-                                  sx={{ mt: 1 }}
-                                >
-                                  Refund Request
-                                </Typography>
-                                <IconButton
-                                  size="small"
-                                  onClick={handleCloseRefund}
-                                >
-                                  <Close
-                                    fontSize="large"
-                                    sx={{
-                                      color: "#ff469e",
-                                      borderRadius: "30px",
-                                      boxShadow: "none",
-                                      transition: "0.3s ease-in-out",
-                                      "&:hover": {
-                                        backgroundColor: "#ff469e",
-                                        color: "white",
-                                        transform: "scale(1.1)",
-                                      },
-                                    }}
-                                  />
-                                </IconButton>
-                              </Box>
-                              <Box sx={{ mt: 2 }}>
-                                <div style={{ margin: "1rem 0.25rem" }}>
-                                  <span
-                                    style={{
-                                      fontSize: "1.05rem",
-                                      fontWeight: "600",
-                                    }}
-                                  >
-                                    Reason:
-                                  </span>
-                                  <TextField
-                                    multiline
-                                    rows={3}
-                                    fullWidth
-                                    placeholder="Input your reason of exchange. E.g: This product is not good"
-                                    size="small"
-                                    variant="outlined"
-                                    value={description}
-                                    onChange={(e) =>
-                                      setDescription(e.target.value)
-                                    }
-                                    InputProps={{
-                                      sx: {
-                                        padding: 1,
-                                        border: "1px solid #ff469e",
-                                        borderRadius: "7px",
-                                        backgroundColor: "white",
-                                        transition: "0.2s ease-in-out",
-                                        "&:hover": {
-                                          border: "1px solid #ff469e",
-                                        },
-                                        "&:focus": {
-                                          backgroundColor: "#F8F8F8",
-                                        },
-                                        "&.Mui-focused": {
-                                          border: "1px solid #ff469e",
-                                          backgroundColor: "#F8F8F8",
-                                          boxShadow:
-                                            "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                          outline: "none",
-                                        },
-                                        "& .MuiOutlinedInput-notchedOutline": {
-                                          border: "none",
-                                        },
-                                      },
-                                    }}
-                                  />
-                                </div>
-                                <Card
-                                  sx={{
-                                    pl: 2,
-                                    pr: 0,
-                                    border: "1px solid #ff469e",
-                                    borderRadius: "1rem",
-                                    my: 2.4,
-                                    minHeight: "120px",
-                                    maxHeight: "260px",
-                                    overflow: "hidden",
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      overflowY: "auto",
-                                      maxHeight: "260px",
-                                      pr: 0.5,
-                                      "&::-webkit-scrollbar": {
-                                        width: "0.65rem",
-                                      },
-                                      "&::-webkit-scrollbar-track": {
-                                        background: "#f5f7fd",
-                                      },
-                                      "&::-webkit-scrollbar-thumb": {
-                                        background: "#ff469e",
-                                        borderRadius: "0.8rem",
-                                      },
-                                      "&::-webkit-scrollbar-thumb:hover": {
-                                        background: "#ffbbd0",
-                                      },
-                                    }}
-                                  >
-                                    {item.order_detail_list.map(
-                                      (detail, index) => (
-                                        <div
-                                          key={index}
-                                          style={{
-                                            display: "flex",
-                                            marginBottom: "10px",
-                                          }}
-                                        >
-                                          <CardMedia
-                                            component="img"
-                                            sx={{
-                                              width: "70px",
-                                              height: "70px",
-                                              justifyContent: "center",
-                                              alignSelf: "center",
-                                              borderRadius: "10px",
-                                            }}
-                                            image={
-                                              productMap[
-                                                detail.product_id
-                                              ][4]?.includes("Product_")
-                                                ? `http://localhost:8080/mamababy/products/images/${
-                                                    productMap[
-                                                      detail.product_id
-                                                    ][4]
-                                                  }`
-                                                : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                            }
-                                            onError={(e) => {
-                                              e.target.src =
-                                                "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                                            }}
-                                            title={
-                                              productMap[detail.product_id][0]
-                                            }
-                                          />
-                                          <CardContent
-                                            sx={{
-                                              flex: "1 0 auto",
-                                              ml: 2,
-                                              borderBottom: "1px dashed black",
-                                            }}
-                                          >
-                                            <Box
-                                              sx={{
-                                                display: "flex",
-                                                flexDirection: "row",
-                                                justifyContent: "space-between",
-                                                mt: 2,
-                                              }}
-                                            >
-                                              <Typography
-                                                sx={{
-                                                  fontWeight: "600",
-                                                  fontSize: "1.25rem",
-                                                  "&:hover": {
-                                                    cursor: "pointer",
-                                                    color: "#ff469e",
-                                                  },
-                                                }}
-                                                onClick={() =>
-                                                  navigate(
-                                                    `/products/${productMap[
-                                                      detail.product_id
-                                                    ][0]
-                                                      .toLowerCase()
-                                                      .replace(/\s/g, "-")}`,
-                                                    {
-                                                      state: {
-                                                        productId:
-                                                          detail.product_id,
-                                                      },
-                                                    },
-                                                    window.scrollTo({
-                                                      top: 0,
-                                                      behavior: "smooth",
-                                                    })
-                                                  )
-                                                }
-                                              >
-                                                {productMap[
-                                                  detail.product_id
-                                                ][0].length > 60
-                                                  ? `${productMap[
-                                                      detail.product_id
-                                                    ][0].substring(0, 60)}...`
-                                                  : productMap[
-                                                      detail.product_id
-                                                    ][0]}
-                                              </Typography>
-                                              <Typography
-                                                sx={{
-                                                  fontWeight: "600",
-                                                  fontSize: "1.15rem",
-                                                }}
-                                              >
-                                                {formatCurrency(
-                                                  // productMap[
-                                                  //   detail.product_id
-                                                  // ][3]
-                                                  detail.unit_price
-                                                )}
-                                                <span
-                                                  style={{
-                                                    fontSize: "1.05rem",
-                                                    opacity: 0.4,
-                                                  }}
-                                                >
-                                                  {" "}
-                                                  x{detail.quantity}
-                                                </span>
-                                              </Typography>
-                                            </Box>
-                                            <Box
-                                              sx={{
-                                                display: "flex",
-                                                flexDirection: "row",
-                                                justifyContent: "space-between",
-                                                mt: 1,
-                                              }}
-                                            >
-                                              <Typography sx={{ opacity: 0.7 }}>
-                                                {
-                                                  brandMap[
-                                                    productMap[
-                                                      detail.product_id
-                                                    ][1]
-                                                  ]
-                                                }{" "}
-                                                |{" "}
-                                                {
-                                                  categoryMap[
-                                                    productMap[
-                                                      detail.product_id
-                                                    ][2]
-                                                  ]
-                                                }
-                                              </Typography>
-                                              <Typography sx={{ opacity: 0.8 }}>
-                                                <span
-                                                  style={{
-                                                    fontWeight: "bold",
-                                                    fontSize: "1.25rem",
-                                                  }}
-                                                >
-                                                  ={" "}
-                                                  {formatCurrency(
-                                                    detail.amount_price
-                                                  )}
-                                                </span>
-                                              </Typography>
-                                            </Box>
-                                            <Box
-                                              sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                mt: 1,
-                                              }}
-                                            >
-                                              <FormControlLabel
-                                                control={
-                                                  <Checkbox
-                                                    sx={{
-                                                      "&.Mui-checked": {
-                                                        color: "#ff469e",
-                                                      },
-                                                      "&:hover": {
-                                                        color: "#ff469e",
-                                                      },
-                                                      "&.Mui-checked + .MuiTypography-root, &:hover + .MuiTypography-root":
-                                                        {
-                                                          color: "#ff469e",
-                                                        },
-                                                    }}
-                                                    onChange={(e) =>
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        e.target.checked
-                                                          ? 1
-                                                          : 0,
-                                                        detail.unit_price
-                                                      )
-                                                    }
-                                                  />
-                                                }
-                                                label={
-                                                  <Typography
-                                                    sx={{
-                                                      fontWeight: "600",
-                                                      "&:hover": {
-                                                        color: "#ff469e",
-                                                      },
-                                                      ".MuiCheckbox-root:hover ~ &":
-                                                        {
-                                                          color: "#ff469e",
-                                                        },
-                                                    }}
-                                                  >
-                                                    Refund
-                                                  </Typography>
-                                                }
-                                              />
-                                              <ButtonGroup
-                                                variant="outlined"
-                                                aria-label="outlined button group"
-                                                style={{
-                                                  height: "2rem",
-                                                  marginLeft: "1rem",
-                                                }}
-                                                disabled={
-                                                  !selectedItems.some(
-                                                    (item) =>
-                                                      item.product_id ===
-                                                      detail.product_id
-                                                  )
-                                                }
-                                              >
-                                                <Button
-                                                  variant="contained"
-                                                  disabled={
-                                                    !selectedItems.some(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    ) ||
-                                                    (selectedItems.find(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    )?.quantity ||
-                                                      detail.quantity) === 1
-                                                  }
-                                                  onClick={() => {
-                                                    const currentQuantity =
-                                                      selectedItems.find(
-                                                        (item) =>
-                                                          item.product_id ===
-                                                          detail.product_id
-                                                      )?.quantity ||
-                                                      detail.quantity;
-                                                    if (currentQuantity >= 10) {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        currentQuantity - 10,
-                                                        detail.unit_price
-                                                      );
-                                                    } else {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        1,
-                                                        detail.unit_price
-                                                      );
-                                                    }
-                                                  }}
-                                                  sx={{
-                                                    backgroundColor: "white",
-                                                    color: "#ff469e",
-                                                    borderRadius: "20px",
-                                                    fontSize: "1rem",
-                                                    width: "2.9rem",
-                                                    fontWeight: "bold",
-                                                    boxShadow: "none",
-                                                    transition:
-                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                                    border: "1px solid #ff469e",
-                                                    "&:hover": {
-                                                      backgroundColor:
-                                                        "#ff469e",
-                                                      color: "white",
-                                                    },
-                                                  }}
-                                                >
-                                                  --
-                                                </Button>
-                                                <Button
-                                                  variant="contained"
-                                                  disabled={
-                                                    !selectedItems.some(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    ) ||
-                                                    (selectedItems.find(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    )?.quantity ||
-                                                      detail.quantity) === 1
-                                                  }
-                                                  onClick={() => {
-                                                    const currentQuantity =
-                                                      selectedItems.find(
-                                                        (item) =>
-                                                          item.product_id ===
-                                                          detail.product_id
-                                                      )?.quantity ||
-                                                      detail.quantity;
-                                                    if (currentQuantity >= 1) {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        currentQuantity - 1,
-                                                        detail.unit_price
-                                                      );
-                                                    } else {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        1,
-                                                        detail.unit_price
-                                                      );
-                                                    }
-                                                  }}
-                                                  sx={{
-                                                    backgroundColor: "white",
-                                                    color: "#ff469e",
-                                                    fontSize: "1rem",
-                                                    width: "2.9rem",
-                                                    fontWeight: "bold",
-                                                    boxShadow: "none",
-                                                    transition:
-                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                                    border: "1px solid #ff469e",
-                                                    "&:hover": {
-                                                      backgroundColor:
-                                                        "#ff469e",
-                                                      color: "white",
-                                                    },
-                                                  }}
-                                                >
-                                                  -
-                                                </Button>
-                                                <Button
-                                                  disableRipple
-                                                  style={{
-                                                    backgroundColor: "white",
-                                                    fontSize: "1rem",
-                                                    width: "2.9rem",
-                                                    cursor: "default",
-                                                    border: "1px solid #ff469e",
-                                                    color: "black",
-                                                  }}
-                                                >
-                                                  {Math.max(
-                                                    1,
-                                                    Math.min(
-                                                      detail.quantity,
-                                                      selectedItems.find(
-                                                        (item) =>
-                                                          item.product_id ===
-                                                          detail.product_id
-                                                      )?.quantity || 1
-                                                    )
-                                                  )}
-                                                </Button>
-                                                <Button
-                                                  variant="contained"
-                                                  disabled={
-                                                    !selectedItems.some(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    ) ||
-                                                    (selectedItems.find(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    )?.quantity ||
-                                                      detail.quantity) ===
-                                                      detail.quantity
-                                                  }
-                                                  onClick={() => {
-                                                    const currentQuantity =
-                                                      selectedItems.find(
-                                                        (item) =>
-                                                          item.product_id ===
-                                                          detail.product_id
-                                                      )?.quantity ||
-                                                      detail.quantity;
-                                                    if (
-                                                      currentQuantity <=
-                                                      detail.quantity
-                                                    ) {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        currentQuantity + 1,
-                                                        detail.unit_price
-                                                      );
-                                                    } else {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        detail.quantity,
-                                                        detail.unit_price
-                                                      );
-                                                    }
-                                                  }}
-                                                  sx={{
-                                                    backgroundColor: "white",
-                                                    color: "#ff469e",
-                                                    fontSize: "1rem",
-                                                    width: "2.9rem",
-                                                    fontWeight: "bold",
-                                                    boxShadow: "none",
-                                                    transition:
-                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                                    border: "1px solid #ff469e",
-                                                    "&:hover": {
-                                                      backgroundColor:
-                                                        "#ff469e",
-                                                      color: "white",
-                                                    },
-                                                  }}
-                                                >
-                                                  +
-                                                </Button>
-                                                <Button
-                                                  variant="contained"
-                                                  disabled={
-                                                    !selectedItems.some(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    ) ||
-                                                    (selectedItems.find(
-                                                      (item) =>
-                                                        item.product_id ===
-                                                        detail.product_id
-                                                    )?.quantity ||
-                                                      detail.quantity) ===
-                                                      detail.quantity
-                                                  }
-                                                  onClick={() => {
-                                                    const currentQuantity =
-                                                      selectedItems.find(
-                                                        (item) =>
-                                                          item.product_id ===
-                                                          detail.product_id
-                                                      )?.quantity ||
-                                                      detail.quantity;
-                                                    if (
-                                                      currentQuantity <=
-                                                      detail.quantity - 10
-                                                    ) {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        currentQuantity + 10,
-                                                        detail.unit_price
-                                                      );
-                                                    } else {
-                                                      handleItemChange2(
-                                                        detail.product_id,
-                                                        detail.quantity,
-                                                        detail.unit_price
-                                                      );
-                                                    }
-                                                  }}
-                                                  sx={{
-                                                    backgroundColor: "white",
-                                                    color: "#ff469e",
-                                                    borderRadius: "20px",
-                                                    fontSize: "1rem",
-                                                    width: "2.9rem",
-                                                    fontWeight: "bold",
-                                                    boxShadow: "none",
-                                                    transition:
-                                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                                    border: "1px solid #ff469e",
-                                                    "&:hover": {
-                                                      backgroundColor:
-                                                        "#ff469e",
-                                                      color: "white",
-                                                    },
-                                                  }}
-                                                >
-                                                  ++
-                                                </Button>
-                                              </ButtonGroup>
-                                            </Box>
-                                          </CardContent>
-                                        </div>
-                                      )
-                                    )}
-                                  </Box>
-                                </Card>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      width: "35%",
-                                      justifyContent: "space-between",
-                                      mt: 1,
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontWeight: "bold",
-                                        fontSize: "1.45rem",
-                                      }}
-                                    >
-                                      Total Refund:
-                                    </span>
-                                    <span
-                                      style={{
-                                        fontWeight: "bold",
-                                        fontSize: "1.5rem",
-                                        color: "#ff469e",
-                                      }}
-                                    >
-                                      {formatCurrency(
-                                        selectedItems.reduce(
-                                          (total, selectedItem) => {
-                                            const difference =
-                                              item.final_amount - total;
-                                            const itemAmount =
-                                              selectedItem.unit_price *
-                                              selectedItem.quantity;
-                                            return (
-                                              total +
-                                              Math.min(difference, itemAmount)
-                                            );
-                                          },
-                                          0
-                                        )
-                                      )}
-                                    </span>
-                                  </Box>
-                                  <Button
-                                    variant="contained"
-                                    sx={{
-                                      backgroundColor: "white",
-                                      color: "#ff469e",
-                                      borderRadius: "20px",
-                                      fontSize: 16,
-                                      fontWeight: "bold",
-                                      my: 0.2,
-                                      mx: 1,
-                                      transition:
-                                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                      border: "1px solid #ff469e",
-                                      "&:hover": {
-                                        backgroundColor: "#ff469e",
-                                        color: "white",
-                                        border: "1px solid white",
-                                      },
-                                    }}
-                                    onClick={() => handleRequestRefund(item)}
-                                  >
-                                    Send
-                                  </Button>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Modal>
-                        )} */}
                       </Grid>
                     )}
                     {item.status_order_list[item.status_order_list.length - 1]
@@ -2605,35 +2003,36 @@ export default function Orders() {
                             </Box>
                           </Box>
                         </Modal>
-                        {(!exchange.some(
+                        {!exchange.some(
                           (exchangeItem) => exchangeItem.order_id === item.id
-                        ) && !refund.some(
-                          (refundItem) => refundItem.order_id === item.id
-                        )) && (
-                          <Button
-                            variant="contained"
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "10px",
-                              fontSize: 16,
-                              fontWeight: "bold",
-                              my: 2,
-                              mx: 1,
-                              transition:
-                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid white",
-                              },
-                            }}
-                            onClick={() => handleOpenExchange(item.id)}
-                          >
-                            EXCHANGE
-                          </Button>
-                        )}
+                        ) &&
+                          !refund.some(
+                            (refundItem) => refundItem.order_id === item.id
+                          ) && (
+                            <Button
+                              variant="contained"
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "10px",
+                                fontSize: 16,
+                                fontWeight: "bold",
+                                my: 2,
+                                mx: 1,
+                                transition:
+                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  border: "1px solid white",
+                                },
+                              }}
+                              onClick={() => handleOpenExchange(item.id)}
+                            >
+                              EXCHANGE
+                            </Button>
+                          )}
                         {item.id === selectedOrderId && (
                           <Modal
                             open={openExchange}
@@ -3331,35 +2730,36 @@ export default function Orders() {
                             </Box>
                           </Modal>
                         )}
-                        {(!exchange.some(
+                        {!exchange.some(
                           (exchangeItem) => exchangeItem.order_id === item.id
-                        ) && !refund.some(
-                          (refundItem) => refundItem.order_id === item.id
-                        )) && (
-                          <Button
-                            variant="contained"
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "10px",
-                              fontSize: 16,
-                              fontWeight: "bold",
-                              my: 2,
-                              mx: 1,
-                              transition:
-                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                border: "1px solid white",
-                              },
-                            }}
-                            onClick={() => handleOpenRefund(item.id)}
-                          >
-                            REFUND
-                          </Button>
-                        )}
+                        ) &&
+                          !refund.some(
+                            (refundItem) => refundItem.order_id === item.id
+                          ) && (
+                            <Button
+                              variant="contained"
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "10px",
+                                fontSize: 16,
+                                fontWeight: "bold",
+                                my: 2,
+                                mx: 1,
+                                transition:
+                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  border: "1px solid white",
+                                },
+                              }}
+                              onClick={() => handleOpenRefund(item.id)}
+                            >
+                              REFUND
+                            </Button>
+                          )}
                         {item.id === selectedOrderId && (
                           <Modal
                             open={openRefund}
@@ -3378,7 +2778,7 @@ export default function Orders() {
                                 top: "50%",
                                 left: "50%",
                                 transform: "translate(-50%, -50%)",
-                                width: 1080,
+                                width: 1100,
                                 borderRadius: "20px",
                                 backgroundColor: "#fff4fc",
                                 border: "2px solid #ff469e",
@@ -3394,9 +2794,9 @@ export default function Orders() {
                                 }}
                               >
                                 <Typography
-                                  variant="h6"
+                                  variant="h5"
                                   component="h2"
-                                  sx={{ mt: 1 }}
+                                  sx={{ mt: 1, fontWeight: "bold" }}
                                 >
                                   Refund Request
                                 </Typography>
@@ -4004,6 +3404,43 @@ export default function Orders() {
                                         fontSize: "1.45rem",
                                       }}
                                     >
+                                      <Tooltip
+                                        title="The total refund has been deducted for the discount."
+                                        enterDelay={300}
+                                        leaveDelay={100}
+                                        placement="bottom-end"
+                                        TransitionComponent={Fade}
+                                        TransitionProps={{ timeout: 250 }}
+                                        componentsProps={{
+                                          tooltip: {
+                                            sx: {
+                                              backgroundColor: "#fff4fc",
+                                              boxShadow:
+                                                "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                                              color: "#ff469e",
+                                              borderRadius: "8px",
+                                              border: "1px solid #ff469e",
+                                              fontSize: "1rem",
+                                            },
+                                          },
+                                        }}
+                                      >
+                                        <IconButton
+                                          sx={{
+                                            p: 0,
+                                            mr: 1,
+                                            mb: 0.5,
+                                            color: "black",
+                                            opacity: 0.3,
+                                            "&:hover": {
+                                              color: "#ff469e",
+                                              opacity: 0.9,
+                                            },
+                                          }}
+                                        >
+                                          <Info sx={{ fontSize: "1.75rem" }} />
+                                        </IconButton>
+                                      </Tooltip>
                                       Total Refund:
                                     </span>
                                     <span

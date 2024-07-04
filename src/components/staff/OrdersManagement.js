@@ -47,7 +47,7 @@ export default function OrdersManagement() {
     DELIVERING: [],
     COMPLETED: [],
     CANCELLED: [],
-    RETURNED: [],
+    // RETURNED: [],
   });
   const [productMap, setProductMap] = useState({});
   const [brandMap, setBrandMap] = useState({});
@@ -114,7 +114,7 @@ export default function OrdersManagement() {
         DELIVERING: [],
         COMPLETED: [],
         CANCELLED: [],
-        RETURNED: [],
+        // RETURNED: [],
       };
 
       orderData.forEach((order) => {
@@ -456,6 +456,91 @@ export default function OrdersManagement() {
                         </span>
                       </Typography>
                     </Grid>
+                    {item?.status_order_list[item.status_order_list.length - 1]
+                      ?.status === "DELIVERING" && (
+                      <Grid item xs={12} md={6}>
+                        <Typography
+                          sx={{
+                            mb: "5px",
+                            fontWeight: "medium",
+                            fontSize: "1.25rem",
+                          }}
+                        >
+                          Delivery Date:{" "}
+                          <span style={{ fontWeight: "600" }}>
+                            {
+                              item.status_order_list[
+                                item.status_order_list.length - 1
+                              ].date
+                            }
+                          </span>
+                        </Typography>
+                      </Grid>
+                    )}
+                    {item?.status_order_list[item.status_order_list.length - 1]
+                      ?.status === "CANCELLED" && (
+                      <Grid item xs={12} md={6}>
+                        <Typography
+                          sx={{
+                            mb: "5px",
+                            fontWeight: "medium",
+                            fontSize: "1.25rem",
+                          }}
+                        >
+                          Cancelled Date:{" "}
+                          <span style={{ fontWeight: "600" }}>
+                            {
+                              item.status_order_list[
+                                item.status_order_list.length - 1
+                              ].date
+                            }
+                          </span>
+                        </Typography>
+                      </Grid>
+                    )}
+                    {(item?.status_order_list[item.status_order_list.length - 2]
+                      ?.status === "DELIVERING" &&
+                      item?.status_order_list[item.status_order_list.length - 1]
+                        ?.status === "COMPLETED") && (
+                        <>
+                          <Grid item xs={12} md={6}>
+                            <Typography
+                              sx={{
+                                mb: "5px",
+                                fontWeight: "medium",
+                                fontSize: "1.25rem",
+                              }}
+                            >
+                              Delivery Date:{" "}
+                              <span style={{ fontWeight: "600" }}>
+                                {
+                                  item.status_order_list[
+                                    item.status_order_list.length - 1
+                                  ].date
+                                }
+                              </span>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <Typography
+                              sx={{
+                                mb: "5px",
+                                fontWeight: "medium",
+                                fontSize: "1.25rem",
+                              }}
+                            >
+                              Received Date:{" "}
+                              <span style={{ fontWeight: "600" }}>
+                                {
+                                  item.status_order_list[
+                                    item.status_order_list.length - 1
+                                  ].date
+                                }
+                              </span>
+                            </Typography>
+                          </Grid>
+                        </>
+                      )}
                     <Grid item xs={12} md={6}>
                       <Typography
                         sx={{
@@ -613,7 +698,7 @@ export default function OrdersManagement() {
                                           }}
                                           onClick={() =>
                                             navigate(
-                                              `/products/${productMap[
+                                              `/products/staff/${productMap[
                                                 detail.product_id
                                               ][0]
                                                 .toLowerCase()
@@ -655,6 +740,7 @@ export default function OrdersManagement() {
                                             style={{
                                               fontSize: "1.05rem",
                                               opacity: 0.4,
+                                              marginLeft: "4px"
                                             }}
                                           >
                                             x{detail.quantity}
