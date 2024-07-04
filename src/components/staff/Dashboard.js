@@ -102,9 +102,6 @@ export default function Dashboard() {
       const refundRes = await refundByStoreIdApi(storeId);
       const productRes = await allProductApi({ limit: 1000 });
 
-      console.log("Orders:", orderRes.data.data);
-      console.log("Exchanges:", exchangeRes.data.data);
-      console.log("Refunds:", refundRes.data.data);
       const ordersData = orderRes.data.data || [];
       const refundsData = refundRes.data.data || [];
 
