@@ -167,10 +167,19 @@ export default function Products() {
   };
 
   const handleAddToCart = (index) => {
-    toast.info(`${product.products[index].name} x 1 was added to cart`, {
-      position: "top-right",
-      autoClose: 1000,
-    });
+    if (product.products[index].status === "OUT OF STOCK") {
+      toast.error(`Cannot add this product to cart`, {
+        position: "top-right",
+        autoClose: 1000,
+      });
+      return;
+    }
+    if (product.products[index].status === "IN STOCK") {
+      toast.info(`${product.products[index].name} x 1 was added to cart`, {
+        position: "top-right",
+        autoClose: 1000,
+      });
+    }
     dispatch(
       addToCart({
         product: {
@@ -1030,6 +1039,19 @@ export default function Products() {
                               {brandMap[item.brand_id]} |{" "}
                               {categoryMap[item.category_id]}
                             </Typography>
+                            {item.status === "OUT OF STOCK" && (
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "#ff469e",
+                                textAlign: "right",
+                                opacity: 0.9,
+                                mt: 0.5,
+                              }}
+                            >
+                              ({item.status})
+                            </Typography>
+                            )}
                           </CardContent>
                           <Divider />
                           <CardActions sx={{ justifyContent: "space-between" }}>
@@ -1074,6 +1096,7 @@ export default function Products() {
                                 </div>
                               </Typography>
                             </CardContent>
+                            {item.status !== "OUT OF STOCK" && (
                             <IconButton
                               size="large"
                               sx={{
@@ -1107,6 +1130,7 @@ export default function Products() {
                               </span>
                               <Cart />
                             </IconButton>
+                            )}
                           </CardActions>
                         </Card>
                       </Tooltip>

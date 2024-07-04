@@ -31,6 +31,7 @@ import { allProductApi } from "../../api/ProductAPI";
 import { allStoreApi } from "../../api/StoreAPI";
 import { allArticleApi } from "../../api/ArticleAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
+import { jwtDecode } from "jwt-decode";
 export default function HomePage() {
   const navigate = useNavigate();
   window.document.title = "Mama-Baby";
@@ -51,9 +52,20 @@ export default function HomePage() {
   const typeGIFT = "GIFT";
   const typeWHOLESALE = "WHOLESALE";
 
-  const handleChange = (panel) => (e, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
+  // const handleChange = (panel) => (e, isExpanded) => {
+  //   setExpanded(isExpanded ? panel : false);
+  // };
+
+  const storedAccessToken = localStorage?.getItem("accessToken");
+  const roleId = storedAccessToken
+    ? jwtDecode(storedAccessToken)?.RoleID || null
+    : null;
+  if (roleId === "STAFF") {
+    window.location.replace("/staff/products");
+  }
+  if (roleId === "ADMIN") {
+    window.location.replace("/admin/dashboard");
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -689,7 +701,7 @@ export default function HomePage() {
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Some of our products
+              Best Rating
             </Typography>
             <Typography
               variant="body2"
@@ -706,7 +718,7 @@ export default function HomePage() {
                 });
               }}
             >
-              See more products
+              See all products
             </Typography>
           </Box>
           {/* List */}
@@ -914,7 +926,7 @@ export default function HomePage() {
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Gift of products
+              Gift products
             </Typography>
             <Typography
               variant="body2"
@@ -931,7 +943,7 @@ export default function HomePage() {
                 });
               }}
             >
-              See more gifts
+              See all gifts
             </Typography>
           </Box>
           {/* List */}
@@ -1158,7 +1170,7 @@ export default function HomePage() {
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Some of stores
+              Stores
             </Typography>
             <Typography
               variant="body2"
@@ -1169,7 +1181,7 @@ export default function HomePage() {
               }}
               onClick={() => navigate("/stores")}
             >
-              See more stores
+              See all stores
             </Typography>
           </Box>
           {/* List */}
@@ -1315,181 +1327,7 @@ export default function HomePage() {
             </IconButton>
           </Box>
         </Box>
-        {/* <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            borderRadius: "16px",
-            background: "white",
-            padding: "1rem",
-            marginTop: "3rem",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Articles
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#ff469e",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => {
-                navigate("/article");
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                });
-              }}
-            >
-              See more articles
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              position: "relative",
-              borderRadius: "16px",
-              background: "white",
-            }}
-          >
-            <IconButton
-              onClick={scrollLeft6}
-              size="small"
-              sx={{
-                position: "absolute",
-                left: -10,
-                zIndex: 1,
-                backgroundColor: "white",
-                color: "#ff469e",
-                border: "1px solid #ff469e",
-                boxShadow: "1px 1px 2px rgba(0, 0, 0.16)",
-                transition: "0.2s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.15)",
-                  background: "white",
-                  boxShadow: "1px 1px 4px rgba(0, 0, 0.24)",
-                  "& svg": {
-                    transform: "scale(1.1)",
-                  },
-                },
-              }}
-            >
-              <ArrowLeft />
-            </IconButton>
-            <Box
-              ref={listRef6}
-              sx={{
-                display: "flex",
-                overflowX: "hidden",
-                scrollBehavior: "smooth",
-                width: "100%",
-                padding: "0px 8px",
-              }}
-            >
-              {article?.articles?.map((item, index) => (
-                <Box
-                  key={index}
-                  onClick={() => {
-                    navigate("/article");
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    });
-                  }}
-                  sx={{
-                    minWidth: 180,
-                    padding: 2,
-                    textAlign: "center",
-                    border: "1px solid white",
-                    borderRadius: "16px",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    marginRight: 2,
-                    backgroundColor: "white",
-                    transition: "border 0.2s",
-                    "&:hover": {
-                      border: "1px solid #ff496e",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                    },
-                  }}
-                >
-                  <img
-                    src={
-                      item.link_image && item.link_image.includes("Article_")
-                        ? `http://localhost:8080/mamababy/products/images/${item.link_image}`
-                        : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                    }
-                    onError={(e) => {
-                      e.target.src =
-                        "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                    }}
-                    style={{ width: "64px", height: "64px" }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: "bold",
-                      marginTop: "0.75rem",
-                      textAlign: "left",
-                      whiteSpace: "normal",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      maxWidth: "100%",
-                      lineHeight: "1.2rem",
-                      maxHeight: "2.4rem",
-                    }}
-                  >
-                    {item.header.length > 40
-                      ? `${item.header.substring(0, 40)}...`
-                      : item.header}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "gray" }}>
-                    {item.content}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-            <IconButton
-              onClick={scrollRight6}
-              size="small"
-              sx={{
-                position: "absolute",
-                right: -10,
-                zIndex: 1,
-                backgroundColor: "white",
-                color: "#ff469e",
-                border: "1px solid #ff469e",
-                boxShadow: "1px 1px 1px rgba(0, 0, 0.16)",
-                transition: "0.2s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.15)",
-                  background: "white",
-                  boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
-                  "& svg": {
-                    transform: "scale(1.1)",
-                  },
-                },
-              }}
-            >
-              <ArrowRight />
-            </IconButton>
-          </Box>
-        </Box> */}
-
+        
         <Box
           sx={{
             display: "flex",
@@ -1527,7 +1365,7 @@ export default function HomePage() {
                 });
               }}
             >
-              See more articles
+              See all articles
             </Typography>
           </Box>
           <Box

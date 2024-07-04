@@ -6,7 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const Footer = () => {
   const { pathname } = useLocation();
-  if (pathname.includes("staff") || pathname.includes("admin")) {
+  if (pathname.includes("staff") || pathname.includes("admin") || pathname.includes("successPayment") || pathname.includes("failedPayment")) {
     return <></>;
   }
   return (

@@ -410,10 +410,19 @@ export default function ProductDetails() {
     //   toast.warn(`No item's quantity selected`);
     //   return;
     // }
-    toast.info(`${product.name} x ${quantity} was added to cart`, {
-      position: "top-right",
-      autoClose: 1500,
-    });
+    if (product.status === "OUT OF STOCK") {
+      toast.error(`Cannot add this product to cart`, {
+        position: "top-right",
+        autoClose: 1000,
+      });
+      return;
+    }
+    if (product.status === "IN STOCK") {
+      toast.info(`${product.name} x ${quantity} was added to cart`, {
+        position: "top-right",
+        autoClose: 1500,
+      });
+    }
     dispatch(
       addToCart({
         product: {
@@ -547,8 +556,8 @@ export default function ProductDetails() {
                   border: "3px solid #ff469e",
                   color: "black",
                   padding: "20px",
-                  maxWidth: "900px",
-                  width: "60vw",
+                  maxWidth: "1500px",
+                  width: "72vw",
                   margin: "0 auto",
                 }}
               >
@@ -611,6 +620,9 @@ export default function ProductDetails() {
                           }}
                         >
                           {product.name}
+                          {product.status === "OUT OF STOCK" && (
+                          <span style={{marginLeft: "0.5rem",fontSize: "1rem", opacity: 0.5}}>({product.status})</span>
+                        )}
                         </Typography>
                         <Typography variant="h6" style={{ textAlign: "left" }}>
                           {formatCurrency(product.price)}
@@ -647,149 +659,151 @@ export default function ProductDetails() {
                       {/* <div style={{ display: "flex", gap: "0.5rem" }}>
                     <Typography>{product.description}</Typography>
                   </div> */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <ButtonGroup
-                          variant="outlined"
-                          aria-label="outlined button group"
-                          style={{ height: "2.5rem" }}
-                        >
-                          <Button
-                            variant="contained"
-                            disabled={quantity <= 1}
-                            onClick={() =>
-                              setQuantity((prevQuantity) =>
-                                Math.max(1, prevQuantity - 10)
-                              )
-                            }
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "20px",
-                              fontSize: "1.25rem",
-                              fontWeight: "bold",
-                              boxShadow: "none",
-                              transition:
-                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                              },
-                            }}
-                          >
-                            --
-                          </Button>
-                          <Button
-                            variant="contained"
-                            disabled={quantity <= 1}
-                            onClick={() => setQuantity(quantity - 1)}
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              fontSize: "1.25rem",
-                              fontWeight: "bold",
-                              boxShadow: "none",
-                              transition:
-                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                              },
-                            }}
-                          >
-                            -
-                          </Button>
-                          <Button
-                            disableRipple
-                            style={{
-                              backgroundColor: "white",
-                              fontSize: "1.25rem",
-                              width: "4rem",
-                              cursor: "default",
-                              border: "1px solid #ff469e",
-                              color: "black",
-                            }}
-                          >
-                            {quantity}
-                          </Button>
-                          <Button
-                            variant="contained"
-                            disabled={quantity >= 99}
-                            onClick={() => setQuantity(quantity + 1)}
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              fontSize: "1.25rem",
-                              fontWeight: "bold",
-                              boxShadow: "none",
-                              transition:
-                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                              },
-                            }}
-                          >
-                            +
-                          </Button>
-                          <Button
-                            variant="contained"
-                            disabled={quantity >= 99}
-                            onClick={() =>
-                              setQuantity((prevQuantity) =>
-                                Math.min(99, prevQuantity + 10)
-                              )
-                            }
-                            sx={{
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                              borderRadius: "20px",
-                              fontSize: "1.25rem",
-                              fontWeight: "bold",
-                              boxShadow: "none",
-                              transition:
-                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                              border: "1px solid #ff469e",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                              },
-                            }}
-                          >
-                            ++
-                          </Button>
-                        </ButtonGroup>
-                        <Button
-                          variant="contained"
-                          onClick={handleAddToCart}
+                      {product.status !== "OUT OF STOCK" && (
+                        <Box
                           sx={{
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "20px",
-                            fontSize: "0.95rem",
-                            fontWeight: "bold",
-                            boxShadow: "none",
-                            transition:
-                              "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                            },
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
                           }}
                         >
-                          <Cart sx={{ mr: 1 }} />
-                          ADD TO CART
-                        </Button>
-                      </Box>
+                          <ButtonGroup
+                            variant="outlined"
+                            aria-label="outlined button group"
+                            style={{ height: "2.5rem" }}
+                          >
+                            <Button
+                              variant="contained"
+                              disabled={quantity <= 1}
+                              onClick={() =>
+                                setQuantity((prevQuantity) =>
+                                  Math.max(1, prevQuantity - 10)
+                                )
+                              }
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "20px",
+                                fontSize: "1.25rem",
+                                fontWeight: "bold",
+                                boxShadow: "none",
+                                transition:
+                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                },
+                              }}
+                            >
+                              --
+                            </Button>
+                            <Button
+                              variant="contained"
+                              disabled={quantity <= 1}
+                              onClick={() => setQuantity(quantity - 1)}
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                fontSize: "1.25rem",
+                                fontWeight: "bold",
+                                boxShadow: "none",
+                                transition:
+                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                },
+                              }}
+                            >
+                              -
+                            </Button>
+                            <Button
+                              disableRipple
+                              style={{
+                                backgroundColor: "white",
+                                fontSize: "1.25rem",
+                                width: "4rem",
+                                cursor: "default",
+                                border: "1px solid #ff469e",
+                                color: "black",
+                              }}
+                            >
+                              {quantity}
+                            </Button>
+                            <Button
+                              variant="contained"
+                              disabled={quantity >= 99}
+                              onClick={() => setQuantity(quantity + 1)}
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                fontSize: "1.25rem",
+                                fontWeight: "bold",
+                                boxShadow: "none",
+                                transition:
+                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                },
+                              }}
+                            >
+                              +
+                            </Button>
+                            <Button
+                              variant="contained"
+                              disabled={quantity >= 99}
+                              onClick={() =>
+                                setQuantity((prevQuantity) =>
+                                  Math.min(99, prevQuantity + 10)
+                                )
+                              }
+                              sx={{
+                                backgroundColor: "white",
+                                color: "#ff469e",
+                                borderRadius: "20px",
+                                fontSize: "1.25rem",
+                                fontWeight: "bold",
+                                boxShadow: "none",
+                                transition:
+                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                border: "1px solid #ff469e",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                },
+                              }}
+                            >
+                              ++
+                            </Button>
+                          </ButtonGroup>
+                          <Button
+                            variant="contained"
+                            onClick={handleAddToCart}
+                            sx={{
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "20px",
+                              fontSize: "0.95rem",
+                              fontWeight: "bold",
+                              boxShadow: "none",
+                              transition:
+                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            <Cart sx={{ mr: 1 }} />
+                            ADD TO CART
+                          </Button>
+                        </Box>
+                      )}
                     </Grid>
                   </Grid>
                 </CardContent>
