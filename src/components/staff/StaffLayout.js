@@ -27,19 +27,14 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 const drawerWidth = 260;
 const itemList = [
   {
-    label: "Products",
-    Icon: Inventory2Icon,
-    href: "products",
-  },
-  {
     label: "Dashboard",
     Icon: Dashboard,
     href: "dashboard",
   },
   {
-    label: "Exchanges",
-    Icon: DesignServicesIcon,
-    href: "exchanges",
+    label: "Products",
+    Icon: Inventory2Icon,
+    href: "products",
   },
   {
     label: "Orders",
@@ -47,9 +42,14 @@ const itemList = [
     href: "orders",
   },
   {
-    label: "Articles",
-    Icon: ArticleIcon,
-    href: "articles",
+    label: "Exchanges",
+    Icon: DesignServicesIcon,
+    href: "exchanges",
+  },
+  {
+    label: "Refunds",
+    Icon: Refund,
+    href: "refunds",
   },
   {
     label: "Vouchers",
@@ -57,9 +57,9 @@ const itemList = [
     href: "vouchers",
   },
   {
-    label: "Refunds",
-    Icon: Refund,
-    href: "refunds",
+    label: "Articles",
+    Icon: ArticleIcon,
+    href: "articles",
   },
 ];
 

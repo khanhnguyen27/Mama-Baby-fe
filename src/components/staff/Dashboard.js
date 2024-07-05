@@ -1430,7 +1430,7 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={handlePieChartClick}
+                  onClick={() => navigate("/staff/refunds")}
                   sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
                 >
                   <CardContent style={{ height: "129px" }}>
@@ -1461,7 +1461,7 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={handlePieChartClick}
+                  onClick={() => navigate("/staff/exchanges")}
                   sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
                 >
                   <CardContent style={{ height: "129px" }}>

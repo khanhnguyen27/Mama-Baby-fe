@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { profileUserApi } from "../../api/UserAPI";
-import { Card, CardContent, Typography, Grid, Paper } from "@mui/material";
+import { Card, CardContent, Typography, Grid, Paper, Box, Container } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -14,6 +15,25 @@ export default function Profile() {
       .catch((err) => console.log(err));
   }, []);
   window.document.title = `${user?.username}`;
+
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOnIcon
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 24,
+            }}
+          />
+        </Box>
+      </>
+    );
+  };
+
   const { pathname } = useLocation();
   if (pathname.includes("staff") || pathname.includes("admin")) {
     return (
@@ -170,6 +190,7 @@ export default function Profile() {
         padding: "20px",
       }}
     >
+      <Container>
       <Card
         sx={{
           backgroundColor: "#fff4fc",
@@ -178,7 +199,6 @@ export default function Profile() {
           borderRadius: "20px",
           color: "black",
           padding: "20px",
-          maxWidth: "900px",
           width: "100%",
         }}
       >
@@ -196,7 +216,7 @@ export default function Profile() {
           </Typography>
           {user && (
             <Grid container spacing={6}>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={5}>
                 <Paper
                   sx={{
                     padding: "10px",
@@ -228,7 +248,7 @@ export default function Profile() {
                   </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12} md={7}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <div>
@@ -298,7 +318,7 @@ export default function Profile() {
                       <Typography
                         style={{ color: "black", fontSize: "1.3rem" }}
                       >
-                        {user.accumulated_points}
+                        {formatCurrencyPoint(user.accumulated_points)}
                       </Typography>
                     </div>
                   </Grid>
@@ -351,6 +371,7 @@ export default function Profile() {
           )}
         </CardContent>
       </Card>
+      </Container>
     </div>
   );
 }

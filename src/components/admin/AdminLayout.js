@@ -31,41 +31,35 @@ const itemList = [
     Icon: Dashboard,
     href: "dashboard",
   },
-
-  {
-    label: "Request Stores",
-    Icon: ShoppingBagIcon,
-    href: "requeststore",
-  },
-
   {
     label: "Accounts",
     Icon: AccountCircleIcon,
     href: "accounts",
   },
-
   {
     label: "Stores",
     Icon: Shop,
     href: "stores",
   },
-
   {
-    label: "Categories",
-    Icon: CategoryIcon,
-    href: "categories",
+    label: "Request Stores",
+    Icon: ShoppingBagIcon,
+    href: "requeststore",
   },
-
+  {
+    label: "Age",
+    Icon: PersonIcon,
+    href: "age",
+  },
   {
     label: "Brands",
     Icon: BrandingWatermarkIcon,
     href: "brands",
   },
-
   {
-    label: "Age",
-    Icon: PersonIcon,
-    href: "age",
+    label: "Categories",
+    Icon: CategoryIcon,
+    href: "categories",
   },
 ];
 

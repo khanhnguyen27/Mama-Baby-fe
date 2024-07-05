@@ -1166,7 +1166,7 @@ export default function StaffHome() {
             </Grid>
 
             <Grid item sm={12} md={9}>
-              <Container sx={{ my: 4 }}>
+              <Container>
                 <Box
                   sx={{
                     display: "flex",
@@ -1181,7 +1181,6 @@ export default function StaffHome() {
                     onChange={handleSortChange}
                     variant="outlined"
                     sx={{
-                      mt: 0.5,
                       height: "40px",
                       "& .MuiToggleButton-root": {
                         color: "black",
@@ -1627,7 +1626,7 @@ export default function StaffHome() {
 
           {/* List Products */}
           <Grid item sm={12} md={9}>
-            <Container sx={{ my: 4 }}>
+            <Container>
               <Box
                 sx={{
                   display: "flex",
@@ -1642,7 +1641,7 @@ export default function StaffHome() {
                   onChange={handleSortChange}
                   variant="outlined"
                   sx={{
-                    mt: 0.5,
+                    mb: 4,
                     height: "40px",
                     "& .MuiToggleButton-root": {
                       color: "black",
