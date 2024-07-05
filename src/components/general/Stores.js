@@ -330,9 +330,9 @@ export default function HomePage() {
                   >
                     <Card
                       onClick={() =>
-                        navigate(`/stores/${item.id}`, {
+                        (navigate(`/stores/${item.id}`, {
                           state: { storeId: item.id },
-                        })
+                        }), window.scrollTo({ top:0, behavior: "smooth" }))
                       }
                       sx={{
                         padding: 2,

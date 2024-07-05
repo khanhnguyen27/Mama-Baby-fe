@@ -113,7 +113,7 @@ export default function CommentHistory() {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              height: "100vh",
+              height: "55vh",
             }}
           >
             <CircularProgress sx={{ color: "#ff469e" }} size={90} />
@@ -276,13 +276,15 @@ export default function CommentHistory() {
             ))
           ) : (
             <Grid item xs={12}>
+              <Box sx={{ height: "11.5vh", justifyContent: "center", alignItems: "center"}}>
               <Typography
-                variant="body1"
+                variant="h6"
                 color="textSecondary"
                 sx={{ textAlign: "center" }}
               >
                 No comments available.
               </Typography>
+              </Box>
             </Grid>
           )}
 

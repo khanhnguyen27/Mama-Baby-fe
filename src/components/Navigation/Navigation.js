@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Edit from "@mui/icons-material/Edit";
-import MailIcon from "@mui/icons-material/MailOutline";
 import ChatIcon from "@mui/icons-material/Chat";
 import PhoneInTalk from "@mui/icons-material/PhoneInTalk";
 import Cart from "@mui/icons-material/ShoppingCart";
@@ -23,16 +21,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart, selectCartAmount } from "../../redux/CartSlice";
 import { ListAlt, RequestPage } from "@mui/icons-material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import { profileUserApi } from "../../api/UserAPI";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import { UserContext } from "./UserContext";
 
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("accessToken") !== null
   );
-
-  const { user } = useContext(UserContext);
 
   const username = localStorage.getItem("username");
   const [anchorElLogout, setAnchorElLogout] = useState(null);
@@ -62,24 +55,6 @@ const Navigation = () => {
   const handleLogoutMenuClose = () => {
     setAnchorElLogout(null);
     setOpenLogoutMenu(false);
-  };
-
-  const formatCurrencyPoint = (amount) => {
-    return (
-      <>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {new Intl.NumberFormat("vi-VN").format(amount)}
-          <MonetizationOnIcon
-            variant="h6"
-            sx={{
-              marginLeft: "4px",
-              color: "gray",
-              fontSize: 24,
-            }}
-          />
-        </Box>
-      </>
-    );
   };
 
   const renderLogoutMenu = (
@@ -252,10 +227,6 @@ const Navigation = () => {
       </MenuItem>
     </Menu>
   );
-  // const toggleCart = (anchor, open) => (event) => {
-  //   navigate("/cart");
-  //   return;
-  // };
 
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("accessToken") !== null);
@@ -270,89 +241,12 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  //   const handleProductOpen = (e) => {
-  //     setAnchorEl(e.currentTarget);
-  //     setOpenProductMenu(true);
-  //   };
-
-  //   const handleProductClose = () => {
-  //     setAnchorEl(null);
-  //     setOpenProductMenu(false);
-  //   };
-
-  //   useEffect(() => {
-  //     const fetchProductData = async () => {
-  //       try {
-  //         const response = await axios.get(
-  //           "https://kietpt.vn/api/classification?type=product"
-  //         );
-  //         const data = response.data;
-  //         // const productObj = {}
-  //         // data?.data.map(item => {
-  //         //   productObj[item.classificationName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]+/g, "")] = item._id
-  //         // })
-  //         // console.log(JSON.stringify(productObj))
-  //         setProductData(
-  //           data.data.map((product) => {
-  //             return {
-  //               ...product,
-  //               slugProductUrl: product.classificationName
-  //                 .toLowerCase()
-  //                 .replace(/\s+/g, "-")
-  //                 .replace(/[^a-z0-9-]+/g, ""),
-  //             };
-  //           })
-  //         );
-  //       } catch (error) {
-  //         console.error("Error fetching data:", error);
-  //       }
-  //     };
-  //     fetchProductData();
-  //   }, []);
-
-  //   const handleRoomOpen = (e) => {
-  //     setAnchorEl(e.currentTarget);
-  //     setOpenRoomMenu(true);
-  //   };
-
-  //   const handleRoomClose = () => {
-  //     setAnchorEl(null);
-  //     setOpenRoomMenu(false);
-  //   };
-
-  //   useEffect(() => {
-  //     const fetchRoomData = async () => {
-  //       try {
-  //         const response = await axios.get(
-  //           "https://kietpt.vn/api/classification?type=room"
-  //         );
-  //         const data = response.data;
-  //         setRoomData(
-  //           data.data.map((room) => {
-  //             // Create slug URL inline for clarity:
-  //             return {
-  //               ...room,
-  //               slugRoomUrl: room.classificationName
-  //                 .toLowerCase()
-  //                 .replace(/\s+/g, "-")
-  //                 .replace(/[^a-z0-9-]+/g, ""),
-  //             };
-  //           })
-  //         );
-  //       } catch (error) {
-  //         console.error("Error fetching data:", error);
-  //       }
-  //     };
-  //     fetchRoomData();
-  //   }, []);
-
   const { pathname } = useLocation();
   if (pathname.includes("signin")) {
     return (
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar
           sx={{
-            // backgroundColor: "#fffbfd",
             boxShadow: "none",
             position: "fixed",
             borderBottom: "1px solid #fffbfd",
@@ -391,7 +285,6 @@ const Navigation = () => {
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar
           sx={{
-            // backgroundColor: "#fffbfd",
             boxShadow: "none",
             position: "fixed",
             borderBottom: "1px solid #fffbfd",
@@ -873,15 +766,6 @@ const Navigation = () => {
               }}
             >
               <ProductSearch />
-            </Box>
-            <Box
-              sx={{
-                flexBasis: "10%",
-                display: "flex",
-                justifyContent: "flex-start",
-              }}
-            >
-              {formatCurrencyPoint(user?.accumulated_points)}
             </Box>
             <Box
               sx={{

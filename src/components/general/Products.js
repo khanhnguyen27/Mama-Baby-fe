@@ -187,6 +187,7 @@ export default function Products() {
           name: product.products[index].name,
           price: product.products[index].price,
           point: product.products[index].point,
+          remain: product.products[index].remain,
           type: product.products[index].type,
           store_id: product.products[index].store_id,
           image_url: product.products[index].image_url,
@@ -1055,7 +1056,6 @@ export default function Products() {
                           </CardContent>
                           <Divider />
                           <CardActions sx={{ justifyContent: "space-between" }}>
-                            <CardContent sx={{ padding: "10px 0 0 0" }}>
                               <Typography
                                 variant="h6"
                                 style={{
@@ -1083,6 +1083,7 @@ export default function Products() {
                                     style={{
                                       color: "gray",
                                       fontSize: "0.8em",
+                                      marginLeft: "4px"
                                     }}
                                   >
                                     (
@@ -1095,8 +1096,7 @@ export default function Products() {
                                   </span>
                                 </div>
                               </Typography>
-                            </CardContent>
-                            {item.status !== "OUT OF STOCK" && (
+                            {/* {item.status !== "OUT OF STOCK" && (
                             <IconButton
                               size="large"
                               sx={{
@@ -1130,7 +1130,7 @@ export default function Products() {
                               </span>
                               <Cart />
                             </IconButton>
-                            )}
+                            )} */}
                           </CardActions>
                         </Card>
                       </Tooltip>

@@ -1179,13 +1179,13 @@ export default function Products() {
           }}
         >
           <Pagination
-            count={store.totalPages}
+            count={product.totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            showFirstButton={store.totalPages !== 1}
-            showLastButton={store.totalPages !== 1}
+            showFirstButton={product.totalPages !== 1}
+            showLastButton={product.totalPages !== 1}
             hidePrevButton={currentPage === 1}
-            hideNextButton={currentPage === store.totalPages}
+            hideNextButton={currentPage === product.totalPages}
             size="large"
             sx={{
               display: "flex",

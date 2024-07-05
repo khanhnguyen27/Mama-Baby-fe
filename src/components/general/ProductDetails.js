@@ -15,6 +15,7 @@ import StarIcon from "@mui/icons-material/Star";
 import PersonIcon from "@mui/icons-material/Person";
 import CheckIcon from "@mui/icons-material/Check";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Refund from "@mui/icons-material/CurrencyExchange";
 import ShopIcon from "@mui/icons-material/Shop";
 import { allStoreApi } from "../../api/StoreAPI";
 import {
@@ -23,6 +24,7 @@ import {
   StarOutline,
   StarQuarter,
   StarThreeQuarter,
+  VerifiedUser,
 } from "@mui/icons-material";
 import {
   Box,
@@ -428,6 +430,7 @@ export default function ProductDetails() {
           name: product.name,
           price: product.price,
           point: product.point,
+          remain: product.remain,
           type: product.type,
           store_id: product.store_id,
           image_url: product.image_url,
@@ -602,6 +605,36 @@ export default function ProductDetails() {
                           alt={product.name}
                         />
                       </Paper>
+                      <Box sx={{ display: "flex", mt: 1.5 }}>
+                        <Refund
+                          sx={{
+                            color: "#ff469e",
+                            fontSize: "1.5rem",
+                            mr: 1,
+                            pt: 1,
+                          }}
+                        />
+                        <Typography
+                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
+                        >
+                          15 days for exchange/refund
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", mt: 1.5 }}>
+                        <VerifiedUser
+                          sx={{
+                            color: "#ff469e",
+                            fontSize: "1.5rem",
+                            mr: 1,
+                            pt: 1,
+                          }}
+                        />
+                        <Typography
+                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
+                        >
+                          100% genuine product
+                        </Typography>
+                      </Box>
                     </Grid>
                     <Grid
                       item
@@ -644,9 +677,32 @@ export default function ProductDetails() {
                             </span>
                           )}
                         </Typography>
-                        <Typography variant="h6" style={{ textAlign: "left" }}>
-                          {formatCurrency(product.price)}
-                        </Typography>
+                        <Box
+                          sx={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mt: 1,
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            style={{ textAlign: "left" }}
+                          >
+                            {formatCurrency(product.price)}
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            style={{ textAlign: "right" }}
+                          >
+                            Remain qty:{" "}
+                            <span
+                              style={{ color: "#ff469e", fontWeight: "600" }}
+                            >
+                              {product.remain}
+                            </span>
+                          </Typography>
+                        </Box>
                       </div>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
                         <Typography variant="h6">Age Range:</Typography>
@@ -685,6 +741,7 @@ export default function ProductDetails() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            mt: 6,
                           }}
                         >
                           <ButtonGroup
@@ -754,7 +811,9 @@ export default function ProductDetails() {
                             </Button>
                             <Button
                               variant="contained"
-                              disabled={quantity >= 99}
+                              disabled={
+                                quantity >= 99 || quantity >= product.remain
+                              }
                               onClick={() => setQuantity(quantity + 1)}
                               sx={{
                                 backgroundColor: "white",
@@ -775,10 +834,16 @@ export default function ProductDetails() {
                             </Button>
                             <Button
                               variant="contained"
-                              disabled={quantity >= 99}
+                              disabled={
+                                quantity >= 99 || quantity >= product.remain
+                              }
                               onClick={() =>
                                 setQuantity((prevQuantity) =>
-                                  Math.min(99, prevQuantity + 10)
+                                  Math.min(
+                                    99,
+                                    product.remain,
+                                    prevQuantity + 10
+                                  )
                                 )
                               }
                               sx={{
@@ -930,79 +995,8 @@ export default function ProductDetails() {
                     </Box>
                   </Box>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Button
-                    variant="outlined"
-                    sx={{
-                      marginRight: "8px",
-                      borderColor: "#ff469e",
-                      color: "#ff469e",
-                      padding: "8px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "20px",
-                      transition:
-                        "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
-                      "&:hover": {
-                        transform: "scale(1.1)",
-                        borderColor: "#ff469e",
-                        color: "#ff469e",
-                      },
-                    }}
-                    onClick={() => (
-                      navigate(
-                        `/stores/${product.store_id}`,
-
-                        { state: { storeId: product.store_id } }
-                      ),
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      })
-                    )}
-                  >
-                    <ShopIcon
-                      sx={{
-                        marginRight: "4px",
-                        color: "#ff469e",
-                        verticalAlign: "middle",
-                      }}
-                    />
-                    <Typography
-                      sx={{
-                        verticalAlign: "middle",
-                        lineHeight: 1,
-                      }}
-                    >
-                      Visit Shop
-                    </Typography>
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    sx={{
-                      marginRight: "8px",
-                      borderColor: "#ff469e",
-                      color: "#ff469e",
-                      padding: "8px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "20px",
-                      transition:
-                        "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
-                      "&:hover": {
-                        transform: "scale(1.1)",
-                        borderColor: "#ff469e",
-                        color: "#ff469e",
-                      },
-                    }}
-                  >
-                    + Follow
-                  </Button>
-                </Box>
-                <Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}></Box>
+                {/* <Box>
                   <Typography variant="body2">
                     Followers:{" "}
                     <span style={{ color: "#ff469e", fontWeight: "bold" }}>
@@ -1021,8 +1015,54 @@ export default function ProductDetails() {
                       5.0 / 5.0
                     </span>
                   </Typography>
-                </Box>
+                </Box> */}
                 <Box>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      mr: 0.5,
+                      mb: 2,
+                      borderColor: "#ff469e",
+                      color: "#ff469e",
+                      padding: "8px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "20px",
+                      transition:
+                        "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        borderColor: "#ff469e",
+                        color: "#ff469e",
+                      },
+                    }}
+                    onClick={() => (
+                      navigate(`/stores/${product.store_id}`, {
+                        state: { storeId: product.store_id },
+                      }),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                  >
+                    <ShopIcon
+                      sx={{
+                        mr: 1,
+                        color: "#ff469e",
+                        verticalAlign: "middle",
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        verticalAlign: "middle",
+                        lineHeight: 1,
+                      }}
+                    >
+                      Visit Shop
+                    </Typography>
+                  </Button>
                   <Typography
                     variant="body2"
                     sx={{ display: "flex", alignItems: "center" }}
@@ -1243,6 +1283,7 @@ export default function ProductDetails() {
                   mr: 2,
                   padding: "0.25rem 0.5rem",
                   boxShadow: "none",
+                  border: "1px solid #f5f7fd",
                   transition:
                     "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                   "&:hover": {
@@ -1427,7 +1468,7 @@ export default function ProductDetails() {
                   sx={{
                     borderRadius: 2,
                     boxShadow: 3,
-                    backgroundColor: "#f9f9f9",
+                    backgroundColor: "#fff4fc",
                     padding: 2,
                     mb: 4,
                     position: "relative",
@@ -1528,7 +1569,7 @@ export default function ProductDetails() {
                   <Card
                     key={item.id}
                     sx={{
-                      backgroundColor: "#f9f9f9",
+                      backgroundColor: "#fff4fc",
                       boxShadow:
                         "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
                       border: "1px solid #e0e0e0",
@@ -1543,7 +1584,7 @@ export default function ProductDetails() {
                           <Paper
                             sx={{
                               padding: "10px",
-                              backgroundColor: "#fafafa",
+                              backgroundColor: "#ffe6f0",
                               textAlign: "center",
                             }}
                           >

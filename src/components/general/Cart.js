@@ -16,8 +16,6 @@ import {
   Modal,
   TextField,
   FormControl,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 import { Close, KeyboardCapslock } from "@mui/icons-material";
 import {
@@ -29,7 +27,7 @@ import {
   selectTotalCost,
   updateQuantityCart,
 } from "../../redux/CartSlice";
-import { redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { allStoreApi } from "../../api/StoreAPI";
@@ -40,7 +38,6 @@ import { jwtDecode } from "jwt-decode";
 import { profileUserApi } from "../../api/UserAPI";
 import { allActiveByUserApi } from "../../api/ActiveAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import { UserContext } from "../Navigation/UserContext";
 
 export default function Cart() {
   window.document.title = "Cart";
@@ -68,7 +65,6 @@ export default function Cart() {
   const [typeGift, setTypeGift] = useState(false);
   const [typeWholeSale, setTypeWholeSale] = useState(false);
   const typeWHOLESALE = "WHOLESALE";
-  const { fetchUserProfile } = useContext(UserContext);
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -339,7 +335,6 @@ export default function Cart() {
             autoClose: 1000,
           });
           setTimeout(() => {
-            fetchUserProfile();
             navigate("/orders");
           }, 500);
           const productIdsToRemove = cartItems2.map((item) => item.product_id);
@@ -386,7 +381,6 @@ export default function Cart() {
                   dispatch(removeFromCart(productIdsToRemove));
                   window.location.replace(res.data?.data?.payment_url);
                   handleClose();
-                  // window.open(res.data?.data?.payment_url);
                   setSelectedStore("");
                   setSelectedStoreId("");
                 }, 500);
@@ -1793,7 +1787,7 @@ export default function Cart() {
                                 </Button>
                                 <Button
                                   variant="contained"
-                                  disabled={item.quantity >= 99}
+                                  disabled={item.quantity >= 99 || item.quantity >= item.product.remain}
                                   // onClick={() => {
                                   //   dispatch(
                                   //     addToCart({
@@ -1835,7 +1829,7 @@ export default function Cart() {
                                 </Button>
                                 <Button
                                   variant="contained"
-                                  disabled={item.quantity >= 99}
+                                  disabled={item.quantity >= 99 || item.quantity >= item.product.remain}
                                   // onClick={() => {
                                   //   const newQuantity =
                                   //     item.quantity <= 89
@@ -1851,7 +1845,7 @@ export default function Cart() {
                                   onClick={() => {
                                     const newQuantity =
                                       item.quantity <= 89
-                                        ? 10
+                                        ? Math.min(10, item.product.remain - item.quantity)
                                         : 99 - item.quantity;
                                     dispatch(
                                       updateQuantityCart({

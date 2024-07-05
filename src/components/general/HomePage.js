@@ -32,6 +32,7 @@ import { allStoreApi } from "../../api/StoreAPI";
 import { allArticleApi } from "../../api/ArticleAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { jwtDecode } from "jwt-decode";
+import { KeyboardArrowRight } from "@mui/icons-material";
 export default function HomePage() {
   const navigate = useNavigate();
   window.document.title = "Mama-Baby";
@@ -78,19 +79,19 @@ export default function HomePage() {
 
   var items = [
     {
-      name: "Random Name #1",
-      description: "Learn Carousel!",
+      // name: "Random Name #1",
+      // description: "Learn Carousel!",
       image: "https://cdn1.concung.com/img/adds/2024/04/1714120748-HOME.png",
     },
     {
-      name: "Random Name #2",
-      description: "Hello World!",
+      // name: "Random Name #2",
+      // description: "Hello World!",
       image:
         "https://cdn1.concung.com/img/adds/2024/04/1713941097-HOME-KIDESSENTIALS.png",
     },
     {
-      name: "Random Name #3",
-      description: "Bye World!",
+      // name: "Random Name #3",
+      // description: "Bye World!",
       image: "https://cdn1.concung.com/img/adds/2024/05/1715592332-HOME.png",
     },
   ];
@@ -520,10 +521,10 @@ export default function HomePage() {
                 borderRadius: "16px",
               }}
             >
-              <Typography variant="h5" gutterBottom>
+              {/* <Typography variant="h5" gutterBottom>
                 {item.name}
               </Typography>
-              <Typography variant="body1">{item.description}</Typography>
+              <Typography variant="body1">{item.description}</Typography> */}
             </div>
           ))}
         </Carousel>
@@ -703,23 +704,29 @@ export default function HomePage() {
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Best Rating
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#ff469e",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => {
-                navigate("/products");
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                });
-              }}
-            >
-              See all products
-            </Typography>
+            <Box sx={{ display: "flex" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#ff469e",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  mt: 0.25,
+                }}
+                onClick={() => {
+                  navigate("/products");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                See all products
+              </Typography>
+              <KeyboardArrowRight
+                sx={{ color: "#ff469e"}}
+              />
+            </Box>
           </Box>
           {/* List */}
           <Box
@@ -928,23 +935,29 @@ export default function HomePage() {
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Gift products
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#ff469e",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => {
-                navigate("/productgift");
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                });
-              }}
-            >
-              See all gifts
-            </Typography>
+            <Box sx={{ display: "flex" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#ff469e",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  mt: 0.25,
+                }}
+                onClick={() => {
+                  navigate("/productgift");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                See all gifts
+              </Typography>
+              <KeyboardArrowRight
+                sx={{ color: "#ff469e"}}
+              />
+            </Box>
           </Box>
           {/* List */}
 
@@ -1172,17 +1185,23 @@ export default function HomePage() {
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Stores
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#ff469e",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => navigate("/stores")}
-            >
-              See all stores
-            </Typography>
+            <Box sx={{ display: "flex" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#ff469e",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  mt: 0.25,
+                }}
+                onClick={() => navigate("/stores")}
+              >
+                See all stores
+              </Typography>
+              <KeyboardArrowRight
+                sx={{ color: "#ff469e"}}
+              />
+            </Box>
           </Box>
           {/* List */}
           <Box
@@ -1327,7 +1346,7 @@ export default function HomePage() {
             </IconButton>
           </Box>
         </Box>
-        
+
         <Box
           sx={{
             display: "flex",
@@ -1350,23 +1369,29 @@ export default function HomePage() {
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Articles
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#ff469e",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => {
-                navigate("/articles");
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                });
-              }}
-            >
-              See all articles
-            </Typography>
+            <Box sx={{ display: "flex" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#ff469e",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  mt: 0.25,
+                }}
+                onClick={() => {
+                  navigate("/articles");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                See all articles
+              </Typography>
+              <KeyboardArrowRight
+                sx={{ color: "#ff469e"}}
+              />
+            </Box>
           </Box>
           <Box
             sx={{
@@ -1512,12 +1537,12 @@ export default function HomePage() {
                 backgroundColor: "white",
                 color: "#ff469e",
                 border: "1px solid #ff469e",
-                boxShadow: "1px 1px 1px rgba(0, 0, 0, 0.16)",
+                boxShadow: "1px 1px 1px rgba(0, 0, 0.16)",
                 transition: "0.2s ease-in-out",
                 "&:hover": {
                   transform: "scale(1.15)",
                   background: "white",
-                  boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.24)",
+                  boxShadow: "1px 1px 3px rgba(0, 0, 0.24)",
                   "& svg": {
                     transform: "scale(1.1)",
                   },

@@ -827,7 +827,7 @@ export default function Orders() {
                               <span style={{ fontWeight: "600" }}>
                                 {
                                   item.status_order_list[
-                                    item.status_order_list.length - 1
+                                    item.status_order_list.length - 2
                                   ].date
                                 }
                               </span>
