@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Typography,
@@ -40,6 +40,8 @@ import { jwtDecode } from "jwt-decode";
 import { profileUserApi } from "../../api/UserAPI";
 import { allActiveByUserApi } from "../../api/ActiveAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import { UserContext } from "../Navigation/UserContext";
+
 export default function Cart() {
   window.document.title = "Cart";
   const [visible, setVisible] = useState(false);
@@ -66,6 +68,7 @@ export default function Cart() {
   const [typeGift, setTypeGift] = useState(false);
   const [typeWholeSale, setTypeWholeSale] = useState(false);
   const typeWHOLESALE = "WHOLESALE";
+  const { fetchUserProfile } = useContext(UserContext);
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -336,6 +339,7 @@ export default function Cart() {
             autoClose: 1000,
           });
           setTimeout(() => {
+            fetchUserProfile();
             navigate("/orders");
           }, 500);
           const productIdsToRemove = cartItems2.map((item) => item.product_id);

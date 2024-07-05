@@ -35,7 +35,7 @@ import { orderByStoreIdApi } from "../../api/OrderAPI";
 import { refundByStoreIdApi } from "../../api/RefundAPI";
 import { exchangeByStoreIdApi } from "../../api/ExchangeAPI";
 import { storeByUserIdApi } from "../../api/StoreAPI";
-import { allProductApi } from "../../api/ProductAPI";
+import { allProductByStoreApi } from "../../api/ProductAPI";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -100,7 +100,7 @@ export default function Dashboard() {
       const orderRes = await orderByStoreIdApi(storeId);
       const exchangeRes = await exchangeByStoreIdApi(storeId);
       const refundRes = await refundByStoreIdApi(storeId);
-      const productRes = await allProductApi({ limit: 1000 });
+      const productRes = await allProductByStoreApi({ limit: 1000 });
 
       const ordersData = orderRes.data.data || [];
       const refundsData = refundRes.data.data || [];
@@ -456,80 +456,126 @@ export default function Dashboard() {
   const months = groupMonths(orders, refunds, exchanges);
 
   const borderStyle = {
-    top: { style: 'thin' },
-    left: { style: 'thin' },
-    bottom: { style: 'thin' },
-    right: { style: 'thin' }
+    top: { style: "thin" },
+    left: { style: "thin" },
+    bottom: { style: "thin" },
+    right: { style: "thin" },
   };
 
   const header1Style = {
     font: { bold: true },
-    alignment: { horizontal: 'center', vertical: 'middle' },
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF9BC2E6' } },
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FF9BC2E6" } },
     height: 40,
-    border: borderStyle
+    border: borderStyle,
   };
 
   const header2Style = {
     font: { bold: true },
-    alignment: { horizontal: 'center', vertical: 'middle' },
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF2CC' } },
+    alignment: { horizontal: "center", vertical: "middle" },
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFF2CC" } },
     height: 40,
-    border: borderStyle
+    border: borderStyle,
   };
   const brattle = {
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7E6E6' } },
-    border: borderStyle
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFE7E6E6" } },
+    border: borderStyle,
   };
 
-  const addDataToWorksheet1 = (worksheet, orders, refunds, exchanges, months) => {
+  const addDataToWorksheet1 = (
+    worksheet,
+    orders,
+    refunds,
+    exchanges,
+    months
+  ) => {
     const headerRow1 = [
-      "Order", "", "", "", "", "", "", "", "", "",
-      "", "Exchange", "", "", "",
-      "", "Refund", "", "", "", "",
+      "Order",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Exchange",
+      "",
+      "",
+      "",
+      "",
+      "Refund",
+      "",
+      "",
+      "",
+      "",
     ];
 
     const headerRow2 = [
-      "Month", "Order Id", "Customer Name", "Phone", "Shipping Address", "Order Date", "Total Amount (VND)", "Discount (VND)", "Final Amount (VND)", "Payment Method",
-      "", "Exchange Id", "Description", "Create Date", "Exchange of Order Id",
-      "", "Refund Id", "Description", "Create Date", "Amount", "Refund of Order Id",
+      "Month",
+      "Order Id",
+      "Customer Name",
+      "Phone",
+      "Shipping Address",
+      "Order Date",
+      "Total Amount (VND)",
+      "Discount (VND)",
+      "Final Amount (VND)",
+      "Payment Method",
+      "",
+      "Exchange Id",
+      "Description",
+      "Create Date",
+      "Exchange of Order Id",
+      "",
+      "Refund Id",
+      "Description",
+      "Create Date",
+      "Amount",
+      "Refund of Order Id",
     ];
 
     worksheet.addRow(headerRow1);
     worksheet.addRow(headerRow2);
 
     // Merge header row 1 cells
-    worksheet.mergeCells('A1:J1');
-    worksheet.mergeCells('L1:O1');
-    worksheet.mergeCells('Q1:U1');
+    worksheet.mergeCells("A1:J1");
+    worksheet.mergeCells("L1:O1");
+    worksheet.mergeCells("Q1:U1");
 
-    worksheet.getRow(1).eachCell((cell) => { cell.style = header1Style; });
-    worksheet.getRow(2).eachCell((cell) => { cell.style = header2Style; });
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.style = header1Style;
+    });
+    worksheet.getRow(2).eachCell((cell) => {
+      cell.style = header2Style;
+    });
 
     worksheet.getRow(1).height = 30; // Height for header row 1
     worksheet.getRow(2).height = 30; // Height for header row 2
     // Set column widths
-    worksheet.getColumn('A').width = 15; // Month
-    worksheet.getColumn('B').width = 15; // Order Id
-    worksheet.getColumn('C').width = 30; // Customer Name
-    worksheet.getColumn('D').width = 15; // Phone
-    worksheet.getColumn('E').width = 40; // Shipping Address
-    worksheet.getColumn('F').width = 20; // Order Date
-    worksheet.getColumn('G').width = 20; // Total Amount
-    worksheet.getColumn('H').width = 20; // Discount
-    worksheet.getColumn('I').width = 20; // Final Amount
-    worksheet.getColumn('J').width = 20; // Payment Method
-    worksheet.getColumn('K').width = 4;  // Empty column
-    worksheet.getColumn('L').width = 15; // Exchange Id
-    worksheet.getColumn('M').width = 30; // Exchange Description
-    worksheet.getColumn('N').width = 20; // Exchange Create Date
-    worksheet.getColumn('O').width = 20; // Exchange of Order Id
-    worksheet.getColumn('P').width = 4;  // Empty column
-    worksheet.getColumn('Q').width = 15; // Refund Id
-    worksheet.getColumn('R').width = 30; // Refund Description
-    worksheet.getColumn('S').width = 20; // Refund Create Date
-    worksheet.getColumn('T').width = 20; // Refund Amount
-    worksheet.getColumn('U').width = 20; // Refund of Order Id
+    worksheet.getColumn("A").width = 15; // Month
+    worksheet.getColumn("B").width = 15; // Order Id
+    worksheet.getColumn("C").width = 30; // Customer Name
+    worksheet.getColumn("D").width = 15; // Phone
+    worksheet.getColumn("E").width = 40; // Shipping Address
+    worksheet.getColumn("F").width = 20; // Order Date
+    worksheet.getColumn("G").width = 20; // Total Amount
+    worksheet.getColumn("H").width = 20; // Discount
+    worksheet.getColumn("I").width = 20; // Final Amount
+    worksheet.getColumn("J").width = 20; // Payment Method
+    worksheet.getColumn("K").width = 4; // Empty column
+    worksheet.getColumn("L").width = 15; // Exchange Id
+    worksheet.getColumn("M").width = 30; // Exchange Description
+    worksheet.getColumn("N").width = 20; // Exchange Create Date
+    worksheet.getColumn("O").width = 20; // Exchange of Order Id
+    worksheet.getColumn("P").width = 4; // Empty column
+    worksheet.getColumn("Q").width = 15; // Refund Id
+    worksheet.getColumn("R").width = 30; // Refund Description
+    worksheet.getColumn("S").width = 20; // Refund Create Date
+    worksheet.getColumn("T").width = 20; // Refund Amount
+    worksheet.getColumn("U").width = 20; // Refund of Order Id
 
     // Create a map to keep track of order row indices
     const orderRowMap = new Map();
@@ -541,7 +587,9 @@ export default function Dashboard() {
       const monthOrders = orders
         .filter((order) => {
           const orderDate = new Date(order.order_date);
-          const monthYear = `${orderDate.getMonth() + 1}-${orderDate.getFullYear()}`;
+          const monthYear = `${
+            orderDate.getMonth() + 1
+          }-${orderDate.getFullYear()}`;
           return monthYear === month;
         })
         .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
@@ -549,7 +597,9 @@ export default function Dashboard() {
       const monthRefunds = refunds
         .filter((refund) => {
           const refundDate = new Date(refund.create_date);
-          const monthYear = `${refundDate.getMonth() + 1}-${refundDate.getFullYear()}`;
+          const monthYear = `${
+            refundDate.getMonth() + 1
+          }-${refundDate.getFullYear()}`;
           return monthYear === month;
         })
         .sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
@@ -557,12 +607,18 @@ export default function Dashboard() {
       const monthExchanges = exchanges
         .filter((exchange) => {
           const exchangeDate = new Date(exchange.create_date);
-          const monthYear = `${exchangeDate.getMonth() + 1}-${exchangeDate.getFullYear()}`;
+          const monthYear = `${
+            exchangeDate.getMonth() + 1
+          }-${exchangeDate.getFullYear()}`;
           return monthYear === month;
         })
         .sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
 
-      const maxRows = Math.max(monthOrders.length, monthRefunds.length, monthExchanges.length);
+      const maxRows = Math.max(
+        monthOrders.length,
+        monthRefunds.length,
+        monthExchanges.length
+      );
 
       for (let i = 0; i < maxRows; i++) {
         const order = monthOrders[i] || {};
@@ -601,21 +657,21 @@ export default function Dashboard() {
         row.height = 20; // Set row height
         row.eachCell((cell, colNumber) => {
           // Add borders to all cells
-          cell.border = borderStyle
+          cell.border = borderStyle;
 
           // Apply number formats
           if ([7, 8, 9, 20].includes(colNumber)) {
-            cell.numFmt = '#,##0'; // Use thousands separator
+            cell.numFmt = "#,##0"; // Use thousands separator
           }
 
           // Apply currency format to amount columns
           if ([7, 8, 9, 20].includes(colNumber)) {
-            cell.numFmt = '#,##0 [$VND]'; // Add VND currency symbol
+            cell.numFmt = "#,##0 [$VND]"; // Add VND currency symbol
           }
 
           // Apply date format
           if ([6, 14, 19].includes(colNumber)) {
-            cell.numFmt = 'yyyy-mm-dd hh:mm:ss';
+            cell.numFmt = "yyyy-mm-dd hh:mm:ss";
           }
         });
 
@@ -623,9 +679,9 @@ export default function Dashboard() {
         const isEvenRow = currentRow % 2 === 0;
         row.eachCell((cell) => {
           cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: isEvenRow ? 'FFFCE4D6' : 'FFFFFFFF' },
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: isEvenRow ? "FFFCE4D6" : "FFFFFFFF" },
           };
         });
 
@@ -639,8 +695,8 @@ export default function Dashboard() {
     worksheet.mergeCells(`K1:K${lastRow}`);
     worksheet.mergeCells(`P1:P${lastRow}`);
 
-    worksheet.getCell(`K1`).style = brattle
-    worksheet.getCell(`P1`).style = brattle
+    worksheet.getCell(`K1`).style = brattle;
+    worksheet.getCell(`P1`).style = brattle;
 
     // Add hyperlinks for exchange and refund order IDs
     worksheet.eachRow((row, rowNumber) => {
@@ -674,53 +730,92 @@ export default function Dashboard() {
     });
   };
 
-  const addDetailsToWorksheet2 = (worksheet2, orders, exchanges, refunds, worksheet1) => {
+  const addDetailsToWorksheet2 = (
+    worksheet2,
+    orders,
+    exchanges,
+    refunds,
+    worksheet1
+  ) => {
     // Create a map to keep track of order row indices
     const orderRowMap = new Map();
 
     const headerRow1 = [
-      "Order", "", "", "", "", "",
-      "", "Exchange", "", "", "",
-      "", "Refund", "", "", "", "",
+      "Order",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Exchange",
+      "",
+      "",
+      "",
+      "",
+      "Refund",
+      "",
+      "",
+      "",
+      "",
     ];
     const headerRow2 = [
-      "Order Id", "Product Name", "Description", "Quantity", "Price", "Point",
-      "", "Exchange Id", "Product Name", "Quantity", "Exchange of Order Id",
-      "", "Refund Id", "Product Name", "Quantity", "Price", "Refund of Order Id",
+      "Order Id",
+      "Product Name",
+      "Description",
+      "Quantity",
+      "Price",
+      "Point",
+      "",
+      "Exchange Id",
+      "Product Name",
+      "Quantity",
+      "Exchange of Order Id",
+      "",
+      "Refund Id",
+      "Product Name",
+      "Quantity",
+      "Price",
+      "Refund of Order Id",
     ];
     worksheet2.addRow(headerRow1);
     worksheet2.addRow(headerRow2);
 
     // Merge header row 1 cells
-    worksheet2.mergeCells('A1:F1');
-    worksheet2.mergeCells('H1:K1');
-    worksheet2.mergeCells('M1:Q1');
+    worksheet2.mergeCells("A1:F1");
+    worksheet2.mergeCells("H1:K1");
+    worksheet2.mergeCells("M1:Q1");
 
-    worksheet2.getRow(1).eachCell((cell) => { cell.style = header1Style; });
-    worksheet2.getRow(2).eachCell((cell) => { cell.style = header2Style; });
+    worksheet2.getRow(1).eachCell((cell) => {
+      cell.style = header1Style;
+    });
+    worksheet2.getRow(2).eachCell((cell) => {
+      cell.style = header2Style;
+    });
 
     worksheet2.getRow(1).height = 30; // Height for header row 1
     worksheet2.getRow(2).height = 30; // Height for header row 2
     // Set column widths
-    worksheet2.getColumn('A').width = 15; // Order Id
-    worksheet2.getColumn('B').width = 30; // Product Name
-    worksheet2.getColumn('C').width = 40; // Description
-    worksheet2.getColumn('D').width = 15; // Quantity
-    worksheet2.getColumn('E').width = 20; // Price
-    worksheet2.getColumn('F').width = 15; // Point
-    worksheet2.getColumn('G').width = 4;  // Empty column
-    worksheet2.getColumn('H').width = 15; // Exchange Id
-    worksheet2.getColumn('I').width = 30; // Exchange Product Name
-    worksheet2.getColumn('J').width = 15; // Exchange Quantity
-    worksheet2.getColumn('K').width = 20; // Exchange of Order Id
-    worksheet2.getColumn('L').width = 4;  // Empty column
-    worksheet2.getColumn('M').width = 15; // Refund Id
-    worksheet2.getColumn('N').width = 30; // Refund Product Name
-    worksheet2.getColumn('O').width = 15; // Refund Quantity
-    worksheet2.getColumn('P').width = 20; // Refund Price
-    worksheet2.getColumn('Q').width = 20; // Refund of Order Id
+    worksheet2.getColumn("A").width = 15; // Order Id
+    worksheet2.getColumn("B").width = 30; // Product Name
+    worksheet2.getColumn("C").width = 40; // Description
+    worksheet2.getColumn("D").width = 15; // Quantity
+    worksheet2.getColumn("E").width = 20; // Price
+    worksheet2.getColumn("F").width = 15; // Point
+    worksheet2.getColumn("G").width = 4; // Empty column
+    worksheet2.getColumn("H").width = 15; // Exchange Id
+    worksheet2.getColumn("I").width = 30; // Exchange Product Name
+    worksheet2.getColumn("J").width = 15; // Exchange Quantity
+    worksheet2.getColumn("K").width = 20; // Exchange of Order Id
+    worksheet2.getColumn("L").width = 4; // Empty column
+    worksheet2.getColumn("M").width = 15; // Refund Id
+    worksheet2.getColumn("N").width = 30; // Refund Product Name
+    worksheet2.getColumn("O").width = 15; // Refund Quantity
+    worksheet2.getColumn("P").width = 20; // Refund Price
+    worksheet2.getColumn("Q").width = 20; // Refund of Order Id
 
-    orders.sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
+    orders
+      .sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
       .forEach((order) => {
         const orderDetails = order.order_detail_list || [];
 
@@ -731,7 +826,11 @@ export default function Dashboard() {
           .filter((refund) => refund.order_id === order.id)
           .flatMap((refund) => refund.refund_detail_list || []);
 
-        const maxDetailsRows = Math.max(orderDetails.length, exchangeDetailList.length, refundDetailList.length);
+        const maxDetailsRows = Math.max(
+          orderDetails.length,
+          exchangeDetailList.length,
+          refundDetailList.length
+        );
 
         let currentRow = worksheet2.rowCount + 1;
 
@@ -741,7 +840,10 @@ export default function Dashboard() {
           const refundDetail = refundDetailList[i] || {};
 
           const orderProduct = productMap[orderDetail.product_id] || ["", ""];
-          const exchangeProduct = productMap[exchangeDetail.product_id] || ["", ""];
+          const exchangeProduct = productMap[exchangeDetail.product_id] || [
+            "",
+            "",
+          ];
           const refundProduct = productMap[refundDetail.product_id] || ["", ""];
 
           const row = worksheet2.addRow([
@@ -772,21 +874,21 @@ export default function Dashboard() {
           row.height = 20; // Set row height
           row.eachCell((cell, colNumber) => {
             // Add borders to all cells
-            cell.border = borderStyle
+            cell.border = borderStyle;
 
             // Apply number formats
             if ([4, 5, 6, 10, 15, 16].includes(colNumber)) {
-              cell.numFmt = '#,##0'; // Use thousands separator
+              cell.numFmt = "#,##0"; // Use thousands separator
             }
 
             // Apply currency format to price columns
             if ([5, 16].includes(colNumber)) {
-              cell.numFmt = '#,##0 [$VND]'; // Add VND currency symbol
+              cell.numFmt = "#,##0 [$VND]"; // Add VND currency symbol
             }
 
             // Center-align quantity and point columns
             if ([4, 6, 10, 15].includes(colNumber)) {
-              cell.alignment = { horizontal: 'center' };
+              cell.alignment = { horizontal: "center" };
             }
           });
 
@@ -794,15 +896,22 @@ export default function Dashboard() {
           const isEvenRow = currentRow % 2 === 0;
           row.eachCell((cell) => {
             cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: isEvenRow ? 'FFFCE4D6' : 'FFFFFFFF' },
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: isEvenRow ? "FFFCE4D6" : "FFFFFFFF" },
             };
           });
 
           row.getCell(1).font = { bold: true };
-          row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
-          row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+          row.getCell(1).alignment = {
+            horizontal: "center",
+            vertical: "middle",
+          };
+          row.getCell(1).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFE2EFDA" },
+          };
           currentRow++;
         }
       });
@@ -812,8 +921,8 @@ export default function Dashboard() {
     worksheet2.mergeCells(`G1:G${lastRow}`);
     worksheet2.mergeCells(`L1:L${lastRow}`);
 
-    worksheet2.getCell(`G1`).style = brattle
-    worksheet2.getCell(`L1`).style = brattle
+    worksheet2.getCell(`G1`).style = brattle;
+    worksheet2.getCell(`L1`).style = brattle;
 
     // Add hyperlinks for order, exchange, and refund order IDs
     worksheet1.eachRow((row, rowNumber) => {
@@ -833,7 +942,8 @@ export default function Dashboard() {
     let mergeStartRow = null;
 
     worksheet2.eachRow((row, rowNumber) => {
-      if (rowNumber > 2) { // Skip header rows
+      if (rowNumber > 2) {
+        // Skip header rows
         const currentOrderId = row.getCell(1).value;
         if (currentOrderId !== previousOrderId) {
           if (mergeStartRow && rowNumber - mergeStartRow > 1) {
@@ -883,13 +993,15 @@ export default function Dashboard() {
           productSales[productId].monthlySales[orderMonth] = {
             quantity: 0,
             totalAmount: 0,
-            refundQuantity: 0,  // Initialize refund quantity
-            refundAmount: 0,    // Initialize refund amount
+            refundQuantity: 0, // Initialize refund quantity
+            refundAmount: 0, // Initialize refund amount
           };
         }
 
-        productSales[productId].monthlySales[orderMonth].quantity += detail.quantity;
-        productSales[productId].monthlySales[orderMonth].totalAmount += totalAmount;
+        productSales[productId].monthlySales[orderMonth].quantity +=
+          detail.quantity;
+        productSales[productId].monthlySales[orderMonth].totalAmount +=
+          totalAmount;
       });
     });
 
@@ -922,8 +1034,10 @@ export default function Dashboard() {
           };
         }
 
-        productSales[productId].monthlySales[refundMonth].refundQuantity += detail.quantity;
-        productSales[productId].monthlySales[refundMonth].refundAmount += totalAmount;
+        productSales[productId].monthlySales[refundMonth].refundQuantity +=
+          detail.quantity;
+        productSales[productId].monthlySales[refundMonth].refundAmount +=
+          totalAmount;
       });
     });
 
@@ -931,38 +1045,48 @@ export default function Dashboard() {
   };
 
   const addProductSalesToWorksheet3 = (worksheet, productSales) => {
-    const headerRow1 = [
-      "Order", "", "", "", "", "", "",
-      "", "Refund", "", "",
-    ];
+    const headerRow1 = ["Order", "", "", "", "", "", "", "", "Refund", "", ""];
     const headerRow2 = [
-      "Month", "Product Id", "Product Name", "Description", "Quantity Sold", "Average price (VND)", "Total Revenue (VND)",
-      "", "Quantity Refunded", "Average Refund Price (VND)", "Total Refund Amount (VND)",
+      "Month",
+      "Product Id",
+      "Product Name",
+      "Description",
+      "Quantity Sold",
+      "Average price (VND)",
+      "Total Revenue (VND)",
+      "",
+      "Quantity Refunded",
+      "Average Refund Price (VND)",
+      "Total Refund Amount (VND)",
     ];
     worksheet.addRow(headerRow1);
     worksheet.addRow(headerRow2);
 
     // Merge header row 1 cells
-    worksheet.mergeCells('A1:G1');
-    worksheet.mergeCells('I1:K1');
+    worksheet.mergeCells("A1:G1");
+    worksheet.mergeCells("I1:K1");
 
-    worksheet.getRow(1).eachCell((cell) => { cell.style = header1Style; });
-    worksheet.getRow(2).eachCell((cell) => { cell.style = header2Style; });
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.style = header1Style;
+    });
+    worksheet.getRow(2).eachCell((cell) => {
+      cell.style = header2Style;
+    });
 
     worksheet.getRow(1).height = 30; // Height for header row 1
     worksheet.getRow(2).height = 30; // Height for header row 2
     // Set column widths
-    worksheet.getColumn('A').width = 15; // Month
-    worksheet.getColumn('B').width = 15; // Product Id
-    worksheet.getColumn('C').width = 30; // Product Name
-    worksheet.getColumn('D').width = 40; // Description
-    worksheet.getColumn('E').width = 15; // Quantity Sold
-    worksheet.getColumn('F').width = 20; // Average price
-    worksheet.getColumn('G').width = 20; // Total Revenue
-    worksheet.getColumn('H').width = 4;  // Empty column
-    worksheet.getColumn('I').width = 20; // Quantity Refunded
-    worksheet.getColumn('J').width = 25; // Average Refund Price
-    worksheet.getColumn('K').width = 25; // Total Refund Amount
+    worksheet.getColumn("A").width = 15; // Month
+    worksheet.getColumn("B").width = 15; // Product Id
+    worksheet.getColumn("C").width = 30; // Product Name
+    worksheet.getColumn("D").width = 40; // Description
+    worksheet.getColumn("E").width = 15; // Quantity Sold
+    worksheet.getColumn("F").width = 20; // Average price
+    worksheet.getColumn("G").width = 20; // Total Revenue
+    worksheet.getColumn("H").width = 4; // Empty column
+    worksheet.getColumn("I").width = 20; // Quantity Refunded
+    worksheet.getColumn("J").width = 25; // Average Refund Price
+    worksheet.getColumn("K").width = 25; // Total Refund Amount
 
     const sortedProductSales = Object.keys(productSales)
       .flatMap((productId) => {
@@ -1004,21 +1128,21 @@ export default function Dashboard() {
       row.height = 20; // Set row height
       row.eachCell((cell, colNumber) => {
         // Add borders to all cells
-        cell.border = borderStyle
+        cell.border = borderStyle;
 
         // Apply number formats
         if ([5, 6, 7, 9, 10, 11].includes(colNumber)) {
-          cell.numFmt = '#,##0'; // Use thousands separator
+          cell.numFmt = "#,##0"; // Use thousands separator
         }
 
         // Apply currency format to price and amount columns
         if ([6, 7, 10, 11].includes(colNumber)) {
-          cell.numFmt = '#,##0 [$VND]'; // Add VND currency symbol
+          cell.numFmt = "#,##0 [$VND]"; // Add VND currency symbol
         }
 
         // Center-align quantity columns
         if ([5, 9].includes(colNumber)) {
-          cell.alignment = { horizontal: 'center' };
+          cell.alignment = { horizontal: "center" };
         }
       });
 
@@ -1026,9 +1150,9 @@ export default function Dashboard() {
       if (index % 2 !== 0) {
         row.eachCell((cell) => {
           cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFCE4D6' },
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFCE4D6" },
           };
         });
       }
@@ -1036,9 +1160,8 @@ export default function Dashboard() {
     const lastRow = worksheet.rowCount;
     // Merge empty columns G and L for the full range
     worksheet.mergeCells(`H1:H${lastRow}`);
-    worksheet.getCell(`H1`).style = brattle
+    worksheet.getCell(`H1`).style = brattle;
   };
-
 
   const handleExportReport = () => {
     if (!orders || !refunds || !exchanges) {
@@ -1047,9 +1170,22 @@ export default function Dashboard() {
     }
 
     // Lọc dữ liệu
-  const filteredOrders = orders.filter(order => (order.status_order_list.some(status => status.status === "COMPLETED")) ||(order.payment_method === "VNPAY" && order.status_order_list.some(status => status.status === "CANCELLED")));
-  const filteredRefunds = refunds.filter(refund => refund.status === 'ACCEPT');
-  const filteredExchanges = exchanges.filter(exchange => exchange.status === 'ACCEPT');
+    const filteredOrders = orders.filter(
+      (order) =>
+        order.status_order_list.some(
+          (status) => status.status === "COMPLETED"
+        ) ||
+        (order.payment_method === "VNPAY" &&
+          order.status_order_list.some(
+            (status) => status.status === "CANCELLED"
+          ))
+    );
+    const filteredRefunds = refunds.filter(
+      (refund) => refund.status === "ACCEPT"
+    );
+    const filteredExchanges = exchanges.filter(
+      (exchange) => exchange.status === "ACCEPT"
+    );
 
     const workbook = new ExcelJS.Workbook();
     const worksheet1 = workbook.addWorksheet("LIST_OER");
@@ -1057,16 +1193,35 @@ export default function Dashboard() {
     const worksheet3 = workbook.addWorksheet("PRODUCT");
 
     // Nhóm orders theo tháng
-    const months = groupMonths(filteredOrders, filteredRefunds, filteredExchanges);
+    const months = groupMonths(
+      filteredOrders,
+      filteredRefunds,
+      filteredExchanges
+    );
 
     // Thêm dữ liệu vào worksheet1
-    addDataToWorksheet1(worksheet1, filteredOrders, filteredRefunds, filteredExchanges, months);
+    addDataToWorksheet1(
+      worksheet1,
+      filteredOrders,
+      filteredRefunds,
+      filteredExchanges,
+      months
+    );
 
     // Thêm dữ liệu vào worksheet2
-    addDetailsToWorksheet2(worksheet2, filteredOrders, filteredExchanges, filteredRefunds, worksheet1);
+    addDetailsToWorksheet2(
+      worksheet2,
+      filteredOrders,
+      filteredExchanges,
+      filteredRefunds,
+      worksheet1
+    );
 
     // Nhóm dữ liệu bán hàng theo sản phẩm và tháng
-    const productSales = groupProductSalesByMonth(filteredOrders || [], filteredRefunds || []);
+    const productSales = groupProductSalesByMonth(
+      filteredOrders || [],
+      filteredRefunds || []
+    );
 
     // Thêm dữ liệu vào worksheet3
     addProductSalesToWorksheet3(worksheet3, productSales);
@@ -1074,7 +1229,10 @@ export default function Dashboard() {
     workbook.xlsx
       .writeBuffer()
       .then((buffer) => {
-        saveAs(new Blob([buffer]), "ReportStore_order_refund_store_monthly.xlsx");
+        saveAs(
+          new Blob([buffer]),
+          "ReportStore_order_refund_store_monthly.xlsx"
+        );
       })
       .catch((err) => {
         console.error("Error writing Excel file:", err);

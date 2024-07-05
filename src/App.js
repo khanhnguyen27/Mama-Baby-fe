@@ -43,6 +43,7 @@ import Requests from "./components/general/Requests";
 import Dashboard from "./components/staff/Dashboard";
 import SuccessPayment from "./components/general/SuccessPayment";
 import FailedPayment from "./components/general/FailedPayment";
+import { UserProvider } from "./components/Navigation/UserContext";
 
 const applyScrollbarStyles = () => {
   const style = document.createElement("style");
@@ -75,58 +76,66 @@ function App() {
 
   return (
     <div className="App">
-      <Navigation />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/introduction" element={<Introduction />} />
-        <Route path="/promotion" element={<Promotion />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/productgift" element={<ProductGift />} />
-        <Route path="/products/:productId" element={<ProductDetails />} />
-        <Route path="/productgiftdetail/:productId" element={<ProductGiftDetails />} />
-        <Route path="/article/:articleId" element={<ArticleDetails />} />
-        <Route path="/stores" element={<Stores />} />
-        <Route path="/stores/:store_id" element={<StoreDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/successPayment" element={<SuccessPayment />} />
-        <Route path="/failedPayment" element={<FailedPayment />} />
-        <Route path="/history/comment" element={<CommentHistory />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/regisstore" element={<RegisStores />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/articles" element={<Article />} />
-        <Route path="/stores/:article_id" element={<Article />} />
-        <Route path="/requests" element={<Requests />} />
-        <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
-          <Route path="/staff" element={<StaffLayout />}>
-            <Route index element={<Navigate to={"/staff/products"} />} />
-            <Route path="products/:productId" element={<ProductDetailsManagement />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="products" element={<StaffHome />} />
-            <Route path="exchanges" element={<ExchangesManagement />} />
-            <Route path="orders" element={<OrdersManagement />} />
-            <Route path="articles" element={<Articles />} />
-            <Route path="vouchers" element={<VoucherManagement />} />
-            <Route path="refunds" element={<RefundManagement />} />
-            <Route path="dashboard" element={<Dashboard />} />
+      <UserProvider>
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/introduction" element={<Introduction />} />
+          <Route path="/promotion" element={<Promotion />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/productgift" element={<ProductGift />} />
+          <Route path="/products/:productId" element={<ProductDetails />} />
+          <Route
+            path="/productgiftdetail/:productId"
+            element={<ProductGiftDetails />}
+          />
+          <Route path="/article/:articleId" element={<ArticleDetails />} />
+          <Route path="/stores" element={<Stores />} />
+          <Route path="/stores/:store_id" element={<StoreDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/successPayment" element={<SuccessPayment />} />
+          <Route path="/failedPayment" element={<FailedPayment />} />
+          <Route path="/history/comment" element={<CommentHistory />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/regisstore" element={<RegisStores />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/articles" element={<Article />} />
+          <Route path="/stores/:article_id" element={<Article />} />
+          <Route path="/requests" element={<Requests />} />
+          <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
+            <Route path="/staff" element={<StaffLayout />}>
+              <Route index element={<Navigate to={"/staff/products"} />} />
+              <Route
+                path="products/:productId"
+                element={<ProductDetailsManagement />}
+              />
+              <Route path="profile" element={<Profile />} />
+              <Route path="products" element={<StaffHome />} />
+              <Route path="exchanges" element={<ExchangesManagement />} />
+              <Route path="orders" element={<OrdersManagement />} />
+              <Route path="articles" element={<Articles />} />
+              <Route path="vouchers" element={<VoucherManagement />} />
+              <Route path="refunds" element={<RefundManagement />} />
+              <Route path="dashboard" element={<Dashboard />} />
+            </Route>
           </Route>
-        </Route>
-        <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to={"/admin/dashboard"} />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="dashboard" element={<AdminHome />} />
-            <Route path="categories" element={<CategorieManagement />} />
-            <Route path="brands" element={<BrandManagement />} />
-            <Route path="age" element={<AgeManagement />} />
-            <Route path="requeststore" element={<RequestStore />} />
-            <Route path="stores" element={<StoreManagement />} />
-            <Route path="accounts" element={<AccountManagement />} />
+          <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to={"/admin/dashboard"} />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="dashboard" element={<AdminHome />} />
+              <Route path="categories" element={<CategorieManagement />} />
+              <Route path="brands" element={<BrandManagement />} />
+              <Route path="age" element={<AgeManagement />} />
+              <Route path="requeststore" element={<RequestStore />} />
+              <Route path="stores" element={<StoreManagement />} />
+              <Route path="accounts" element={<AccountManagement />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </UserProvider>
       <Footer />
       <ToastContainer />
     </div>
