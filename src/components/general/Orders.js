@@ -30,7 +30,11 @@ import {
 } from "@mui/material";
 import { makePaymentApi } from "../../api/VNPayAPI";
 import { toast } from "react-toastify";
-import { allProductApi, productByIdApi } from "../../api/ProductAPI";
+import {
+  allProductApi,
+  productByIdApi,
+  allProductCHApi,
+} from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
@@ -101,7 +105,7 @@ export default function Orders() {
         refundRes,
       ] = await Promise.all([
         orderByUserIdApi(userId),
-        allProductApi({ limit: 1000 }),
+        allProductCHApi({ limit: 1000 }),
         allStoreApi({ limit: 1000 }),
         allBrandApi(),
         allCategorytApi(),
@@ -1151,57 +1155,59 @@ export default function Orders() {
                                       </Box>
                                       {item.status_order_list[
                                         item.status_order_list.length - 1
-                                      ].status === "COMPLETED" && (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            justifyContent: "flex-end",
-                                            mt: 2,
-                                          }}
-                                          onClick={() =>
-                                            navigate(
-                                              `/products/${productMap[
-                                                detail.product_id
-                                              ][0]
-                                                .toLowerCase()
-                                                .replace(/\s/g, "-")}`,
-                                              {
-                                                state: {
-                                                  productId: detail.product_id,
-                                                },
-                                              },
-                                              window.scrollTo({
-                                                top: 0,
-                                                behavior: "smooth",
-                                              })
-                                            )
-                                          }
-                                        >
-                                          <Button
+                                      ].status === "COMPLETED" &&
+                                        detail.unit_price > 0 && (
+                                          <Box
                                             sx={{
-                                              color: "#ff469e",
-                                              border: "2px solid #ff469e",
-                                              borderRadius: "8px",
-                                              padding: "8px 16px",
-                                              transition: "all 0.3s ease",
-                                              "&:hover": {
-                                                backgroundColor: "#ff469e",
-                                                color: "#ffffff",
-                                                transform: "scale(1.05)",
-                                                boxShadow:
-                                                  "0 4px 8px rgba(0, 0, 0, 0.2)",
-                                              },
-                                              "&:active": {
-                                                backgroundColor: "#e0357b",
-                                                borderColor: "#e0357b",
-                                              },
+                                              display: "flex",
+                                              flexDirection: "row",
+                                              justifyContent: "flex-end",
+                                              mt: 2,
                                             }}
+                                            onClick={() =>
+                                              navigate(
+                                                `/products/${productMap[
+                                                  detail.product_id
+                                                ][0]
+                                                  .toLowerCase()
+                                                  .replace(/\s/g, "-")}`,
+                                                {
+                                                  state: {
+                                                    productId:
+                                                      detail.product_id,
+                                                  },
+                                                },
+                                                window.scrollTo({
+                                                  top: 0,
+                                                  behavior: "smooth",
+                                                })
+                                              )
+                                            }
                                           >
-                                            Comment
-                                          </Button>
-                                        </Box>
-                                      )}
+                                            <Button
+                                              sx={{
+                                                color: "#ff469e",
+                                                border: "2px solid #ff469e",
+                                                borderRadius: "8px",
+                                                padding: "8px 16px",
+                                                transition: "all 0.3s ease",
+                                                "&:hover": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "#ffffff",
+                                                  transform: "scale(1.05)",
+                                                  boxShadow:
+                                                    "0 4px 8px rgba(0, 0, 0, 0.2)",
+                                                },
+                                                "&:active": {
+                                                  backgroundColor: "#e0357b",
+                                                  borderColor: "#e0357b",
+                                                },
+                                              }}
+                                            >
+                                              Comment
+                                            </Button>
+                                          </Box>
+                                        )}
                                     </CardContent>
                                   </div>
                                 ))}

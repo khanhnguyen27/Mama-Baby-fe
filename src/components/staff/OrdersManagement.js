@@ -25,7 +25,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { allProductApi } from "../../api/ProductAPI";
+import { allProductByStoreApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { useNavigate } from "react-router-dom";
@@ -96,7 +96,7 @@ export default function OrdersManagement() {
       const [orderRes, productRes, brandRes, categoryRes, voucherRes] =
         await Promise.all([
           orderByStoreIdApi(storeId),
-          allProductApi({ limit: 1000 }),
+          allProductByStoreApi({ limit: 1000 }),
           allBrandApi(),
           allCategorytApi(),
           allVoucherApi(),
@@ -498,10 +498,10 @@ export default function OrdersManagement() {
                         </Typography>
                       </Grid>
                     )}
-                    {(item?.status_order_list[item.status_order_list.length - 2]
+                    {item?.status_order_list[item.status_order_list.length - 2]
                       ?.status === "DELIVERING" &&
                       item?.status_order_list[item.status_order_list.length - 1]
-                        ?.status === "COMPLETED") && (
+                        ?.status === "COMPLETED" && (
                         <>
                           <Grid item xs={12} md={6}>
                             <Typography
@@ -698,7 +698,7 @@ export default function OrdersManagement() {
                                           }}
                                           onClick={() =>
                                             navigate(
-                                              `/products/staff/${productMap[
+                                              `/staff/products/${productMap[
                                                 detail.product_id
                                               ][0]
                                                 .toLowerCase()
@@ -740,7 +740,7 @@ export default function OrdersManagement() {
                                             style={{
                                               fontSize: "1.05rem",
                                               opacity: 0.4,
-                                              marginLeft: "4px"
+                                              marginLeft: "4px",
                                             }}
                                           >
                                             x{detail.quantity}

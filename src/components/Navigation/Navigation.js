@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -23,11 +23,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart, selectCartAmount } from "../../redux/CartSlice";
 import { ListAlt, RequestPage } from "@mui/icons-material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import { profileUserApi } from "../../api/UserAPI";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import { UserContext } from "./UserContext";
 
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("accessToken") !== null
   );
+
+  const { user } = useContext(UserContext);
+
   const username = localStorage.getItem("username");
   const [anchorElLogout, setAnchorElLogout] = useState(null);
   const [openLogoutMenu, setOpenLogoutMenu] = useState(false);
@@ -56,6 +62,24 @@ const Navigation = () => {
   const handleLogoutMenuClose = () => {
     setAnchorElLogout(null);
     setOpenLogoutMenu(false);
+  };
+
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOnIcon
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 24,
+            }}
+          />
+        </Box>
+      </>
+    );
   };
 
   const renderLogoutMenu = (
@@ -332,10 +356,17 @@ const Navigation = () => {
             boxShadow: "none",
             position: "fixed",
             borderBottom: "1px solid #fffbfd",
-            backgroundColor: "white"
+            backgroundColor: "white",
           }}
         >
-          <Container style={{ display: "flex", justifyContent: "space-between", height: "6rem", backgroundColor: "white" }}>
+          <Container
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              height: "6rem",
+              backgroundColor: "white",
+            }}
+          >
             <Link
               to="/"
               style={{
@@ -364,10 +395,17 @@ const Navigation = () => {
             boxShadow: "none",
             position: "fixed",
             borderBottom: "1px solid #fffbfd",
-            backgroundColor: "white"
+            backgroundColor: "white",
           }}
         >
-          <Container style={{ display: "flex", justifyContent: "space-between", height: "6rem", backgroundColor: "white" }}>
+          <Container
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              height: "6rem",
+              backgroundColor: "white",
+            }}
+          >
             <Link
               to="/"
               style={{
@@ -831,14 +869,24 @@ const Navigation = () => {
                 flexGrow: 1,
                 display: "flex",
                 justifyContent: "space-around",
+                flexBasis: "90%",
               }}
             >
               <ProductSearch />
             </Box>
             <Box
               sx={{
+                flexBasis: "10%",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              {formatCurrencyPoint(user?.accumulated_points)}
+            </Box>
+            <Box
+              sx={{
                 display: { sm: "flex" },
-                justifyContent: "flex-end",
+                justifyContent: "flex-start",
               }}
             >
               <IconButton

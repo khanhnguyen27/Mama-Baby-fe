@@ -198,6 +198,18 @@ export default function ProductDetails() {
     );
   };
 
+  // Helper function to format date as "yyyy-mm-dd"
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Inside your component
+  const today = formatDate(new Date());
+
   return (
     <div
       style={{
@@ -256,7 +268,9 @@ export default function ProductDetails() {
           </Typography>
         </Breadcrumbs>
       </Container>
-      {product.type === typeWholeSale ? (
+      {product.type === typeWholeSale ||
+      product.is_active === false ||
+      (product.expiryDate && product.expiryDate <= today) ? (
         <Typography
           variant="h6"
           color="textSecondary"

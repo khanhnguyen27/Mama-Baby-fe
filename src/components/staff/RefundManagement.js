@@ -34,7 +34,7 @@ import {
   Table,
 } from "@mui/material";
 import { refundByStoreIdApi, updateRefundApi } from "../../api/RefundAPI";
-import { allProductApi } from "../../api/ProductAPI";
+import { allProductByStoreApi } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
 import { storeByUserIdApi } from "../../api/StoreAPI";
@@ -65,7 +65,7 @@ export default function OrdersManagement() {
   const [tabValue, setTabValue] = useState(0);
   const [openOrderDetail, setOpenOrderDetail] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
+  console.log(productMap);
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -101,7 +101,7 @@ export default function OrdersManagement() {
       const [refundRes, productRes, brandRes, categoryRes, orderRes] =
         await Promise.all([
           refundByStoreIdApi(storeId),
-          allProductApi({ limit: 1000 }),
+          allProductByStoreApi({ limit: 1000 }),
           allBrandApi(),
           allCategorytApi(),
           allOrderApi(),
@@ -649,7 +649,7 @@ export default function OrdersManagement() {
                                           }}
                                           onClick={() =>
                                             navigate(
-                                              `/products/${product[0]
+                                              `/staff/products/${product[0]
                                                 .toLowerCase()
                                                 .replace(/\s/g, "-")}`,
                                               {

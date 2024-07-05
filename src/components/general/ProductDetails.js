@@ -325,8 +325,6 @@ export default function ProductDetails() {
       console.log(err);
     }
   };
-  console.log(store);
-  console.log(product);
 
   useEffect(() => {
     setTimeout(() => {
@@ -443,6 +441,18 @@ export default function ProductDetails() {
     setVisibleComments((prevVisibleComments) => prevVisibleComments + 5);
   };
 
+  // Helper function to format date as "yyyy-mm-dd"
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Inside your component
+  const today = formatDate(new Date());
+
   return (
     <div
       style={{
@@ -501,7 +511,9 @@ export default function ProductDetails() {
           </Typography>
         </Breadcrumbs>
       </Container>
-      {product.type === typeGift ? (
+      {product.type === typeGift ||
+      product.is_active === false ||
+      (product.expiryDate && product.expiryDate <= today) ? (
         <Typography
           variant="h6"
           color="textSecondary"
@@ -621,8 +633,16 @@ export default function ProductDetails() {
                         >
                           {product.name}
                           {product.status === "OUT OF STOCK" && (
-                          <span style={{marginLeft: "0.5rem",fontSize: "1rem", opacity: 0.5}}>({product.status})</span>
-                        )}
+                            <span
+                              style={{
+                                marginLeft: "0.5rem",
+                                fontSize: "1rem",
+                                opacity: 0.5,
+                              }}
+                            >
+                              ({product.status})
+                            </span>
+                          )}
                         </Typography>
                         <Typography variant="h6" style={{ textAlign: "left" }}>
                           {formatCurrency(product.price)}

@@ -355,7 +355,7 @@ export default function StaffHome() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    fetchData(1);
+    fetchData();
   }, [ageFilter, brandFilter, categoryFilter, storeId, currentPage, sortPrice]);
 
   const onPageChange = (page) => {

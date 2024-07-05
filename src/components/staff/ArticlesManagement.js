@@ -85,7 +85,7 @@ export default function Articles() {
   }, []);
 
   const storeId = store.id;
-  const fetchData = async (page) => {
+  const fetchData = async (minDate, maxDate) => {
     try {
       const [articleRes, productRes] = await Promise.all([
         getArticlesByStoreIdApi({
@@ -124,7 +124,7 @@ export default function Articles() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    fetchData(1);
+    fetchData(minDate, maxDate);
   }, [storeId, currentPage]);
 
   const onPageChange = (page) => {
@@ -142,13 +142,13 @@ export default function Articles() {
     if (keyword === "") {
       setTimeout(() => {
         setLoading(false);
-        fetchData();
+        fetchData(minDate, maxDate);
       }, 2000);
       return;
     }
     setTimeout(() => {
       setLoading(false);
-      fetchData();
+      fetchData(minDate, maxDate);
     }, 2000);
   };
 
@@ -193,7 +193,7 @@ export default function Articles() {
 
     addArticleApi(image.file, header, content, productRecom, storeId, isActive)
       .then((response) => {
-        fetchData(currentPage);
+        fetchData(minDate, maxDate);
         handleCloseAddArticle();
         toast.success("Article added successfully!");
       })
@@ -252,7 +252,7 @@ export default function Articles() {
 
     updateArticleApi(selectedArticle.id, articleData, image.file)
       .then((response) => {
-        fetchData(currentPage);
+        fetchData(minDate, maxDate);
         handleClose();
         toast.success("Article updated successfully:", response.data);
       })
@@ -386,6 +386,9 @@ export default function Articles() {
     const [newMinDate, newMaxDate] = newValue;
     setMinDate(newMinDate);
     setMaxDate(newMaxDate);
+    if (newValue[0] && newValue[1]) {
+      fetchData(newValue[0], newValue[1]);
+    }
   };
 
   if (loading) {

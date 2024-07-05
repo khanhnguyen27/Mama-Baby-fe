@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { allProductApi } from "../../api/ProductAPI";
+import { allProductByStoreApi } from "../../api/ProductAPI";
 import { exchangeByUserIdApi } from "../../api/ExchangeAPI";
 import { refundByUserIdApi } from "../../api/RefundAPI";
 import {
@@ -50,7 +50,7 @@ export default function Requests() {
   const fetchData = async () => {
     try {
       const [productRes, storeRes, exchangeRes, refundRes] = await Promise.all([
-        allProductApi({ limit: 1000 }),
+        allProductByStoreApi({ limit: 1000 }),
         allStoreApi({ limit: 1000 }),
         exchangeByUserIdApi(userId),
         refundByUserIdApi(userId),
@@ -242,8 +242,12 @@ export default function Requests() {
         <Grid container spacing={4}>
           {(view === "all" || view === "exchange") && (
             <>
-              <Grid item xs={12} >
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
+              <Grid item xs={12}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ fontWeight: "bold" }}
+                >
                   Exchange Requests
                 </Typography>
               </Grid>
@@ -270,7 +274,7 @@ export default function Requests() {
                         boxShadow: 6,
                         transform: "scale(1.02)",
                         border: "1px solid #ff469e",
-                      }
+                      },
                     }}
                   >
                     <CardContent>
@@ -351,7 +355,7 @@ export default function Requests() {
                                   x{detail.quantity}
                                 </span>
                               </Typography>
-                              <Divider sx={{ my: 0.75 }}/>
+                              <Divider sx={{ my: 0.75 }} />
                             </div>
                           ))}
                         </AccordionDetails>
@@ -365,7 +369,11 @@ export default function Requests() {
           {(view === "all" || view === "refund") && (
             <>
               <Grid item xs={12}>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold"}}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ fontWeight: "bold" }}
+                >
                   Refund Requests
                 </Typography>
               </Grid>
@@ -392,7 +400,7 @@ export default function Requests() {
                         boxShadow: 6,
                         transform: "scale(1.02)",
                         border: "1px solid #ff469e",
-                      }
+                      },
                     }}
                   >
                     <CardContent>
@@ -474,7 +482,9 @@ export default function Requests() {
                                   - {productMap[detail.product_id][0]}
                                 </span>{" "}
                               </Typography>
-                              <Typography sx={{ fontSize: "1.1rem", textAlign: "right" }}>
+                              <Typography
+                                sx={{ fontSize: "1.1rem", textAlign: "right" }}
+                              >
                                 <span style={{ fontWeight: "600" }}>
                                   {formatCurrency(detail.unit_price)}
                                 </span>
@@ -485,13 +495,14 @@ export default function Requests() {
                                     marginLeft: "2px",
                                   }}
                                 >
-                                  {" "}x{detail.quantity}
+                                  {" "}
+                                  x{detail.quantity}
                                 </span>
                                 {/* <span style={{ fontWeight: "600" }}>
                                   {" "}={" "}{formatCurrency(detail.amount)}
                                 </span> */}
                               </Typography>
-                              <Divider sx={{ my: 0.75 }}/>
+                              <Divider sx={{ my: 0.75 }} />
                             </div>
                           ))}
                         </AccordionDetails>

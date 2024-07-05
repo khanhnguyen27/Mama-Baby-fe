@@ -30,7 +30,7 @@ import {
   exchangeByStoreIdApi,
   updateStatusExchangeApi,
 } from "../../api/ExchangeAPI";
-import { allProductApi } from "../../api/ProductAPI";
+import { allProductByStoreApi } from "../../api/ProductAPI";
 import { allOrderDetailApi } from "../../api/OrderAPI";
 import { jwtDecode } from "jwt-decode";
 import { storeByUserIdApi } from "../../api/StoreAPI";
@@ -82,7 +82,7 @@ export default function ExchangeManagement() {
         await Promise.all([
           exchangeByStoreIdApi(storeId),
           allOrderDetailApi(),
-          allProductApi({ limit: 1000 }),
+          allProductByStoreApi({ limit: 1000 }),
           allUserApi(),
         ]);
 
@@ -139,14 +139,14 @@ export default function ExchangeManagement() {
     ? [...filteredExchanges].reverse()
     : filteredExchanges;
 
-    const formatDateTime = (dateTime) => {
-      try {
-          const parsedDate = parseISO(dateTime);
-          return format(parsedDate, "dd-MM-yyyy \n HH:mm ");
-      } catch (error) {
-          console.error("Invalid date format:", dateTime, error);
-          return "Invalid date";
-      }
+  const formatDateTime = (dateTime) => {
+    try {
+      const parsedDate = parseISO(dateTime);
+      return format(parsedDate, "dd-MM-yyyy \n HH:mm ");
+    } catch (error) {
+      console.error("Invalid date format:", dateTime, error);
+      return "Invalid date";
+    }
   };
 
   const handleChangePage = (e, newPage) => {
@@ -425,7 +425,7 @@ export default function ExchangeManagement() {
                   </TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody sx={{ backgroundColor: "white"}}>
+              <TableBody sx={{ backgroundColor: "white" }}>
                 {sortedExchanges
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((item, index) => (
@@ -558,9 +558,9 @@ export default function ExchangeManagement() {
                             "& .Mui-disabled": {
                               "-webkit-text-fill-color": "#ff469e",
                               opacity: 0.9,
-                              "&:hover":{
+                              "&:hover": {
                                 "-webkit-text-fill-color": "white",
-                              }
+                              },
                             },
                           }}
                           MenuProps={{
@@ -745,7 +745,7 @@ export default function ExchangeManagement() {
               page={page}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{ backgroundColor: "white"}}
+              sx={{ backgroundColor: "white" }}
             />
           </TableContainer>
         </Box>
