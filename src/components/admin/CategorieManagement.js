@@ -116,7 +116,7 @@ export default function CategoryManagement() {
   const handleAddCategory = async () => {
     const trimmedCategoryName = newCategoryName.trim();
     if (categories.some(category => category.name.toLowerCase() === trimmedCategoryName.toLowerCase())) {
-      toast.error('Category name already exists');
+      toast.error('Category name already exists.');
       return;
     }
 
@@ -125,7 +125,7 @@ export default function CategoryManagement() {
       await addCategoryApi(newCategory); // Replace with your API call to add category
       fetchData(); // Refresh category list
       handleCloseAddDialog();
-      toast.success("Category added successfully!");
+      toast.success("Category added successfully.");
       setPage(0);
     } catch (error) {
       toast.error("Failed to add category. Please try again later.");
@@ -153,7 +153,7 @@ export default function CategoryManagement() {
     const trimmedCategoryName = selectedCategory.name.trim();
 
     if (categories.some(category => category.name.toLowerCase() === trimmedCategoryName.toLowerCase() && category.id !== selectedCategory.id)) {
-      toast.error('Category name already exists');
+      toast.error('Category name already exists.');
       return;
     }
 
@@ -170,7 +170,7 @@ export default function CategoryManagement() {
       .then(() => {
         fetchData(); // Refresh category list
         closeUpdate();
-        toast.success("Category updated successfully!");
+        toast.success("Category updated successfully.");
       })
       .catch((error) => {
         console.error("Error updating category:", error);
@@ -269,8 +269,8 @@ export default function CategoryManagement() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={1} md={3}></Grid>
-            <Grid item xs={3} md={2}>
+            <Grid item xs={1} md={2}></Grid>
+            <Grid item xs={3} md={3} container justifyContent="flex-end">
               <Button
                 variant="contained"
                 size="medium"
@@ -353,7 +353,7 @@ export default function CategoryManagement() {
           <DialogContent>
             <TextField
               autoFocus
-              margin="dense"
+              margin="normal"
               label="Category Name"
               type="text"
               fullWidth
@@ -377,7 +377,7 @@ export default function CategoryManagement() {
             <DialogTitle>Edit Category</DialogTitle>
             <DialogContent>
               <TextField
-                label="Name"
+                label="Category Name"
                 value={selectedCategory.name}
                 fullWidth
                 margin="normal"
@@ -388,14 +388,14 @@ export default function CategoryManagement() {
                 <Select
                   value={selectedCategory.active}
                   onChange={(e) => handleChange("active", e.target.value)}
-                  label="Active"
+                  label="Status"
                   inputProps={{
                     name: "active",
                     id: "active-select",
                   }}
                 >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
+               <MenuItem value={true}>Active</MenuItem>
+               <MenuItem value={false}>Inactive</MenuItem>
                 </Select>
               </FormControl>
             </DialogContent>

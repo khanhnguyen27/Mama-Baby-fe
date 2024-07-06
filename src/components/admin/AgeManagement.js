@@ -117,7 +117,7 @@ export default function AgeManagement() {
   const handleAddAge = async () => {
     const trimmedRangeAge = newAgeName.trim();
     if (ages.some((age) => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase())) {
-      toast.error("RangeAge already exists");
+      toast.error("RangeAge already exists.");
       return;
     }
     try {
@@ -125,7 +125,7 @@ export default function AgeManagement() {
       await addAgeApi(newAge);
       fetchData();
       handleCloseAddDialog();
-      toast.success("RangeAge added successfully!");
+      toast.success("RangeAge added successfully.");
       setPage(0);
     } catch (error) {
       toast.error("Failed to add RangeAge. Please try again later.");
@@ -155,8 +155,8 @@ export default function AgeManagement() {
   const handleEdit = async () => {
     const trimmedRangeAge = selectedAges.rangeAge.trim();
 
-    if (ages.some(age => age.name.toLowerCase() === trimmedRangeAge.toLowerCase() && age.id !== selectedAges.id)) {
-      toast.error('Brand name already exists');
+    if (ages.some(age => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase() && age.id !== selectedAges.id)) {
+      toast.error('Brand name already exists.');
       return;
     }
 
@@ -173,7 +173,7 @@ export default function AgeManagement() {
       .then(() => {
         fetchData(); // Refresh rangeAge list
         closeUpdate();
-        toast.success("RangeAge updated successfully!");
+        toast.success("RangeAge updated successfully.");
       })
       .catch((error) => {
         console.error("Error updating brand:", error);
@@ -253,7 +253,7 @@ export default function AgeManagement() {
                 }}
               />
             </Grid>
-            <Grid item xs={4} md={3}>
+            <Grid item xs={3} md={3}>
               <FormControl sx={{ width: "170px" }}>
                 <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
                   Sorting Status
@@ -272,8 +272,8 @@ export default function AgeManagement() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={1} md={3}></Grid>
-            <Grid item xs={3} md={2}>
+            <Grid item xs={1} md={2}></Grid>
+            <Grid item xs={4} md={3} container justifyContent="flex-end">
               <Button
                 variant="contained"
                 size="medium"
@@ -356,7 +356,7 @@ export default function AgeManagement() {
           <DialogContent  >
             <TextField
               autoFocus
-              margin="dense"
+              margin="normal"
               label="Range Age"
               type="text"
               fullWidth
@@ -380,7 +380,7 @@ export default function AgeManagement() {
             <DialogTitle>Edit Age</DialogTitle>
             <DialogContent>
               <TextField
-                label="RangeAge"
+                label="Range Age"
                 value={selectedAges.rangeAge}
                 fullWidth
                 margin="normal"
@@ -391,14 +391,14 @@ export default function AgeManagement() {
                 <Select
                   value={selectedAges.active}
                   onChange={(e) => handleChange("active", e.target.value)}
-                  label="Active"
+                  label="Status"
                   inputProps={{
                     name: "active",
                     id: "active-select",
                   }}
                 >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
+                 <MenuItem value={true}>Active</MenuItem>
+                 <MenuItem value={false}>Inactive</MenuItem>
                 </Select>
               </FormControl>
             </DialogContent>

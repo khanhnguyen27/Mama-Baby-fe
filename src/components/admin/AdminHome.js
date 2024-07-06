@@ -39,6 +39,12 @@ import { allStatusOrderApi } from "../../api/OrderAPI";
 export default function AdminHome() {
   window.document.title = "AdminHome";
   const navigate = useNavigate();
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const PreviousMonth = (month) => (month === 1 ? 12 : month - 1);
+  const currentYear = currentDate.getFullYear();
+  const PreviousYear = (year = currentYear()) => year - 1;
+
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -59,19 +65,14 @@ export default function AdminHome() {
   const [yearsListOrder, setYearsListOrder] = useState([]);
   const [YearsListAccount, setYearsListAccount] = useState([]);
   const [monthsList, setMonthsList] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYearOrder, setSelectedYearOrder] = useState(new Date().getFullYear());
-  const [selectedYearAccount, setSelectedYearAccount] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYearOrder, setSelectedYearOrder] = useState(currentYear);
+  const [selectedYearAccount, setSelectedYearAccount] = useState(currentYear);
   const [minYear, setMinYear] = useState(new Date().getFullYear() - 15);
   const [maxYear, setMaxYear] = useState(new Date().getFullYear());
   const [totalAccountYear, setTotalAccountYear] = useState(0);
-  // const [currentMonthAccount, setCurrentMonthAccount] = useState(0);
   const [totalAccounts, setTotalAccounts] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -611,6 +612,15 @@ export default function AdminHome() {
         statusOrderRes = await allStatusOrderApi();
       }
 
+      // Fallback to the previous year if no data is available for the selected year
+      if (!orderRes?.data?.data.length && !refundRes?.data?.data.length) {
+        const previousYear = PreviousYear(year);
+        orderRes = await orderByYearApi(previousYear);
+        refundRes = await refundByYearApi(previousYear);
+        statusOrderRes = await allStatusOrderApi();
+        setSelectedYearOrder(previousYear);
+      }
+
       console.log("orderRes:", orderRes);
       console.log("refundRes:", refundRes);
       console.log("statusOrderRes:", statusOrderRes);
@@ -722,9 +732,22 @@ export default function AdminHome() {
       }
 
       let storeMonth;
-
-      if (month) {
+      try {
         storeMonth = await StoreByMonthApi(month);
+      } catch (error) {
+        console.error(`Error fetching data for month ${month}:`, error);
+
+        // Fallback to the previous month if no data is available for the selected month
+        const previousMonth = PreviousMonth(month);
+        try {
+          storeMonth = await StoreByMonthApi(previousMonth);
+          setSelectedMonth(previousMonth);
+        } catch (prevMonthError) {
+          console.error(`Error fetching data for month ${previousMonth}:`, prevMonthError);
+          setCompleteData(0);
+          setInProgressData(0);
+          return;
+        }
       }
 
       console.log("storeMonth:", storeMonth);
@@ -801,6 +824,13 @@ export default function AdminHome() {
         accountRes = await userByYearApi(year);
       }
 
+      // Fallback to the previous year if no data is available for the selected year
+      if (!accountRes?.data?.data.length) {
+        const previousYear = PreviousYear(year);
+        accountRes = await userByYearApi(previousYear);
+        setSelectedYearAccount(previousYear);
+      }
+
       console.log("accountRes:", accountRes);
 
       const accountsData = accountRes?.data?.data || [];
@@ -814,25 +844,12 @@ export default function AdminHome() {
       }, 0);
       setTotalAccountYear(totalAccountsYear);
 
-      // const currentDate = new Date();
-      // const currentMonth = currentDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
-
-      // const currentMonthAccounts = accountsData.reduce((sum, account) => {
-      //   const accountDate = new Date(account.create_at);
-      //   const accountMonth = accountDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
-      //   if (accountMonth === currentMonth && account.role_id.id !== 3) {
-      //     return sum + 1;
-      //   }
-      //   return sum;
-      // }, 0);
-      // setCurrentMonthAccount(currentMonthAccounts);
-
       const monthlyData = Array(12).fill(0);
 
       accountsData.forEach((account) => {
         const accountDate = new Date(account.create_at);
         const month = accountDate.getMonth(); // 0-indexed, Jan is 0, Dec is 11
-        if (account.role_id !== 3) {
+        if (account.role_id.id !== 3) {
           monthlyData[month]++;
         }
       });
@@ -850,7 +867,6 @@ export default function AdminHome() {
       console.error("Error handling Account line chart data:", error);
     }
   };
-
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   const xAxisConfig = [
@@ -942,7 +958,7 @@ export default function AdminHome() {
     } else if (value >= 1_000_000) {
       return `${(value / 1_000_000).toFixed(0)} Mil`;
     } else if (value >= 1_000) {
-      return `${(value / 1_000).toFixed(0)} K`;
+      return `${(value / 1_000).toFixed(0)}K`;
     } else {
       return value;
     }
@@ -954,7 +970,7 @@ export default function AdminHome() {
     } else if (value >= 1_000_000) {
       return `${(value / 1_000_000).toFixed(1)} Mil`;
     } else if (value >= 1_000) {
-      return `${(value / 1_000).toFixed(1)} K`;
+      return `${(value / 1_000).toFixed(1)}K`;
     } else {
       return value;
     }
@@ -1105,7 +1121,7 @@ export default function AdminHome() {
                     <Typography
                       variant="body1"
                       style={{
-                        fontSize: "16px",
+                        fontSize: "19px",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1140,7 +1156,7 @@ export default function AdminHome() {
                     <Typography
                       variant="body1"
                       style={{
-                        fontSize: "16px",
+                        fontSize: "19px",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1426,7 +1442,7 @@ export default function AdminHome() {
                       <Typography
                         variant="body1"
                         style={{
-                          fontSize: "17px",
+                          fontSize: "20px",
                           fontWeight: "bold",
                           color: "#E9967A",
                           marginBottom: "20px",
@@ -1459,7 +1475,7 @@ export default function AdminHome() {
                       <Typography
                         variant="body1"
                         style={{
-                          fontSize: "17px",
+                          fontSize: "20px",
                           fontWeight: "bold",
                           color: "#E9967A",
                           marginBottom: "20px",

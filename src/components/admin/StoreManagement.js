@@ -144,7 +144,7 @@ export default function StoreManagement() {
       .then(() => {
         fetchData();
         closeUpdate();
-        toast.success("Store updated successfully!");
+        toast.success("Store updated successfully.");
       })
       .catch((error) => {
         console.error("Error updating store:", error);
@@ -366,25 +366,31 @@ export default function StoreManagement() {
             <DialogTitle>Edit Store</DialogTitle>
             <DialogContent>
               <TextField
-                label="Name"
+                label="Store Name"
                 value={selectedStore.name_store || ""}
                 fullWidth
                 margin="normal"
                 onChange={(e) => handleChange("name", e.target.value)}
+                InputProps={{
+                  readOnly: true,
+                  sx: {
+                    backgroundColor: "#f0f0f0",
+                  },
+                }}
               />
               <FormControl fullWidth margin="normal">
                 <InputLabel htmlFor="active-select">Status</InputLabel>
                 <Select
                   value={selectedStore.is_active}
                   onChange={(e) => handleChange("is_active", e.target.value)}
-                  label="Active"
+                  label="Status"
                   inputProps={{
                     name: "is_active",
                     id: "active-select",
                   }}
                 >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
+                  <MenuItem value={true}>Active</MenuItem>
+                  <MenuItem value={false}>Inactive</MenuItem>
                 </Select>
               </FormControl>
             </DialogContent>

@@ -114,7 +114,9 @@ export default function AccountManagement() {
     }));
   };
   console.log(selectedAccount);
+
   const handleEdit = () => {
+
     if (!selectedAccount) {
       console.error("No account selected for editing.");
       return;
@@ -134,7 +136,7 @@ export default function AccountManagement() {
       .then(() => {
         fetchData();
         closeUpdate();
-        toast.success("Account updated successfully!");
+        toast.success("Account updated successfully.");
       })
       .catch((error) => {
         console.error("Error updating account:", error);
@@ -374,25 +376,31 @@ export default function AccountManagement() {
             <DialogTitle>Edit Account</DialogTitle>
             <DialogContent>
               <TextField
-                label="Name"
+                label="User Name"
                 value={selectedAccount.username || ""}
                 fullWidth
                 margin="normal"
-                onChange={(e) => handleChange("username", e.target.value)}
+                onChange={(e) => handleChange("name", e.target.value)}
+                InputProps={{
+                  readOnly: true,
+                  sx: {
+                    backgroundColor: "#f0f0f0",
+                  },
+                }}
               />
               <FormControl fullWidth margin="normal">
                 <InputLabel htmlFor="active-select">Status</InputLabel>
                 <Select
                   value={selectedAccount.isActive}
                   onChange={(e) => handleChange("isActive", e.target.value)}
-                  label="Active"
+                  label="Status"
                   inputProps={{
                     name: "isActive",
                     id: "active-select",
                   }}
                 >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
+                  <MenuItem value={true}>Active</MenuItem>
+                  <MenuItem value={false}>Inactive</MenuItem>
                 </Select>
               </FormControl>
             </DialogContent>
