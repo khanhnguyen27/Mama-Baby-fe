@@ -405,7 +405,6 @@ export default function OrdersManagement() {
                 justifyContent: "center",
                 alignItems: "center",
                 height: "75vh",
-                maxWidth: 1000,
                 maxHeight: "90vh",
                 overflowY: "auto",
               }}

@@ -20,7 +20,7 @@ import { jwtDecode } from "jwt-decode";
 import { TextField,InputLabel } from "@mui/material";
 
 const RegistStore = () => {
-  window.document.title = "Sign Up";
+  window.document.title = "Regist For Seller and Store";
   const [storename, setStorename] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");

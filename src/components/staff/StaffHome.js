@@ -292,15 +292,27 @@ export default function StaffHome() {
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
 
+  // useEffect(() => {
+  //   storeByUserIdApi(userId)
+  //     .then((res) => {
+  //       setStore(res?.data?.data);
+  //     })
+  //     .catch((err) => console.log(err));
+  // }, []);
+
   useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     storeByUserIdApi(userId)
       .then((res) => {
         setStore(res?.data?.data);
       })
-      .catch((err) => console.log(err));
-  }, []);
+    fetchData();
+  }, [ageFilter, brandFilter, categoryFilter, store.id, currentPage, sortPrice]);
 
-  const storeId = store.id;
+  // const storeId = store.id;
   const fetchData = async () => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
@@ -313,7 +325,7 @@ export default function StaffHome() {
           category_id: categoryFilter,
           brand_id: brandFilter,
           age_id: ageFilter,
-          store_id: storeId,
+          store_id: store.id,
           page: currentPage - 1,
         }),
       ]);
@@ -349,14 +361,6 @@ export default function StaffHome() {
       console.log(err);
     }
   };
-
-  useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    fetchData();
-  }, [ageFilter, brandFilter, categoryFilter, storeId, currentPage, sortPrice]);
 
   const onPageChange = (page) => {
     fetchData(page);

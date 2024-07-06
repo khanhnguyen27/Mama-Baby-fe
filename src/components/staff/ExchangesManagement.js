@@ -426,319 +426,416 @@ export default function ExchangeManagement() {
                 </TableRow>
               </TableHead>
               <TableBody sx={{ backgroundColor: "white" }}>
-                {sortedExchanges
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell
-                        align="left"
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Typography sx={{ fontWeight: "bold", color: "black" }}>
-                          {index + 1}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Typography sx={{ fontSize: "14px", color: "black" }}>
-                          {userMap[item.user_id][0]}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        scope="row"
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Typography sx={{ fontSize: "14px", color: "black" }}>
-                          {userMap[item.user_id][1]}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          component="div"
-                          sx={{ fontSize: "14px", color: "black" }}
-                        >
-                          {formatDateTime(item.create_date)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ fontSize: "14px", color: "black" }}
-                        >
-                          {item.description}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Typography variant="subtitle1" sx={{ color: "black" }}>
-                          {item?.exchange_detail_list?.map((detail) => (
-                            <Typography
-                              variant="body2"
-                              component="span"
-                              key={detail.id}
-                            >
-                              <strong>
-                                - {productMap[detail.product_id][0]}
-                              </strong>{" "}
-                              <span style={{ fontSize: "12px", opacity: 0.7 }}>
-                                x{detail.quantity}
-                              </span>
-                              <br />
-                            </Typography>
-                          ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          verticalAlign: "top",
-                          textAlign: "left",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <Select
-                          fullWidth
-                          value={item.status}
-                          onChange={(e) => handleSelectChange(e, item)}
-                          disabled={
-                            item.status === "ACCEPT" || item.status === "REFUSE"
-                          }
+                {sortedExchanges.length !== 0 ? (
+                  sortedExchanges
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell
+                          align="left"
                           sx={{
-                            backgroundColor: "#fff4fc",
-                            color: "#ff469e",
-                            borderRadius: "20px",
-                            fontSize: "16px",
-                            border: "1px solid #ff469e",
-                            boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16)",
-                            transition:
-                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                            "&:hover": {
-                              color: "white",
-                              backgroundColor: "#ff469e",
-                              border: "1px solid white",
-                            },
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              border: "none",
-                            },
-                            "& .MuiSvgIcon-root": {
-                              color: "inherit",
-                            },
-                            "& .Mui-disabled": {
-                              "-webkit-text-fill-color": "#ff469e",
-                              opacity: 0.9,
-                              "&:hover": {
-                                "-webkit-text-fill-color": "white",
-                              },
-                            },
-                          }}
-                          MenuProps={{
-                            sx: {
-                              "& .MuiMenu-list": {
-                                backgroundColor: "white",
-                                borderRadius: "10px",
-                                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.16)",
-                              },
-                            },
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
                           }}
                         >
-                          <MenuItem
-                            value={"PROCESSING"}
-                            sx={{
-                              color: "black",
-                              fontSize: "16px",
-                              transition:
-                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                              "&:hover": {
-                                backgroundColor: "#fff4fc",
-                                color: "#ff469e",
-                              },
-                              "&.Mui-selected": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                              },
-                            }}
+                          <Typography
+                            sx={{ fontWeight: "bold", color: "black" }}
                           >
-                            PROCESSING
-                          </MenuItem>
-                          <MenuItem
-                            value={"ACCEPT"}
-                            sx={{
-                              color: "black",
-                              fontSize: "16px",
-                              transition:
-                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                              "&:hover": {
-                                backgroundColor: "#fff4fc",
-                                color: "#ff469e",
-                              },
-                              "&.Mui-selected": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                              },
-                            }}
-                          >
-                            ACCEPT
-                          </MenuItem>
-                          <MenuItem
-                            value={"REFUSE"}
-                            sx={{
-                              color: "black",
-                              fontSize: "16px",
-                              transition:
-                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                              "&:hover": {
-                                backgroundColor: "#fff4fc",
-                                color: "#ff469e",
-                              },
-                              "&.Mui-selected": {
-                                backgroundColor: "#ff469e",
-                                color: "white",
-                                "&:hover": {
-                                  backgroundColor: "#fff4fc",
-                                  color: "#ff469e",
-                                },
-                              },
-                            }}
-                          >
-                            REFUSE
-                          </MenuItem>
-                        </Select>
-                        <Modal
-                          open={open}
-                          onClose={handleClose}
-                          slotProps={{
-                            backdrop: {
-                              style: {
-                                backgroundColor: "rgba(0, 0, 0, 0.1)",
-                              },
-                            },
+                            {index + 1}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
                           }}
                         >
-                          <Box
+                          <Typography sx={{ fontSize: "14px", color: "black" }}>
+                            {userMap[item.user_id][0]}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <Typography sx={{ fontSize: "14px", color: "black" }}>
+                            {userMap[item.user_id][1]}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            component="div"
+                            sx={{ fontSize: "14px", color: "black" }}
+                          >
+                            {formatDateTime(item.create_date)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontSize: "14px", color: "black" }}
+                          >
+                            {item.description}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "black" }}
+                          >
+                            {item?.exchange_detail_list?.map((detail) => (
+                              <Typography
+                                variant="body2"
+                                component="span"
+                                key={detail.id}
+                              >
+                                <strong>
+                                  - {productMap[detail.product_id][0]}
+                                </strong>{" "}
+                                <span
+                                  style={{ fontSize: "12px", opacity: 0.7 }}
+                                >
+                                  x{detail.quantity}
+                                </span>
+                                <br />
+                              </Typography>
+                            ))}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            verticalAlign: "top",
+                            textAlign: "left",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <Select
+                            fullWidth
+                            value={item.status}
+                            onChange={(e) => handleSelectChange(e, item)}
+                            disabled={
+                              item.status === "ACCEPT" ||
+                              item.status === "REFUSE"
+                            }
                             sx={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              width: 700,
-                              borderRadius: "20px",
                               backgroundColor: "#fff4fc",
-                              border: "2px solid #ff469e",
-                              boxShadow: 10,
-                              p: 4,
+                              color: "#ff469e",
+                              borderRadius: "20px",
+                              fontSize: "16px",
+                              border: "1px solid #ff469e",
+                              boxShadow: "0 3px 6px rgba(0, 0, 0, 0.16)",
+                              transition:
+                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
+                              "&:hover": {
+                                color: "white",
+                                backgroundColor: "#ff469e",
+                                border: "1px solid white",
+                              },
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                border: "none",
+                              },
+                              "& .MuiSvgIcon-root": {
+                                color: "inherit",
+                              },
+                              "& .Mui-disabled": {
+                                "-webkit-text-fill-color": "#ff469e",
+                                opacity: 0.9,
+                                "&:hover": {
+                                  "-webkit-text-fill-color": "white",
+                                },
+                              },
+                            }}
+                            MenuProps={{
+                              sx: {
+                                "& .MuiMenu-list": {
+                                  backgroundColor: "white",
+                                  borderRadius: "10px",
+                                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                },
+                              },
                             }}
                           >
-                            <Typography variant="h6" component="h2">
-                              Confirm Update Request's Status
-                            </Typography>
-                            <Typography sx={{ mt: 2 }}>
-                              Are you sure you want to update the status of
-                              exchange? (This cannot be undone and changed back
-                              to the previous status)
-                            </Typography>
-                            <Box
+                            <MenuItem
+                              value={"PROCESSING"}
                               sx={{
-                                mt: 2,
-                                display: "flex",
-                                justifyContent: "flex-end",
+                                color: "black",
+                                fontSize: "16px",
+                                transition:
+                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#fff4fc",
+                                  color: "#ff469e",
+                                },
+                                "&.Mui-selected": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
+                                  "&:hover": {
+                                    backgroundColor: "#fff4fc",
+                                    color: "#ff469e",
+                                  },
+                                },
                               }}
                             >
-                              <Button
-                                variant="contained"
-                                sx={{
-                                  backgroundColor: "white",
+                              PROCESSING
+                            </MenuItem>
+                            <MenuItem
+                              value={"ACCEPT"}
+                              sx={{
+                                color: "black",
+                                fontSize: "16px",
+                                transition:
+                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#fff4fc",
                                   color: "#ff469e",
-                                  borderRadius: "20px",
-                                  fontSize: 16,
-                                  fontWeight: "bold",
-                                  my: 0.2,
-                                  mx: 1,
-                                  transition:
-                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                  border: "1px solid #ff469e",
+                                },
+                                "&.Mui-selected": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
                                   "&:hover": {
-                                    backgroundColor: "#ff469e",
-                                    color: "white",
-                                    border: "1px solid white",
+                                    backgroundColor: "#fff4fc",
+                                    color: "#ff469e",
                                   },
-                                }}
-                                onClick={() => handleUpdateExchangeStatus()}
-                              >
-                                Yes
-                              </Button>
-                              <Button
-                                variant="contained"
-                                sx={{
-                                  backgroundColor: "white",
+                                },
+                              }}
+                            >
+                              ACCEPT
+                            </MenuItem>
+                            <MenuItem
+                              value={"REFUSE"}
+                              sx={{
+                                color: "black",
+                                fontSize: "16px",
+                                transition:
+                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#fff4fc",
                                   color: "#ff469e",
-                                  borderRadius: "20px",
-                                  fontSize: 16,
-                                  fontWeight: "bold",
-                                  my: 0.2,
-                                  mx: 1,
-                                  transition:
-                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                  border: "1px solid #ff469e",
+                                },
+                                "&.Mui-selected": {
+                                  backgroundColor: "#ff469e",
+                                  color: "white",
                                   "&:hover": {
-                                    backgroundColor: "#ff469e",
-                                    color: "white",
-                                    border: "1px solid white",
+                                    backgroundColor: "#fff4fc",
+                                    color: "#ff469e",
                                   },
+                                },
+                              }}
+                            >
+                              REFUSE
+                            </MenuItem>
+                          </Select>
+                          <Modal
+                            open={open}
+                            onClose={handleClose}
+                            slotProps={{
+                              backdrop: {
+                                style: {
+                                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                },
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: 700,
+                                borderRadius: "20px",
+                                backgroundColor: "#fff4fc",
+                                border: "2px solid #ff469e",
+                                boxShadow: 10,
+                                p: 4,
+                              }}
+                            >
+                              <Typography variant="h6" component="h2">
+                                Confirm Update Request's Status
+                              </Typography>
+                              <Typography sx={{ mt: 2 }}>
+                                Are you sure you want to update the status of
+                                exchange? (This cannot be undone and changed
+                                back to the previous status)
+                              </Typography>
+                              <Box
+                                sx={{
+                                  mt: 2,
+                                  display: "flex",
+                                  justifyContent: "flex-end",
                                 }}
-                                onClick={handleClose}
                               >
-                                No
-                              </Button>
+                                <Button
+                                  variant="contained"
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "20px",
+                                    fontSize: 16,
+                                    fontWeight: "bold",
+                                    my: 0.2,
+                                    mx: 1,
+                                    transition:
+                                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                      border: "1px solid white",
+                                    },
+                                  }}
+                                  onClick={() => handleUpdateExchangeStatus()}
+                                >
+                                  Yes
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "20px",
+                                    fontSize: 16,
+                                    fontWeight: "bold",
+                                    my: 0.2,
+                                    mx: 1,
+                                    transition:
+                                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                      border: "1px solid white",
+                                    },
+                                  }}
+                                  onClick={handleClose}
+                                >
+                                  No
+                                </Button>
+                              </Box>
                             </Box>
-                          </Box>
-                        </Modal>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          </Modal>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        verticalAlign: "top",
+                        textAlign: "left",
+                        borderRight: "1px solid rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "1.25rem", color: "black" }}>
+                        -
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 20]}
+              rowsPerPageOptions={[10, 20, 50]}
               component="div"
               count={sortedExchanges.length}
               rowsPerPage={rowsPerPage}

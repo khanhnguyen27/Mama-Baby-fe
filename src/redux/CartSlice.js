@@ -25,7 +25,7 @@ export const cartSlice = createSlice({
       );
       if (existingProduct) {
         const updatedQuantity = Math.min(
-          existingProduct.quantity + quantity,
+          existingProduct.quantity + quantity, product.remain,
           99
         );
         existingProduct.quantity = Math.max(updatedQuantity, 1);

@@ -28,16 +28,13 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
 } from "@mui/material";
-import { Rating } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
-import { KeyboardCapslock } from "@mui/icons-material";
+import { KeyboardCapslock, VerifiedUser } from "@mui/icons-material";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
 
 export default function ProductDetails() {
   const [visible, setVisible] = useState(false);
@@ -153,8 +150,22 @@ export default function ProductDetails() {
 
   window.document.title = `${product?.name}`;
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOnIcon
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 24,
+            }}
+          />
+        </Box>
+      </>
+    );
   };
 
   if (!product) {
@@ -190,8 +201,10 @@ export default function ProductDetails() {
           name: product.name,
           price: product.price,
           point: product.point,
+          remain: product.remain,
           type: product.type,
           store_id: product.store_id,
+          image_url: product.image_url,
         },
         quantity: quantity,
       })
@@ -325,8 +338,8 @@ export default function ProductDetails() {
                   border: "3px solid #ff469e",
                   color: "black",
                   padding: "20px",
-                  maxWidth: "900px",
-                  width: "60vw",
+                  maxWidth: "1500px",
+                  width: "72vw",
                   margin: "0 auto",
                 }}
               >
@@ -359,6 +372,21 @@ export default function ProductDetails() {
                           alt={product.name}
                         />
                       </Paper>
+                      <Box sx={{ display: "flex", mt: 1.5 }}>
+                        <VerifiedUser
+                          sx={{
+                            color: "#ff469e",
+                            fontSize: "1.5rem",
+                            mr: 1,
+                            pt: 1,
+                          }}
+                        />
+                        <Typography
+                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
+                        >
+                          100% genuine product
+                        </Typography>
+                      </Box>
                     </Grid>
                     <Grid
                       item
@@ -390,17 +418,28 @@ export default function ProductDetails() {
                         >
                           {product.name}
                         </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Box
+                          sx={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mt: 1,
+                          }}
+                        >
                           <Typography variant="h6" sx={{ textAlign: "left" }}>
-                            {product.point}
+                            {formatCurrencyPoint(product.point)}
                           </Typography>
-                          <MonetizationOnIcon
+                          <Typography
                             variant="h6"
-                            sx={{
-                              marginLeft: "4px",
-                              fontSize: 24,
-                            }}
-                          />
+                            style={{ textAlign: "right" }}
+                          >
+                            Available:{" "}
+                            <span
+                              style={{ color: "#ff469e", fontWeight: "600" }}
+                            >
+                              {product.remain}
+                            </span>
+                          </Typography>
                         </Box>
                       </div>
 
@@ -437,6 +476,7 @@ export default function ProductDetails() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
+                          mt: 6,
                         }}
                       >
                         <ButtonGroup

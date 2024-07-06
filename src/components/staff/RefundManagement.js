@@ -420,7 +420,6 @@ export default function OrdersManagement() {
                 justifyContent: "center",
                 alignItems: "center",
                 height: "75vh",
-                maxWidth: 1000,
                 maxHeight: "90vh",
                 overflowY: "auto",
               }}
@@ -1148,7 +1147,7 @@ export default function OrdersManagement() {
         </Modal>
       </Container>
       <Dialog open={openOrderDetail} onClose={handleCloseOrderDetail}>
-        <Box sx={{ width: "100%", textAlign: "right", pt: 2, px: 3 }}>
+        <Box sx={{ width: "100%", textAlign: "right", pt: 2, px: 2.5 }}>
           <Close
             fontSize="large"
             onClick={() => handleCloseOrderDetail()}
@@ -1263,10 +1262,10 @@ export default function OrdersManagement() {
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Product Name</TableCell>
-                          <TableCell align="right">Unit Price</TableCell>
-                          <TableCell align="right">Quantity</TableCell>
-                          <TableCell align="right">Amount</TableCell>
+                          <TableCell sx={{ fontWeight: "600", width: "40%" }}>Product Name</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: "600" }}>Unit Price</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: "600" }}>Quantity</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: "600" }}>Amount</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -1360,13 +1359,12 @@ export default function OrdersManagement() {
                     </Typography>
                     <TableContainer
                       component={Paper}
-                      sx={{ width: "80%", marginLeft: 8 }}
                     >
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell sx={{ fontWeight: "600" }}>Date</TableCell>
+                            <TableCell sx={{ fontWeight: "600" }}>Status</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>

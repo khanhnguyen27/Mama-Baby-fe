@@ -26,7 +26,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
+import { ClearAll, KeyboardCapslock, MonetizationOn } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
 import { addToCart } from "../../redux/CartSlice";
 import { useDispatch } from "react-redux";
@@ -149,26 +149,44 @@ export default function Products() {
     setCategoryFilter(null);
   };
 
-  const handleAddToCart = (index) => {
-    toast.info(`${product.products[index].name} x 1 was added to cart`, {
-      position: "top-right",
-      autoClose: 2500,
-    });
-    dispatch(
-      addToCart({
-        product: {
-          id: product.products[index].id,
-          name: product.products[index].name,
-          price: product.products[index].price,
-          point: product.products[index].point,
-          type: product.products[index].type,
-          store_id: product.products[index].store_id,
-          image_url: product.products[index].image_url,
-        },
-        quantity: 1,
-      })
+  const formatCurrencyPoint = (amount) => {
+    return (
+      <>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {new Intl.NumberFormat("vi-VN").format(amount)}
+          <MonetizationOn
+            variant="h6"
+            sx={{
+              marginLeft: "4px",
+              color: "gray",
+              fontSize: 20,
+            }}
+          />
+        </Box>
+      </>
     );
   };
+
+  // const handleAddToCart = (index) => {
+  //   toast.info(`${product.products[index].name} x 1 was added to cart`, {
+  //     position: "top-right",
+  //     autoClose: 2500,
+  //   });
+  //   dispatch(
+  //     addToCart({
+  //       product: {
+  //         id: product.products[index].id,
+  //         name: product.products[index].name,
+  //         price: product.products[index].price,
+  //         point: product.products[index].point,
+  //         type: product.products[index].type,
+  //         store_id: product.products[index].store_id,
+  //         image_url: product.products[index].image_url,
+  //       },
+  //       quantity: 1,
+  //     })
+  //   );
+  // };
 
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -673,7 +691,14 @@ export default function Products() {
               ) : (
                 product?.products?.map((item, index) => {
                   return (
-                    <Grid item xs={12} sm={6} lg={4} key={index}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      lg={4}
+                      key={index}
+                      sx={{ display: "flex", flexWrap: "wrap" }}
+                    >
                       <Tooltip
                         title={item.name}
                         enterDelay={500}
@@ -698,6 +723,7 @@ export default function Products() {
                           sx={{
                             minWidth: 180,
                             padding: 2,
+                            flexGrow: 1,
                             border: "1px solid #f5f7fd",
                             borderRadius: "16px",
                             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
@@ -777,18 +803,10 @@ export default function Products() {
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                               <Typography
                                 variant="body2"
-                                sx={{ color: "gray", textAlign: "left" }}
+                                sx={{ color: "gray", textAlign: "left", fontSize: "16px" }}
                               >
-                                {item.point}
+                                {formatCurrencyPoint(item.point)}
                               </Typography>
-                              <MonetizationOnIcon
-                                variant="h6"
-                                sx={{
-                                  marginLeft: "4px",
-                                  color: "gray",
-                                  fontSize: 16,
-                                }}
-                              />
                             </Box>
                             <Typography
                               variant="body2"
@@ -798,8 +816,7 @@ export default function Products() {
                               {categoryMap[item.category_id]}
                             </Typography>
                           </CardContent>
-                          <Divider />
-                          <CardActions sx={{ justifyContent: "end" }}>
+                          {/* <CardActions sx={{ justifyContent: "end" }}>
                             <IconButton
                               size="large"
                               sx={{
@@ -833,7 +850,7 @@ export default function Products() {
                               </span>
                               <Cart />
                             </IconButton>
-                          </CardActions>
+                          </CardActions> */}
                         </Card>
                       </Tooltip>
                     </Grid>
