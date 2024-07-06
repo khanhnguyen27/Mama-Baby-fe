@@ -26,7 +26,7 @@ import { allStoreApi } from "../../api/StoreAPI";
 
 export default function Requests() {
   const navigate = useNavigate();
-  window.document.title = "Requests";
+  window.document.title = "Your Requests";
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
@@ -37,6 +37,8 @@ export default function Requests() {
   const [exchange, setExchange] = useState([]);
   const [refund, setRefund] = useState([]);
   const [view, setView] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("-");
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,6 +96,23 @@ export default function Requests() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
+  const handleStatusFilterChange = () => {
+    const statusOrder = ["-", "P", "A", "R"];
+    const currentIndex = statusOrder.indexOf(filterStatus);
+    const nextIndex = (currentIndex + 1) % statusOrder.length;
+    setFilterStatus(statusOrder[nextIndex]);
+  };
+
+  const filteredExchanges = exchange.filter(
+    (item) =>
+      filterStatus === "-" || item.status.startsWith(filterStatus)
+  );
+
+  const filteredRefunds = refund.filter(
+    (item) =>
+      filterStatus === "-" || item.status.startsWith(filterStatus)
+  );
+
   const handleViewChange = (e, newView) => {
     setLoading(true);
     if (newView !== null) {
@@ -109,7 +128,7 @@ export default function Requests() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "60vh",
+          minHeight: "77vh",
           maxWidth: "100vw",
           backgroundColor: "#f5f7fd",
         }}
@@ -134,6 +153,7 @@ export default function Requests() {
           backgroundColor: "white",
           borderRadius: "20px",
           boxShadow: 4,
+          paddingBottom: "10px"
         }}
       >
         <Typography
@@ -148,97 +168,126 @@ export default function Requests() {
         >
           Your Requests
         </Typography>
-        <ToggleButtonGroup
-          value={view}
-          exclusive
-          onChange={handleViewChange}
-          variant="outlined"
-          sx={{
-            mb: 4,
-            "& .MuiToggleButton-root": {
-              color: "black",
-              border: "1px solid #ff469e",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              transition:
-                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-              "&:hover": {
-                backgroundColor: "#fff4fc",
-                color: "#ff469e",
-              },
-              "&.Mui-selected": {
-                backgroundColor: "#ff469e",
-                color: "white",
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <ToggleButtonGroup
+            value={view}
+            exclusive
+            onChange={handleViewChange}
+            variant="outlined"
+            sx={{
+              mb: 4,
+              height: "40px",
+              "& .MuiToggleButton-root": {
+                color: "black",
+                border: "1px solid #ff469e",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
                 "&:hover": {
                   backgroundColor: "#fff4fc",
                   color: "#ff469e",
                 },
+                "&.Mui-selected": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                  },
+                },
               },
-            },
-          }}
-        >
-          <ToggleButton
-            value="all"
+            }}
+          >
+            <ToggleButton
+              value="all"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                },
+              }}
+            >
+              All
+            </ToggleButton>
+            <ToggleButton
+              value="exchange"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderLeft: "1px solid #ff469e",
+                borderRight: "1px solid #ff469e",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                },
+              }}
+            >
+              Exchanges
+            </ToggleButton>
+            <ToggleButton
+              value="refund"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                },
+              }}
+            >
+              Refunds
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <IconButton
+            variant="contained"
+            size="medium"
             sx={{
               backgroundColor: "white",
               color: "#ff469e",
-              borderRadius: "20px",
+              borderRadius: "10px",
               fontSize: "1rem",
+              height: "36px",
+              width: "40px",
+              padding: "4px 12px",
               fontWeight: "bold",
-              boxShadow: "none",
+              mx: 0.25,
               transition:
-                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #ff469e",
               "&:hover": {
                 backgroundColor: "#ff469e",
                 color: "white",
+                border: "1px solid white",
               },
             }}
+            onClick={handleStatusFilterChange}
           >
-            All
-          </ToggleButton>
-          <ToggleButton
-            value="exchange"
-            sx={{
-              backgroundColor: "white",
-              color: "#ff469e",
-              borderLeft: "1px solid #ff469e",
-              borderRight: "1px solid #ff469e",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              boxShadow: "none",
-              transition:
-                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #ff469e",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-              },
-            }}
-          >
-            Exchanges
-          </ToggleButton>
-          <ToggleButton
-            value="refund"
-            sx={{
-              backgroundColor: "white",
-              color: "#ff469e",
-              borderRadius: "20px",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              boxShadow: "none",
-              transition:
-                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #ff469e",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-              },
-            }}
-          >
-            Refunds
-          </ToggleButton>
-        </ToggleButtonGroup>
+            {filterStatus === "-" ? "-" : filterStatus}
+          </IconButton>
+        </Box>
         <Grid container spacing={4}>
           {(view === "all" || view === "exchange") && (
             <>
@@ -246,12 +295,12 @@ export default function Requests() {
                 <Typography
                   variant="h5"
                   gutterBottom
-                  sx={{ fontWeight: "bold" }}
+                  sx={{ fontWeight: "bold", color: "#ff469e" }}
                 >
-                  Exchange Requests
+                  Exchange Requests ({filteredExchanges.length})
                 </Typography>
               </Grid>
-              {exchange?.map((item) => (
+              {filteredExchanges?.reverse().map((item) => (
                 <Grid
                   item
                   xs={12}
@@ -284,7 +333,7 @@ export default function Requests() {
                       </Typography>
                       <Typography variant="h6">
                         <span style={{ fontWeight: "600" }}>Status:</span>{" "}
-                        {item.status}
+                        <span style={{ fontWeight: "bold", color: "#ff469e" }}>{item.status}</span>
                       </Typography>
                       <Typography variant="h6">
                         <span style={{ fontWeight: "600" }}>Created Date:</span>{" "}
@@ -372,12 +421,12 @@ export default function Requests() {
                 <Typography
                   variant="h5"
                   gutterBottom
-                  sx={{ fontWeight: "bold" }}
+                  sx={{ fontWeight: "bold", color: "#ff469e" }}
                 >
-                  Refund Requests
+                  Refund Requests ({filteredRefunds.length})
                 </Typography>
               </Grid>
-              {refund?.map((item) => (
+              {filteredRefunds?.reverse().map((item) => (
                 <Grid
                   item
                   xs={12}
@@ -410,7 +459,7 @@ export default function Requests() {
                       </Typography>
                       <Typography variant="h6">
                         <span style={{ fontWeight: "600" }}>Status:</span>{" "}
-                        {item.status}
+                        <span style={{ fontWeight: "bold", color: "#ff469e" }}>{item.status}</span>
                       </Typography>
                       <Typography variant="h6">
                         <span style={{ fontWeight: "600" }}>Created Date:</span>{" "}

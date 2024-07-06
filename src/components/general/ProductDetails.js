@@ -665,7 +665,7 @@ export default function ProductDetails() {
                           }}
                         >
                           {product.name}
-                          {product.status === "OUT OF STOCK" && (
+                          {/* {product.status === "OUT OF STOCK" && (
                             <span
                               style={{
                                 marginLeft: "0.5rem",
@@ -675,7 +675,7 @@ export default function ProductDetails() {
                             >
                               ({product.status})
                             </span>
-                          )}
+                          )} */}
                         </Typography>
                         <Box
                           sx={{
@@ -695,7 +695,7 @@ export default function ProductDetails() {
                             variant="h6"
                             style={{ textAlign: "right" }}
                           >
-                            Remain qty:{" "}
+                            Available:{" "}
                             <span
                               style={{ color: "#ff469e", fontWeight: "600" }}
                             >

@@ -94,7 +94,7 @@ const SignIn = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            minHeight: "100vh",
+            minHeight: "85vh",
             maxWidth: "100vw",
             backgroundColor: "#f5f5f5",
           }}
