@@ -118,7 +118,7 @@ export default function BrandManagement() {
   const handleAddBrand = async () => {
     const trimmedBrandName = newBrandName.trim();
     if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase())) {
-      toast.error('Brand name already exists');
+      toast.error('Brand name already exists.');
       return;
     }
 
@@ -127,7 +127,7 @@ export default function BrandManagement() {
       await addBrandApi(newBrand); // Replace with your API call to add brand
       fetchData(); // Refresh brand list
       handleCloseAddDialog();
-      toast.success("Brand added successfully!");
+      toast.success("Brand added successfully.");
       setPage(0);
     } catch (error) {
       toast.error("Failed to add brand. Please try again later.");
@@ -155,7 +155,7 @@ export default function BrandManagement() {
     const trimmedBrandName = selectedBrand.name.trim();
 
     if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase() && brand.id !== selectedBrand.id)) {
-      toast.error('Brand name already exists');
+      toast.error('Brand name already exists.');
       return;
     }
 
@@ -172,7 +172,7 @@ export default function BrandManagement() {
       .then(() => {
         fetchData(); // Refresh brand list
         closeUpdate();
-        toast.success("Brand updated successfully!");
+        toast.success("Brand updated successfully.");
       })
       .catch((error) => {
         console.error("Error updating brand:", error);
@@ -272,8 +272,8 @@ export default function BrandManagement() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={1} md={3}></Grid>
-            <Grid item xs={3} md={2}>
+            <Grid item xs={1} md={2}></Grid>
+            <Grid item xs={3} md={3} container justifyContent="flex-end">
               <Button
                 variant="contained"
                 size="medium"
@@ -356,7 +356,7 @@ export default function BrandManagement() {
           <DialogContent>
             <TextField
               autoFocus
-              margin="dense"
+              margin="normal"
               label="Brand Name"
               type="text"
               fullWidth
@@ -380,7 +380,7 @@ export default function BrandManagement() {
             <DialogTitle>Edit Brand</DialogTitle>
             <DialogContent>
               <TextField
-                label="Name"
+                label="Brand Name"
                 value={selectedBrand.name}
                 fullWidth
                 margin="normal"
@@ -391,14 +391,14 @@ export default function BrandManagement() {
                 <Select
                   value={selectedBrand.active}
                   onChange={(e) => handleChange("active", e.target.value)}
-                  label="Active"
+                  label="Status"
                   inputProps={{
                     name: "active",
                     id: "active-select",
                   }}
                 >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
+                  <MenuItem value={true}>Active</MenuItem>
+                  <MenuItem value={false}>Inactive</MenuItem>
                 </Select>
               </FormControl>
             </DialogContent>

@@ -25,7 +25,8 @@ import {
   DialogContent,
   DialogActions,
   TablePagination,
-  InputAdornment
+  InputAdornment,
+  TableContainer
 } from "@mui/material";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import EditIcon from "@mui/icons-material/Edit";
@@ -142,10 +143,18 @@ export default function Vouchers() {
   };
 
   const handleEdit = () => {
+    const trimmedVoucherCode = selectedVoucher.code.trim();
+
+    if (vouchers.some(voucher => voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase() && voucher.id !== selectedVoucher.id)) {
+      toast.error('Voucher code already exists.');
+      return;
+    }
+
     if (!selectedVoucher) {
       toast.error("No voucher selected.");
       return;
     }
+
     updateVoucherApi(
       selectedVoucher.id,
       selectedVoucher.code,
@@ -154,10 +163,10 @@ export default function Vouchers() {
       selectedVoucher.endAt,
       selectedVoucher.active
     )
-      .then((response) => {
-        toast.success("Voucher updated successfully!");
-        // Reload the page to keep the current search keyword
-        window.location.reload();
+      .then(() => {
+        fetchData();
+        closeUpdate();
+        toast.success("Voucher updated successfully.");
       })
       .catch((error) => {
         console.error("Error updating voucher:", error);
@@ -214,12 +223,24 @@ export default function Vouchers() {
 
   const handleCloseAddVoucher = () => {
     setOpenAddVoucher(false);
+    setCode("");
+    setDiscountValue("");
+    setDescription("");
+    setEndAt("");
+    setActive(true);
   };
 
   const now = new Date();
   const endDate = new Date(endAt);
 
   const handleAddVoucher = () => {
+
+    const trimmedVoucherCode = code.trim();
+    if (vouchers.some(voucher => voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase())) {
+      toast.error('Voucher code already exists.');
+      return;
+    }
+
     if (!code || !discountValue || !description || !endAt) {
       toast.warn("Please fill in all required fields.");
       return;
@@ -236,11 +257,9 @@ export default function Vouchers() {
       isActive
     )
       .then(() => {
-        // Fetch vouchers again to update the list
-
         fetchData();
         handleCloseAddVoucher();
-        toast.success("Voucher added successfully!");
+        toast.success("Voucher added successfully.");
         setPage(0);
       })
       .catch((error) => {
@@ -289,7 +308,7 @@ export default function Vouchers() {
                   <TextField
                     value={searchKeyword}
                     onChange={handleSearchChange}
-                    placeholder="Search By Voucher Code!"
+                    placeholder="Search By Voucher Code"
                     variant="outlined"
                     size="small"
                     fullWidth
@@ -333,11 +352,17 @@ export default function Vouchers() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={1} md={3}></Grid>
-                <Grid item xs={3} md={2} container justifyContent="flex-end">
+                <Grid item xs={1} md={2}></Grid>
+                <Grid item xs={3} md={3} container justifyContent="flex-end">
                   <Tooltip title="Add New Voucher">
                     <Button
-                      style={{ backgroundColor: "white", color: "black" }}
+                      style={{
+                        color: "black",
+                        height: "56px",
+                        border: "1px solid #ff469e",
+                        borderRadius: "10px",
+                        backgroundColor: "white",
+                      }}
                       variant="contained"
                       startIcon={<AddIcon />}
                       onClick={handleAddNew}
@@ -348,50 +373,62 @@ export default function Vouchers() {
                 </Grid>
               </Grid>
               {loading ? (
-                <Grid item xs={12} style={{ textAlign: "center" }}>
+                <Grid style={{ textAlign: "center" }}>
                   <CircularProgress />
                 </Grid>
               ) : (
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No.</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Code</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Discount Value</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Description</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>End Date</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Action</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {currentItems.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell align="left">{index + 1}</TableCell>
-                        <TableCell align="left">{item.code}</TableCell>
-                        <TableCell align="left">{formatCurrency(item.discount_value)}</TableCell>
-                        <TableCell align="left">{item.description}</TableCell>
-                        <TableCell align="left">{formatDate(item.endAt)}</TableCell>
-                        <TableCell align="left">
-                          <Tooltip title={item.active ? "Active" : "Inactive"}>
-                            {item.active ? (
-                              <CheckIcon style={{ color: "green" }} />
-                            ) : (
-                              <CloseIcon style={{ color: "red" }} />
-                            )}
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell align="left">
-                          <Tooltip title="Edit Voucher">
-                            <IconButton onClick={() => openUpdate(item)}>
-                              <EditIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Code</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Discount Value</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Description</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>End Date</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHead>
+                    <TableBody>
+                      {currentItems.map((item, index) => (
+                        <TableRow
+                          key={item.id}
+                          sx={{
+                            "&:hover": {
+                              backgroundColor: "#f1f1f1",
+                              cursor: "pointer",
+                            },
+                          }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {indexOfFirstItem + index + 1}
+                          </TableCell>
+                          <TableCell align="left">{item.code}</TableCell>
+                          <TableCell align="left">{formatCurrency(item.discount_value)}</TableCell>
+                          <TableCell align="left">{item.description}</TableCell>
+                          <TableCell align="left">{formatDate(item.endAt)}</TableCell>
+                          <TableCell align="left">
+                            <Tooltip title={item.active ? "Active" : "Inactive"}>
+                              {item.active ? (
+                                <CheckIcon style={{ color: "green" }} />
+                              ) : (
+                                <CloseIcon style={{ color: "red" }} />
+                              )}
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell align="left">
+                            <Tooltip title="Edit Voucher">
+                              <IconButton onClick={() => openUpdate(item)}>
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
@@ -401,6 +438,13 @@ export default function Vouchers() {
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
+                sx={{
+                  justifyContent: "center",
+                  backgroundColor: "f1f1f1",
+                  marginRight: "40px"
+                }}
+                labelRowsPerPage="Rows:"
+                labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
               />
             </Paper>
           </Grid>
@@ -436,44 +480,52 @@ export default function Vouchers() {
 
       {/* Dialog for Update Voucher */}
       <Dialog open={openUpdateVoucher} onClose={closeUpdate}>
-        <DialogTitle>Update Voucher</DialogTitle>
+        <DialogTitle>Edit Voucher</DialogTitle>
         <DialogContent>
           {selectedVoucher && (
             <>
               <TextField
-                margin="dense"
+                margin="normal"
                 label="Voucher Code"
+                type="text"
                 fullWidth
                 value={selectedVoucher.code}
                 onChange={(e) => handleChange("code", e.target.value)}
               />
               <TextField
-                margin="dense"
+                margin="normal"
                 label="Discount Value"
+                type="number"
                 fullWidth
                 value={selectedVoucher.discount_value}
                 onChange={(e) => handleChange("discount_value", e.target.value)}
               />
               <TextField
-                margin="dense"
+                margin="normal"
                 label="Description"
+                type="text"
                 fullWidth
                 value={selectedVoucher.description}
                 onChange={(e) => handleChange("description", e.target.value)}
               />
               <TextField
-                margin="dense"
+                margin="normal"
                 label="End Date"
-                fullWidth
                 type="date"
+                fullWidth
                 value={selectedVoucher.endAt}
                 onChange={(e) => handleChange("endAt", e.target.value)}
               />
-              <FormControl fullWidth margin="dense">
-                <InputLabel>Active</InputLabel>
+              <FormControl fullWidth margin="normal">
+                <InputLabel htmlFor="active-select">Status</InputLabel>
                 <Select
                   value={selectedVoucher.active}
                   onChange={(e) => handleChange("active", e.target.value)}
+                  label="Status"
+                  inputProps={{
+                    name: "active",
+                    id: "active-select",
+                  }}
                 >
                   <MenuItem value={true}>Active</MenuItem>
                   <MenuItem value={false}>Inactive</MenuItem>
@@ -493,39 +545,50 @@ export default function Vouchers() {
         <DialogTitle>Add New Voucher</DialogTitle>
         <DialogContent>
           <TextField
-            margin="dense"
+            margin="normal"
             label="Voucher Code"
+            type="text"
             fullWidth
             value={code}
             onChange={(e) => setCode(e.target.value)}
           />
           <TextField
-            margin="dense"
+            margin="normal"
             label="Discount Value"
+            type="number"
             fullWidth
             value={discountValue}
             onChange={(e) => setDiscountValue(e.target.value)}
           />
           <TextField
-            margin="dense"
+            margin="normal"
             label="Description"
+            type="text"
             fullWidth
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <label>End Day</label>
           <TextField
-            margin="dense"
+            margin="normal"
+            marginTop="15px"
+            label="End Date"
             fullWidth
             type="date"
             value={endAt}
             onChange={(e) => setEndAt(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
-          <FormControl fullWidth margin="dense">
-            <InputLabel>Active</InputLabel>
+          <FormControl fullWidth margin="normal">
+            <InputLabel htmlFor="active-select">Status</InputLabel>
             <Select
               value={isActive}
               onChange={(e) => setActive(e.target.value)}
+              label="Status"
+              inputProps={{
+                id: "active-select",
+              }}
             >
               <MenuItem value={true}>Active</MenuItem>
               <MenuItem value={false}>Inactive</MenuItem>
