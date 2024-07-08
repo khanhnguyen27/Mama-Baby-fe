@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { signupApi } from "../../api/UserAPI";
+import { allUserApi, signupApi } from "../../api/UserAPI";
 
 const SignUp = () => {
   window.document.title = "Sign Up";
@@ -27,7 +27,7 @@ const SignUp = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     // if (!handleValidationEmail()) {
     //   return;
@@ -39,9 +39,12 @@ const SignUp = () => {
       return;
     }
     if (password.length < 8 || retype.length < 8) {
-      toast.error("Password's length and confirm's password is at least 8 characters", {
-        autoClose: 1500,
-      });
+      toast.error(
+        "Password's length and confirm's password is at least 8 characters",
+        {
+          autoClose: 1500,
+        }
+      );
       return;
     }
     if (retype !== password) {
@@ -67,21 +70,41 @@ const SignUp = () => {
       toast.error("Please input all fields", { autoClose: 1500 });
       return;
     }
-    signupApi(username, password, retype, fullname, address, phone)
-      .then((response) => {
-        console.log("Sign Up Successfully", response);
-        toast.success(`Sign Up Successfully`, { autoClose: 1500 });
-        setTimeout(() => {
-          setLoading(true);
-        }, 2000);
-        setTimeout(() => {
-          navigate("/signin");
-        }, 5000);
-      })
-      .catch((error) => {
-        console.error("Sign Up Failed", error);
-        toast.error("Sign Up Failed.", { autoClose: 1500 });
-      });
+    try {
+      const response = await allUserApi();
+
+      if (response?.data?.data?.some((item) => item.username === username)) {
+        toast.error("This username is already existed", {
+          autoClose: 1500,
+        });
+        return;
+      }
+
+      if (response?.data?.data?.some((item) => item.phone_number === phone)) {
+        toast.error("This phone is already used", {
+          autoClose: 1500,
+        });
+        return;
+      }
+      signupApi(username, password, retype, fullname, address, phone)
+        .then((response) => {
+          console.log("Sign Up Successfully", response);
+          toast.success(`Sign Up Successfully`, { autoClose: 1500 });
+          setTimeout(() => {
+            setLoading(true);
+          }, 2000);
+          setTimeout(() => {
+            navigate("/signin");
+          }, 5000);
+        })
+        .catch((error) => {
+          console.error("Sign Up Failed", error);
+          toast.error("Sign Up Failed.", { autoClose: 1500 });
+        });
+    } catch (error) {
+      console.error("Error fetching user data", error);
+      toast.error("Error checking username availability", { autoClose: 1500 });
+    }
   };
 
   if (loading) {
@@ -156,10 +179,17 @@ const SignUp = () => {
                     paddingBottom: 1,
                     fontWeight: "700",
                     display: "flex",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
                   }}
                 >
-                  <span>Username <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(At least 6 characters)</span>
+                  <span>
+                    Username <span style={{ color: "red" }}>*</span>
+                  </span>{" "}
+                  <span
+                    style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3 }}
+                  >
+                    (At least 6 characters)
+                  </span>
                 </Typography>
                 <Input
                   id="username"
@@ -211,10 +241,17 @@ const SignUp = () => {
                     paddingBottom: 1,
                     fontWeight: "700",
                     display: "flex",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
                   }}
                 >
-                  <span>Password <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(At least 8 characters)</span>
+                  <span>
+                    Password <span style={{ color: "red" }}>*</span>
+                  </span>{" "}
+                  <span
+                    style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3 }}
+                  >
+                    (At least 8 characters)
+                  </span>
                 </Typography>
                 <Input
                   id="password"
@@ -275,10 +312,17 @@ const SignUp = () => {
                     paddingBottom: 1,
                     fontWeight: "700",
                     display: "flex",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
                   }}
                 >
-                  <span>Confirm Password <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(Re-type your password)</span>
+                  <span>
+                    Confirm Password <span style={{ color: "red" }}>*</span>
+                  </span>{" "}
+                  <span
+                    style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3 }}
+                  >
+                    (Re-type your password)
+                  </span>
                 </Typography>
                 <Input
                   id="retype"
@@ -445,10 +489,17 @@ const SignUp = () => {
                     paddingBottom: 1,
                     fontWeight: "700",
                     display: "flex",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
                   }}
                 >
-                  <span>Phone <span style={{ color: "red" }}>*</span></span> <span style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3}}>(9 - 11 digits)</span>
+                  <span>
+                    Phone <span style={{ color: "red" }}>*</span>
+                  </span>{" "}
+                  <span
+                    style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3 }}
+                  >
+                    (9 - 11 digits)
+                  </span>
                 </Typography>
                 <Input
                   id="phone"
