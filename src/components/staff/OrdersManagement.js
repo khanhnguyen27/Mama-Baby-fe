@@ -1040,6 +1040,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Reject", item.id)}
+                          disabled={!store.is_active}
                         >
                           REJECT ORDER
                         </Button>
@@ -1064,6 +1065,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Accept", item.id)}
+                          disabled={!store.is_active}
                         >
                           ACCEPT ORDER
                         </Button>
@@ -1195,6 +1197,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Deliver", item.id)}
+                          disabled={!store.is_active}
                         >
                           READY TO DELIVER
                         </Button>

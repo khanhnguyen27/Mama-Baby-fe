@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import Logo2 from "../../assets/logo2.png";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
@@ -23,6 +24,9 @@ import ArticleIcon from "@mui/icons-material/Article";
 import Voucher from "@mui/icons-material/ConfirmationNumber";
 import Refund from "@mui/icons-material/CurrencyExchange";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
+import { storeByUserIdApi } from "../../api/StoreAPI";
+import Tooltip from "@mui/material/Tooltip";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 const drawerWidth = 260;
 const itemList = [
@@ -67,6 +71,17 @@ export default function StaffLayout() {
   const { pathname } = useLocation();
   const username = localStorage.getItem("username");
   const navigate = useNavigate();
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedAccessToken = jwtDecode(accessToken);
+  const userId = decodedAccessToken.UserID;
+  const [store, setStore] = useState([]);
+
+  useEffect(() => {
+    setTimeout(() => {}, 1000);
+    storeByUserIdApi(userId).then((res) => {
+      setStore(res?.data?.data);
+    });
+  }, [userId]);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -139,16 +154,38 @@ export default function StaffLayout() {
             }}
             alt="logo"
           />
-          <Typography
+          <Box
             sx={{
-              textAlign: "center",
-              fontSize: "1.25rem",
-              color: "white",
+              display: "flex",
+              alignItems: "center",
               mt: 2,
             }}
           >
-            Welcome, <span style={{ fontWeight: "bold" }}>{username}</span>
-          </Typography>
+            <Typography
+              sx={{
+                textAlign: "center",
+                fontSize: "1.25rem",
+                color: "white",
+              }}
+            >
+              Welcome, <span style={{ fontWeight: "bold" }}>{username}</span>
+            </Typography>
+            {!store.is_active && (
+              <Tooltip title="Your store is currently blocked" arrow>
+                <ErrorOutlineIcon
+                  sx={{
+                    fontSize: "1.5rem",
+                    color: "yellow",
+                    ml: 1,
+                    cursor: "pointer",
+                    borderRadius: "50%",
+                    border: "2px solid yellow",
+                    padding: "2px",
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Box>
         </Box>
         <List>
           {itemList.map((item, index) => (

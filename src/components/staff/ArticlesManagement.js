@@ -512,6 +512,7 @@ export default function Articles() {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={!store.is_active}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -695,6 +696,7 @@ export default function Articles() {
             <Button
               variant="contained"
               color="primary"
+              disabled={!store.is_active}
               sx={{
                 display: "flex",
                 justifyContent: "center",
@@ -800,6 +802,7 @@ export default function Articles() {
                             border: "1px solid #ff469e",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                           },
+                          pointerEvents: store.is_active ? "auto" : "none",
                         }}
                       >
                         <Box

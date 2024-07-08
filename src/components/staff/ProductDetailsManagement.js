@@ -53,6 +53,7 @@ export default function ProductDetailsManagement() {
   const [comment, setComment] = useState([]);
   const [visibleComments, setVisibleComments] = useState(5);
   const productId = state?.productId;
+  const statusStore = state?.status;
   const [quantity, setQuantity] = useState(1);
   const isComment = comment?.length;
   const [userMap, setUserMap] = useState({});
@@ -929,6 +930,7 @@ export default function ProductDetailsManagement() {
                   </Grid>
                   <>
                     <IconButton
+                      disabled={!statusStore}
                       aria-label="more"
                       aria-controls="long-menu"
                       aria-haspopup="true"
