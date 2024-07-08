@@ -80,7 +80,6 @@ export default function StaffHome() {
   const statusInStock = "IN STOCK";
   const statusComingSoon = "COMING SOON";
   const [sortPrice, setSortPrice] = useState("");
-
   const countries = [
     "Afghanistan",
     "Albania",
@@ -474,9 +473,9 @@ export default function StaffHome() {
   const handleAddProduct = () => {
     if (
       !name ||
-      !price ||
-      !point ||
-      !remain ||
+      price === "" ||
+      point === "" ||
+      remain === "" ||
       !image.file ||
       !weight ||
       !brandOrigin ||
@@ -637,9 +636,9 @@ export default function StaffHome() {
     debugger;
     if (
       !selectedProduct.name ||
-      !selectedProduct.price ||
+      selectedProduct.price === "" ||
       selectedProduct.point === "" ||
-      !selectedProduct.remain ||
+      selectedProduct.remain === "" ||
       !weight ||
       !brandOrigin ||
       !manufacturedAt ||
@@ -947,6 +946,7 @@ export default function StaffHome() {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={!store.is_active}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -1400,6 +1400,7 @@ export default function StaffHome() {
             <Button
               variant="contained"
               color="primary"
+              disabled={!store.is_active}
               sx={{
                 display: "flex",
                 justifyContent: "center",
@@ -1835,7 +1836,12 @@ export default function StaffHome() {
                               `/staff/products/${item.name
                                 .toLowerCase()
                                 .replace(/\s/g, "-")}`,
-                              { state: { productId: item.id } },
+                              {
+                                state: {
+                                  productId: item.id,
+                                  status: store.is_active,
+                                },
+                              },
                               window.scrollTo({
                                 top: 0,
                                 behavior: "smooth",
@@ -1849,7 +1855,12 @@ export default function StaffHome() {
                               `/staff/products/${item.name
                                 .toLowerCase()
                                 .replace(/\s/g, "-")}`,
-                              { state: { productId: item.id } },
+                              {
+                                state: {
+                                  productId: item.id,
+                                  status: store.is_active,
+                                },
+                              },
                               window.scrollTo({
                                 top: 0,
                                 behavior: "smooth",
@@ -1952,6 +1963,7 @@ export default function StaffHome() {
                         </CardContent>
                         <Divider sx={{ mt: 0.5, mb: 2 }} />
                         <Button
+                          disabled={!store.is_active}
                           variant="contained"
                           sx={{
                             ml: "auto",

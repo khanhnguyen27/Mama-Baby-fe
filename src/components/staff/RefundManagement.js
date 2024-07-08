@@ -654,6 +654,7 @@ export default function OrdersManagement() {
                                               {
                                                 state: {
                                                   productId: detail.product_id,
+                                                  status: store?.is_active,
                                                 },
                                               },
                                               window.scrollTo({
@@ -865,6 +866,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpenAccept(item.id)}
+                          disabled={!store?.is_active}
                         >
                           ACCEPT REFUND
                         </Button>
@@ -888,6 +890,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpenRefuse(item.id)}
+                          disabled={!store?.is_active}
                         >
                           REFUSE REFUND
                         </Button>
@@ -1262,10 +1265,18 @@ export default function OrdersManagement() {
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ fontWeight: "600", width: "40%" }}>Product Name</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: "600" }}>Unit Price</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: "600" }}>Quantity</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: "600" }}>Amount</TableCell>
+                          <TableCell sx={{ fontWeight: "600", width: "40%" }}>
+                            Product Name
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: "600" }}>
+                            Unit Price
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: "600" }}>
+                            Quantity
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: "600" }}>
+                            Amount
+                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -1357,14 +1368,16 @@ export default function OrdersManagement() {
                     >
                       Order Status:
                     </Typography>
-                    <TableContainer
-                      component={Paper}
-                    >
+                    <TableContainer component={Paper}>
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell sx={{ fontWeight: "600" }}>Date</TableCell>
-                            <TableCell sx={{ fontWeight: "600" }}>Status</TableCell>
+                            <TableCell sx={{ fontWeight: "600" }}>
+                              Date
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: "600" }}>
+                              Status
+                            </TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>

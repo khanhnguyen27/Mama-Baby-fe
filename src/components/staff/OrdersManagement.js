@@ -141,7 +141,7 @@ export default function OrdersManagement() {
           item.category_id,
           item.price,
           item.image_url,
-          item.status
+          item.status,
         ];
         return x;
       }, {});
@@ -439,14 +439,14 @@ export default function OrdersManagement() {
                   <Box
                     sx={{ display: "flex", justifyContent: "space-between" }}
                   >
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: "10px", fontWeight: "bold" }}
-                  >
-                    Order No. {item.id}{" "}
-                  </Typography>
-                  {item.type === "PRE_ORDER" && (
-                        <Tooltip
+                    <Typography
+                      variant="h5"
+                      sx={{ mb: "10px", fontWeight: "bold" }}
+                    >
+                      Order No. {item.id}{" "}
+                    </Typography>
+                    {item.type === "PRE_ORDER" && (
+                      <Tooltip
                         title="One or more products in this order are pre-order items"
                         enterDelay={300}
                         leaveDelay={100}
@@ -465,16 +465,20 @@ export default function OrdersManagement() {
                             },
                           },
                         }}
-                      >      
-                      <Typography style={{
-                        borderRadius: "1rem",
-                        border: "1px solid #ff469e",
-                        color: "#ff469e",
-                        fontWeight: "bold",
-                        padding: "4px 8px",
-                        height: "32px",
-                        cursor: "pointer"
-                      }}>PRE-ORDER</Typography>
+                      >
+                        <Typography
+                          style={{
+                            borderRadius: "1rem",
+                            border: "1px solid #ff469e",
+                            color: "#ff469e",
+                            fontWeight: "bold",
+                            padding: "4px 8px",
+                            height: "32px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          PRE-ORDER
+                        </Typography>
                       </Tooltip>
                     )}
                   </Box>
@@ -744,6 +748,7 @@ export default function OrdersManagement() {
                                               {
                                                 state: {
                                                   productId: detail.product_id,
+                                                  status: store?.is_active,
                                                 },
                                               },
                                               window.scrollTo({
@@ -1040,12 +1045,19 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Reject", item.id)}
+                          disabled={!store.is_active}
                         >
                           REJECT ORDER
                         </Button>
                         <Button
                           variant="contained"
-                          disabled={item.type === "PRE_ORDER" && item.order_detail_list.some((item) => productMap[item.product_id][5] === "COMING SOON")}
+                          disabled={
+                            item.type === "PRE_ORDER" &&
+                            item.order_detail_list.some(
+                              (item) =>
+                                productMap[item.product_id][5] === "COMING SOON"
+                            )
+                          }
                           sx={{
                             backgroundColor: "white",
                             color: "#ff469e",
@@ -1064,6 +1076,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Accept", item.id)}
+                          disabled={!store.is_active}
                         >
                           ACCEPT ORDER
                         </Button>
@@ -1195,6 +1208,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Deliver", item.id)}
+                          disabled={!store.is_active}
                         >
                           READY TO DELIVER
                         </Button>

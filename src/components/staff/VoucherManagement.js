@@ -26,7 +26,7 @@ import {
   DialogActions,
   TablePagination,
   InputAdornment,
-  TableContainer
+  TableContainer,
 } from "@mui/material";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import EditIcon from "@mui/icons-material/Edit";
@@ -36,8 +36,12 @@ import Button from "@mui/material/Button";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
-import 'react-toastify/dist/ReactToastify.css';
-import { getVoucherByStoreIdApi, updateVoucherApi, addVoucherApi } from "../../api/VoucherAPI";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  getVoucherByStoreIdApi,
+  updateVoucherApi,
+  addVoucherApi,
+} from "../../api/VoucherAPI";
 
 export default function Vouchers() {
   window.document.title = "Vouchers";
@@ -145,8 +149,14 @@ export default function Vouchers() {
   const handleEdit = () => {
     const trimmedVoucherCode = selectedVoucher.code.trim();
 
-    if (vouchers.some(voucher => voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase() && voucher.id !== selectedVoucher.id)) {
-      toast.error('Voucher code already exists.');
+    if (
+      vouchers.some(
+        (voucher) =>
+          voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase() &&
+          voucher.id !== selectedVoucher.id
+      )
+    ) {
+      toast.error("Voucher code already exists.");
       return;
     }
 
@@ -183,7 +193,7 @@ export default function Vouchers() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+    return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
   const handleChangePage = (event, newPage) => {
@@ -214,7 +224,7 @@ export default function Vouchers() {
   const [code, setCode] = useState("");
   const [discountValue, setDiscountValue] = useState("");
   const [description, setDescription] = useState("");
-  const [endAt, setEndAt] = useState('');
+  const [endAt, setEndAt] = useState("");
   const [isActive, setActive] = useState(true);
 
   const handleOpenAddVoucher = () => {
@@ -234,10 +244,14 @@ export default function Vouchers() {
   const endDate = new Date(endAt);
 
   const handleAddVoucher = () => {
-
     const trimmedVoucherCode = code.trim();
-    if (vouchers.some(voucher => voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase())) {
-      toast.error('Voucher code already exists.');
+    if (
+      vouchers.some(
+        (voucher) =>
+          voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase()
+      )
+    ) {
+      toast.error("Voucher code already exists.");
       return;
     }
 
@@ -248,14 +262,7 @@ export default function Vouchers() {
       toast.error("End date must be in the future.");
       return;
     }
-    addVoucherApi(
-      code,
-      discountValue,
-      description,
-      endAt,
-      storeId,
-      isActive
-    )
+    addVoucherApi(code, discountValue, description, endAt, storeId, isActive)
       .then(() => {
         fetchData();
         handleCloseAddVoucher();
@@ -273,7 +280,8 @@ export default function Vouchers() {
       <Container>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Paper elevation={3}
+            <Paper
+              elevation={3}
               sx={{
                 position: "sticky",
                 marginTop: "20px",
@@ -293,14 +301,15 @@ export default function Vouchers() {
                   fontSize: "20px",
                   borderRadius: "4px",
                   textAlign: "center",
-                  marginBottom: "16px"
+                  marginBottom: "16px",
                 }}
               >
                 Vouchers Management
               </Typography>
 
               <Grid
-                container spacing={2}
+                container
+                spacing={2}
                 alignItems="center"
                 sx={{ marginBottom: "16px" }}
               >
@@ -324,7 +333,10 @@ export default function Vouchers() {
                       endAdornment: (
                         <InputAdornment position="end">
                           {searchKeyword && (
-                            <IconButton onClick={() => setSearchKeyword("")} size="small">
+                            <IconButton
+                              onClick={() => setSearchKeyword("")}
+                              size="small"
+                            >
                               <CloseIcon fontSize="small" />
                             </IconButton>
                           )}
@@ -335,7 +347,10 @@ export default function Vouchers() {
                 </Grid>
                 <Grid item xs={4} md={3}>
                   <FormControl sx={{ width: "170px" }}>
-                    <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                    <InputLabel
+                      htmlFor="sorting-status-select"
+                      id="sorting-status-label"
+                    >
                       Sorting Status
                     </InputLabel>
                     <Select
@@ -366,6 +381,7 @@ export default function Vouchers() {
                       variant="contained"
                       startIcon={<AddIcon />}
                       onClick={handleAddNew}
+                      disabled={!store?.is_active}
                     >
                       Add New Voucher
                     </Button>
@@ -381,13 +397,48 @@ export default function Vouchers() {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Code</TableCell>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Discount Value</TableCell>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Description</TableCell>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>End Date</TableCell>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
-                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          No
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Code
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Discount Value
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Description
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          End Date
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Status
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Actions
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -405,11 +456,17 @@ export default function Vouchers() {
                             {indexOfFirstItem + index + 1}
                           </TableCell>
                           <TableCell align="left">{item.code}</TableCell>
-                          <TableCell align="left">{formatCurrency(item.discount_value)}</TableCell>
-                          <TableCell align="left">{item.description}</TableCell>
-                          <TableCell align="left">{formatDate(item.endAt)}</TableCell>
                           <TableCell align="left">
-                            <Tooltip title={item.active ? "Active" : "Inactive"}>
+                            {formatCurrency(item.discount_value)}
+                          </TableCell>
+                          <TableCell align="left">{item.description}</TableCell>
+                          <TableCell align="left">
+                            {formatDate(item.endAt)}
+                          </TableCell>
+                          <TableCell align="left">
+                            <Tooltip
+                              title={item.active ? "Active" : "Inactive"}
+                            >
                               {item.active ? (
                                 <CheckIcon style={{ color: "green" }} />
                               ) : (
@@ -419,7 +476,10 @@ export default function Vouchers() {
                           </TableCell>
                           <TableCell align="left">
                             <Tooltip title="Edit Voucher">
-                              <IconButton onClick={() => openUpdate(item)}>
+                              <IconButton
+                                disabled={!store?.is_active}
+                                onClick={() => openUpdate(item)}
+                              >
                                 <EditIcon />
                               </IconButton>
                             </Tooltip>
@@ -441,10 +501,12 @@ export default function Vouchers() {
                 sx={{
                   justifyContent: "center",
                   backgroundColor: "f1f1f1",
-                  marginRight: "40px"
+                  marginRight: "40px",
                 }}
                 labelRowsPerPage="Rows:"
-                labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}/${to} of ${count}`
+                }
               />
             </Paper>
           </Grid>

@@ -542,7 +542,8 @@ export default function ExchangeManagement() {
                             onChange={(e) => handleSelectChange(e, item)}
                             disabled={
                               item.status === "ACCEPT" ||
-                              item.status === "REFUSE"
+                              item.status === "REFUSE" ||
+                              store.is_active === false
                             }
                             sx={{
                               backgroundColor: "#fff4fc",
