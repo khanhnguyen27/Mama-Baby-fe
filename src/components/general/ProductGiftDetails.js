@@ -203,6 +203,7 @@ export default function ProductDetails() {
           point: product.point,
           remain: product.remain,
           type: product.type,
+          status: product.status,
           store_id: product.store_id,
           image_url: product.image_url,
         },
@@ -402,7 +403,13 @@ export default function ProductDetails() {
                         <Typography variant="h6">Brand:</Typography>
                         <Typography
                           variant="h6"
-                          style={{ color: "#ff469e", fontWeight: "bold" }}
+                          style={{
+                            borderRadius: "1rem",
+                            border: "1px solid #ff469e",
+                            color: "#ff469e",
+                            fontWeight: "bold",
+                            padding: "0 8px",
+                          }}
                         >
                           {brandMap[product.brand_id]}
                         </Typography>
@@ -426,11 +433,11 @@ export default function ProductDetails() {
                             mt: 1,
                           }}
                         >
-                          <Typography variant="h6" sx={{ textAlign: "left" }}>
+                          <Typography variant="h5" sx={{ textAlign: "left", color: "#ff469e", fontWeight: "bold" }}>
                             {formatCurrencyPoint(product.point)}
                           </Typography>
                           <Typography
-                            variant="h6"
+                            variant="h5"
                             style={{ textAlign: "right" }}
                           >
                             Available:{" "}
@@ -448,6 +455,7 @@ export default function ProductDetails() {
                         <Typography
                           variant="h6"
                           style={{
+                            borderRadius: "1rem",
                             border: "1px solid #ff469e",
                             color: "#ff469e",
                             fontWeight: "bold",
@@ -462,6 +470,7 @@ export default function ProductDetails() {
                         <Typography
                           variant="h6"
                           style={{
+                            borderRadius: "1rem",
                             border: "1px solid #ff469e",
                             color: "#ff469e",
                             fontWeight: "bold",
@@ -476,7 +485,6 @@ export default function ProductDetails() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
-                          mt: 6,
                         }}
                       >
                         <ButtonGroup
@@ -721,7 +729,7 @@ export default function ProductDetails() {
                     </Box>
                   </Box>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                {/* <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Button
                     variant="outlined"
                     sx={{
@@ -792,28 +800,54 @@ export default function ProductDetails() {
                   >
                     + Follow
                   </Button>
-                </Box>
+                </Box> */}
                 <Box>
-                  <Typography variant="body2">
-                    Followers:{" "}
-                    <span style={{ color: "#ff469e", fontWeight: "bold" }}>
-                      1K
-                    </span>
-                  </Typography>
-                  <Typography variant="body2">
-                    Satisfaction:{" "}
-                    <span style={{ color: "#ff469e", fontWeight: "bold" }}>
-                      100%
-                    </span>
-                  </Typography>
-                  <Typography variant="body2">
-                    Ratings:{" "}
-                    <span style={{ color: "#ff469e", fontWeight: "bold" }}>
-                      5.0 / 5.0
-                    </span>
-                  </Typography>
-                </Box>
-                <Box>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      mr: 0.5,
+                      mb: 2,
+                      borderColor: "#ff469e",
+                      color: "#ff469e",
+                      padding: "8px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "20px",
+                      transition:
+                        "transform 0.3s ease-in-out, border-color 0.3s ease-in-out",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        borderColor: "#ff469e",
+                        color: "#ff469e",
+                      },
+                    }}
+                    onClick={() => (
+                      navigate(`/stores/${product.store_id}`, {
+                        state: { storeId: product.store_id },
+                      }),
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                    )}
+                  >
+                    <ShopIcon
+                      sx={{
+                        mr: 1,
+                        color: "#ff469e",
+                        verticalAlign: "middle",
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        verticalAlign: "middle",
+                        lineHeight: 1,
+                      }}
+                    >
+                      Visit Shop
+                    </Typography>
+                  </Button>
                   <Typography
                     variant="body2"
                     sx={{ display: "flex", alignItems: "center" }}
@@ -1033,6 +1067,7 @@ export default function ProductDetails() {
                   mr: 2,
                   padding: "0.25rem 0.5rem",
                   boxShadow: "none",
+                  border: "1px solid #f5f7fd",
                   transition:
                     "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                   "&:hover": {

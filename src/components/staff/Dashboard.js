@@ -1400,7 +1400,10 @@ export default function Dashboard() {
               <Grid item xs={12}>
                 <Card
                   onClick={handlePieChartClick}
-                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                  sx={{
+                    cursor: "pointer",
+                    ":hover": { backgroundColor: "#FFFAF0" },
+                  }}
                 >
                   <CardContent style={{ height: "129px" }}>
                     <Grid>
@@ -1430,39 +1433,11 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={() => navigate("/staff/refunds")}
-                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
-                >
-                  <CardContent style={{ height: "129px" }}>
-                    <Grid>
-                      <Typography
-                        variant="body1"
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: "20px",
-                          color: "#FF8042",
-                        }}
-                      >
-                        Refund
-                      </Typography>
-                      <Typography
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
-                        }}
-                      >
-                        <span>{refundCount}</span>
-                      </Typography>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12}>
-                <Card
                   onClick={() => navigate("/staff/exchanges")}
-                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                  sx={{
+                    cursor: "pointer",
+                    ":hover": { backgroundColor: "#FFFAF0" },
+                  }}
                 >
                   <CardContent style={{ height: "129px" }}>
                     <Grid>
@@ -1485,6 +1460,40 @@ export default function Dashboard() {
                         }}
                       >
                         <span>{exchangeCount}</span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12}>
+                <Card
+                  onClick={() => navigate("/staff/refunds")}
+                  sx={{
+                    cursor: "pointer",
+                    ":hover": { backgroundColor: "#FFFAF0" },
+                  }}
+                >
+                  <CardContent style={{ height: "129px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#FF8042",
+                        }}
+                      >
+                        Refund
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "10px",
+                          fontSize: "30px",
+                        }}
+                      >
+                        <span>{refundCount}</span>
                       </Typography>
                     </Grid>
                   </CardContent>

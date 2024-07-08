@@ -20,9 +20,9 @@ import { Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import Edit from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
-import Voucher from '@mui/icons-material/ConfirmationNumber';
-import Refund from '@mui/icons-material/CurrencyExchange';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
+import Voucher from "@mui/icons-material/ConfirmationNumber";
+import Refund from "@mui/icons-material/CurrencyExchange";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
 
 const drawerWidth = 260;
 const itemList = [
@@ -74,6 +74,7 @@ export default function StaffLayout() {
     toast.success("Logout Successfully", { autoClose: 1000 });
     setTimeout(() => {
       navigate("/");
+      window.scrollTo({ top: 0, behavior: "instant" });
       console.log("Logout successfully");
     }, 1000);
   };

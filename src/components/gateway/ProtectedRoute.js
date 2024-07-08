@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 
 export default function ProtectedRoute({ allowedRole }) {
   const accessToken = localStorage.getItem("accessToken");
-  const decodedAccessToken = jwtDecode(accessToken);
+  const decodedAccessToken = accessToken ? jwtDecode(accessToken) : null;
   const role = decodedAccessToken?.RoleID;
   return allowedRole == role ? (
     <Outlet />
@@ -11,6 +11,8 @@ export default function ProtectedRoute({ allowedRole }) {
     <Navigate to="/staff" />
   ) : role == "ADMIN" ? (
     <Navigate to="/admin" />
+  ) : role == "MEMBER" ? (
+    <Navigate to="/" />
   ) : (
     <Navigate to="/signin" />
   );

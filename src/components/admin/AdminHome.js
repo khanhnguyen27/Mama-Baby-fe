@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { KeyboardCapslock } from "@mui/icons-material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import SummarizeIcon from '@mui/icons-material/Summarize';
+import SummarizeIcon from "@mui/icons-material/Summarize";
 import { useNavigate } from "react-router-dom";
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
-import ExcelJS from 'exceljs';
+import ExcelJS from "exceljs";
 import jsPDF from "jspdf";
 import io from "socket.io-client";
 import {
@@ -155,23 +155,27 @@ export default function AdminHome() {
       // Group months available
       const uniqueMonths = new Set();
       // Xử lý dữ liệu đơn hàng
-      console.log("order data: ", ordersData)
-      ordersData.forEach(order => {
+      console.log("order data: ", ordersData);
+      ordersData.forEach((order) => {
         const orderDate = new Date(order.order_date);
         const month = orderDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
         const year = orderDate.getFullYear();
         uniqueMonths.add(`${month}-${year}`);
-        console.log(`Order Date: ${order.order_date}, Month-Year: ${month}-${year}`);
+        console.log(
+          `Order Date: ${order.order_date}, Month-Year: ${month}-${year}`
+        );
       });
 
       // Xử lý dữ liệu hoàn tiền
-      console.log("refund data: ", refundData)
-      refundData.forEach(refundItem => {
+      console.log("refund data: ", refundData);
+      refundData.forEach((refundItem) => {
         const refundDate = new Date(refundItem.create_date);
         const month = refundDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
         const year = refundDate.getFullYear();
         uniqueMonths.add(`${month}-${year}`);
-        console.log(`Refund Date: ${refundItem.create_date}, Month-Year: ${month}-${year}`);
+        console.log(
+          `Refund Date: ${refundItem.create_date}, Month-Year: ${month}-${year}`
+        );
       });
       setMonths(Array.from(uniqueMonths));
       console.log("Month Unique:", Array.from(uniqueMonths));
@@ -334,8 +338,8 @@ export default function AdminHome() {
 
   //Export report revenue, refund
   const sortedMonths = months.sort((a, b) => {
-    const [monthA, yearA] = a.split('-').map(Number);
-    const [monthB, yearB] = b.split('-').map(Number);
+    const [monthA, yearA] = a.split("-").map(Number);
+    const [monthB, yearB] = b.split("-").map(Number);
 
     // Tạo đối tượng Date từ tháng và năm
     const dateA = new Date(yearA, monthA - 1); // Trừ 1 vì tháng trong Date bắt đầu từ 0
@@ -345,31 +349,46 @@ export default function AdminHome() {
   });
 
   // Lọc danh sách các store có trạng thái "APPROVED"
-  const approvedStores = stores.filter(store => store.status === 'APPROVED');
+  const approvedStores = stores.filter((store) => store.status === "APPROVED");
 
   const calculateMonthlyData = (storeId, month, year) => {
     let revenue = 0;
     let refund = 0;
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const orderDate = new Date(order.order_date);
       const orderMonth = orderDate.getMonth() + 1;
       const orderYear = orderDate.getFullYear();
 
-      if (order.store_id === storeId && orderMonth === month && orderYear === year) {
-        if (order.status_order_list.some(status => status.status === "COMPLETED") ||
-          (order.payment_method === "VNPAY" && order.status_order_list.some(status => status.status === "CANCELLED"))) {
+      if (
+        order.store_id === storeId &&
+        orderMonth === month &&
+        orderYear === year
+      ) {
+        if (
+          order.status_order_list.some(
+            (status) => status.status === "COMPLETED"
+          ) ||
+          (order.payment_method === "VNPAY" &&
+            order.status_order_list.some(
+              (status) => status.status === "CANCELLED"
+            ))
+        ) {
           revenue += order.final_amount; // Giả sử final_amount là doanh thu
         }
       }
     });
 
-    refunds.forEach(refundItem => {
+    refunds.forEach((refundItem) => {
       const refundDate = new Date(refundItem.create_date);
       const refundMonth = refundDate.getMonth() + 1;
       const refundYear = refundDate.getFullYear();
 
-      if (refundItem.store_id === storeId && refundMonth === month && refundYear === year) {
+      if (
+        refundItem.store_id === storeId &&
+        refundMonth === month &&
+        refundYear === year
+      ) {
         if (refundItem.status == "ACCEPT") {
           refund += refundItem.amount;
         }
@@ -383,72 +402,116 @@ export default function AdminHome() {
     setMonths(sortedMonths);
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Sheet1');
+    const worksheet = workbook.addWorksheet("Sheet1");
 
     // Define styles
     const borderStyle = {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      bottom: { style: 'thin' },
-      right: { style: 'thin' }
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
     };
 
     const headerStyle = {
-      font: { bold: true, color: { argb: 'FF000000' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8CCE4' } },
-      alignment: { horizontal: 'center', vertical: 'middle' },
-      border: borderStyle
+      font: { bold: true, color: { argb: "FF000000" } },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFB8CCE4" },
+      },
+      alignment: { horizontal: "center", vertical: "middle" },
+      border: borderStyle,
     };
 
     const monthStyle = {
-      font: { bold: true, color: { argb: 'FF000000' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8CCE4' } },
-      alignment: { horizontal: 'center', vertical: 'middle' },
-      border: borderStyle
+      font: { bold: true, color: { argb: "FF000000" } },
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFB8CCE4" },
+      },
+      alignment: { horizontal: "center", vertical: "middle" },
+      border: borderStyle,
     };
 
     const headerRevenueStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC4D79B' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC4D79B" },
+      },
+      border: borderStyle,
     };
 
     const headerRefundStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFABF8F' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFFABF8F" },
+      },
+      border: borderStyle,
     };
 
     const revenueStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBF1DE' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFEBF1DE" },
+      },
+      border: borderStyle,
     };
 
     const refundStyle = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDE9D9' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFFDE9D9" },
+      },
+      border: borderStyle,
     };
 
     const infoStoreStyle1 = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEECE1' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFEEECE1" },
+      },
+      border: borderStyle,
     };
 
     const infoStoreStyle2 = {
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD6D0B7' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD6D0B7" },
+      },
+      border: borderStyle,
     };
 
     const totalRowStyle = {
       font: { bold: true },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE57D' } },
-      border: borderStyle
+      fill: {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFFFE57D" },
+      },
+      border: borderStyle,
     };
 
     // Add headers
-    const headerRow1 = ["No.", "Store name", "Store phone", "Store address", "Owner full name", "Owner phone", "Owner address"];
+    const headerRow1 = [
+      "No.",
+      "Store name",
+      "Store phone",
+      "Store address",
+      "Owner full name",
+      "Owner phone",
+      "Owner address",
+    ];
     const headerRow2 = ["", "", "", "", "", "", ""];
 
-    sortedMonths.forEach(monthYear => {
-      const [month, year] = monthYear.split('-');
+    sortedMonths.forEach((monthYear) => {
+      const [month, year] = monthYear.split("-");
       headerRow1.push(`${month}-${year}`, "");
       headerRow2.push("Revenue (VND)", "Refund (VND)");
     });
@@ -457,8 +520,12 @@ export default function AdminHome() {
     worksheet.addRow(headerRow2);
 
     // Style header rows
-    worksheet.getRow(1).eachCell((cell) => { cell.style = headerStyle; });
-    worksheet.getRow(2).eachCell((cell) => { cell.style = headerStyle; });
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.style = headerStyle;
+    });
+    worksheet.getRow(2).eachCell((cell) => {
+      cell.style = headerStyle;
+    });
 
     for (let i = 0; i < sortedMonths.length; i++) {
       // Style month cells
@@ -470,7 +537,9 @@ export default function AdminHome() {
       cell2.style = { ...cell2.style, ...headerRevenueStyle };
 
       // Style refund cells
-      const cell3 = worksheet.getCell(`${String.fromCharCode(72 + 2 * i + 1)}2`);
+      const cell3 = worksheet.getCell(
+        `${String.fromCharCode(72 + 2 * i + 1)}2`
+      );
       cell3.style = { ...cell2.style, ...headerRefundStyle };
     }
 
@@ -486,9 +555,13 @@ export default function AdminHome() {
         userMap[store.user_id][2],
       ];
 
-      sortedMonths.forEach(monthYear => {
-        const [month, year] = monthYear.split('-');
-        const { revenue, refund } = calculateMonthlyData(store.id, parseInt(month), parseInt(year));
+      sortedMonths.forEach((monthYear) => {
+        const [month, year] = monthYear.split("-");
+        const { revenue, refund } = calculateMonthlyData(
+          store.id,
+          parseInt(month),
+          parseInt(year)
+        );
         row.push(revenue, refund);
       });
 
@@ -520,13 +593,21 @@ export default function AdminHome() {
     sortedMonths.forEach((_, index) => {
       const revenueCol = worksheet.getColumn(8 + 2 * index).letter;
       const refundCol = worksheet.getColumn(9 + 2 * index).letter;
-      totalRow.push({ formula: `SUM(${revenueCol}3:${revenueCol}${approvedStores.length + 2})` });
-      totalRow.push({ formula: `SUM(${refundCol}3:${refundCol}${approvedStores.length + 2})` });
+      totalRow.push({
+        formula: `SUM(${revenueCol}3:${revenueCol}${
+          approvedStores.length + 2
+        })`,
+      });
+      totalRow.push({
+        formula: `SUM(${refundCol}3:${refundCol}${approvedStores.length + 2})`,
+      });
     });
     const totalRowNumber = worksheet.addRow(totalRow).number;
 
     // Style total row
-    worksheet.getRow(totalRowNumber).eachCell((cell) => { cell.style = totalRowStyle; });
+    worksheet.getRow(totalRowNumber).eachCell((cell) => {
+      cell.style = totalRowStyle;
+    });
 
     // Set column widths
     const columnWidths = [5, 20, 15, 30, 20, 15, 30];
@@ -538,13 +619,13 @@ export default function AdminHome() {
     });
 
     // Merge cells
-    worksheet.mergeCells('A1:A2');
-    worksheet.mergeCells('B1:B2');
-    worksheet.mergeCells('C1:C2');
-    worksheet.mergeCells('D1:D2');
-    worksheet.mergeCells('E1:E2');
-    worksheet.mergeCells('F1:F2');
-    worksheet.mergeCells('G1:G2');
+    worksheet.mergeCells("A1:A2");
+    worksheet.mergeCells("B1:B2");
+    worksheet.mergeCells("C1:C2");
+    worksheet.mergeCells("D1:D2");
+    worksheet.mergeCells("E1:E2");
+    worksheet.mergeCells("F1:F2");
+    worksheet.mergeCells("G1:G2");
     worksheet.mergeCells(`E${totalRowNumber}:G${totalRowNumber}`);
 
     sortedMonths.forEach((_, index) => {
@@ -554,15 +635,18 @@ export default function AdminHome() {
 
     // Set number format for revenue and refund columns
     for (let col = 8; col <= worksheet.columnCount; col++) {
-      worksheet.getColumn(col).numFmt = '#,##0';
+      worksheet.getColumn(col).numFmt = "#,##0";
     }
 
     // Generate Excel file
-    workbook.xlsx.writeBuffer().then(buffer => {
-      saveAs(new Blob([buffer]), 'Report_revenue_refund_store_monthly.xlsx');
-    }).catch(err => {
-      console.error('Error writing Excel file:', err);
-    });
+    workbook.xlsx
+      .writeBuffer()
+      .then((buffer) => {
+        saveAs(new Blob([buffer]), "Report_revenue_refund_store_monthly.xlsx");
+      })
+      .catch((err) => {
+        console.error("Error writing Excel file:", err);
+      });
   };
 
   const handleExportPDF = async () => {
@@ -571,9 +655,9 @@ export default function AdminHome() {
       const canvas = await html2canvas(input, { scale: 2 });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -589,12 +673,12 @@ export default function AdminHome() {
         if (position !== 15) {
           pdf.addPage(); // Add a new page only if it's not the first page
         }
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pdfHeight;
         position -= pdfHeight;
       }
 
-      pdf.save('Dashboard.pdf');
+      pdf.save("Dashboard.pdf");
     } else {
       console.error("Element not found: #dashboard");
     }
@@ -630,12 +714,16 @@ export default function AdminHome() {
       const statusOrders = statusOrderRes?.data?.data || [];
 
       const orderIdsWithCancelStatus = statusOrders
-        .filter(statusOrder => statusOrder.status.toUpperCase() === "CANCELLED")
-        .map(statusOrder => statusOrder.order_id);
+        .filter(
+          (statusOrder) => statusOrder.status.toUpperCase() === "CANCELLED"
+        )
+        .map((statusOrder) => statusOrder.order_id);
 
       const orderIdsWithCompleteStatus = statusOrders
-        .filter(statusOrder => statusOrder.status.toUpperCase() === "COMPLETED")
-        .map(statusOrder => statusOrder.order_id);
+        .filter(
+          (statusOrder) => statusOrder.status.toUpperCase() === "COMPLETED"
+        )
+        .map((statusOrder) => statusOrder.order_id);
 
       console.log("BarOrderIdsWithCancelStatus:", orderIdsWithCancelStatus);
       console.log("BarOrderIdsWithCompleteStatus:", orderIdsWithCompleteStatus);
@@ -676,12 +764,12 @@ export default function AdminHome() {
       ordersData.forEach((order) => {
         if (order.type.toUpperCase() === "ORDER") {
           if (
-            !(order.payment_method.toUpperCase() === "COD" &&
-              orderIdsWithCancelStatus.includes(order.id))
+            !(
+              order.payment_method.toUpperCase() === "COD" &&
+              orderIdsWithCancelStatus.includes(order.id)
+            )
           ) {
-            if (
-              (orderIdsWithCompleteStatus.includes(order.id))
-            ) {
+            if (orderIdsWithCompleteStatus.includes(order.id)) {
               const date = new Date(order.order_date);
               const month = monthNames[date.getMonth()];
               monthlyData[month].Revenue += order.final_amount || 0;
@@ -743,7 +831,10 @@ export default function AdminHome() {
           storeMonth = await StoreByMonthApi(previousMonth);
           setSelectedMonth(previousMonth);
         } catch (prevMonthError) {
-          console.error(`Error fetching data for month ${previousMonth}:`, prevMonthError);
+          console.error(
+            `Error fetching data for month ${previousMonth}:`,
+            prevMonthError
+          );
           setCompleteData(0);
           setInProgressData(0);
           return;
@@ -805,8 +896,9 @@ export default function AdminHome() {
 
   const calculateTotalAccounts = (accounts) => {
     if (accounts && Array.isArray(accounts)) {
-
-      const filteredAccounts = accounts.filter(account => account.role_id.id !== 3);
+      const filteredAccounts = accounts.filter(
+        (account) => account.role_id.id !== 3
+      );
 
       const total = filteredAccounts.length;
 
@@ -862,18 +954,30 @@ export default function AdminHome() {
       console.log("lineChartAccountsData:", lineChartAccountsData);
 
       setAccountLineChartData(lineChartAccountsData);
-
     } catch (error) {
       console.error("Error handling Account line chart data:", error);
     }
   };
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const xAxisConfig = [
     {
-      fontWeight: 'bold',
-      label: 'Month',
-      dataKey: 'month',
+      fontWeight: "bold",
+      label: "Month",
+      dataKey: "month",
       valueFormatter: (month) => monthNames[month - 1], // Convert month number to month name
       min: 1, // January
       max: 12, // December
@@ -904,20 +1008,31 @@ export default function AdminHome() {
       const statusOrders = statusOrderRes?.data?.data || [];
 
       const orderIdsWithCancelStatus = statusOrders
-        .filter(statusOrder => statusOrder.status.toUpperCase() === "CANCELLED")
-        .map(statusOrder => statusOrder.order_id);
+        .filter(
+          (statusOrder) => statusOrder.status.toUpperCase() === "CANCELLED"
+        )
+        .map((statusOrder) => statusOrder.order_id);
 
       const orderIdsWithCompleteStatus = statusOrders
-        .filter(statusOrder => statusOrder.status.toUpperCase() === "COMPLETED")
-        .map(statusOrder => statusOrder.order_id);
+        .filter(
+          (statusOrder) => statusOrder.status.toUpperCase() === "COMPLETED"
+        )
+        .map((statusOrder) => statusOrder.order_id);
 
       console.log("LineOrderIdsWithCancelStatus:", orderIdsWithCancelStatus);
-      console.log("LineOrderIdsWithCompleteStatus:", orderIdsWithCompleteStatus);
+      console.log(
+        "LineOrderIdsWithCompleteStatus:",
+        orderIdsWithCompleteStatus
+      );
 
       const yearlyRevenue = orders.reduce((acc, order) => {
-        if (order.type.toUpperCase() === "ORDER" &&
-          !(order.payment_method.toUpperCase() === "COD" &&
-            orderIdsWithCancelStatus.includes(order.id))) {
+        if (
+          order.type.toUpperCase() === "ORDER" &&
+          !(
+            order.payment_method.toUpperCase() === "COD" &&
+            orderIdsWithCancelStatus.includes(order.id)
+          )
+        ) {
           if (orderIdsWithCompleteStatus.includes(order.id)) {
             const date = new Date(order.order_date);
             const year = date.getFullYear();
@@ -936,9 +1051,14 @@ export default function AdminHome() {
         return acc;
       }, {});
 
-      const years = [...new Set([...Object.keys(yearlyRevenue), ...Object.keys(yearlyRefund)])].sort();
+      const years = [
+        ...new Set([
+          ...Object.keys(yearlyRevenue),
+          ...Object.keys(yearlyRefund),
+        ]),
+      ].sort();
 
-      const LineChartReData = years.map(year => ({
+      const LineChartReData = years.map((year) => ({
         year,
         label: year.toString(),
         Revenue: yearlyRevenue[year] || 0,
@@ -989,7 +1109,7 @@ export default function AdminHome() {
       "September",
       "October",
       "November",
-      "December"
+      "December",
     ];
 
     return months[monthNumber - 1];
@@ -1046,7 +1166,7 @@ export default function AdminHome() {
   };
 
   return (
-    <Container id="dashboard" >
+    <Container id="dashboard">
       <Paper
         elevation={3}
         sx={{
@@ -1061,20 +1181,20 @@ export default function AdminHome() {
       >
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            background: '#ff469e',
-            borderRadius: '4px',
-            marginBottom: '16px',
+            display: "flex",
+            alignItems: "center",
+            background: "#ff469e",
+            borderRadius: "4px",
+            marginBottom: "16px",
           }}
         >
           <Typography
             sx={{
-              color: 'white',
-              padding: '13px',
-              fontWeight: 'bold',
-              fontSize: '20px',
-              textAlign: 'center',
+              color: "white",
+              padding: "13px",
+              fontWeight: "bold",
+              fontSize: "20px",
+              textAlign: "center",
               flexGrow: 1,
             }}
           >
@@ -1082,8 +1202,8 @@ export default function AdminHome() {
           </Typography>
           <IconButton
             style={{
-              color: 'white',
-              Size: 'medium',
+              color: "white",
+              Size: "medium",
             }}
             onClick={handleMenuClick}
           >
@@ -1116,12 +1236,12 @@ export default function AdminHome() {
           <Grid item xs={4} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
                   <CardContent style={{ height: "242px" }}>
                     <Typography
                       variant="body1"
                       style={{
-                        fontSize: "19px",
+                        fontSize: "1.15rem",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1136,7 +1256,7 @@ export default function AdminHome() {
                         justifyContent: "center",
                         paddingTop: "30px",
                         paddingRight: "10px",
-                        fontSize: "40px",
+                        fontSize: "2.25rem",
                       }}
                     >
                       <ArrowDropUpIcon
@@ -1151,12 +1271,12 @@ export default function AdminHome() {
                 </Card>
               </Grid>
               <Grid item xs={12} md={12}>
-                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
                   <CardContent style={{ height: "243px" }}>
                     <Typography
                       variant="body1"
                       style={{
-                        fontSize: "19px",
+                        fontSize: "1.15rem",
                         fontWeight: "bold",
                         color: "#E9967A",
                         marginBottom: "20px",
@@ -1171,7 +1291,7 @@ export default function AdminHome() {
                         justifyContent: "center",
                         paddingTop: "30px",
                         paddingRight: "10px",
-                        fontSize: "40px",
+                        fontSize: "2.25rem",
                       }}
                     >
                       <ArrowDropDownIcon
@@ -1192,7 +1312,7 @@ export default function AdminHome() {
             </Grid>
           </Grid>
           <Grid item xs={8} md={9}>
-            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+            <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
               <CardContent
                 style={{
                   height: "500px",
@@ -1200,7 +1320,7 @@ export default function AdminHome() {
                   flexDirection: "column",
                 }}
               >
-                <div style={{ display: "flex", gap: "20px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="h6"
                     style={{
@@ -1211,7 +1331,7 @@ export default function AdminHome() {
                       paddingBottom: "20px",
                     }}
                   >
-                    Overall Milk Profit
+                    Overall Profit
                   </Typography>
                   <FormControl
                     variant="outlined"
@@ -1222,7 +1342,7 @@ export default function AdminHome() {
                     <InputLabel
                       htmlFor="year-select"
                       shrink
-                      style={{ fontWeight: 'bold', color: '#E9967A' }}
+                      style={{ fontWeight: "bold", color: "#E9967A" }}
                     >
                       Year
                     </InputLabel>
@@ -1231,8 +1351,8 @@ export default function AdminHome() {
                       onChange={handleYearOrderChange}
                       label="Year"
                       inputProps={{
-                        name: 'Year',
-                        id: 'year-select',
+                        name: "Year",
+                        id: "year-select",
                       }}
                       displayEmpty
                     >
@@ -1243,7 +1363,7 @@ export default function AdminHome() {
                       ))}
                     </Select>
                   </FormControl>
-                </div>
+                </Box>
                 <BarChart
                   dataset={BarChartData}
                   yAxis={[
@@ -1272,10 +1392,10 @@ export default function AdminHome() {
                   ]}
                 />
               </CardContent>
-            </Card >
+            </Card>
           </Grid>
           <Grid item xs={8} md={9}>
-            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+            <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
               <CardContent style={{ height: "420px", display: "flex" }}>
                 <Grid marginTop={"90px"}>
                   <Typography
@@ -1372,7 +1492,7 @@ export default function AdminHome() {
           <Grid item xs={4} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
                   <CardContent style={{ height: "202px" }}>
                     <Grid>
                       <Typography
@@ -1402,7 +1522,7 @@ export default function AdminHome() {
                 </Card>
               </Grid>
               <Grid item xs={12} md={12}>
-                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
                   <CardContent style={{ height: "201px" }}>
                     <Grid>
                       <Typography
@@ -1436,7 +1556,7 @@ export default function AdminHome() {
           <Grid item xs={4} md={3}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12} md={12}>
-                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
                   <CardContent style={{ height: "243px" }}>
                     <Grid>
                       <Typography
@@ -1469,7 +1589,7 @@ export default function AdminHome() {
                 </Card>
               </Grid>
               <Grid item xs={12} md={12}>
-                <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
                   <CardContent style={{ height: "242px" }}>
                     <Grid>
                       <Typography
@@ -1504,13 +1624,15 @@ export default function AdminHome() {
             </Grid>
           </Grid>
           <Grid item xs={8} md={9}>
-            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
-              <CardContent style={{
-                height: "500px",
-                display: "flex",
-                flexDirection: "column",
-              }}>
-                <div style={{ display: "flex", gap: "20px" }}>
+            <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
+              <CardContent
+                style={{
+                  height: "500px",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     sx={{
                       fontSize: "26px",
@@ -1559,11 +1681,9 @@ export default function AdminHome() {
                       ))}
                     </Select>
                   </FormControl>
-                </div>
+                </Box>
                 <LineChart
-                  xAxis={
-                    xAxisConfig
-                  }
+                  xAxis={xAxisConfig}
                   yAxis={[{ valueFormatter: (value) => value.toString() }]}
                   series={Object.keys(keyToLabelAccount).map((key) => ({
                     dataKey: key,
@@ -1580,7 +1700,7 @@ export default function AdminHome() {
             </Card>
           </Grid>
           <Grid item xs={12} md={12}>
-            <Card style={{ boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)' }}>
+            <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
               <CardContent
                 style={{
                   height: "500px",
@@ -1600,7 +1720,7 @@ export default function AdminHome() {
                     marginRight: "20px",
                   }}
                 >
-                  Profit Milk Each Year
+                  Profit Each Year
                 </Typography>
                 <LineChart
                   xAxis={[
@@ -1630,35 +1750,33 @@ export default function AdminHome() {
           </Grid>
         </Grid>
       </Paper>
-      {
-        visible && (
-          <IconButton
-            size="large"
-            sx={{
-              position: "fixed",
-              right: 25,
-              bottom: 25,
-              border: "1px solid #ff469e",
-              backgroundColor: "#fff4fc",
-              color: "#ff469e",
-              transition:
-                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-              "&:hover": {
-                backgroundColor: "#ff469e",
-                color: "white",
-              },
-            }}
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              })
-            }
-          >
-            <KeyboardCapslock />
-          </IconButton>
-        )
-      }
-    </Container >
+      {visible && (
+        <IconButton
+          size="large"
+          sx={{
+            position: "fixed",
+            right: 25,
+            bottom: 25,
+            border: "1px solid #ff469e",
+            backgroundColor: "#fff4fc",
+            color: "#ff469e",
+            transition:
+              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+            "&:hover": {
+              backgroundColor: "#ff469e",
+              color: "white",
+            },
+          }}
+          onClick={() =>
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            })
+          }
+        >
+          <KeyboardCapslock />
+        </IconButton>
+      )}
+    </Container>
   );
 }

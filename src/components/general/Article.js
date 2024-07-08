@@ -327,14 +327,12 @@ export default function HomePage() {
 
       <Grid container spacing={3}>
         {/* List Store */}
-        <Grid item xs={12} md={15}>
-          <Grid container spacing={3}>
             {article?.articles?.map((item, index) => (
               <Grid
                 item
-                xs={40}
-                sm={5}
-                md={4}
+                xs={12}
+                sm={6}
+                lg={4}
                 key={index}
                 onClick={() => {
                   navigate(
@@ -368,8 +366,8 @@ export default function HomePage() {
                   }}
                 >
                   <Card
-                    //   onClick={() => navigate(`/stores/${item.id}`)}
                     sx={{
+                      cursor: "pointer",
                       minWidth: 180,
                       padding: 2,
                       border: "1px solid #f5f7fd",
@@ -448,8 +446,6 @@ export default function HomePage() {
                 </Tooltip>
               </Grid>
             ))}
-          </Grid>
-        </Grid>
       </Grid>
       <Box
         sx={{

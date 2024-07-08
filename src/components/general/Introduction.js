@@ -56,7 +56,7 @@ const Introduction = () => {
             </Typography>
           </Breadcrumbs>
         </Container>
-        <section style={{ marginLeft: "1rem" }}>
+        <section style={{ marginLeft: "1rem", marginTop: "1rem" }}>
           <Typography
             variant="h3"
             sx={{ fontWeight: "bold", textAlign: "center" }}
@@ -181,7 +181,7 @@ const Introduction = () => {
                 borderRadius: "10px",
                 fontSize: 16,
                 fontWeight: "bold",
-                width: "20vw",
+                width: "200px",
                 mt: 8,
                 mb: 4,
                 transition:

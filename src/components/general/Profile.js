@@ -185,7 +185,7 @@ export default function Profile() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "65vh",
+        minHeight: "71vh",
         backgroundColor: "#f5f7fd",
         padding: "20px",
       }}

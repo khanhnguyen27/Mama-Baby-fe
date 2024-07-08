@@ -40,7 +40,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-export default function Products() {
+export default function StoreDetail() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [visible, setVisible] = useState(false);

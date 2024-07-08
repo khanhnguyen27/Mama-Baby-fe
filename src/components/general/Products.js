@@ -948,6 +948,7 @@ export default function Products() {
                       >
                         <Card
                           sx={{
+                            cursor: "pointer",
                             minWidth: 180,
                             padding: 2,
                             flexGrow: 1,
@@ -1040,7 +1041,7 @@ export default function Products() {
                               {brandMap[item.brand_id]} |{" "}
                               {categoryMap[item.category_id]}
                             </Typography>
-                            {item.status === "OUT OF STOCK" && (
+                            {(item.status === "COMING SOON" || item.status === "OUT OF STOCK") && (
                             <Typography
                               variant="body2"
                               sx={{

@@ -3,6 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Edit from "@mui/icons-material/Edit";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -29,6 +30,8 @@ const Navigation = () => {
   );
 
   const username = localStorage.getItem("username");
+  const [anchorElHeader, setAnchorElHeader] = useState(null);
+  const [openHeaderMenu, setOpenHeaderMenu] = useState(false);
   const [anchorElLogout, setAnchorElLogout] = useState(null);
   const [openLogoutMenu, setOpenLogoutMenu] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -45,18 +48,101 @@ const Navigation = () => {
     setOpenLogoutMenu(false);
     setTimeout(() => {
       navigate("/");
+      window.scrollTo({ top: 0, behavior: "instant" });
       console.log("Logout successfully");
     }, 1000);
   };
 
-  const handleLogoutMenuOpen = (event) => {
-    setAnchorElLogout(event.currentTarget);
+  const handleHeaderMenuOpen = (e) => {
+    setAnchorElHeader(e.currentTarget);
+    setOpenHeaderMenu(true);
+  };
+  const handleHeaderMenuClose = () => {
+    setAnchorElHeader(null);
+    setOpenHeaderMenu(false);
+  };
+
+  const handleLogoutMenuOpen = (e) => {
+    setAnchorElLogout(e.currentTarget);
     setOpenLogoutMenu(true);
   };
   const handleLogoutMenuClose = () => {
     setAnchorElLogout(null);
     setOpenLogoutMenu(false);
   };
+
+  const renderHeaderMenu = (
+    <Menu
+      id="header-menu"
+      anchorEl={anchorElHeader}
+      open={openHeaderMenu}
+      onClose={handleHeaderMenuClose}
+    >
+      <MenuItem
+        onClick={() => (
+          navigate("/introduction"),
+          window.scrollTo(
+            { top: 0, behavior: "instant" },
+            setAnchorElHeader(null),
+            setOpenHeaderMenu(false)
+          )
+        )}
+        sx={{
+          fontWeight: "bold",
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        Introduction
+      </MenuItem>
+      <MenuItem
+        onClick={() => (
+          navigate("/promotion"),
+          window.scrollTo(
+            { top: 0, behavior: "instant" },
+            setAnchorElHeader(null),
+            setOpenHeaderMenu(false)
+          )
+        )}
+        sx={{
+          fontWeight: "bold",
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        Promotion
+      </MenuItem>
+      <MenuItem
+        onClick={() => (
+          navigate("/policy"),
+          window.scrollTo(
+            { top: 0, behavior: "instant" },
+            setAnchorElHeader(null),
+            setOpenHeaderMenu(false)
+          )
+        )}
+        sx={{
+          fontWeight: "bold",
+          transition:
+            "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#ff469e",
+          },
+        }}
+      >
+        Warranty Policy
+      </MenuItem>
+    </Menu>
+  );
 
   const renderLogoutMenu = (
     <Menu
@@ -566,13 +652,43 @@ const Navigation = () => {
                 justifyContent: "center",
                 gap: "15px",
                 fontSize: "18px",
-                display: { xs: "none", md: "flex" },
+                display: "flex",
               }}
             >
-              <Link to="/introduction" style={{ textDecoration: "none" }}>
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-haspopup="true"
+                color="inherit"
+                onClick={handleHeaderMenuOpen}
+                sx={{
+                  display: { sm: "flex", md: "none" },
+                  borderRadius: 2,
+                  color: "white",
+                  height: 40,
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "white",
+                    color: "#ff469e",
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+              {renderHeaderMenu}
+              <Typography
+                onClick={() => navigate("/introduction")}
+                sx={{
+                  textDecoration: "none",
+                  display: { xs: "none", sm: "none", md: "flex" },
+                }}
+              >
                 <Typography
                   sx={{
                     color: "white",
+                    cursor: "pointer",
                     transition:
                       "color 0.2s ease-in-out, scale 0.3s ease-in-out",
                     fontSize: 20,
@@ -585,16 +701,18 @@ const Navigation = () => {
                 >
                   Introduction
                 </Typography>
-              </Link>
-              <Link
-                to="/promotion"
-                style={{
+              </Typography>
+              <Typography
+                onClick={() => navigate("/promotion")}
+                sx={{
                   textDecoration: "none",
+                  display: { xs: "none", sm: "none", md: "flex" },
                 }}
               >
                 <Typography
                   sx={{
                     color: "white",
+                    cursor: "pointer",
                     transition:
                       "color 0.2s ease-in-out, scale 0.3s ease-in-out",
                     fontSize: 20,
@@ -607,17 +725,19 @@ const Navigation = () => {
                 >
                   Promotion
                 </Typography>
-              </Link>
-              <Link
-                to="/policy"
-                style={{
+              </Typography>
+              <Typography
+                onClick={() => navigate("/policy")}
+                sx={{
                   textDecoration: "none",
-                  fontWeight: "500",
+                  fontWeight: "600",
+                  display: { xs: "none", sm: "none", md: "flex" },
                 }}
               >
                 <Typography
                   sx={{
                     color: "white",
+                    cursor: "pointer",
                     transition:
                       "color 0.2s ease-in-out, scale 0.3s ease-in-out",
                     fontSize: 20,
@@ -630,7 +750,7 @@ const Navigation = () => {
                 >
                   Warranty Policy
                 </Typography>
-              </Link>
+              </Typography>
             </Box>
             <Box
               sx={{
@@ -641,11 +761,14 @@ const Navigation = () => {
               }}
             >
               <PhoneInTalk />
-              <Typography sx={{ padding: "5px 10px", fontWeight: "600" }}>
+              <Typography sx={{ padding: "5px 10px", fontWeight: "600", display: { xs: "none", md: "block" } }}>
                 Customer care: 1900 0019
               </Typography>
+              <Typography sx={{ padding: "5px 10px", fontWeight: "600", display: { xs: "block", md: "none" } }}>
+                : 1900 0019
+              </Typography>
             </Box>
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Box sx={{ display: { xs: "flex" } }}>
               <>
                 {/* Phần AppBar và Toolbar */}
                 <Box sx={{ display: "flex", flexGrow: 1 }}>
