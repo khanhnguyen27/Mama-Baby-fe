@@ -305,14 +305,20 @@ export default function StaffHome() {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
-    storeByUserIdApi(userId)
-      .then((res) => {
-        setStore(res?.data?.data);
-      })
+    storeByUserIdApi(userId).then((res) => {
+      setStore(res?.data?.data);
+    });
     fetchData();
-  }, [ageFilter, brandFilter, categoryFilter, store.id, currentPage, sortPrice]);
+  }, [
+    ageFilter,
+    brandFilter,
+    categoryFilter,
+    store.id,
+    currentPage,
+    sortPrice,
+  ]);
 
-  // const storeId = store.id;
+  const storeId = store.id;
   const fetchData = async () => {
     try {
       const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
@@ -487,7 +493,7 @@ export default function StaffHome() {
         "If the status is in stock, the remain must be greater than 0."
       );
       return;
-    } else if (status !== statusInStock && remain < 0) {
+    } else if (status !== statusInStock && remain <= 0) {
       toast.error(
         "If the status is coming soon, the remain must be greater than or equal to 0."
       );
@@ -655,7 +661,7 @@ export default function StaffHome() {
       return;
     } else if (
       selectedProduct?.status !== statusInStock &&
-      selectedProduct?.remain < 0
+      selectedProduct?.remain <= 0
     ) {
       toast.error(
         "If the status is coming soon, the remain must be greater than or equal to 0."

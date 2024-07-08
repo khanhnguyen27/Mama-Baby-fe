@@ -31,6 +31,7 @@ import { allProductApi } from "../../api/ProductAPI";
 import { allStoreApi } from "../../api/StoreAPI";
 import { allArticleApi } from "../../api/ArticleAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
+import { allCommentApi } from "../../api/CommentAPI";
 import { jwtDecode } from "jwt-decode";
 import { KeyboardArrowRight } from "@mui/icons-material";
 export default function HomePage() {
@@ -50,6 +51,7 @@ export default function HomePage() {
   const [storeMap, setStoreMap] = useState([]);
   const [article, setArticle] = useState([]);
   const [voucher, setVoucher] = useState([]);
+  const [comment, setComment] = useState([]);
   const typeGIFT = "GIFT";
   const typeWHOLESALE = "WHOLESALE";
 
@@ -109,6 +111,30 @@ export default function HomePage() {
   //     .catch((err) => console.log(err));
   // }, []);
 
+  const calculateAverageRating = (comments) => {
+    if (comments.length === 0) return 0;
+
+    const totalRating = comments.reduce(
+      (sum, comment) => sum + comment.rating,
+      0
+    );
+    return totalRating / comments.length;
+  };
+
+  const mergeCommentsWithProducts = (products, comments) => {
+    const productsCopy = [...products];
+    productsCopy.forEach((product) => {
+      const productComments = comments.filter(
+        (comment) => comment.product_id === product.id
+      );
+      const averageRating = calculateAverageRating(productComments);
+      product.averageRating = averageRating;
+    });
+    productsCopy.sort((a, b) => b.averageRating - a.averageRating);
+
+    return productsCopy;
+  };
+
   const fetchData = async () => {
     try {
       const [
@@ -120,34 +146,42 @@ export default function HomePage() {
         storeRes,
         articleRes,
         voucherRes,
+        commentRes,
       ] = await Promise.all([
         allAgeApi(),
         allBrandApi(),
         allCategorytApi(),
-        allProductApi({ type: typeWHOLESALE }),
+        allProductApi({ type: typeWHOLESALE, limit: 10000 }),
         allProductApi({ type: typeGIFT }),
         allStoreApi(),
         allArticleApi(),
         allVoucherApi(),
+        allCommentApi(),
       ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
-      const productDataW = productResW?.data?.data || [];
       const productDataG = productResG?.data?.data || [];
       const storeData = storeRes?.data?.data || [];
       const articleData = articleRes?.data?.data || [];
       const voucherData = voucherRes?.data?.data || [];
+      const productDataW = productResW?.data?.data?.products || [];
+      const commentData = commentRes?.data?.data || [];
 
       setAge(ageData);
       setBrand(brandData);
       setCategory(categoryData);
-      setProductWholesale(productDataW);
       setProductGift(productDataG);
       setStore(storeData);
       setArticle(articleData);
       setVoucher(voucherData);
+
+      const productsWithRating = mergeCommentsWithProducts(
+        productDataW,
+        commentData
+      );
+      setProductWholesale(productsWithRating);
 
       const ageMap = ageData.reduce((x, item) => {
         x[item.id] = item.rangeAge;
@@ -723,9 +757,7 @@ export default function HomePage() {
               >
                 See all products
               </Typography>
-              <KeyboardArrowRight
-                sx={{ color: "#ff469e"}}
-              />
+              <KeyboardArrowRight sx={{ color: "#ff469e" }} />
             </Box>
           </Box>
           {/* List */}
@@ -772,7 +804,7 @@ export default function HomePage() {
                 padding: "0px 8px",
               }}
             >
-              {productWholesale?.products?.map((item, index) => (
+              {productWholesale?.map((item, index) => (
                 <Tooltip
                   title={item.name}
                   enterDelay={500}
@@ -954,9 +986,7 @@ export default function HomePage() {
               >
                 See all gifts
               </Typography>
-              <KeyboardArrowRight
-                sx={{ color: "#ff469e"}}
-              />
+              <KeyboardArrowRight sx={{ color: "#ff469e" }} />
             </Box>
           </Box>
           {/* List */}
@@ -1198,9 +1228,7 @@ export default function HomePage() {
               >
                 See all stores
               </Typography>
-              <KeyboardArrowRight
-                sx={{ color: "#ff469e"}}
-              />
+              <KeyboardArrowRight sx={{ color: "#ff469e" }} />
             </Box>
           </Box>
           {/* List */}
@@ -1388,9 +1416,7 @@ export default function HomePage() {
               >
                 See all articles
               </Typography>
-              <KeyboardArrowRight
-                sx={{ color: "#ff469e"}}
-              />
+              <KeyboardArrowRight sx={{ color: "#ff469e" }} />
             </Box>
           </Box>
           <Box

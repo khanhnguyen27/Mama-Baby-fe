@@ -75,11 +75,9 @@ export default function Cart() {
       userId = decodedAccessToken.UserID;
     } catch (error) {
       console.error("Failed to decode token:", error);
-      // Xử lý lỗi nếu cần thiết
     }
   } else {
     console.warn("Invalid token specified: must be a string");
-    // Xử lý trường hợp token không hợp lệ nếu cần thiết
   }
 
   useEffect(() => {
@@ -1787,7 +1785,10 @@ export default function Cart() {
                                 </Button>
                                 <Button
                                   variant="contained"
-                                  disabled={item.quantity >= 99 || item.quantity >= item.product.remain}
+                                  disabled={
+                                    item.quantity >= 99 ||
+                                    item.quantity >= item.product.remain
+                                  }
                                   // onClick={() => {
                                   //   dispatch(
                                   //     addToCart({
@@ -1829,7 +1830,10 @@ export default function Cart() {
                                 </Button>
                                 <Button
                                   variant="contained"
-                                  disabled={item.quantity >= 99 || item.quantity >= item.product.remain}
+                                  disabled={
+                                    item.quantity >= 99 ||
+                                    item.quantity >= item.product.remain
+                                  }
                                   // onClick={() => {
                                   //   const newQuantity =
                                   //     item.quantity <= 89
@@ -1845,7 +1849,10 @@ export default function Cart() {
                                   onClick={() => {
                                     const newQuantity =
                                       item.quantity <= 89
-                                        ? Math.min(10, item.product.remain - item.quantity)
+                                        ? Math.min(
+                                            10,
+                                            item.product.remain - item.quantity
+                                          )
                                         : 99 - item.quantity;
                                     dispatch(
                                       updateQuantityCart({
