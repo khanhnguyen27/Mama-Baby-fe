@@ -242,10 +242,10 @@ export default function Cart() {
 
   const handleOpen = () => {
     if (!isEmptyCart) {
-      setOpen(true),
-        setFullName(userInfo.full_name),
-        setPhone(userInfo.phone_number),
-        setAddress(userInfo.address);
+      setOpen(true);
+      setFullName(userInfo.full_name);
+      setPhone(userInfo.phone_number);
+      setAddress(userInfo.address);
     } else {
       toast.warn("There's no item in your cart", { autoClose: 1000 });
     }
@@ -1529,8 +1529,8 @@ export default function Cart() {
                                       id="modal-modal-description"
                                       sx={{ mt: 2 }}
                                     >
-                                      Are you sure you want to checkout
-                                      for this order?
+                                      Are you sure you want to checkout for this
+                                      order?
                                     </Typography>
                                     <Box
                                       sx={{
