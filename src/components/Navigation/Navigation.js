@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart, selectCartAmount } from "../../redux/CartSlice";
 import { ListAlt, RequestPage } from "@mui/icons-material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import TidioChatScript from "../../Chat/TidioChatScript ";
 
 const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -831,6 +832,7 @@ const Navigation = () => {
           </Container>
         </AppBar>
       </Box>
+      <TidioChatScript />
     </>
   );
 };
