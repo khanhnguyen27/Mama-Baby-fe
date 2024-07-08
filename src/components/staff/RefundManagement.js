@@ -654,6 +654,7 @@ export default function OrdersManagement() {
                                               {
                                                 state: {
                                                   productId: detail.product_id,
+                                                  status: store?.is_active,
                                                 },
                                               },
                                               window.scrollTo({
