@@ -157,6 +157,7 @@ export default function Orders() {
           item.category_id,
           item.price,
           item.image_url,
+          item.status
         ];
         return x;
       }, {});
@@ -407,7 +408,7 @@ export default function Orders() {
     //   .then((res) => (
     for (const item of items) {
       const res = await productByIdApi(item.product_id);
-      console.log(res?.data?.data),
+      // console.log(res?.data?.data),
         dispatch(
           addToCart({
             product: {
@@ -716,6 +717,39 @@ export default function Orders() {
                     >
                       Order No. {item.id}{" "}
                     </Typography>
+                    <Box sx={{ display: "flex"}}>
+                    {item.type === "PRE_ORDER" && (
+                        <Tooltip
+                        title="One or more products in this order are pre-order items"
+                        enterDelay={300}
+                        leaveDelay={100}
+                        placement="left"
+                        TransitionComponent={Fade}
+                        TransitionProps={{ timeout: 250 }}
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "#fff4fc",
+                              boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                              color: "#ff469e",
+                              borderRadius: "8px",
+                              border: "1px solid #ff469e",
+                              fontSize: "1rem",
+                            },
+                          },
+                        }}
+                      >       
+                      <Typography style={{
+                        borderRadius: "1rem",
+                        border: "1px solid #ff469e",
+                        color: "#ff469e",
+                        fontWeight: "bold",
+                        padding: "4px 8px",
+                        height: "24px",
+                        cursor: "pointer"
+                      }}>PRE-ORDER</Typography>
+                      </Tooltip>
+                    )}
                     {item?.status_order_list[item.status_order_list.length - 1]
                       ?.status === "COMPLETED" && (
                       <Tooltip
@@ -742,6 +776,7 @@ export default function Orders() {
                           sx={{
                             p: 0,
                             mb: 1,
+                            ml: 1.5,
                             color: "black",
                             opacity: 0.3,
                             "&:hover": { color: "#ff469e", opacity: 0.9 },
@@ -751,6 +786,7 @@ export default function Orders() {
                         </IconButton>
                       </Tooltip>
                     )}
+                    </Box>
                   </Box>
                   <Divider sx={{ mb: "16px" }} />
                   <Grid container spacing={2}>

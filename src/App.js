@@ -89,19 +89,21 @@ function App() {
           path="/productgiftdetail/:productId"
           element={<ProductGiftDetails />}
         />
-        <Route path="/article/:articleId" element={<ArticleDetails />} />
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/:store_id" element={<StoreDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/successPayment" element={<SuccessPayment />} />
-        <Route path="/failedPayment" element={<FailedPayment />} />
-        <Route path="/history/comment" element={<CommentHistory />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/regisstore" element={<RegisStores />} />
-        <Route path="/orders" element={<Orders />} />
         <Route path="/articles" element={<Article />} />
         <Route path="/stores/:article_id" element={<Article />} />
-        <Route path="/requests" element={<Requests />} />
+        <Route path="/article/:articleId" element={<ArticleDetails />} />
+        <Route path="/history/comment" element={<CommentHistory />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route element={<ProtectedRoute allowedRole={"MEMBER"} />}>
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/successPayment" element={<SuccessPayment />} />
+          <Route path="/failedPayment" element={<FailedPayment />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/requests" element={<Requests />} />
+          <Route path="/regisstore" element={<RegisStores />} />
+        </Route>
         <Route element={<ProtectedRoute allowedRole={"STAFF"} />}>
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<Navigate to={"/staff/products"} />} />

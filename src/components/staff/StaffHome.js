@@ -1748,7 +1748,7 @@ export default function StaffHome() {
                 </Grid>
               ) : (
                 product?.products?.map((item, index) => (
-                  <Grid item xs={12} sm={6} lg={4} key={index}>
+                  <Grid item xs={12} sm={6} lg={4} key={index} sx={{ display: "flex", flexWrap: "wrap" }}>
                     <Tooltip
                       title={item.name}
                       enterDelay={500}
@@ -1771,9 +1771,11 @@ export default function StaffHome() {
                     >
                       <Card
                         sx={{
+                          cursor: "pointer",
                           display: "flex",
                           flexDirection: "column",
                           minWidth: 180,
+                          flexGrow: 1,
                           padding: 2,
                           border: "1px solid #f5f7fd",
                           borderRadius: "16px",

@@ -5,46 +5,47 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { allStoreApi } from "../../api/StoreAPI";
 
-const useQuery = () => {
-  return new URLSearchParams(useLocation().search);
-};
-
 export default function FailedPayment() {
-  const accessToken = localStorage.getItem("accessToken");
-  if (accessToken === null) {
-    window.location.replace("/");
-    return;
-  }
-  const decodedAccessToken = jwtDecode(accessToken);
-  const role = decodedAccessToken?.RoleID;
-  const navigate = useNavigate();
-  if (role !== "MEMBER" || role === null) {
-    window.location.replace("/");
-    return;
-  }
-  const query = useQuery();
   const [storeMap, setStoreMap] = useState({});
-  const orderId = query.get("orderId");
-  const storeId = query.get("storeId");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const fetchData = async () => {
-    try {
-      const storeRes = await allStoreApi({ limit: 1000 });
-      const storeData = storeRes?.data?.data?.stores || [];
-
-      const storeMap = storeData.reduce((x, item) => {
-        x[item.id] = item.name_store;
-        return x;
-      }, {});
-      setStoreMap(storeMap);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedAccessToken = accessToken ? jwtDecode(accessToken) : null;
+  const role = decodedAccessToken?.RoleID;
 
   useEffect(() => {
+    if (!accessToken || role !== "MEMBER") {
+      window.location.replace("/");
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const storeRes = await allStoreApi({ limit: 1000 });
+        const storeData = storeRes?.data?.data?.stores || [];
+
+        const storeMap = storeData.reduce((x, item) => {
+          x[item.id] = item.name_store;
+          return x;
+        }, {});
+
+        setStoreMap(storeMap);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
     fetchData();
-  }, []);
+  }, [accessToken, role, location]);
+
+  if (!accessToken || role !== "MEMBER") {
+    return null;
+  }
+
+  const query = new URLSearchParams(location.search);
+  const orderId = query.get("orderId");
+  const storeId = query.get("storeId");
 
   return (
     <div

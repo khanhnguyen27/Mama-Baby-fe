@@ -55,9 +55,9 @@ const Promotion = () => {
             </Typography>
           </Breadcrumbs>
         </Container>
-        <Container maxWidth="md" sx={{ mt: 4, pb: 8 }}>
+        <Container sx={{ mt: 4, pb: 8 }}>
           <Grid container spacing={6}>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVTF03m76I30qrNhD6qm04chuvoaqiW6OS486iXwPr7A&s"
                 alt="Promotion Image1"
@@ -78,40 +78,9 @@ const Promotion = () => {
                   marginTop: "5px",
                 }}
               />
-              <Button
-                variant="contained"
-                onClick={() => {
-                  navigate("/signin");
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "instant",
-                  });
-                }}
-                size="large"
-                sx={{
-                  backgroundColor: "white",
-                  color: "#ff469e",
-                  borderRadius: "10px",
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  width: "24vw",
-                  mt: 8,
-                  mb: 4,
-                  transition:
-                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                  border: "1px solid #ff469e",
-                  "&:hover": {
-                    backgroundColor: "#ff469e",
-                    color: "white",
-                    border: "1px solid white",
-                  },
-                }}
-              >
-                Join to get these valuable deals
-              </Button>
             </Grid>
-            <Grid item xs={6} sx={{ textAlign: "left" }}>
-              <Typography variant="h4" component="h2" gutterBottom>
+            <Grid item xs={12} md={6} sx={{ textAlign: "left" }}>
+              <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
                 Special Promotion: Nutritious Milk for Moms & Babies
               </Typography>
               <Typography variant="body1" gutterBottom>
@@ -137,6 +106,37 @@ const Promotion = () => {
                 for you and your baby. Join us now and take the first step
                 towards providing the best nutrition for your growing family!
               </Typography>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  navigate("/signin");
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "instant",
+                  });
+                }}
+                size="large"
+                sx={{
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderRadius: "10px",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  width: "100%",
+                  mt: 8,
+                  mb: 4,
+                  transition:
+                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    border: "1px solid white",
+                  },
+                }}
+              >
+                Join to get these valuable deals
+              </Button>
             </Grid>
           </Grid>
           {visible && (

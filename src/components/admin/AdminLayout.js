@@ -74,6 +74,7 @@ export default function AdminLayout() {
     toast.success("Logout Successfully", { autoClose: 1000 });
     setTimeout(() => {
       navigate("/");
+      window.scrollTo({ top: 0, behavior: "instant" });
       console.log("Logout successfully");
     }, 1000);
   };

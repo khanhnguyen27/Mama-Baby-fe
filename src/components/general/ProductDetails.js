@@ -19,6 +19,8 @@ import Refund from "@mui/icons-material/CurrencyExchange";
 import ShopIcon from "@mui/icons-material/Shop";
 import { allStoreApi } from "../../api/StoreAPI";
 import {
+  CalendarMonth,
+  Info,
   Star,
   StarHalf,
   StarOutline,
@@ -53,6 +55,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
+  Fade,
 } from "@mui/material";
 import { Rating } from "@mui/material";
 import Cart from "@mui/icons-material/ShoppingCart";
@@ -417,7 +421,7 @@ export default function ProductDetails() {
       });
       return;
     }
-    if (product.status === "IN STOCK") {
+    if (product.status === "IN STOCK" || product.status === "COMING SOON") {
       toast.info(`${product.name} x ${quantity} was added to cart`, {
         position: "top-right",
         autoClose: 1500,
@@ -432,6 +436,7 @@ export default function ProductDetails() {
           point: product.point,
           remain: product.remain,
           type: product.type,
+          status: product.status,
           store_id: product.store_id,
           image_url: product.image_url,
         },
@@ -605,6 +610,23 @@ export default function ProductDetails() {
                           alt={product.name}
                         />
                       </Paper>
+                      {product.status === "COMING SOON" && (
+                        <Box sx={{ display: "flex", mt: 1.5 }}>
+                          <CalendarMonth
+                            sx={{
+                              color: "#ff469e",
+                              fontSize: "1.5rem",
+                              mr: 1,
+                              pt: 1,
+                            }}
+                          />
+                          <Typography
+                            sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
+                          >
+                            Pre-Order (available after 15 days)
+                          </Typography>
+                        </Box>
+                      )}
                       <Box sx={{ display: "flex", mt: 1.5 }}>
                         <Refund
                           sx={{
@@ -650,7 +672,13 @@ export default function ProductDetails() {
                         <Typography variant="h6">Brand:</Typography>
                         <Typography
                           variant="h6"
-                          style={{ color: "#ff469e", fontWeight: "bold" }}
+                          style={{
+                            borderRadius: "1rem",
+                            border: "1px solid #ff469e",
+                            color: "#ff469e",
+                            fontWeight: "bold",
+                            padding: "0 8px",
+                          }}
                         >
                           {brandMap[product.brand_id]}
                         </Typography>
@@ -686,15 +714,53 @@ export default function ProductDetails() {
                           }}
                         >
                           <Typography
-                            variant="h6"
-                            style={{ textAlign: "left" }}
+                            variant="h5"
+                            sx={{
+                              textAlign: "left",
+                              color: "#ff469e",
+                              fontWeight: "bold",
+                            }}
                           >
                             {formatCurrency(product.price)}
                           </Typography>
                           <Typography
-                            variant="h6"
+                            variant="h5"
                             style={{ textAlign: "right" }}
                           >
+                            {product.status === "COMING SOON" && (
+                            <Tooltip
+                              title="These are available quantity at the store. If you want to buy more than these number, you can contact to store's owner for more information."
+                              enterDelay={300}
+                              leaveDelay={100}
+                              placement="bottom"
+                              TransitionComponent={Fade}
+                              TransitionProps={{ timeout: 250 }}
+                              componentsProps={{
+                                tooltip: {
+                                  sx: {
+                                    backgroundColor: "#fff4fc",
+                                    boxShadow:
+                                      "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                                    color: "#ff469e",
+                                    borderRadius: "8px",
+                                    border: "1px solid #ff469e",
+                                    fontSize: "1rem",
+                                  },
+                                },
+                              }}
+                            >
+                              <IconButton
+                                sx={{
+                                  p: 0,
+                                  mb: 1,
+                                  color: "black",
+                                  opacity: 0.3,
+                                  "&:hover": { color: "#ff469e", opacity: 0.9 },
+                                }}
+                              >
+                                <Info sx={{ fontSize: "1.5rem", mt: 0.5 }} />
+                              </IconButton>
+                            </Tooltip>)}{" "}
                             Available:{" "}
                             <span
                               style={{ color: "#ff469e", fontWeight: "600" }}
@@ -709,6 +775,7 @@ export default function ProductDetails() {
                         <Typography
                           variant="h6"
                           style={{
+                            borderRadius: "1rem",
                             border: "1px solid #ff469e",
                             color: "#ff469e",
                             fontWeight: "bold",
@@ -723,6 +790,7 @@ export default function ProductDetails() {
                         <Typography
                           variant="h6"
                           style={{
+                            borderRadius: "1rem",
                             border: "1px solid #ff469e",
                             color: "#ff469e",
                             fontWeight: "bold",
@@ -741,7 +809,6 @@ export default function ProductDetails() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            mt: 6,
                           }}
                         >
                           <ButtonGroup

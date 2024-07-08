@@ -23,6 +23,8 @@ import {
   IconButton,
   Modal,
   CircularProgress,
+  Tooltip,
+  Fade,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { allProductByStoreApi } from "../../api/ProductAPI";
@@ -139,6 +141,7 @@ export default function OrdersManagement() {
           item.category_id,
           item.price,
           item.image_url,
+          item.status
         ];
         return x;
       }, {});
@@ -433,12 +436,48 @@ export default function OrdersManagement() {
                     boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
                   }}
                 >
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
                   <Typography
                     variant="h5"
                     sx={{ mb: "10px", fontWeight: "bold" }}
                   >
                     Order No. {item.id}{" "}
                   </Typography>
+                  {item.type === "PRE_ORDER" && (
+                        <Tooltip
+                        title="One or more products in this order are pre-order items"
+                        enterDelay={300}
+                        leaveDelay={100}
+                        placement="left"
+                        TransitionComponent={Fade}
+                        TransitionProps={{ timeout: 250 }}
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "#fff4fc",
+                              boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                              color: "#ff469e",
+                              borderRadius: "8px",
+                              border: "1px solid #ff469e",
+                              fontSize: "1rem",
+                            },
+                          },
+                        }}
+                      >      
+                      <Typography style={{
+                        borderRadius: "1rem",
+                        border: "1px solid #ff469e",
+                        color: "#ff469e",
+                        fontWeight: "bold",
+                        padding: "4px 8px",
+                        height: "32px",
+                        cursor: "pointer"
+                      }}>PRE-ORDER</Typography>
+                      </Tooltip>
+                    )}
+                  </Box>
                   <Divider sx={{ mb: "16px" }} />
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
@@ -1006,6 +1045,7 @@ export default function OrdersManagement() {
                         </Button>
                         <Button
                           variant="contained"
+                          disabled={item.type === "PRE_ORDER" && item.order_detail_list.some((item) => productMap[item.product_id][5] === "COMING SOON")}
                           sx={{
                             backgroundColor: "white",
                             color: "#ff469e",

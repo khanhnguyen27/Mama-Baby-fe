@@ -721,6 +721,7 @@ export default function Products() {
                       >
                         <Card
                           sx={{
+                            cursor: "pointer",
                             minWidth: 180,
                             padding: 2,
                             flexGrow: 1,

@@ -354,8 +354,8 @@ export default function ProductDetailsManagement() {
               border: "3px solid #ff469e",
               color: "black",
               padding: "20px",
-              maxWidth: "900px",
-              width: "60vw",
+              maxWidth: "1200px",
+              width: "70vw",
               margin: "0 auto",
             }}
           >
@@ -405,7 +405,13 @@ export default function ProductDetailsManagement() {
                     <Typography variant="h6">Brand:</Typography>
                     <Typography
                       variant="h6"
-                      style={{ color: "#ff469e", fontWeight: "bold" }}
+                      style={{
+                        borderRadius: "1rem",
+                        border: "1px solid #ff469e",
+                        color: "#ff469e",
+                        fontWeight: "bold",
+                        padding: "0 8px",
+                      }}
                     >
                       {brandMap[product.brand_id]}
                     </Typography>
@@ -421,7 +427,14 @@ export default function ProductDetailsManagement() {
                     >
                       {product.name}
                     </Typography>
-                    <Typography variant="h6" style={{ textAlign: "left" }}>
+                    <Typography
+                      variant="h6"
+                      style={{
+                        textAlign: "left",
+                        color: "#ff469e",
+                        fontWeight: "bold",
+                      }}
+                    >
                       {formatCurrency(product.price)}
                     </Typography>
                   </div>
@@ -430,6 +443,7 @@ export default function ProductDetailsManagement() {
                     <Typography
                       variant="h6"
                       style={{
+                        borderRadius: "1rem",
                         border: "1px solid #ff469e",
                         color: "#ff469e",
                         fontWeight: "bold",
@@ -444,6 +458,7 @@ export default function ProductDetailsManagement() {
                     <Typography
                       variant="h6"
                       style={{
+                        borderRadius: "1rem",
                         border: "1px solid #ff469e",
                         color: "#ff469e",
                         fontWeight: "bold",
@@ -462,6 +477,7 @@ export default function ProductDetailsManagement() {
           <IconButton
             size="large"
             sx={{
+              zIndex:"2",
               position: "fixed",
               right: 25,
               bottom: 25,
@@ -680,6 +696,7 @@ export default function ProductDetailsManagement() {
               mr: 2,
               padding: "0.25rem 0.5rem",
               boxShadow: "none",
+              border: "1px solid #f5f7fd",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               "&:hover": {
@@ -718,7 +735,7 @@ export default function ProductDetailsManagement() {
             <Grid
               item
               xs={12}
-              md={3}
+              md={6}
               sx={{
                 display: "flex",
                 justifyContent: "center",

@@ -840,6 +840,7 @@ export default function HomePage() {
                       })
                     )}
                     sx={{
+                      cursor: "pointer",
                       minWidth: 180,
                       padding: 2,
                       border: "1px solid white",
@@ -1070,6 +1071,7 @@ export default function HomePage() {
                       })
                     )}
                     sx={{
+                      cursor: "pointer",
                       minWidth: 180,
                       padding: 2,
                       border: "1px solid white",
@@ -1290,6 +1292,7 @@ export default function HomePage() {
                     })
                   )}
                   sx={{
+                    cursor: "pointer",
                     minWidth: 180,
                     padding: 2,
                     border: "1px solid white",
@@ -1478,6 +1481,7 @@ export default function HomePage() {
                     });
                   }}
                   sx={{
+                    cursor: "pointer",
                     minWidth: 300,
                     padding: 2,
                     textAlign: "center",
