@@ -178,7 +178,7 @@ export default function Articles() {
   };
 
   const handleAddArticle = () => {
-    if (!header || !content || !image.file || !productRecom) {
+    if (!header || !content || !image.file) {
       toast.warn("Please fill in all fields and select a file.");
       return;
     }
@@ -191,7 +191,14 @@ export default function Articles() {
       return;
     }
 
-    addArticleApi(image.file, header, content, productRecom, storeId, isActive)
+    addArticleApi(
+      image.file,
+      header,
+      content,
+      productRecom.id,
+      storeId,
+      isActive
+    )
       .then((response) => {
         fetchData(minDate, maxDate);
         handleCloseAddArticle();
@@ -257,13 +264,9 @@ export default function Articles() {
         toast.success("Article updated successfully:", response.data);
       })
       .catch((error) => {
-        if (error.response.headers["content-type"] === "application/json") {
-          toast.error(
-            "The product photo is currently damaged, please select a new photo."
-          );
-        } else {
-          toast.error("Failed to update article. Please try again later.");
-        }
+        console.error("Error updating article:", error);
+        toast.error("Failed to update article. Please try again later.");
+
         // if (error.response) {
         //   console.error("Error response data:", error.response.data);
         //   console.error("Error response status:", error.response.status);
@@ -338,11 +341,12 @@ export default function Articles() {
     const setImageFromUrl = async (url) => {
       if (image.url === "") {
         try {
-          const response = await fetch(url);
-          const blob = await response.blob();
-          const file = new File([blob], selectedArticle.link_image, {
-            type: blob.type,
-          });
+          // const response = await fetch(url);
+          // const blob = await response.blob();
+          // const file = new File([blob], selectedArticle.link_image, {
+          //   type: blob.type,
+          // });
+          const file = null;
 
           setImage((prevImage) => ({
             ...prevImage,

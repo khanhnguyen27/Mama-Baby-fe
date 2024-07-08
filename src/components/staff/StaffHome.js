@@ -640,7 +640,6 @@ export default function StaffHome() {
       !selectedProduct.price ||
       selectedProduct.point === "" ||
       !selectedProduct.remain ||
-      !image.url ||
       !weight ||
       !brandOrigin ||
       !manufacturedAt ||
@@ -716,11 +715,10 @@ export default function StaffHome() {
     const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${ingredient}|${usageInstructions}|${storageInstructions}`;
     setDescription(fullDescription);
     selectedProduct.description = fullDescription;
-    console.log(selectedProduct.expiryDate);
 
     //Handle product updates
     updateProductApi(
-      image.file || "",
+      image.file,
       selectedProduct.id,
       selectedProduct.name,
       selectedProduct.price,
@@ -744,13 +742,8 @@ export default function StaffHome() {
         toast.success("Product updated successfully!");
       })
       .catch((error) => {
-        if (error.response.headers["content-type"] === "application/json") {
-          toast.error(
-            "The product photo is currently damaged, please select a new photo."
-          );
-        } else {
-          toast.error("Failed to update product. Please try again later.");
-        }
+        console.error("Error updating product:", error);
+        toast.error("Failed to update product. Please try again later.");
         // if (error.response) {
         //   console.error("Error response data:", error.response.data);
         //   console.error("Error response status:", error.response.status);
@@ -778,11 +771,12 @@ export default function StaffHome() {
     const setImageFromUrl = async (url) => {
       if (image.url === "") {
         try {
-          const response = await fetch(url);
-          const blob = await response.blob();
-          const file = new File([blob], selectedProduct.image_url, {
-            type: blob.type,
-          });
+          // const response = await fetch(url);
+          // const blob = await response.blob();
+          // const file = new File([blob], selectedProduct.image_url, {
+          //   type: blob.type,
+          // });
+          const file = null;
 
           setImage((prevImage) => ({
             ...prevImage,
