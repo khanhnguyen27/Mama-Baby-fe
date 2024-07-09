@@ -14,6 +14,7 @@ import {
   Button,
   Badge,
   Card,
+  Divider,
   CardContent,
   CardMedia,
 } from "@mui/material";
@@ -33,7 +34,12 @@ import { allArticleApi } from "../../api/ArticleAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { allCommentApi } from "../../api/CommentAPI";
 import { jwtDecode } from "jwt-decode";
-import { KeyboardArrowRight } from "@mui/icons-material";
+import {
+  Star,
+  StarHalf,
+  StarOutline,
+  KeyboardArrowRight,
+} from "@mui/icons-material";
 export default function HomePage() {
   const navigate = useNavigate();
   window.document.title = "Mama-Baby";
@@ -122,17 +128,24 @@ export default function HomePage() {
   };
 
   const mergeCommentsWithProducts = (products, comments) => {
-    const productsCopy = [...products];
-    productsCopy.forEach((product) => {
+    const productsWithRatings = products.map((product) => {
       const productComments = comments.filter(
         (comment) => comment.product_id === product.id
       );
       const averageRating = calculateAverageRating(productComments);
-      product.averageRating = averageRating;
+      return {
+        ...product,
+        averageRating: productComments.length > 0 ? averageRating : null,
+      };
     });
-    productsCopy.sort((a, b) => b.averageRating - a.averageRating);
 
-    return productsCopy;
+    const filteredProducts = productsWithRatings.filter(
+      (product) => product.averageRating !== null
+    );
+
+    filteredProducts.sort((a, b) => b.averageRating - a.averageRating);
+
+    return filteredProducts;
   };
 
   const fetchData = async () => {
@@ -176,6 +189,7 @@ export default function HomePage() {
       setStore(storeData);
       setArticle(articleData);
       setVoucher(voucherData);
+      setComment(commentData);
 
       const productsWithRating = mergeCommentsWithProducts(
         productDataW,
@@ -804,120 +818,168 @@ export default function HomePage() {
                 padding: "0px 8px",
               }}
             >
-              {productWholesale?.map((item, index) => (
-                <Tooltip
-                  title={item.name}
-                  enterDelay={500}
-                  leaveDelay={50}
-                  placement="right-start"
-                  TransitionComponent={Fade}
-                  TransitionProps={{ timeout: 250 }}
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "white",
-                        boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                        color: "black",
-                        borderRadius: "8px",
-                        border: "1px solid black",
-                        fontSize: "12px",
-                      },
-                    },
-                  }}
-                >
-                  <Box
-                    key={index}
-                    onClick={() => (
-                      navigate(
-                        `/products/${item.name
-                          .toLowerCase()
-                          .replace(/\s/g, "-")}`,
-                        { state: { productId: item.id } }
-                      ),
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      })
-                    )}
-                    sx={{
-                      cursor: "pointer",
-                      minWidth: 180,
-                      padding: 2,
-                      border: "1px solid white",
-                      borderRadius: "16px",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                      marginRight: 2,
-                      backgroundColor: "white",
-                      transition: "border 0.2s",
-                      "&:hover": {
-                        border: "1px solid #ff496e",
-                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+              {productWholesale?.map((item, index) => {
+                const productComments = comment.filter(
+                  (x) => x.product_id === item.id
+                );
+
+                const averageRating = productComments.length
+                  ? (
+                      productComments.reduce(
+                        (acc, cmt) => acc + cmt.rating,
+                        0
+                      ) / productComments.length
+                    ).toFixed(1)
+                  : 0;
+
+                const fullStars = Math.floor(averageRating);
+                const halfStar = averageRating - fullStars >= 0.5;
+                const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                return (
+                  <Tooltip
+                    title={item.name}
+                    enterDelay={500}
+                    leaveDelay={50}
+                    placement="right-start"
+                    TransitionComponent={Fade}
+                    TransitionProps={{ timeout: 250 }}
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: "white",
+                          boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                          color: "black",
+                          borderRadius: "8px",
+                          border: "1px solid black",
+                          fontSize: "12px",
+                        },
                       },
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
+                    <Box
+                      key={index}
+                      onClick={() => (
+                        navigate(
+                          `/products/${item.name
+                            .toLowerCase()
+                            .replace(/\s/g, "-")}`,
+                          { state: { productId: item.id } }
+                        ),
+                        window.scrollTo({
+                          top: 0,
+                          behavior: "smooth",
+                        })
+                      )}
+                      sx={{
+                        cursor: "pointer",
+                        minWidth: 180,
+                        padding: 2,
+                        border: "1px solid white",
+                        borderRadius: "16px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        marginRight: 2,
+                        backgroundColor: "white",
+                        transition: "border 0.2s",
+                        "&:hover": {
+                          border: "1px solid #ff496e",
+                          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                        },
                       }}
                     >
-                      <img
-                        src={
-                          item.image_url.includes("Product_")
-                            ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
-                            : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                        }
-                        onError={(e) => {
-                          e.target.src =
-                            "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
                         }}
-                        style={{ width: "64px", height: "64px" }}
-                      />
-                    </div>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: "bold",
-                        marginTop: "0.75rem",
-                        textAlign: "left",
-                        whiteSpace: "normal",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        maxWidth: "100%",
-                        lineHeight: "1.2rem",
-                        maxHeight: "2.4rem",
-                      }}
-                    >
-                      {item.name.length > 40
-                        ? `${item.name.substring(0, 40)}...`
-                        : item.name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "gray",
-                        textAlign: "left",
-                      }}
-                    >
-                      {formatCurrency(item.price)}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "gray",
-                        textAlign: "left",
-                      }}
-                    >
-                      {brandMap[item.brand_id]} |{" "}
-                      {categoryMap[item.category_id]}
-                    </Typography>
-                  </Box>
-                </Tooltip>
-              ))}
+                      >
+                        <img
+                          src={
+                            item.image_url.includes("Product_")
+                              ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
+                              : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                          }
+                          onError={(e) => {
+                            e.target.src =
+                              "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                          }}
+                          style={{ width: "64px", height: "64px" }}
+                        />
+                      </div>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          marginTop: "0.75rem",
+                          textAlign: "left",
+                          whiteSpace: "normal",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          maxWidth: "100%",
+                          lineHeight: "1.2rem",
+                          maxHeight: "2.4rem",
+                        }}
+                      >
+                        {item.name.length > 40
+                          ? `${item.name.substring(0, 40)}...`
+                          : item.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "gray",
+                          textAlign: "left",
+                        }}
+                      >
+                        {formatCurrency(item.price)}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "gray",
+                          textAlign: "left",
+                        }}
+                      >
+                        {brandMap[item.brand_id]} |{" "}
+                        {categoryMap[item.category_id]}
+                      </Typography>
+                      <Divider sx={{ my: 1 }} />
+                      <Typography
+                        variant="h6"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        {Array(fullStars).fill(
+                          <Star style={{ color: "#ff469e" }} />
+                        )}
+                        {halfStar && <StarHalf style={{ color: "#ff469e" }} />}
+                        {Array(emptyStars).fill(
+                          <StarOutline style={{ color: "#ff469e" }} />
+                        )}
+                        <span
+                          style={{
+                            color: "gray",
+                            fontSize: "0.8em",
+                            marginLeft: "4px",
+                          }}
+                        >
+                          (
+                          {
+                            comment.filter((x) => x.product_id === item.id)
+                              .length
+                          }
+                          )
+                        </span>
+                      </Typography>
+                    </Box>
+                  </Tooltip>
+                );
+              })}
             </Box>
             <IconButton
               onClick={scrollRight2}
