@@ -192,7 +192,7 @@ export default function ProductDetails() {
     // }
     toast.info(`${product.name} x ${quantity} was added to cart`, {
       position: "top-right",
-      autoClose: 2500,
+      autoClose: 1500,
     });
     dispatch(
       addToCart({
@@ -554,7 +554,7 @@ export default function ProductDetails() {
                           </Button>
                           <Button
                             variant="contained"
-                            disabled={quantity >= 99}
+                            disabled={quantity >= 99 || quantity >= product.remain}
                             onClick={() => setQuantity(quantity + 1)}
                             sx={{
                               backgroundColor: "white",
@@ -575,10 +575,10 @@ export default function ProductDetails() {
                           </Button>
                           <Button
                             variant="contained"
-                            disabled={quantity >= 99}
+                            disabled={quantity >= 99 || quantity >= product.remain}
                             onClick={() =>
                               setQuantity((prevQuantity) =>
-                                Math.min(99, prevQuantity + 10)
+                                Math.min(99, product.remain, prevQuantity + 10)
                               )
                             }
                             sx={{

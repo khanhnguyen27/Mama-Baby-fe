@@ -32,7 +32,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
-import "react-toastify/dist/ReactToastify.css";
 import { allUserForAdApi, updateAccountApi } from "../../api/UserAPI";
 
 export default function AccountManagement() {
@@ -117,7 +116,7 @@ export default function AccountManagement() {
 
   const handleEdit = () => {
     if (!selectedAccount) {
-      console.error("No account selected for editing.");
+      toast.warn("No account selected for editing.", { autoClose: 1500 });
       return;
     }
 
@@ -135,11 +134,11 @@ export default function AccountManagement() {
       .then(() => {
         fetchData();
         closeUpdate();
-        toast.success("Account updated successfully.");
+        toast.success("Account updated successfully.", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating account:", error);
-        toast.error("Failed to update account. Please try again later.");
+        toast.error("Failed to update account. Please try again later.", { autoClose: 1500 });
       });
   };
 

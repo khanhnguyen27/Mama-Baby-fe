@@ -77,122 +77,124 @@ export default function HomePage() {
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
     return (
-      <Container>
-        <Grid item xs={12}>
-          <Carousel
-            PrevIcon={<ArrowLeft />}
-            NextIcon={<ArrowRight />}
-            height="240px"
-            animation="slide"
-            duration={500}
-            navButtonsProps={{
-              style: {
-                backgroundColor: "white",
-                color: "#ff469e",
-              },
-            }}
-            sx={{
-              border: "1px solid #ddd",
-              borderRadius: "16px",
-              position: "relative",
-              marginBottom: "2rem",
-              overflow: "hidden",
-            }}
-            indicatorContainerProps={{
-              style: {
-                position: "absolute",
-                bottom: "10px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 99,
-              },
-            }}
-            indicatorIconButtonProps={{
-              style: {
-                color: "whitesmoke",
-                backgroundColor: "black",
-                borderRadius: "50%",
-                width: "12px",
-                height: "12px",
-                margin: "0 4px",
-              },
-            }}
-            activeIndicatorIconButtonProps={{
-              style: {
-                color: "#ff469e",
-                backgroundColor: "#ff469e",
-                border: "1px solid white",
-                borderRadius: "8px",
-                width: "28px",
-                height: "12px",
-              },
-            }}
-          >
-            {items.map((item, i) => (
-              <div
-                onClick={() => navigate("/article")}
-                key={i}
-                style={{
-                  padding: 20,
-                  textAlign: "center",
-                  backgroundImage: `url(${item.image})`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  height: "200px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  color: "white",
-                  borderRadius: "16px",
-                  cursor: "pointer",
-                }}
-              ></div>
-            ))}
-          </Carousel>
-        </Grid>
-        <Container sx={{ my: 4 }}>
-          <Breadcrumbs separator=">" sx={{ color: "black" }}>
-            <Link
-              to="/"
-              style={{
-                textDecoration: "none",
+      <div style={{ backgroundColor: "#f5f7fd" }}>
+        <Container>
+          <Grid item xs={12}>
+            <Carousel
+              PrevIcon={<ArrowLeft />}
+              NextIcon={<ArrowRight />}
+              height="240px"
+              animation="slide"
+              duration={500}
+              navButtonsProps={{
+                style: {
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                },
+              }}
+              sx={{
+                border: "1px solid #ddd",
+                borderRadius: "16px",
+                position: "relative",
+                marginBottom: "2rem",
+                overflow: "hidden",
+              }}
+              indicatorContainerProps={{
+                style: {
+                  position: "absolute",
+                  bottom: "10px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 99,
+                },
+              }}
+              indicatorIconButtonProps={{
+                style: {
+                  color: "whitesmoke",
+                  backgroundColor: "black",
+                  borderRadius: "50%",
+                  width: "12px",
+                  height: "12px",
+                  margin: "0 4px",
+                },
+              }}
+              activeIndicatorIconButtonProps={{
+                style: {
+                  color: "#ff469e",
+                  backgroundColor: "#ff469e",
+                  border: "1px solid white",
+                  borderRadius: "8px",
+                  width: "28px",
+                  height: "12px",
+                },
               }}
             >
-              <Typography
-                sx={{
-                  color: "black",
-                  transition: "color 0.2s ease-in-out",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
+              {items.map((item, i) => (
+                <div
+                  onClick={() => navigate("/article")}
+                  key={i}
+                  style={{
+                    padding: 20,
+                    textAlign: "center",
+                    backgroundImage: `url(${item.image})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    height: "200px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    color: "white",
+                    borderRadius: "16px",
+                    cursor: "pointer",
+                  }}
+                ></div>
+              ))}
+            </Carousel>
+          </Grid>
+          <Container sx={{ my: 4 }}>
+            <Breadcrumbs separator=">" sx={{ color: "black" }}>
+              <Link
+                to="/"
+                style={{
+                  textDecoration: "none",
                 }}
               >
-                Home
+                <Typography
+                  sx={{
+                    color: "black",
+                    transition: "color 0.2s ease-in-out",
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Home
+                </Typography>
+              </Link>
+              <Typography
+                sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+              >
+                Store List
               </Typography>
-            </Link>
-            <Typography
-              sx={{ fontWeight: "700", fontSize: 20, color: "#ff469e" }}
+            </Breadcrumbs>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "100vh",
+                maxWidth: "100vw",
+                mt: -20,
+              }}
             >
-              Store List
-            </Typography>
-          </Breadcrumbs>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: "100vh",
-              maxWidth: "100vw",
-              mt: -20,
-            }}
-          >
-            <CircularProgress sx={{ color: "#ff469e" }} size={100} />
-          </Box>
+              <CircularProgress sx={{ color: "#ff469e" }} size={100} />
+            </Box>
+          </Container>
         </Container>
-      </Container>
+      </div>
     );
   }
 
@@ -329,11 +331,12 @@ export default function HomePage() {
                     }}
                   >
                     <Card
-                      onClick={() =>
-                        (navigate(`/stores/${item.id}`, {
+                      onClick={() => (
+                        navigate(`/stores/${item.id}`, {
                           state: { storeId: item.id },
-                        }), window.scrollTo({ top:0, behavior: "smooth" }))
-                      }
+                        }),
+                        window.scrollTo({ top: 0, behavior: "smooth" })
+                      )}
                       sx={{
                         padding: 2,
                         border: "1px solid #f5f7fd",

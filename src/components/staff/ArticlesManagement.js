@@ -179,7 +179,7 @@ export default function Articles() {
 
   const handleAddArticle = () => {
     if (!header || !content || !image.file) {
-      toast.warn("Please fill in all fields and select a file.");
+      toast.warn("Please fill in all fields and select a file.", { autoClose: 1500 });
       return;
     }
 
@@ -187,7 +187,7 @@ export default function Articles() {
       (article) => article.header === header
     );
     if (isDuplicateHeader) {
-      toast.error("Article with this name already exists.");
+      toast.error("Article with this name already exists.", { autoClose: 1500 });
       return;
     }
 
@@ -202,11 +202,11 @@ export default function Articles() {
       .then((response) => {
         fetchData(minDate, maxDate);
         handleCloseAddArticle();
-        toast.success("Article added successfully!");
+        toast.success("Article added successfully!", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error adding article:", error);
-        toast.error("Failed to add article. Please try again later.");
+        toast.error("Failed to add article. Please try again later.", { autoClose: 1500 });
       });
   };
 
@@ -234,7 +234,7 @@ export default function Articles() {
 
   const handleUpdate = () => {
     if (!selectedArticle.header || !selectedArticle.content) {
-      toast.warn("Please fill in all fields and select a file.");
+      toast.warn("Please fill in all fields and select a file.", { autoClose: 1500 });
       return;
     }
 
@@ -244,7 +244,7 @@ export default function Articles() {
         article.id !== selectedArticle.id
     );
     if (isDuplicateHeader) {
-      toast.error("Article with this name already exists.");
+      toast.error("Article with this name already exists.", { autoClose: 1500 });
       return;
     }
 
@@ -261,11 +261,11 @@ export default function Articles() {
       .then((response) => {
         fetchData(minDate, maxDate);
         handleClose();
-        toast.success("Article updated successfully:", response.data);
+        toast.success(`Article updated successfully: ${response.data}`, ), { autoClose: 1500 };
       })
       .catch((error) => {
         console.error("Error updating article:", error);
-        toast.error("Failed to update article. Please try again later.");
+        toast.error("Failed to update article. Please try again later.", { autoClose: 1500 });
 
         // if (error.response) {
         //   console.error("Error response data:", error.response.data);

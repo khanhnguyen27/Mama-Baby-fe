@@ -32,7 +32,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import 'react-toastify/dist/ReactToastify.css';
 import { allAgeAdminApi, addAgeApi, updateAgeApi } from "../../api/AgeAPI";
 
 export default function AgeManagement() {
@@ -117,7 +116,7 @@ export default function AgeManagement() {
   const handleAddAge = async () => {
     const trimmedRangeAge = newAgeName.trim();
     if (ages.some((age) => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase())) {
-      toast.error("RangeAge already exists.");
+      toast.error("RangeAge already exists.", { autoClose: 1500 });
       return;
     }
     try {
@@ -125,10 +124,10 @@ export default function AgeManagement() {
       await addAgeApi(newAge);
       fetchData();
       handleCloseAddDialog();
-      toast.success("RangeAge added successfully.");
+      toast.success("RangeAge added successfully.", { autoClose: 1500 });
       setPage(0);
     } catch (error) {
-      toast.error("Failed to add RangeAge. Please try again later.");
+      toast.error("Failed to add RangeAge. Please try again later.", { autoClose: 1500 });
       console.error("Error adding RangeAge:", error);
     }
   };
@@ -156,12 +155,12 @@ export default function AgeManagement() {
     const trimmedRangeAge = selectedAges.rangeAge.trim();
 
     if (ages.some(age => age.rangeAge.toLowerCase() === trimmedRangeAge.toLowerCase() && age.id !== selectedAges.id)) {
-      toast.error('Brand name already exists.');
+      toast.error('Brand name already exists.', { autoClose: 1500 });
       return;
     }
 
     if (!selectedAges) {
-      console.error("No RangeAge selected for editing.");
+      toast.warn("No RangeAge selected for editing.", { autoClose: 1500 });
       return;
     }
 
@@ -173,11 +172,11 @@ export default function AgeManagement() {
       .then(() => {
         fetchData(); // Refresh rangeAge list
         closeUpdate();
-        toast.success("RangeAge updated successfully.");
+        toast.success("RangeAge updated successfully.", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating brand:", error);
-        toast.error("Failed to update brand. Please try again later.");
+        toast.error("Failed to update brand. Please try again later.", { autoClose: 1500 });
       });
   };
 

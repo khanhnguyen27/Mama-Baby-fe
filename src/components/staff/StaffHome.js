@@ -485,51 +485,51 @@ export default function StaffHome() {
       !usageInstructions ||
       !storageInstructions
     ) {
-      toast.warn("Please fill in all required fields.");
+      toast.warn("Please fill in all required fields.", { autoClose: 1500 });
       return;
     } else if (status !== statusComingSoon && remain <= 0) {
       toast.error(
-        "If the status is in stock, the remain must be greater than 0."
+        "If the status is in stock, the remain must be greater than 0.", { autoClose: 1500 }
       );
       return;
     } else if (status !== statusInStock && remain <= 0) {
       toast.error(
-        "If the status is coming soon, the remain must be greater than or equal to 0."
+        "If the status is coming soon, the remain must be greater than or equal to 0.", { autoClose: 1500 }
       );
       return;
     } else if (type === typeWHOLESALE) {
       if (price <= 0) {
         toast.error(
-          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
         );
         return;
       }
       if (point < 0 || point > 0) {
         toast.error(
-          "If the type is wholesale, the point must be greater than 0 and the price must be 0."
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
         );
         return;
       }
     } else if (type === typeGIFT) {
       if (point <= 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
         );
         return;
       }
       if (price < 0 || price > 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
         );
         return;
       }
       if (status === statusComingSoon) {
-        toast.error("Gifts cannot have a coming soon status.");
+        toast.error("Gifts cannot have a coming soon status.", { autoClose: 1500 });
         return;
       }
     }
     if (weight <= 0) {
-      toast.error("The weight must be greater than 0.");
+      toast.error("The weight must be greater than 0.", { autoClose: 1500 });
       return;
     }
 
@@ -537,7 +537,7 @@ export default function StaffHome() {
       (product) => product.name === name
     );
     if (isDuplicateName) {
-      toast.error("Product with this name already exists.");
+      toast.error("Product with this name already exists.", { autoClose: 1500 });
       return;
     }
 
@@ -562,11 +562,11 @@ export default function StaffHome() {
       .then((response) => {
         fetchData(currentPage);
         handleCloseAddProduct();
-        toast.success("Product added successfully!");
+        toast.success("Product added successfully!", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error adding product:", error);
-        toast.error("Failed to add product. Please try again later.");
+        toast.error("Failed to add product. Please try again later.", { autoClose: 1500 });
       });
   };
 
@@ -647,14 +647,14 @@ export default function StaffHome() {
       !usageInstructions ||
       !storageInstructions
     ) {
-      toast.warn("Please fill in all required fields.");
+      toast.warn("Please fill in all required fields.", { autoClose: 1500 });
       return;
     } else if (
       selectedProduct?.status !== statusComingSoon &&
       selectedProduct?.remain <= 0
     ) {
       toast.error(
-        "If the status is in stock, the remain must be greater than 0."
+        "If the status is in stock, the remain must be greater than 0.", { autoClose: 1500 }
       );
       return;
     } else if (
@@ -662,42 +662,42 @@ export default function StaffHome() {
       selectedProduct?.remain <= 0
     ) {
       toast.error(
-        "If the status is coming soon, the remain must be greater than or equal to 0."
+        "If the status is coming soon, the remain must be greater than or equal to 0.", { autoClose: 1500 }
       );
       return;
     } else if (selectedProduct?.type === typeWHOLESALE) {
       if (selectedProduct?.price <= 0) {
         toast.error(
-          "If the type is wholesale, the price must be greater than 0 and the point must be 0."
+          "If the type is wholesale, the price must be greater than 0 and the point must be 0.", { autoClose: 1500 }
         );
         return;
       }
       if (selectedProduct?.point < 0 || selectedProduct?.point > 0) {
         toast.error(
-          "If the type is wholesale, the price must be greater than 0 and the point must be 0."
+          "If the type is wholesale, the price must be greater than 0 and the point must be 0.", { autoClose: 1500 }
         );
         return;
       }
     } else if (selectedProduct?.type === typeGIFT) {
       if (selectedProduct?.point <= 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
         );
         return;
       }
       if (selectedProduct?.price < 0 || selectedProduct?.price > 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0."
+          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
         );
         return;
       }
       if (status === statusComingSoon) {
-        toast.error("Gifts cannot have a coming soon status.");
+        toast.error("Gifts cannot have a coming soon status.", { autoClose: 1500 });
         return;
       }
     }
     if (weight <= 0) {
-      toast.error("The weight must be greater than 0.");
+      toast.error("The weight must be greater than 0.", { autoClose: 1500 });
       return;
     }
 
@@ -707,7 +707,7 @@ export default function StaffHome() {
         product.id !== selectedProduct.id
     );
     if (isDuplicateName) {
-      toast.error("Product with this name already exists.");
+      toast.error("Product with this name already exists.", { autoClose: 1500 });
       return;
     }
 
@@ -738,11 +738,11 @@ export default function StaffHome() {
         // Close the product update dialog
         fetchData(currentPage);
         handleClose();
-        toast.success("Product updated successfully!");
+        toast.success("Product updated successfully!", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating product:", error);
-        toast.error("Failed to update product. Please try again later.");
+        toast.error("Failed to update product. Please try again later.", { autoClose: 1500 });
         // if (error.response) {
         //   console.error("Error response data:", error.response.data);
         //   console.error("Error response status:", error.response.status);

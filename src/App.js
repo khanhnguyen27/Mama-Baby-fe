@@ -7,6 +7,7 @@ import Footer from "./components/Footer/Footer";
 import SignIn from "./components/general/SignIn";
 import Introduction from "./components/general/Introduction";
 import Promotion from "./components/general/Promotion";
+import Policy from "./components/general/Policy";
 import SignUp from "./components/general/SignUp";
 import HomePage from "./components/general/HomePage";
 import Cart from "./components/general/Cart";
@@ -82,6 +83,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/introduction" element={<Introduction />} />
         <Route path="/promotion" element={<Promotion />} />
+        <Route path="/policy" element={<Policy />} />
         <Route path="/products" element={<Products />} />
         <Route path="/productgift" element={<ProductGift />} />
         <Route path="/products/:productId" element={<ProductDetails />} />

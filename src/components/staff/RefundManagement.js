@@ -143,7 +143,7 @@ export default function OrdersManagement() {
       );
     } catch (err) {
       console.log(err);
-      toast.error("Error fetching data");
+      toast.error("Error fetching data", { autoClose: 1500 });
     } finally {
       setLoading(false);
     }
@@ -170,12 +170,12 @@ export default function OrdersManagement() {
             "ACCEPT",
             selectedRefund.refund_detail_list
           );
-          toast.success("Refund updated successfully!");
+          toast.success("Refund updated successfully!", { autoClose: 1500 });
           fetchData();
           handleClose();
         } catch (error) {
           console.error("Error updating refund status:", error);
-          toast.error("Failed to update refund status.");
+          toast.error("Failed to update refund status.", { autoClose: 1500 });
         }
       } else {
         alert("Selected refund not found in the list");
@@ -201,18 +201,18 @@ export default function OrdersManagement() {
             "REFUSE",
             selectedRefund.cartItemsRefund
           );
-          toast.success("Refund updated successfully!");
+          toast.success("Refund updated successfully!", { autoClose: 1500 });
           fetchData();
           handleClose();
         } catch (error) {
           console.error("Error updating refund status:", error);
-          toast.error("Failed to update refund status.");
+          toast.error("Failed to update refund status.", { autoClose: 1500 });
         }
       } else {
-        alert("Selected refund not found in the list");
+        toast.warn("Selected refund not found in the list", { autoClose: 1500 });
       }
     } else {
-      alert("Please select a refund to approve");
+      toast.warn("Please select a refund to approve", { autoClose: 1500 });
     }
   };
 

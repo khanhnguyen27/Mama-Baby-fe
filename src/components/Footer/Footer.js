@@ -77,7 +77,7 @@ const Footer = () => {
               </Typography>
             </Link>
             <Link
-              to="/"
+              to="/policy"
               style={{ textDecoration: "none" }}
               onClick={() => window.scrollTo(0, 0)}
             >
@@ -128,7 +128,7 @@ const Footer = () => {
               onClick={() => window.scrollTo(0, 0)}
             >
               <EmailIcon style={{ marginRight: "0.5rem" }} />
-              <span>123Socket@gmail.com</span>
+              <span>Mama-Baby_Official@gmail.com</span>
             </Link>
           </div>
 

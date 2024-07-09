@@ -84,21 +84,25 @@ export default function ProductDetailsManagement() {
 
     if (item.status === false) {
       updateCommentStatusApi(item.id, "true")
-        .then((response) => {
+        .then((res) => {
+          console.log(res);
           fetchData();
-          toast.success("Comment locked successfully!");
+          toast.success("Comment locked successfully!", { autoClose: 1500 });
         })
-        .catch((error) => {
-          toast.error("Failed to lock comment. Please try again later.");
+        .catch((e) => {
+          console.log(e);
+          toast.error("Failed to lock comment. Please try again later.", { autoClose: 1500 });
         });
     } else {
       updateCommentStatusApi(item.id, "false")
-        .then((response) => {
+        .then((res) => {
+          console.log(res);
           fetchData();
-          toast.success("Comment unlocked successfully!");
+          toast.success("Comment unlocked successfully!", { autoClose: 1500 });
         })
-        .catch((error) => {
-          toast.error("Failed to unlock comment. Please try again later.");
+        .catch((e) => {
+          console.log(e);
+          toast.error("Failed to unlock comment. Please try again later.", { autoClose: 1500 });
         });
     }
   };

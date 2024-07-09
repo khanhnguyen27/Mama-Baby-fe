@@ -156,12 +156,12 @@ export default function Vouchers() {
           voucher.id !== selectedVoucher.id
       )
     ) {
-      toast.error("Voucher code already exists.");
+      toast.error("Voucher code already exists.", { autoClose: 1500 });
       return;
     }
 
     if (!selectedVoucher) {
-      toast.error("No voucher selected.");
+      toast.error("No voucher selected.", { autoClose: 1500 });
       return;
     }
 
@@ -176,11 +176,11 @@ export default function Vouchers() {
       .then(() => {
         fetchData();
         closeUpdate();
-        toast.success("Voucher updated successfully.");
+        toast.success("Voucher updated successfully.", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating voucher:", error);
-        toast.error("Failed to update voucher. Please try again later.");
+        toast.error("Failed to update voucher. Please try again later.", { autoClose: 1500 });
       });
   };
 
@@ -251,27 +251,27 @@ export default function Vouchers() {
           voucher.code.toLowerCase() === trimmedVoucherCode.toLowerCase()
       )
     ) {
-      toast.error("Voucher code already exists.");
+      toast.error("Voucher code already exists.", { autoClose: 1500 });
       return;
     }
 
     if (!code || !discountValue || !description || !endAt) {
-      toast.warn("Please fill in all required fields.");
+      toast.warn("Please fill in all required fields.", { autoClose: 1500 });
       return;
     } else if (endDate <= now) {
-      toast.error("End date must be in the future.");
+      toast.error("End date must be in the future.", { autoClose: 1500 });
       return;
     }
     addVoucherApi(code, discountValue, description, endAt, storeId, isActive)
       .then(() => {
         fetchData();
         handleCloseAddVoucher();
-        toast.success("Voucher added successfully.");
+        toast.success("Voucher added successfully.", { autoClose: 1500 });
         setPage(0);
       })
       .catch((error) => {
         console.error("Error adding voucher:", error);
-        toast.error("Failed to add voucher. Please try again later.");
+        toast.error("Failed to add voucher. Please try again later.", { autoClose: 1500 });
       });
   };
 
