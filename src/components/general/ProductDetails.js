@@ -728,39 +728,43 @@ export default function ProductDetails() {
                             style={{ textAlign: "right" }}
                           >
                             {product.status === "COMING SOON" && (
-                            <Tooltip
-                              title="These are available quantity at the store. If you want to buy more than these number, you can contact to store's owner for more information."
-                              enterDelay={300}
-                              leaveDelay={100}
-                              placement="bottom"
-                              TransitionComponent={Fade}
-                              TransitionProps={{ timeout: 250 }}
-                              componentsProps={{
-                                tooltip: {
-                                  sx: {
-                                    backgroundColor: "#fff4fc",
-                                    boxShadow:
-                                      "1px 1px 3px rgba(0, 0, 0, 0.16)",
-                                    color: "#ff469e",
-                                    borderRadius: "8px",
-                                    border: "1px solid #ff469e",
-                                    fontSize: "1rem",
+                              <Tooltip
+                                title="These are available quantity at the store. If you want to buy more than these number, you can contact to store's owner for more information."
+                                enterDelay={300}
+                                leaveDelay={100}
+                                placement="bottom"
+                                TransitionComponent={Fade}
+                                TransitionProps={{ timeout: 250 }}
+                                componentsProps={{
+                                  tooltip: {
+                                    sx: {
+                                      backgroundColor: "#fff4fc",
+                                      boxShadow:
+                                        "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                                      color: "#ff469e",
+                                      borderRadius: "8px",
+                                      border: "1px solid #ff469e",
+                                      fontSize: "1rem",
+                                    },
                                   },
-                                },
-                              }}
-                            >
-                              <IconButton
-                                sx={{
-                                  p: 0,
-                                  mb: 1,
-                                  color: "black",
-                                  opacity: 0.3,
-                                  "&:hover": { color: "#ff469e", opacity: 0.9 },
                                 }}
                               >
-                                <Info sx={{ fontSize: "1.5rem", mt: 0.5 }} />
-                              </IconButton>
-                            </Tooltip>)}{" "}
+                                <IconButton
+                                  sx={{
+                                    p: 0,
+                                    mb: 1,
+                                    color: "black",
+                                    opacity: 0.3,
+                                    "&:hover": {
+                                      color: "#ff469e",
+                                      opacity: 0.9,
+                                    },
+                                  }}
+                                >
+                                  <Info sx={{ fontSize: "1.5rem", mt: 0.5 }} />
+                                </IconButton>
+                              </Tooltip>
+                            )}{" "}
                             Available:{" "}
                             <span
                               style={{ color: "#ff469e", fontWeight: "600" }}
@@ -1385,7 +1389,6 @@ export default function ProductDetails() {
                 className="rating-table row-small align-middle"
                 mb={5}
               >
-                {/* Điểm đánh giá trung bình */}
                 <Grid
                   item
                   xs={12}
@@ -1464,7 +1467,6 @@ export default function ProductDetails() {
                   </Box>
                 </Grid>
 
-                {/* Thanh thanh đánh giá từng sao */}
                 <Grid
                   item
                   xs={12}
@@ -1509,9 +1511,9 @@ export default function ProductDetails() {
                                 sx={{
                                   height: 8,
                                   borderRadius: 5,
-                                  backgroundColor: "#e0e0e0", // Màu nền nhạt khi ratingPer là 0
+                                  backgroundColor: "#e0e0e0",
                                   "& .MuiLinearProgress-bar": {
-                                    backgroundColor: barColor, // Màu sắc thanh tiến trình
+                                    backgroundColor: barColor,
                                   },
                                 }}
                               />

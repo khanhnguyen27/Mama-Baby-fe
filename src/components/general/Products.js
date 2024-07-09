@@ -1041,62 +1041,56 @@ export default function Products() {
                               {brandMap[item.brand_id]} |{" "}
                               {categoryMap[item.category_id]}
                             </Typography>
-                            {(item.status === "COMING SOON" || item.status === "OUT OF STOCK") && (
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "#ff469e",
-                                textAlign: "right",
-                                opacity: 0.9,
-                                mt: 0.5,
-                              }}
-                            >
-                              ({item.status})
-                            </Typography>
+                            {(item.status === "COMING SOON" ||
+                              item.status === "OUT OF STOCK") && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "#ff469e",
+                                  textAlign: "right",
+                                  opacity: 0.9,
+                                  mt: 0.5,
+                                }}
+                              >
+                                ({item.status})
+                              </Typography>
                             )}
                           </CardContent>
                           <Divider />
                           <CardActions sx={{ justifyContent: "space-between" }}>
-                              <Typography
-                                variant="h6"
+                            <Typography
+                              variant="h6"
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {Array(fullStars).fill(
+                                <Star style={{ color: "#ff469e" }} />
+                              )}
+                              {halfStar && (
+                                <StarHalf style={{ color: "#ff469e" }} />
+                              )}
+                              {Array(emptyStars).fill(
+                                <StarOutline style={{ color: "#ff469e" }} />
+                              )}
+                              <span
                                 style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
+                                  color: "gray",
+                                  fontSize: "0.8em",
+                                  marginLeft: "4px",
                                 }}
                               >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  {Array(fullStars).fill(
-                                    <Star style={{ color: "#ff469e" }} />
-                                  )}
-                                  {halfStar && (
-                                    <StarHalf style={{ color: "#ff469e" }} />
-                                  )}
-                                  {Array(emptyStars).fill(
-                                    <StarOutline style={{ color: "#ff469e" }} />
-                                  )}
-                                  <span
-                                    style={{
-                                      color: "gray",
-                                      fontSize: "0.8em",
-                                      marginLeft: "4px"
-                                    }}
-                                  >
-                                    (
-                                    {
-                                      comment.filter(
-                                        (x) => x.product_id === item.id
-                                      ).length
-                                    }
-                                    )
-                                  </span>
-                                </div>
-                              </Typography>
+                                (
+                                {
+                                  comment.filter(
+                                    (x) => x.product_id === item.id
+                                  ).length
+                                }
+                                )
+                              </span>
+                            </Typography>
                             {/* {item.status !== "OUT OF STOCK" && (
                             <IconButton
                               size="large"

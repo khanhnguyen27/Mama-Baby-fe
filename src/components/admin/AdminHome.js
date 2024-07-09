@@ -33,7 +33,7 @@ import {
 import { allOrderApi, orderByYearApi } from "../../api/OrderAPI";
 import { allRefundApi, refundByYearApi } from "../../api/RefundAPI";
 import { allStoreByAdminApi, StoreByMonthApi } from "../../api/StoreAPI";
-import { allUserApi, userByYearApi } from "../../api/UserAPI";
+import { allUserForAdApi, userByYearApi } from "../../api/UserAPI";
 import { allStatusOrderApi } from "../../api/OrderAPI";
 
 export default function AdminHome() {
@@ -131,7 +131,7 @@ export default function AdminHome() {
       const orderRes = await allOrderApi();
       const storeRes = await allStoreByAdminApi();
       const refundRes = await allRefundApi();
-      const accountRes = await allUserApi();
+      const accountRes = await allUserForAdApi();
 
       setOrders(orderRes.data.data || []);
       console.log("orderRes", orderRes);
@@ -142,7 +142,7 @@ export default function AdminHome() {
       setAccounts(accountRes.data.data || []);
       console.log("accountRes", accountRes);
 
-      const userRes = await allUserApi();
+      const userRes = await allUserForAdApi();
       const ordersData = orderRes.data.data || [];
       const refundData = refundRes.data.data.refunds || [];
       const userData = userRes?.data?.data || [];

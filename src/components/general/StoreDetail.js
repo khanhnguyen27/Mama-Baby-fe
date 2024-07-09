@@ -1111,36 +1111,29 @@ export default function StoreDetail() {
                                   justifyContent: "center",
                                 }}
                               >
-                                <div
+                                {Array(fullStars).fill(
+                                  <Star style={{ color: "#ff469e" }} />
+                                )}
+                                {halfStar && (
+                                  <StarHalf style={{ color: "#ff469e" }} />
+                                )}
+                                {Array(emptyStars).fill(
+                                  <StarOutline style={{ color: "#ff469e" }} />
+                                )}
+                                <span
                                   style={{
-                                    display: "flex",
-                                    alignItems: "center",
+                                    color: "gray",
+                                    fontSize: "0.8em",
                                   }}
                                 >
-                                  {Array(fullStars).fill(
-                                    <Star style={{ color: "#ff469e" }} />
-                                  )}
-                                  {halfStar && (
-                                    <StarHalf style={{ color: "#ff469e" }} />
-                                  )}
-                                  {Array(emptyStars).fill(
-                                    <StarOutline style={{ color: "#ff469e" }} />
-                                  )}
-                                  <span
-                                    style={{
-                                      color: "gray",
-                                      fontSize: "0.8em",
-                                    }}
-                                  >
-                                    (
-                                    {
-                                      comment.filter(
-                                        (x) => x.product_id === item.id
-                                      ).length
-                                    }
-                                    )
-                                  </span>
-                                </div>
+                                  (
+                                  {
+                                    comment.filter(
+                                      (x) => x.product_id === item.id
+                                    ).length
+                                  }
+                                  )
+                                </span>
                               </Typography>
                             </CardContent>
                             <IconButton
