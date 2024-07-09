@@ -873,6 +873,7 @@ export default function HomePage() {
                       sx={{
                         cursor: "pointer",
                         minWidth: 180,
+                        maxWidth: 240,
                         padding: 2,
                         border: "1px solid white",
                         borderRadius: "16px",
@@ -1135,6 +1136,7 @@ export default function HomePage() {
                     sx={{
                       cursor: "pointer",
                       minWidth: 180,
+                      maxWidth: 240,
                       padding: 2,
                       border: "1px solid white",
                       borderRadius: "16px",
@@ -1356,6 +1358,7 @@ export default function HomePage() {
                   sx={{
                     cursor: "pointer",
                     minWidth: 180,
+                    maxWidth: 240,
                     padding: 2,
                     border: "1px solid white",
                     borderRadius: "16px",
@@ -1544,7 +1547,7 @@ export default function HomePage() {
                   }}
                   sx={{
                     cursor: "pointer",
-                    minWidth: 300,
+                    minWidth: 240,
                     padding: 2,
                     textAlign: "center",
                     border: "1px solid #f5f7fd",

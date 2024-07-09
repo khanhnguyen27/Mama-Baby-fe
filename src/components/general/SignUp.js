@@ -6,8 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import Eye from "@mui/icons-material/Visibility";
 import EyeSlash from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { allUserApi, signupApi } from "../../api/UserAPI";
 
@@ -27,13 +26,16 @@ const SignUp = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignUp = async (e) => {
+  const handleSignUp = (e) => {
     e.preventDefault();
-    // if (!handleValidationEmail()) {
-    //   return;
-    // }
     if (username.length < 6) {
       toast.error("Username's length is at least 6 characters", {
+        autoClose: 1500,
+      });
+      return;
+    }
+    if (username.includes(" ")) {
+      toast.error("Username cannot contain space characters", {
         autoClose: 1500,
       });
       return;
@@ -71,7 +73,7 @@ const SignUp = () => {
       return;
     }
     try {
-      const response = await allUserApi();
+      const response = allUserApi();
 
       if (response?.data?.data?.some((item) => item.username === username)) {
         toast.error("This username is already existed", {
@@ -124,19 +126,6 @@ const SignUp = () => {
     );
   }
 
-  // const handleValidationEmail = () => {
-  //   const emailPattern = /^[\w-]+(\.[\w-]+)*@(gmail\.com)$/;
-
-  //   if (!email) {
-  //     toast.error("An email is required!");
-  //     return false;
-  //   } else if (!emailPattern.test(email)) {
-  //     toast.error("An invalid email format! (must be @gmail.com)");
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
   return (
     <div style={{ marginTop: "7rem" }}>
       <div
@@ -151,8 +140,20 @@ const SignUp = () => {
           alignItems: "center",
         }}
       >
-        <div style={{ width: "50%" }}>
-          {" "}
+        <Box
+          sx={{
+            width: "50%",
+            animation: "slideSignup 1s ease-in-out",
+            "@keyframes slideSignup": {
+              from: {
+                transform: "translateX(50%)",
+              },
+              to: {
+                transform: "translateX(0)",
+              },
+            },
+          }}
+        >
           <div
             style={{
               backgroundColor: "#fce3ef",
@@ -188,7 +189,7 @@ const SignUp = () => {
                   <span
                     style={{ fontSize: "14px", fontWeight: 0, opacity: 0.3 }}
                   >
-                    (At least 6 characters)
+                    (At least 6 characters and no spaces)
                   </span>
                 </Typography>
                 <Input
@@ -581,7 +582,7 @@ const SignUp = () => {
                       navigate("/signin"),
                       window.scrollTo({
                         top: 0,
-                        behavior: "smooth",
+                        behavior: "instant",
                       })
                     )}
                     sx={{
@@ -603,8 +604,7 @@ const SignUp = () => {
               </div>
             </form>
           </div>
-        </div>
-        <ToastContainer />
+        </Box>
       </div>
     </div>
   );

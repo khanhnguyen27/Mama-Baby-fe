@@ -31,7 +31,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import 'react-toastify/dist/ReactToastify.css';
 import { allStoreByAdminApi, requestStoreApi } from "../../api/StoreAPI";
 
 export default function StoreManagement() {
@@ -116,7 +115,7 @@ export default function StoreManagement() {
 
   const handleEdit = () => {
     if (!selectedStore) {
-      console.error("No store selected for editing.");
+      toast.warn("No store selected for editing.", { autoClose: 1500 });
       return;
     }
 
@@ -144,11 +143,11 @@ export default function StoreManagement() {
       .then(() => {
         fetchData();
         closeUpdate();
-        toast.success("Store updated successfully.");
+        toast.success("Store updated successfully.", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating store:", error);
-        toast.error("Failed to update store. Please try again later.");
+        toast.error("Failed to update store. Please try again later.", { autoClose: 1500 });
       });
   };
 

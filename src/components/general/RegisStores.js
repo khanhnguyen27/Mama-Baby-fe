@@ -17,7 +17,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { TextField,InputLabel } from "@mui/material";
+import { TextField, InputLabel } from "@mui/material";
 
 const RegistStore = () => {
   window.document.title = "Regist For Seller and Store";
@@ -67,7 +67,7 @@ const RegistStore = () => {
       description === "" ||
       phone === ""
     ) {
-      toast.error("Please input all fields", { autoClose: 2500 });
+      toast.error("Please input all fields", { autoClose: 1500 });
       return;
     }
 
@@ -97,8 +97,6 @@ const RegistStore = () => {
       .finally(() => {
         setLoading(false);
       });
-
-
   };
   const handleImage = (e) => {
     if (e.target.files[0]) {
@@ -112,7 +110,7 @@ const RegistStore = () => {
   };
 
   return (
-    <div style={{ marginTop: "3rem" }}>
+    <div style={{ backgroundColor: "#fdf5d7" }}>
       <div
         style={{
           backgroundImage:
@@ -125,7 +123,20 @@ const RegistStore = () => {
           alignItems: "center",
         }}
       >
-        <div style={{ width: "50%" }}>
+        <Box
+          sx={{
+            width: "50%",
+            animation: "slideStoreRegist 1s ease-in-out",
+            "@keyframes slideStoreRegist": {
+              from: {
+                transform: "translateY(50%)",
+              },
+              to: {
+                transform: "translateX(0)",
+              },
+            },
+          }}
+        >
           {" "}
           <div
             style={{
@@ -366,7 +377,7 @@ const RegistStore = () => {
                 <input
                   type="file"
                   accept="image/*"
-                   onChange={handleImage}
+                  onChange={handleImage}
                   style={{ marginTop: "16px", marginBottom: "16px" }}
                 />
                 {image && (
@@ -492,7 +503,7 @@ const RegistStore = () => {
               </div>
             </form>
           </div>
-        </div>
+        </Box>
         <ToastContainer />
       </div>
     </div>

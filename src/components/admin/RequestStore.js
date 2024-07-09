@@ -157,7 +157,7 @@ export default function RequestStore() {
     )
       .then((res) => {
         toast.success("Request Accepted!", {
-          autoClose: 3000,
+          autoClose: 1500,
         });
         handleApproveUserStatus(userId, 2); // Pass userId and new roleId
         updateRequestStatus(selectedStoreId, "APPROVED");
@@ -183,7 +183,7 @@ export default function RequestStore() {
 
     deleteStoreApi(selectedStoreId)
       .then(() => {
-        toast.success("Store deleted successfully!");
+        toast.success("Store deleted successfully!", { autoClose: 1500 });
         setLoading(true);
         setTimeout(() => {
           fetchData();
@@ -244,14 +244,14 @@ export default function RequestStore() {
           true,
           newRoleId
         );
-        toast.success("User role and status updated successfully!");
+        toast.success("User role and status updated successfully!", { autoClose: 1500 });
         window.location.reload();
       } catch (error) {
         console.error("Error updating user status:", error);
-        toast.error("Failed to update user status.");
+        toast.error("Failed to update user status.", { autoClose: 1500 });
       }
     } else {
-      alert("Selected user not found in the list");
+      toast.warn("Selected user not found in the list", { autoClose: 1500 });
     }
   };
   const handleOpenLicense = (item) => {

@@ -32,7 +32,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import 'react-toastify/dist/ReactToastify.css';
 import { allBrandAdminApi, addBrandApi, updateBrandApi } from "../../api/BrandAPI";
 
 export default function BrandManagement() {
@@ -118,7 +117,7 @@ export default function BrandManagement() {
   const handleAddBrand = async () => {
     const trimmedBrandName = newBrandName.trim();
     if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase())) {
-      toast.error('Brand name already exists.');
+      toast.error('Brand name already exists.', { autoClose: 1500 });
       return;
     }
 
@@ -127,10 +126,10 @@ export default function BrandManagement() {
       await addBrandApi(newBrand); // Replace with your API call to add brand
       fetchData(); // Refresh brand list
       handleCloseAddDialog();
-      toast.success("Brand added successfully.");
+      toast.success("Brand added successfully.", { autoClose: 1500 });
       setPage(0);
     } catch (error) {
-      toast.error("Failed to add brand. Please try again later.");
+      toast.error("Failed to add brand. Please try again later.", { autoClose: 1500 });
       // Handle error
     }
   };
@@ -155,12 +154,12 @@ export default function BrandManagement() {
     const trimmedBrandName = selectedBrand.name.trim();
 
     if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase() && brand.id !== selectedBrand.id)) {
-      toast.error('Brand name already exists.');
+      toast.error('Brand name already exists.', { autoClose: 1500 });
       return;
     }
 
     if (!selectedBrand) {
-      console.error("No brand selected for editing.");
+      toast.warn("No brand selected for editing.", { autoClose: 1500 });
       return;
     }
 
@@ -172,11 +171,11 @@ export default function BrandManagement() {
       .then(() => {
         fetchData(); // Refresh brand list
         closeUpdate();
-        toast.success("Brand updated successfully.");
+        toast.success("Brand updated successfully.", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating brand:", error);
-        toast.error("Failed to update brand. Please try again later.");
+        toast.error("Failed to update brand. Please try again later.", { autoClose: 1500 });
       });
   };
 

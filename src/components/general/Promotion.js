@@ -55,7 +55,21 @@ const Promotion = () => {
             </Typography>
           </Breadcrumbs>
         </Container>
-        <Container sx={{ mt: 4, pb: 8 }}>
+        <Container
+          sx={{
+            mt: 4,
+            pb: 8,
+            animation: "slideIn 1.5s ease-in-out",
+            "@keyframes slideIn": {
+              from: {
+                transform: "translateY(60%)",
+              },
+              to: {
+                transform: "translateY(0)",
+              },
+            },
+          }}
+        >
           <Grid container spacing={6}>
             <Grid item xs={12} md={6}>
               <img
@@ -72,15 +86,20 @@ const Promotion = () => {
                 src="https://www.shutterstock.com/shutterstock/videos/1088535213/thumb/5.jpg?ip=x480"
                 alt="Promotion Image2"
                 style={{
+                  marginTop: "-8px",
                   width: "100%",
                   height: "auto",
                   borderRadius: "8px",
-                  marginTop: "5px",
                 }}
               />
             </Grid>
             <Grid item xs={12} md={6} sx={{ textAlign: "left" }}>
-              <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="h4"
+                component="h2"
+                gutterBottom
+                sx={{ fontWeight: "bold" }}
+              >
                 Special Promotion: Nutritious Milk for Moms & Babies
               </Typography>
               <Typography variant="body1" gutterBottom>

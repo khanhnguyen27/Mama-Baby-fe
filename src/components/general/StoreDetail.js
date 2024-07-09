@@ -10,7 +10,7 @@ import ArrowLeft from "@mui/icons-material/ArrowLeft";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import { allArticleApi } from "../../api/ArticleAPI";
 import { allCommentApi } from "../../api/CommentAPI";
-import { Star, StarHalf, StarOutline } from "@mui/icons-material";
+import { Inventory, Star, StarHalf, StarOutline } from "@mui/icons-material";
 
 import { storeByIdApi, productByStoreIdApi } from "../../api/StoreAPI";
 import {
@@ -259,7 +259,7 @@ export default function StoreDetail() {
           <Paper
             sx={{
               padding: "20px",
-              backgroundColor: "#f8f8f8",
+              backgroundColor: "#fff4fc",
               textAlign: "center",
               boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
               borderRadius: "15px",
@@ -270,19 +270,8 @@ export default function StoreDetail() {
             }}
           >
             <CardContent>
-              <Typography
-                variant="h4"
-                sx={{
-                  color: "#ff469e",
-                  fontWeight: "bold",
-                  marginBottom: "1rem",
-                  textAlign: "left",
-                }}
-              >
-                {store?.name_store}
-              </Typography>
               <Grid container spacing={3}>
-                <Grid item xs={10} md={4}>
+                <Grid item xs={12} md={5}>
                   <Box
                     sx={{
                       display: "flex",
@@ -291,7 +280,8 @@ export default function StoreDetail() {
                       height: "100%", // Đảm bảo chiều cao của Box tương thích với Paper
                       padding: "10px",
                       border: "2px solid #ff469e", // Viền bọc quanh Avatar
-                      borderRadius: "15px",
+                      borderRadius: "1rem",
+                      backgroundColor: "#ffe6f0",
                     }}
                   >
                     <Avatar
@@ -303,17 +293,51 @@ export default function StoreDetail() {
                         borderRadius: "50%",
                       }}
                     />
-                    <Box
+                    <Typography
+                      variant="h4"
                       sx={{
-                        borderRadius: "15px",
-                        padding: "10px",
-                        marginTop: "20px",
+                        color: "#ff469e",
+                        fontWeight: "bold",
+                        mt: 2,
+                        textAlign: "center",
                       }}
                     >
-                      <Divider
-                        sx={{ margin: "12px 0", backgroundColor: "#ff469e" }}
-                      />
-                      <Typography variant="body1" gutterBottom>
+                      {store?.name_store}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={7}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          color: "#ff469e",
+                          textAlign: "left",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Description:
+                      </Typography>
+                      <Typography
+                        paragraph
+                        sx={{
+                          textAlign: "left",
+                          marginTop: 0.5,
+                          color: "#333",
+                          fontSize: "1rem",
+                        }}
+                      >
+                        {store?.description}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}></Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body1"
+                        gutterBottom
+                        sx={{ textAlign: "left" }}
+                      >
                         <LocationOnIcon
                           sx={{
                             fontSize: 20,
@@ -324,7 +348,11 @@ export default function StoreDetail() {
                         />
                         {store?.address}
                       </Typography>
-                      <Typography variant="body1" gutterBottom>
+                      <Typography
+                        variant="body1"
+                        gutterBottom
+                        sx={{ textAlign: "left" }}
+                      >
                         <PhoneIcon
                           sx={{
                             fontSize: 20,
@@ -335,28 +363,26 @@ export default function StoreDetail() {
                         />
                         {store?.phone}
                       </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={8}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      marginBottom: "1rem",
-                      color: "#ff469e",
-                      textAlign: "left",
-                    }}
-                  >
-                    Description
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    paragraph
-                    sx={{ textAlign: "left" }}
-                  >
-                    {store?.description}
-                  </Typography>
-                  {/* Add more content or sections as needed */}
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography
+                        variant="body1"
+                        gutterBottom
+                        sx={{ textAlign: "left" }}
+                      >
+                        <Inventory
+                          sx={{
+                            fontSize: 20,
+                            verticalAlign: "middle",
+                            marginRight: "8px",
+                            mb: 0.5,
+                            color: "#ff469e",
+                          }}
+                        />
+                        Products: {product?.products?.length}
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </CardContent>
@@ -697,7 +723,7 @@ export default function StoreDetail() {
                   sx={{
                     position: "relative",
                     minWidth: 180,
-                    maxWidth: 600,
+                    maxWidth: 300,
                     textAlign: "center",
                     border: "3px solid white",
                     borderRadius: "16px",

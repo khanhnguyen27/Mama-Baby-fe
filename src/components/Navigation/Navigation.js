@@ -854,7 +854,7 @@ const Navigation = () => {
             backgroundColor: "white",
             color: "black",
             padding: "10px 40px",
-            boxShadow: "none",
+            boxShadow: 1,
           }}
         >
           <Container

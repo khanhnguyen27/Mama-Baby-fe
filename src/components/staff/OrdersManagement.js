@@ -1052,11 +1052,11 @@ export default function OrdersManagement() {
                         <Button
                           variant="contained"
                           disabled={
-                            item.type === "PRE_ORDER" &&
+                            (item.type === "PRE_ORDER" &&
                             item.order_detail_list.some(
                               (item) =>
                                 productMap[item.product_id][5] === "COMING SOON"
-                            )
+                            )) || !store.is_active
                           }
                           sx={{
                             backgroundColor: "white",
@@ -1076,7 +1076,6 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Accept", item.id)}
-                          disabled={!store.is_active}
                         >
                           ACCEPT ORDER
                         </Button>

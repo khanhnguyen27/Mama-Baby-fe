@@ -67,7 +67,21 @@ const Introduction = () => {
             Providing Nutritious Milk for Moms & Babies
           </Typography>
         </section>
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            mt: 4,
+            animation: "fadeIn  1s ease-in-out",
+            "@keyframes fadeIn ": {
+              from: {
+                opacity: 0
+              },
+              to: {
+                opacity: 1
+              },
+            },
+          }}
+        >
           <Typography
             variant="h4"
             component="h2"

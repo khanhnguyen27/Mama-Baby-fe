@@ -32,7 +32,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import 'react-toastify/dist/ReactToastify.css';
 import { allCategoryAdminApi, addCategoryApi, updateCategoryApi } from "../../api/CategoryAPI";
 
 export default function CategoryManagement() {
@@ -116,7 +115,7 @@ export default function CategoryManagement() {
   const handleAddCategory = async () => {
     const trimmedCategoryName = newCategoryName.trim();
     if (categories.some(category => category.name.toLowerCase() === trimmedCategoryName.toLowerCase())) {
-      toast.error('Category name already exists.');
+      toast.error('Category name already exists.', { autoClose: 1500 });
       return;
     }
 
@@ -125,10 +124,10 @@ export default function CategoryManagement() {
       await addCategoryApi(newCategory); // Replace with your API call to add category
       fetchData(); // Refresh category list
       handleCloseAddDialog();
-      toast.success("Category added successfully.");
+      toast.success("Category added successfully.", { autoClose: 1500 });
       setPage(0);
     } catch (error) {
-      toast.error("Failed to add category. Please try again later.");
+      toast.error("Failed to add category. Please try again later.", { autoClose: 1500 });
       // Handle error
     }
   };
@@ -153,12 +152,12 @@ export default function CategoryManagement() {
     const trimmedCategoryName = selectedCategory.name.trim();
 
     if (categories.some(category => category.name.toLowerCase() === trimmedCategoryName.toLowerCase() && category.id !== selectedCategory.id)) {
-      toast.error('Category name already exists.');
+      toast.error('Category name already exists.', { autoClose: 1500 });
       return;
     }
 
     if (!selectedCategory) {
-      console.error("No category selected for editing.");
+      toast.warn("No category selected for editing.", { autoClose: 1500 });
       return;
     }
 
@@ -170,11 +169,11 @@ export default function CategoryManagement() {
       .then(() => {
         fetchData(); // Refresh category list
         closeUpdate();
-        toast.success("Category updated successfully.");
+        toast.success("Category updated successfully.", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating category:", error);
-        toast.error("Failed to update category. Please try again later.");
+        toast.error("Failed to update category. Please try again later.", { autoClose: 1500 });
       });
   };
 

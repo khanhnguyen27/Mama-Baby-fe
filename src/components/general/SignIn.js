@@ -6,8 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import Eye from "@mui/icons-material/Visibility";
 import EyeSlash from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { loginApi } from "../../api/UserAPI";
 import { jwtDecode } from "jwt-decode";
@@ -26,9 +25,6 @@ const SignIn = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // if (!handleValidationEmail()) {
-    //   return;
-    // }
     if (!username) {
       toast.error("The username is required", { autoClose: 1500 });
       return;
@@ -73,19 +69,6 @@ const SignIn = () => {
       });
   };
 
-  // const handleValidationEmail = () => {
-  //   const emailPattern = /^[\w-]+(\.[\w-]+)*@(gmail\.com)$/;
-
-  //   if (!email) {
-  //     toast.error("An email is required!");
-  //     return false;
-  //   } else if (!emailPattern.test(email)) {
-  //     toast.error("An invalid email format! (must be @gmail.com)");
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
   return (
     <div style={{ marginTop: "7rem" }}>
       {loading ? (
@@ -115,7 +98,20 @@ const SignIn = () => {
             alignItems: "center",
           }}
         >
-          <div style={{ width: "50%" }}>
+          <Box
+            sx={{
+              width: "50%",
+              animation: "slideLogin 1s ease-in-out",
+              "@keyframes slideLogin": {
+                from: {
+                  transform: "translateX(-50%)",
+                },
+                to: {
+                  transform: "translateX(0)",
+                },
+              },
+            }}
+          >
             <div
               style={{
                 backgroundColor: "#fce3ef",
@@ -294,7 +290,7 @@ const SignIn = () => {
                         navigate("/signup"),
                         window.scrollTo({
                           top: 0,
-                          behavior: "smooth",
+                          behavior: "instant",
                         })
                       )}
                       sx={{
@@ -316,7 +312,7 @@ const SignIn = () => {
                 </div>
               </form>
             </div>
-          </div>
+          </Box>
         </div>
       )}
       {/* <ToastContainer /> */}
