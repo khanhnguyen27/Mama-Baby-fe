@@ -258,10 +258,10 @@ export default function Articles() {
     };
 
     updateArticleApi(selectedArticle.id, articleData, image.file)
-      .then((response) => {
+      .then((res) => {
         fetchData(minDate, maxDate);
         handleClose();
-        toast.success(`Article updated successfully: ${response.data}`, ), { autoClose: 1500 };
+        toast.success("Article updated successfully", ), { autoClose: 1500 };
       })
       .catch((error) => {
         console.error("Error updating article:", error);
