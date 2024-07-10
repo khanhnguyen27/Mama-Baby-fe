@@ -594,9 +594,8 @@ export default function AdminHome() {
       const revenueCol = worksheet.getColumn(8 + 2 * index).letter;
       const refundCol = worksheet.getColumn(9 + 2 * index).letter;
       totalRow.push({
-        formula: `SUM(${revenueCol}3:${revenueCol}${
-          approvedStores.length + 2
-        })`,
+        formula: `SUM(${revenueCol}3:${revenueCol}${approvedStores.length + 2
+          })`,
       });
       totalRow.push({
         formula: `SUM(${refundCol}3:${refundCol}${approvedStores.length + 2})`,
@@ -1191,7 +1190,7 @@ export default function AdminHome() {
           <Typography
             sx={{
               color: "white",
-              padding: "13px",
+              padding: "11px",
               fontWeight: "bold",
               fontSize: "20px",
               textAlign: "center",
@@ -1422,7 +1421,7 @@ export default function AdminHome() {
                     style={{
                       width: 120,
                       marginTop: 10,
-                      marginLeft: 73,
+                      marginLeft: 74,
                     }}
                   >
                     <InputLabel
