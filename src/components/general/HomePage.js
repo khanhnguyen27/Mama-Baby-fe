@@ -1134,6 +1134,7 @@ export default function HomePage() {
                       })
                     )}
                     sx={{
+                      position: "relative",
                       cursor: "pointer",
                       minWidth: 180,
                       maxWidth: 240,
@@ -1150,21 +1151,24 @@ export default function HomePage() {
                       },
                     }}
                   >
-                    <Typography
-                      variant="h5"
+                    <Box
                       sx={{
                         mb: "10px",
-                        fontWeight: "bold",
+                        width: "1.5rem",
+                        alignItems: "end",
+                        textAlign: "right",
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
                         backgroundColor: "#ff469e",
                         color: "white",
-                        marginLeft: "auto",
-                        fontSize: "1rem",
-                        textAlign: "right",
-                        width: "20%",
+                        borderRadius: "8px",
+                        padding: "4px 8px",
+                        fontSize: "12px",
                       }}
                     >
                       {item.type}{" "}
-                    </Typography>
+                    </Box>
 
                     <div
                       style={{
