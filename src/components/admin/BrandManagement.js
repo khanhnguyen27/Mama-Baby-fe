@@ -25,7 +25,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  FormControl
+  FormControl,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
@@ -74,7 +74,9 @@ export default function BrandManagement() {
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
   };
 
@@ -116,6 +118,12 @@ export default function BrandManagement() {
 
   const handleAddBrand = async () => {
     const trimmedBrandName = newBrandName.trim();
+
+    if (trimmedBrandName === '') {
+      toast.warn('Please enter a brand name.', { autoClose: 1500 });
+      return;
+    }
+
     if (brands.some(brand => brand.name.toLowerCase() === trimmedBrandName.toLowerCase())) {
       toast.error('Brand name already exists.', { autoClose: 1500 });
       return;
@@ -204,7 +212,7 @@ export default function BrandManagement() {
         >
           <Typography
             sx={{
-              padding: "13px",
+              padding: "11px",
               background: "#ff469e",
               color: "white",
               fontWeight: "bold",
@@ -215,87 +223,151 @@ export default function BrandManagement() {
             }}>
             Brands Management
           </Typography>
-          <Grid
-            container spacing={2}
-            alignItems="center"
-            sx={{ marginBottom: "16px" }}
-          >
-            <Grid item xs={4} md={4}>
-              <TextField
-                value={searchKeyword}
-                onChange={handleSearchChange}
-                placeholder="Search By Brand Name"
-                variant="outlined"
-                size="small"
-                fullWidth
-                InputProps={{
-                  style: { padding: "8px" },
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IconButton>
-                        <SearchIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {searchKeyword && (
-                        <IconButton
-                          onClick={() => setSearchKeyword("")}
-                          size="small"
-                        >
-                          <CloseIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={4} md={3}>
-              <FormControl sx={{ width: "170px" }}>
-                <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
-                  Sorting Status
-                </InputLabel>
-                <Select
-                  labelId="sorting-status-label"
-                  id="sorting-status-select"
-                  size="medium"
-                  value={sortingStatus}
-                  onChange={handleSortingStatus}
-                  label="Sorting Status"
-                >
-                  <MenuItem value="">Sort by Default</MenuItem>
-                  <MenuItem value="active">Sort by Active</MenuItem>
-                  <MenuItem value="inactive">Sort by Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={1} md={2}></Grid>
-            <Grid item xs={3} md={3} container justifyContent="flex-end">
-              <Button
-                variant="contained"
-                size="medium"
-                onClick={handleOpenAddDialog}
-                startIcon={<AddIcon />}
-                style={{
-                  color: "black",
-                  height: "56px",
-                  border: "1px solid #ff469e",
-                  borderRadius: "10px",
-                  backgroundColor: "white",
-                }}
-              >
-                Add New Brand
-              </Button>
-            </Grid>
-          </Grid>
           {loading ? (
             <div style={{ textAlign: "center" }}>
-              <CircularProgress />
+              <CircularProgress
+                sx={{ color: "#ff469e" }}
+                size={50}
+              />
             </div>
           ) : (
             <>
+              <Grid
+                container spacing={2}
+                alignItems="center"
+                sx={{ marginBottom: "16px" }}
+              >
+                <Grid item xs={3} md={4}>
+                  <TextField
+                    sx={{
+                      border: "2px solid #ff469e",
+                      borderRadius: "7px",
+                      backgroundColor: "white",
+                      transition: "0.2s ease-in-out",
+                      "&:hover": {
+                        border: "2px solid #ff469e",
+                      },
+                      "&:focus": {
+                        backgroundColor: "#F8F8F8",
+                      },
+                      "&.Mui-focused": {
+                        border: "1px solid #ff469e",
+                        backgroundColor: "#F8F8F8",
+                        boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                        outline: "none",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                    }}
+                    value={searchKeyword}
+                    onChange={handleSearchChange}
+                    placeholder="Search By Brand Name"
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconButton>
+                            <SearchIcon fontSize="small" style={{ color: "FF1493" }} />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {searchKeyword && (
+                            <IconButton
+                              onClick={() => setSearchKeyword("")}
+                              size="small"
+                            >
+                              <CloseIcon fontSize="small" style={{ color: "DC143C" }} />
+                            </IconButton>
+                          )}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={3} md={3}>
+                  <FormControl
+                    sx={{
+                      width: '170px',
+                      border: '2px solid #ff469e',
+                      borderRadius: '7px',
+                      backgroundColor: 'white',
+                      transition: '0.2s ease-in-out',
+                      '&:hover': {
+                        borderColor: '#ff469e',
+                      },
+                      '&:focus': {
+                        backgroundColor: '#F8F8F8',
+                      },
+                      '&.Mui-focused': {
+                        border: '2px solid #ff469e',
+                        backgroundColor: '#F8F8F8',
+                        boxShadow: 'inset 0px 2px 4px rgba(0, 0, 0, 0.32)',
+                        outline: 'none',
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: 'none',
+                      },
+                      '& .MuiInputLabel-root': {
+                        top: '-1px',
+                        backgroundColor: 'white',
+                      },
+                    }}
+                    size="small"
+                  >
+                    <InputLabel htmlFor="sorting-status-select" id="sorting-status-label">
+                      Sorting Status
+                    </InputLabel>
+                    <Select
+                      labelId="sorting-status-label"
+                      id="sorting-status-select"
+                      value={sortingStatus}
+                      onChange={handleSortingStatus}
+                      label="Sorting Status"
+                    >
+                      <MenuItem value="">Sort by Default</MenuItem>
+                      <MenuItem value="active">Sort by Active</MenuItem>
+                      <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={1} md={2}></Grid>
+                <Grid item xs={5} md={3} container justifyContent="flex-end">
+                  <Button
+                    variant="contained"
+                    onClick={handleOpenAddDialog}
+                    startIcon={<AddIcon style={{ color: "	FF1493" }} />}
+                    style={{
+                      color: "#4d4d4d",
+                      border: "2px solid #ff469e",
+                      borderRadius: "7px",
+                      backgroundColor: "white",
+                      transition: "0.2s ease-in-out",
+                      "&:hover": {
+                        border: "2px solid #ff469e",
+                      },
+                      "&:focus": {
+                        backgroundColor: "#F8F8F8",
+                      },
+                      "&.Mui-focused": {
+                        border: "1px solid #ff469e",
+                        backgroundColor: "#F8F8F8",
+                        boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                        outline: "none",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                    }}
+                  >
+                    Add New Brand
+                  </Button>
+                </Grid>
+              </Grid>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -340,6 +412,7 @@ export default function BrandManagement() {
                 sx={{
                   justifyContent: "flex-end",
                   backgroundColor: "f1f1f1",
+                  marginTop: "8px",
                   marginRight: "40px"
                 }}
                 labelRowsPerPage="Rows:"
@@ -364,10 +437,34 @@ export default function BrandManagement() {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseAddDialog} color="primary">
+            <Button onClick={handleCloseAddDialog} sx={{
+              backgroundColor: "white",
+              color: "#757575",
+              borderRadius: "7px",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}>
               Cancel
             </Button>
-            <Button onClick={handleAddBrand} color="primary">
+            <Button onClick={handleAddBrand} sx={{
+              backgroundColor: "white",
+              color: "#ff469e",
+              borderRadius: "7px",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #ff469e",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}>
               Add
             </Button>
           </DialogActions>
@@ -402,10 +499,34 @@ export default function BrandManagement() {
               </FormControl>
             </DialogContent>
             <DialogActions>
-              <Button onClick={closeUpdate} color="primary">
+              <Button onClick={closeUpdate} sx={{
+                backgroundColor: "white",
+                color: "#757575",
+                borderRadius: "7px",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #757575",
+                "&:hover": {
+                  backgroundColor: "#757575",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}>
                 Cancel
               </Button>
-              <Button onClick={handleEdit} color="primary">
+              <Button onClick={handleEdit} sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "7px",
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}>
                 Save
               </Button>
             </DialogActions>

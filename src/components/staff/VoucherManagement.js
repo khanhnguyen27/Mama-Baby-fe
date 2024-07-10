@@ -36,7 +36,6 @@ import Button from "@mui/material/Button";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
-import "react-toastify/dist/ReactToastify.css";
 import {
   getVoucherByStoreIdApi,
   updateVoucherApi,
@@ -72,11 +71,16 @@ export default function Vouchers() {
   useEffect(() => {
     const fetchStoreData = async () => {
       try {
+        setLoading(true);
         const res = await storeByUserIdApi(userId);
 
         setStore(res?.data?.data);
       } catch (err) {
         console.log(err);
+      } finally {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       }
     };
 
@@ -114,7 +118,9 @@ export default function Vouchers() {
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
   };
 
@@ -294,7 +300,7 @@ export default function Vouchers() {
             >
               <Typography
                 sx={{
-                  padding: "13px",
+                  padding: "11px",
                   background: "#ff469e",
                   color: "white",
                   fontWeight: "bold",
@@ -306,208 +312,274 @@ export default function Vouchers() {
               >
                 Vouchers Management
               </Typography>
-
-              <Grid
-                container
-                spacing={2}
-                alignItems="center"
-                sx={{ marginBottom: "16px" }}
-              >
-                <Grid item xs={4} md={4}>
-                  <TextField
-                    value={searchKeyword}
-                    onChange={handleSearchChange}
-                    placeholder="Search By Voucher Code"
-                    variant="outlined"
-                    size="small"
-                    fullWidth
-                    InputProps={{
-                      style: { padding: "8px" },
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <IconButton>
-                            <SearchIcon fontSize="small" />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          {searchKeyword && (
-                            <IconButton
-                              onClick={() => setSearchKeyword("")}
-                              size="small"
-                            >
-                              <CloseIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={4} md={3}>
-                  <FormControl sx={{ width: "170px" }}>
-                    <InputLabel
-                      htmlFor="sorting-status-select"
-                      id="sorting-status-label"
-                    >
-                      Sorting Status
-                    </InputLabel>
-                    <Select
-                      labelId="sorting-status-label"
-                      id="sorting-status-select"
-                      size="medium"
-                      value={sortingStatus}
-                      onChange={handleSortingStatus}
-                      label="Sorting Status"
-                    >
-                      <MenuItem value="">Sort by Default</MenuItem>
-                      <MenuItem value="active">Sort by Active</MenuItem>
-                      <MenuItem value="inactive">Sort by Inactive</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={1} md={2}></Grid>
-                <Grid item xs={3} md={3} container justifyContent="flex-end">
-                  <Tooltip title="Add New Voucher">
-                    <Button
-                      style={{
-                        color: "black",
-                        height: "56px",
-                        border: "1px solid #ff469e",
-                        borderRadius: "10px",
-                        backgroundColor: "white",
-                      }}
-                      variant="contained"
-                      startIcon={<AddIcon />}
-                      onClick={handleAddNew}
-                      disabled={!store?.is_active}
-                    >
-                      Add New Voucher
-                    </Button>
-                  </Tooltip>
-                </Grid>
-              </Grid>
               {loading ? (
-                <Grid style={{ textAlign: "center" }}>
-                  <CircularProgress />
-                </Grid>
+                <div style={{ textAlign: "center" }}>
+                  <CircularProgress
+                    sx={{ color: "#ff469e" }}
+                    size={50}
+                  />
+                </div>
               ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                <>
+                  <Grid
+                    container
+                    spacing={2}
+                    alignItems="center"
+                    sx={{ marginBottom: "16px" }}
+                  >
+                    <Grid item xs={3} md={4}>
+                      <TextField
+                        sx={{
+                          border: "2px solid #ff469e",
+                          borderRadius: "7px",
+                          backgroundColor: "white",
+                          transition: "0.2s ease-in-out",
+                          "&:hover": {
+                            border: "2px solid #ff469e",
+                          },
+                          "&:focus": {
+                            backgroundColor: "#F8F8F8",
+                          },
+                          "&.Mui-focused": {
+                            border: "1px solid #ff469e",
+                            backgroundColor: "#F8F8F8",
+                            boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                            outline: "none",
+                          },
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
+                          },
+                        }}
+                        value={searchKeyword}
+                        onChange={handleSearchChange}
+                        placeholder="Search By Voucher Code"
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <IconButton>
+                                <SearchIcon fontSize="small" style={{ color: "FF1493" }} />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              {searchKeyword && (
+                                <IconButton
+                                  onClick={() => setSearchKeyword("")}
+                                  size="small"
+                                >
+                                  <CloseIcon fontSize="small" style={{ color: "DC143C" }} />
+                                </IconButton>
+                              )}
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={3} md={3}>
+                      <FormControl
+                        sx={{
+                          width: '170px',
+                          border: '2px solid #ff469e',
+                          borderRadius: '7px',
+                          backgroundColor: 'white',
+                          transition: '0.2s ease-in-out',
+                          '&:hover': {
+                            borderColor: '#ff469e',
+                          },
+                          '&:focus': {
+                            backgroundColor: '#F8F8F8',
+                          },
+                          '&.Mui-focused': {
+                            border: '2px solid #ff469e',
+                            backgroundColor: '#F8F8F8',
+                            boxShadow: 'inset 0px 2px 4px rgba(0, 0, 0, 0.32)',
+                            outline: 'none',
+                          },
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            border: 'none',
+                          },
+                          '& .MuiInputLabel-root': {
+                            top: '-1px',
+                            backgroundColor: 'white',
+                          },
+                        }}
+                        size="small"
+                      >
+                        <InputLabel
+                          htmlFor="sorting-status-select"
+                          id="sorting-status-label"
                         >
-                          No
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          Sorting Status
+                        </InputLabel>
+                        <Select
+                          labelId="sorting-status-label"
+                          id="sorting-status-select"
+                          value={sortingStatus}
+                          onChange={handleSortingStatus}
+                          label="Sorting Status"
                         >
-                          Code
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
-                        >
-                          Discount Value
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
-                        >
-                          Description
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
-                        >
-                          End Date
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
-                        >
-                          Status
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ fontWeight: "bold", fontSize: "16px" }}
-                        >
-                          Actions
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {currentItems.map((item, index) => (
-                        <TableRow
-                          key={item.id}
-                          sx={{
+                          <MenuItem value="">Sort by Default</MenuItem>
+                          <MenuItem value="active">Sort by Active</MenuItem>
+                          <MenuItem value="inactive">Sort by Inactive</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={1} md={2}></Grid>
+                    <Grid item xs={5} md={3} container justifyContent="flex-end">
+                      <Tooltip title="Add New Voucher">
+                        <Button
+                          style={{
+                            color: "#4d4d4d",
+                            border: "2px solid #ff469e",
+                            borderRadius: "7px",
+                            backgroundColor: "white",
+                            transition: "0.2s ease-in-out",
                             "&:hover": {
-                              backgroundColor: "#f1f1f1",
-                              cursor: "pointer",
+                              border: "2px solid #ff469e",
+                            },
+                            "&:focus": {
+                              backgroundColor: "#F8F8F8",
+                            },
+                            "&.Mui-focused": {
+                              border: "1px solid #ff469e",
+                              backgroundColor: "#F8F8F8",
+                              boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                              outline: "none",
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              border: "none",
                             },
                           }}
+                          variant="contained"
+                          startIcon={<AddIcon style={{ color: "	FF1493" }} />}
+                          onClick={handleAddNew}
+                          disabled={!store?.is_active}
                         >
-                          <TableCell component="th" scope="row">
-                            {indexOfFirstItem + index + 1}
+                          Add New Voucher
+                        </Button>
+                      </Tooltip>
+                    </Grid>
+                  </Grid>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            No
                           </TableCell>
-                          <TableCell align="left">{item.code}</TableCell>
-                          <TableCell align="left">
-                            {formatCurrency(item.discount_value)}
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            Code
                           </TableCell>
-                          <TableCell align="left">{item.description}</TableCell>
-                          <TableCell align="left">
-                            {formatDate(item.endAt)}
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            Discount Value
                           </TableCell>
-                          <TableCell align="left">
-                            <Tooltip
-                              title={item.active ? "Active" : "Inactive"}
-                            >
-                              {item.active ? (
-                                <CheckIcon style={{ color: "green" }} />
-                              ) : (
-                                <CloseIcon style={{ color: "red" }} />
-                              )}
-                            </Tooltip>
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            Description
                           </TableCell>
-                          <TableCell align="left">
-                            <Tooltip title="Edit Voucher">
-                              <IconButton
-                                disabled={!store?.is_active}
-                                onClick={() => openUpdate(item)}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            End Date
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            Status
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            sx={{ fontWeight: "bold", fontSize: "16px" }}
+                          >
+                            Actions
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredVoucher.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{
-                  justifyContent: "center",
-                  backgroundColor: "f1f1f1",
-                  marginRight: "40px",
-                }}
-                labelRowsPerPage="Rows:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}/${to} of ${count}`
-                }
-              />
+                      </TableHead>
+                      <TableBody>
+                        {currentItems.map((item, index) => (
+                          <TableRow
+                            key={item.id}
+                            sx={{
+                              "&:hover": {
+                                backgroundColor: "#f1f1f1",
+                                cursor: "pointer",
+                              },
+                            }}
+                          >
+                            <TableCell component="th" scope="row">
+                              {indexOfFirstItem + index + 1}
+                            </TableCell>
+                            <TableCell align="left">{item.code}</TableCell>
+                            <TableCell align="left">
+                              {formatCurrency(item.discount_value)}
+                            </TableCell>
+                            <TableCell align="left">{item.description}</TableCell>
+                            <TableCell align="left">
+                              {formatDate(item.endAt)}
+                            </TableCell>
+                            <TableCell align="left">
+                              <Tooltip
+                                title={item.active ? "Active" : "Inactive"}
+                              >
+                                {item.active ? (
+                                  <CheckIcon style={{ color: "green" }} />
+                                ) : (
+                                  <CloseIcon style={{ color: "red" }} />
+                                )}
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell align="left">
+                              <Tooltip title="Edit Voucher">
+                                <IconButton
+                                  disabled={!store?.is_active}
+                                  onClick={() => openUpdate(item)}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={filteredVoucher.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    sx={{
+                      justifyContent: "center",
+                      backgroundColor: "f1f1f1",
+                      marginTop: "8px",
+                      marginRight: "40px"
+                    }}
+                    labelRowsPerPage="Rows:"
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}/${to} of ${count}`
+                    }
+                  />
+                </>)}
             </Paper>
           </Grid>
         </Grid>
@@ -597,8 +669,36 @@ export default function Vouchers() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeUpdate}>Cancel</Button>
-          <Button onClick={handleEdit}>Save</Button>
+          <Button onClick={closeUpdate} sx={{
+            backgroundColor: "white",
+            color: "#757575",
+            borderRadius: "7px",
+            transition:
+              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+            border: "1px solid #757575",
+            "&:hover": {
+              backgroundColor: "#757575",
+              color: "white",
+              border: "1px solid white",
+            },
+          }}>
+            Cancel
+          </Button>
+          <Button onClick={handleEdit} sx={{
+            backgroundColor: "white",
+            color: "#ff469e",
+            borderRadius: "7px",
+            transition:
+              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+            border: "1px solid #ff469e",
+            "&:hover": {
+              backgroundColor: "#ff469e",
+              color: "white",
+              border: "1px solid white",
+            },
+          }}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -658,10 +758,39 @@ export default function Vouchers() {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddVoucher}>Cancel</Button>
-          <Button onClick={handleAddVoucher}>Add</Button>
+          <Button onClick={handleCloseAddVoucher}
+            sx={{
+              backgroundColor: "white",
+              color: "#757575",
+              borderRadius: "7px",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}>
+            Cancel
+          </Button>
+          <Button onClick={handleAddVoucher} sx={{
+            backgroundColor: "white",
+            color: "#ff469e",
+            borderRadius: "7px",
+            transition:
+              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+            border: "1px solid #ff469e",
+            "&:hover": {
+              backgroundColor: "#ff469e",
+              color: "white",
+              border: "1px solid white",
+            },
+          }}>
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </div >
   );
 }
