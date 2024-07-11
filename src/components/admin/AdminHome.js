@@ -83,6 +83,22 @@ export default function AdminHome() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const sortedMonths = months
+  .filter(monthYear => {
+    const [month, year] = monthYear.split("-").map(Number);
+    return year === selectedYearOrder; // Lọc các tháng trong năm được chọn
+  })
+  .sort((a, b) => {
+    const [monthA, yearA] = a.split("-").map(Number);
+    const [monthB, yearB] = b.split("-").map(Number);
+
+    // Tạo đối tượng Date từ tháng và năm
+    const dateA = new Date(yearA, monthA - 1); // Trừ 1 vì tháng trong Date bắt đầu từ 0
+    const dateB = new Date(yearB, monthB - 1);
+
+    return dateB - dateA; // Sắp xếp từ mới nhất đến cũ nhất
+  });
+
   useEffect(() => {
     fetchData();
 
@@ -123,7 +139,7 @@ export default function AdminHome() {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [sortedMonths]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -337,16 +353,6 @@ export default function AdminHome() {
   };
 
   //Export report revenue, refund
-  const sortedMonths = months.sort((a, b) => {
-    const [monthA, yearA] = a.split("-").map(Number);
-    const [monthB, yearB] = b.split("-").map(Number);
-
-    // Tạo đối tượng Date từ tháng và năm
-    const dateA = new Date(yearA, monthA - 1); // Trừ 1 vì tháng trong Date bắt đầu từ 0
-    const dateB = new Date(yearB, monthB - 1);
-
-    return dateB - dateA; // Sắp xếp từ mới nhất đến cũ nhất
-  });
 
   // Lọc danh sách các store có trạng thái "APPROVED"
   const approvedStores = stores.filter((store) => store.status === "APPROVED");

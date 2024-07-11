@@ -168,7 +168,10 @@ export default function Dashboard() {
         data[year].orders += order.final_amount || 0;
       }
     });
-    refundsData.forEach((refund) => {
+    const filteredRefunds = refundsData.filter(
+      (refund) => refund.status === "ACCEPT"
+    );
+    filteredRefunds.forEach((refund) => {
       const year = new Date(refund.create_date).getFullYear();
       if (!data[year]) data[year] = { orders: 0, refunds: 0 };
       data[year].refunds += refund.amount || 0;
@@ -187,14 +190,18 @@ export default function Dashboard() {
       );
       const orderYear = new Date(order.order_date).getFullYear();
       const orderMonth = new Date(order.order_date).getMonth();
+     
       if (isCompleted && orderYear === year) {
         data[orderMonth].orders += order.final_amount || 0;
       }
     });
     refundsData.forEach((refund) => {
+      const filteredRefunds = refundsData.filter(
+        (refunds) => refunds.status === "ACCEPT"
+      );
       const refundYear = new Date(refund.create_date).getFullYear();
       const refundMonth = new Date(refund.create_date).getMonth();
-      if (refundYear === year) {
+      if (filteredRefunds && refundYear === year) {
         data[refundMonth].refunds += refund.amount || 0;
       }
     });
@@ -211,35 +218,42 @@ export default function Dashboard() {
       const orderRes = await orderByStoreIdApi(storeId);
       const exchangeRes = await exchangeByStoreIdApi(storeId);
       const refundRes = await refundByStoreIdApi(storeId);
-
+ 
       const ordersData = (orderRes.data.data || []).filter(
         (order) =>
           new Date(order.order_date).getMonth() + 1 === month &&
           new Date(order.order_date).getFullYear() === year
       );
-
+ 
       const exchangesData = (exchangeRes.data.data || []).filter(
         (exchange) =>
           new Date(exchange.create_date).getMonth() + 1 === month &&
           new Date(exchange.create_date).getFullYear() === year
       );
-
+ 
       const refundsData = (refundRes.data.data || []).filter(
         (refund) =>
           new Date(refund.create_date).getMonth() + 1 === month &&
           new Date(refund.create_date).getFullYear() === year
       );
-
+ 
       const completedOrders = ordersData.filter((order) =>
         order.status_order_list.some((status) => status.status === "COMPLETED")
       );
-
+ 
+      const filteredExchanges = exchangesData.filter(
+        (exchanges) =>
+          exchanges.status === "ACCEPT"
+      );
+      const filteredRefunds = refundsData.filter(
+        (refunds) => refunds.status === "ACCEPT"
+      );
       const totalCount =
-        completedOrders.length + exchangesData.length + refundsData.length;
-
+        completedOrders.length + filteredExchanges.length + filteredRefunds.length;
+ 
       if (totalCount > 0) {
         const refundPercentage = (
-          (refundsData.length / totalCount) *
+          (filteredRefunds.length / totalCount) *
           100
         ).toFixed(2);
         const orderPercentage = (
@@ -247,28 +261,28 @@ export default function Dashboard() {
           100
         ).toFixed(2);
         const exchangePercentage = (
-          (exchangesData.length / totalCount) *
+          (filteredExchanges.length / totalCount) *
           100
         ).toFixed(2);
-
+ 
         setOrderCompletedData(orderPercentage);
         setRefundData(refundPercentage);
         setExchangeData(exchangePercentage);
-
+ 
         setOrderCount(completedOrders.length);
-        setRefundCount(refundsData.length);
-        setExchangeCount(exchangesData.length);
-
+        setRefundCount(filteredRefunds.length);
+        setExchangeCount(filteredExchanges.length);
+ 
         const orderTotalAmount = completedOrders.reduce(
           (sum, order) => sum + (order.final_amount || 0),
           0
         );
-        const refundTotalAmount = refundsData.reduce(
+        const refundTotalAmount = filteredRefunds.reduce(
           (sum, refund) => sum + (refund.amount || 0),
           0
         );
         const totalRevenue = orderTotalAmount - refundTotalAmount;
-
+ 
         setOrderTotalAmount(orderTotalAmount);
         setRefundTotalAmount(refundTotalAmount);
         setTotalRevenue(totalRevenue);
@@ -276,11 +290,11 @@ export default function Dashboard() {
         setOrderCompletedData(0);
         setRefundData(0);
         setExchangeData(0);
-
+ 
         setOrderCount(0);
         setRefundCount(0);
         setExchangeCount(0);
-
+ 
         setOrderTotalAmount(0);
         setRefundTotalAmount(0);
         setTotalRevenue(0);
@@ -1169,23 +1183,31 @@ export default function Dashboard() {
       return;
     }
 
-    // Lọc dữ liệu
-    const filteredOrders = orders.filter(
-      (order) =>
-        order.status_order_list.some(
-          (status) => status.status === "COMPLETED"
-        ) ||
-        (order.payment_method === "VNPAY" &&
-          order.status_order_list.some(
-            (status) => status.status === "CANCELLED"
-          ))
-    );
-    const filteredRefunds = refunds.filter(
-      (refund) => refund.status === "ACCEPT"
-    );
-    const filteredExchanges = exchanges.filter(
-      (exchange) => exchange.status === "ACCEPT"
-    );
+   // Sử dụng selectedYear từ state
+   const year = selectedYear;
+
+   // Lọc dữ liệu
+   const filteredOrders = orders.filter(
+     (order) =>
+       (new Date(order.order_date).getFullYear() === year) &&
+       (order.status_order_list.some(
+         (status) => status.status === "COMPLETED"
+       ) ||
+       (order.payment_method === "VNPAY" &&
+         order.status_order_list.some(
+           (status) => status.status === "CANCELLED"
+         )))
+   );
+   const filteredRefunds = refunds.filter(
+     (refund) =>
+       (new Date(refund.create_date).getFullYear() === year) &&
+       refund.status === "ACCEPT"
+   );
+   const filteredExchanges = exchanges.filter(
+     (exchange) =>
+       (new Date(exchange.create_date).getFullYear() === year) &&
+       exchange.status === "ACCEPT"
+   );
 
     const workbook = new ExcelJS.Workbook();
     const worksheet1 = workbook.addWorksheet("LIST_OER");
