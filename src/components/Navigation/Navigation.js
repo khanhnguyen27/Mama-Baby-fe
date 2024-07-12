@@ -955,7 +955,7 @@ const Navigation = () => {
           </Container>
         </AppBar>
       </Box>
-      <TidioChatScript />
+      {/* <TidioChatScript /> */}
     </>
   );
 };

@@ -35,6 +35,7 @@ import { ExpandMore, KeyboardCapslock } from "@mui/icons-material";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import { allVoucherApi } from "../../api/VoucherAPI";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import { allUserApi } from "../../api/UserAPI";
 
 export default function OrdersManagement() {
   window.document.title = "Orders Management";
@@ -51,6 +52,7 @@ export default function OrdersManagement() {
     CANCELLED: [],
     // RETURNED: [],
   });
+  const [userMap, setUserMap] = useState({});
   const [productMap, setProductMap] = useState({});
   const [brandMap, setBrandMap] = useState({});
   const [categoryMap, setCategoryMap] = useState({});
@@ -95,9 +97,10 @@ export default function OrdersManagement() {
 
   const fetchData = async () => {
     try {
-      const [orderRes, productRes, brandRes, categoryRes, voucherRes] =
+      const [orderRes, userRes, productRes, brandRes, categoryRes, voucherRes] =
         await Promise.all([
           orderByStoreIdApi(storeId),
+          allUserApi({ limit: 1000 }),
           allProductByStoreApi({ limit: 1000 }),
           allBrandApi(),
           allCategorytApi(),
@@ -105,6 +108,7 @@ export default function OrdersManagement() {
         ]);
 
       const orderData = orderRes?.data?.data || [];
+      const userData = userRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
@@ -133,6 +137,12 @@ export default function OrdersManagement() {
       //   categorizedOrders[status].reverse();
       // }
       setOrdersByStatus(categorizedOrders);
+
+      const userMap = userData.reduce((x, item) => {
+        x[item.id] = [item.full_name, item.phone_number];
+        return x;
+      }, {});
+      setUserMap(userMap);
 
       const productMap = productData.reduce((x, item) => {
         x[item.id] = [
@@ -702,6 +712,9 @@ export default function OrdersManagement() {
                                       image={
                                         productMap[
                                           detail.product_id
+                                        ][4] &&
+                                        productMap[
+                                          detail.product_id
                                         ][4]?.includes("Product_")
                                           ? `http://localhost:8080/mamababy/products/images/${
                                               productMap[detail.product_id][4]
@@ -709,6 +722,7 @@ export default function OrdersManagement() {
                                           : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                       }
                                       onError={(e) => {
+                                        e.target.onerror = null;
                                         e.target.src =
                                           "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                       }}
@@ -875,7 +889,14 @@ export default function OrdersManagement() {
                         >
                           Delivery:
                         </span>{" "}
-                        <Divider sx={{ width: "70%", my: 1 }} />
+                        <Divider
+                          sx={{
+                            width: { sm: "100%", md: "70%" },
+                            my: 1,
+                            borderColor: "rgba(0, 0, 0, 0.4)",
+                            borderWidth: "1px",
+                          }}
+                        />
                         <Box
                           sx={{
                             display: "flex",
@@ -887,10 +908,18 @@ export default function OrdersManagement() {
                             sx={{
                               display: "flex",
                               justifyContent: "space-between",
-                              width: "70%",
+                              width: { sm: "100%", md: "70%" },
                             }}
                           >
-                            <span style={{ opacity: 0.7 }}>Receiver:</span>
+                            <span style={{ opacity: 0.7 }}>
+                              Receiver
+                              {item.full_name === userMap[item.user_id][0] &&
+                                item.phone_number ===
+                                  userMap[item.user_id][1] && (
+                                  <span>/Buyer</span>
+                                )}
+                              :
+                            </span>
                             <span style={{ fontWeight: "600" }}>
                               {item.full_name}
                             </span>
@@ -899,19 +928,7 @@ export default function OrdersManagement() {
                             sx={{
                               display: "flex",
                               justifyContent: "space-between",
-                              width: "70%",
-                            }}
-                          >
-                            <span style={{ opacity: 0.7 }}>Address:</span>
-                            <span style={{ fontWeight: "600" }}>
-                              {item.shipping_address}
-                            </span>
-                          </Box>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              width: "70%",
+                              width: { sm: "100%", md: "70%" },
                             }}
                           >
                             <span style={{ opacity: 0.7 }}>Contact:</span>
@@ -919,6 +936,56 @@ export default function OrdersManagement() {
                               {item.phone_number}
                             </span>
                           </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              width: { sm: "100%", md: "70%" },
+                            }}
+                          >
+                            <span style={{ opacity: 0.7 }}>Address:</span>
+                            <span style={{ fontWeight: "600" }}>
+                              {item.shipping_address}
+                            </span>
+                          </Box>
+                          {(item.full_name !== userMap[item.user_id][0] ||
+                            item.phone_number !== userMap[item.user_id][1]) && (
+                            <>
+                              <Divider
+                                sx={{
+                                  width: { sm: "100%", md: "70%" },
+                                  my: 0.1,
+                                  opacity: 0.2,
+                                  borderColor: "rgba(0, 0, 0, 0.4)",
+                                  borderWidth: "1px",
+                                }}
+                              />
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  width: { sm: "100%", md: "70%" },
+                                }}
+                              >
+                                <span style={{ opacity: 0.7 }}>Buyer:</span>
+                                <span style={{ fontWeight: "600" }}>
+                                  {userMap[item.user_id][0]}
+                                </span>
+                              </Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  width: { sm: "100%", md: "70%" },
+                                }}
+                              >
+                                <span style={{ opacity: 0.7 }}>Contact:</span>
+                                <span style={{ fontWeight: "600" }}>
+                                  {userMap[item.user_id][1]}
+                                </span>
+                              </Box>
+                            </>
+                          )}
                         </Box>
                       </Typography>
                     </Grid>

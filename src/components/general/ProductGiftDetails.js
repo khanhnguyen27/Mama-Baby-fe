@@ -379,11 +379,11 @@ export default function ProductDetails() {
                             color: "#ff469e",
                             fontSize: "1.5rem",
                             mr: 1,
-                            pt: 1,
+                            pt: 0.75,
                           }}
                         />
                         <Typography
-                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
+                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.5 }}
                         >
                           100% genuine product
                         </Typography>

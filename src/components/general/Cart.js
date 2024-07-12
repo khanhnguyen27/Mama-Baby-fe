@@ -1922,8 +1922,8 @@ export default function Cart() {
                                 <Button
                                   variant="contained"
                                   disabled={
-                                    item.quantity >= 99 ||
-                                    item.quantity >= item.product.remain
+                                    item.quantity >= 99 || (item.product.status === "COMING SOON" ? item.quantity >= 99 : item.quantity >= item.product.remain)
+                                    // item.quantity >= item.product.remain
                                   }
                                   // onClick={() => {
                                   //   dispatch(
@@ -1968,8 +1968,7 @@ export default function Cart() {
                                   variant="contained"
                                   disabled={
                                     item.quantity >= 99 ||
-                                    item.quantity >= item.product.remain
-                                  }
+                                    (item.product.status === "COMING SOON" ? item.quantity >= 99 : item.quantity >= item.product.remain)                                  }
                                   // onClick={() => {
                                   //   const newQuantity =
                                   //     item.quantity <= 89
@@ -1987,7 +1986,7 @@ export default function Cart() {
                                       item.quantity <= 89
                                         ? Math.min(
                                             10,
-                                            item.product.remain - item.quantity
+                                            item.product.status === "COMING SOON" ? 10 : item.product.remain - item.quantity
                                           )
                                         : 99 - item.quantity;
                                     dispatch(

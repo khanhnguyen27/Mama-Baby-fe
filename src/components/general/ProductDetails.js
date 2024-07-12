@@ -611,52 +611,34 @@ export default function ProductDetails() {
                         />
                       </Paper>
                       {product.status === "COMING SOON" && (
-                        <Box sx={{ display: "flex", mt: 1.5 }}>
-                          <CalendarMonth
-                            sx={{
-                              color: "#ff469e",
-                              fontSize: "1.5rem",
-                              mr: 1,
-                              pt: 1,
-                            }}
-                          />
-                          <Typography
-                            sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
-                          >
-                            Pre-Order (available after 15 days)
-                          </Typography>
-                        </Box>
+                        <Grid
+                          item
+                          xs={12}
+                          sx={{
+                            display: { sm: "none", md: "none", lg: "flex" },
+                          }}
+                        >
+                          <Box sx={{ display: "flex", mt: 0.5 }}>
+                            <CalendarMonth
+                              sx={{
+                                color: "#ff469e",
+                                fontSize: "1.5rem",
+                                mr: 1,
+                                pt: 1,
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                color: "black",
+                                fontSize: "1.2rem",
+                                mt: 0.7,
+                              }}
+                            >
+                              Pre-Order (available after 15 days)
+                            </Typography>
+                          </Box>
+                        </Grid>
                       )}
-                      <Box sx={{ display: "flex", mt: 1.5 }}>
-                        <Refund
-                          sx={{
-                            color: "#ff469e",
-                            fontSize: "1.5rem",
-                            mr: 1,
-                            pt: 1,
-                          }}
-                        />
-                        <Typography
-                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
-                        >
-                          15 days for exchange/refund
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", mt: 1.5 }}>
-                        <VerifiedUser
-                          sx={{
-                            color: "#ff469e",
-                            fontSize: "1.5rem",
-                            mr: 1,
-                            pt: 1,
-                          }}
-                        />
-                        <Typography
-                          sx={{ color: "black", fontSize: "1.2rem", mt: 0.7 }}
-                        >
-                          100% genuine product
-                        </Typography>
-                      </Box>
                     </Grid>
                     <Grid
                       item
@@ -723,12 +705,12 @@ export default function ProductDetails() {
                           >
                             {formatCurrency(product.price)}
                           </Typography>
-                          <Typography
-                            variant="h5"
-                            style={{ textAlign: "right" }}
-                          >
-                            {product.status === "COMING SOON" && (
-                              <Tooltip
+                          {product.status !== "COMING SOON" && (
+                            <Typography
+                              variant="h5"
+                              style={{ textAlign: "right" }}
+                            >
+                              {/* <Tooltip
                                 title="These are available quantity at the store. If you want to buy more than these number, you can contact to store's owner for more information."
                                 enterDelay={300}
                                 leaveDelay={100}
@@ -763,15 +745,15 @@ export default function ProductDetails() {
                                 >
                                   <Info sx={{ fontSize: "1.5rem", mt: 0.5 }} />
                                 </IconButton>
-                              </Tooltip>
-                            )}{" "}
-                            Available:{" "}
-                            <span
-                              style={{ color: "#ff469e", fontWeight: "600" }}
-                            >
-                              {product.remain}
-                            </span>
-                          </Typography>
+                              </Tooltip> */}
+                              Available:{" "}
+                              <span
+                                style={{ color: "#ff469e", fontWeight: "600" }}
+                              >
+                                {product.remain}
+                              </span>
+                            </Typography>
+                          )}{" "}
                         </Box>
                       </div>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -804,9 +786,81 @@ export default function ProductDetails() {
                           {categoryMap[product.category_id]}
                         </Typography>
                       </div>
-                      {/* <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <Typography>{product.description}</Typography>
-                  </div> */}
+                      <Grid container spacing={2}>
+                        {product.status === "COMING SOON" && (
+                          <Grid
+                            item
+                            sm={12}
+                            md={6}
+                            xl={6}
+                            sx={{
+                              display: { sm: "flex", md: "flex", lg: "none" },
+                            }}
+                          >
+                            <Box sx={{ display: "flex", mt: 0.5 }}>
+                              <CalendarMonth
+                                sx={{
+                                  color: "#ff469e",
+                                  fontSize: "1.5rem",
+                                  mr: 1,
+                                  pt: 1,
+                                }}
+                              />
+                              <Typography
+                                sx={{
+                                  color: "black",
+                                  fontSize: "1.2rem",
+                                  mt: 0.7,
+                                }}
+                              >
+                                Pre-Order (available after 15 days)
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        <Grid item sm={12} md={6} xl={6}>
+                          <Box sx={{ display: "flex" }}>
+                            <Refund
+                              sx={{
+                                color: "#ff469e",
+                                fontSize: "1.5rem",
+                                mr: 1,
+                                pt: 1,
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                color: "black",
+                                fontSize: "1.2rem",
+                                mt: 0.7,
+                              }}
+                            >
+                              15 days for exchange/refund
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item sm={12} md={6} xl={6}>
+                          <Box sx={{ display: "flex" }}>
+                            <VerifiedUser
+                              sx={{
+                                color: "#ff469e",
+                                fontSize: "1.5rem",
+                                mr: 1,
+                                pt: 1,
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                color: "black",
+                                fontSize: "1.2rem",
+                                mt: 0.7,
+                              }}
+                            >
+                              100% genuine product
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
                       {product.status !== "OUT OF STOCK" && (
                         <Box
                           sx={{
@@ -883,7 +937,10 @@ export default function ProductDetails() {
                             <Button
                               variant="contained"
                               disabled={
-                                quantity >= 99 || quantity >= product.remain
+                                quantity >= 99 ||
+                                (product.status === "COMING SOON"
+                                  ? quantity >= 99
+                                  : quantity >= product.remain)
                               }
                               onClick={() => setQuantity(quantity + 1)}
                               sx={{
@@ -906,13 +963,18 @@ export default function ProductDetails() {
                             <Button
                               variant="contained"
                               disabled={
-                                quantity >= 99 || quantity >= product.remain
+                                quantity >= 99 ||
+                                (product.status === "COMING SOON"
+                                  ? quantity >= 99
+                                  : quantity >= product.remain)
                               }
                               onClick={() =>
                                 setQuantity((prevQuantity) =>
                                   Math.min(
                                     99,
-                                    product.remain,
+                                    product.status === "COMING SOON"
+                                      ? 99
+                                      : product.remain,
                                     prevQuantity + 10
                                   )
                                 )
