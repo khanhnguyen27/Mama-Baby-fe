@@ -78,6 +78,7 @@ export default function Dashboard() {
   const [store, setStore] = useState(null);
   const [productMap, setProductMap] = useState({});
   const [yearOptions, setYearOptions] = useState([]);
+  const [monthlyRevenueData, setMonthlyRevenueData] = useState([]);
 
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -168,10 +169,7 @@ export default function Dashboard() {
         data[year].orders += order.final_amount || 0;
       }
     });
-    const filteredRefunds = refundsData.filter(
-      (refund) => refund.status === "ACCEPT"
-    );
-    filteredRefunds.forEach((refund) => {
+    refundsData.forEach((refund) => {
       const year = new Date(refund.create_date).getFullYear();
       if (!data[year]) data[year] = { orders: 0, refunds: 0 };
       data[year].refunds += refund.amount || 0;
@@ -190,18 +188,14 @@ export default function Dashboard() {
       );
       const orderYear = new Date(order.order_date).getFullYear();
       const orderMonth = new Date(order.order_date).getMonth();
-     
       if (isCompleted && orderYear === year) {
         data[orderMonth].orders += order.final_amount || 0;
       }
     });
     refundsData.forEach((refund) => {
-      const filteredRefunds = refundsData.filter(
-        (refunds) => refunds.status === "ACCEPT"
-      );
       const refundYear = new Date(refund.create_date).getFullYear();
       const refundMonth = new Date(refund.create_date).getMonth();
-      if (filteredRefunds && refundYear === year) {
+      if (refundYear === year) {
         data[refundMonth].refunds += refund.amount || 0;
       }
     });
@@ -218,42 +212,35 @@ export default function Dashboard() {
       const orderRes = await orderByStoreIdApi(storeId);
       const exchangeRes = await exchangeByStoreIdApi(storeId);
       const refundRes = await refundByStoreIdApi(storeId);
- 
+
       const ordersData = (orderRes.data.data || []).filter(
         (order) =>
           new Date(order.order_date).getMonth() + 1 === month &&
           new Date(order.order_date).getFullYear() === year
       );
- 
+
       const exchangesData = (exchangeRes.data.data || []).filter(
         (exchange) =>
           new Date(exchange.create_date).getMonth() + 1 === month &&
           new Date(exchange.create_date).getFullYear() === year
       );
- 
+
       const refundsData = (refundRes.data.data || []).filter(
         (refund) =>
           new Date(refund.create_date).getMonth() + 1 === month &&
           new Date(refund.create_date).getFullYear() === year
       );
- 
+
       const completedOrders = ordersData.filter((order) =>
         order.status_order_list.some((status) => status.status === "COMPLETED")
       );
- 
-      const filteredExchanges = exchangesData.filter(
-        (exchanges) =>
-          exchanges.status === "ACCEPT"
-      );
-      const filteredRefunds = refundsData.filter(
-        (refunds) => refunds.status === "ACCEPT"
-      );
+
       const totalCount =
-        completedOrders.length + filteredExchanges.length + filteredRefunds.length;
- 
+        completedOrders.length + exchangesData.length + refundsData.length;
+
       if (totalCount > 0) {
         const refundPercentage = (
-          (filteredRefunds.length / totalCount) *
+          (refundsData.length / totalCount) *
           100
         ).toFixed(2);
         const orderPercentage = (
@@ -261,28 +248,28 @@ export default function Dashboard() {
           100
         ).toFixed(2);
         const exchangePercentage = (
-          (filteredExchanges.length / totalCount) *
+          (exchangesData.length / totalCount) *
           100
         ).toFixed(2);
- 
+
         setOrderCompletedData(orderPercentage);
         setRefundData(refundPercentage);
         setExchangeData(exchangePercentage);
- 
+
         setOrderCount(completedOrders.length);
-        setRefundCount(filteredRefunds.length);
-        setExchangeCount(filteredExchanges.length);
- 
+        setRefundCount(refundsData.length);
+        setExchangeCount(exchangesData.length);
+
         const orderTotalAmount = completedOrders.reduce(
           (sum, order) => sum + (order.final_amount || 0),
           0
         );
-        const refundTotalAmount = filteredRefunds.reduce(
+        const refundTotalAmount = refundsData.reduce(
           (sum, refund) => sum + (refund.amount || 0),
           0
         );
         const totalRevenue = orderTotalAmount - refundTotalAmount;
- 
+
         setOrderTotalAmount(orderTotalAmount);
         setRefundTotalAmount(refundTotalAmount);
         setTotalRevenue(totalRevenue);
@@ -290,11 +277,11 @@ export default function Dashboard() {
         setOrderCompletedData(0);
         setRefundData(0);
         setExchangeData(0);
- 
+
         setOrderCount(0);
         setRefundCount(0);
         setExchangeCount(0);
- 
+
         setOrderTotalAmount(0);
         setRefundTotalAmount(0);
         setTotalRevenue(0);
@@ -304,6 +291,65 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+  useEffect(() => {
+    calculateMonthlyRevenueData();
+  }, [orders]);
+
+  const calculateMonthlyRevenueData = () => {
+    // Lọc các đơn hàng đã hoàn thành
+    const completedOrders = orders.filter((order) =>
+      order.status_order_list.some((status) => status.status === "COMPLETED")
+    );
+
+    // Lọc các đơn hoàn trả đã được chấp nhận
+    const acceptedRefunds = refunds.filter(
+      (refund) => refund.status === "ACCEPT"
+    );
+
+    // Tạo mảng để lưu trữ doanh thu theo từng tháng
+    const revenueData = Array(12).fill(0);
+
+    // Tính tổng doanh thu theo từng tháng từ các đơn hàng đã hoàn thành và các đơn hoàn trả đã được chấp nhận
+    completedOrders.forEach((order) => {
+      const orderMonth = new Date(order.order_date).getMonth();
+      revenueData[orderMonth] += order.final_amount || 0;
+    });
+
+    acceptedRefunds.forEach((refund) => {
+      const refundMonth = new Date(refund.create_date).getMonth();
+      revenueData[refundMonth] -= refund.amount || 0;
+    });
+
+    // Cập nhật state với dữ liệu tổng doanh thu theo từng tháng
+    setMonthlyRevenueData(revenueData);
+  };
+
+  const MonthlyDataChart
+   = {
+    labels: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
+    datasets: [
+      {
+        label: "Revenue",
+        data: monthlyRevenueData,
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+      },
+    ],
   };
 
   const currentYear = new Date().getFullYear();
@@ -1183,31 +1229,23 @@ export default function Dashboard() {
       return;
     }
 
-   // Sử dụng selectedYear từ state
-   const year = selectedYear;
-
-   // Lọc dữ liệu
-   const filteredOrders = orders.filter(
-     (order) =>
-       (new Date(order.order_date).getFullYear() === year) &&
-       (order.status_order_list.some(
-         (status) => status.status === "COMPLETED"
-       ) ||
-       (order.payment_method === "VNPAY" &&
-         order.status_order_list.some(
-           (status) => status.status === "CANCELLED"
-         )))
-   );
-   const filteredRefunds = refunds.filter(
-     (refund) =>
-       (new Date(refund.create_date).getFullYear() === year) &&
-       refund.status === "ACCEPT"
-   );
-   const filteredExchanges = exchanges.filter(
-     (exchange) =>
-       (new Date(exchange.create_date).getFullYear() === year) &&
-       exchange.status === "ACCEPT"
-   );
+    // Lọc dữ liệu
+    const filteredOrders = orders.filter(
+      (order) =>
+        order.status_order_list.some(
+          (status) => status.status === "COMPLETED"
+        ) ||
+        (order.payment_method === "VNPAY" &&
+          order.status_order_list.some(
+            (status) => status.status === "CANCELLED"
+          ))
+    );
+    const filteredRefunds = refunds.filter(
+      (refund) => refund.status === "ACCEPT"
+    );
+    const filteredExchanges = exchanges.filter(
+      (exchange) => exchange.status === "ACCEPT"
+    );
 
     const workbook = new ExcelJS.Workbook();
     const worksheet1 = workbook.addWorksheet("LIST_OER");
@@ -1422,10 +1460,7 @@ export default function Dashboard() {
               <Grid item xs={12}>
                 <Card
                   onClick={handlePieChartClick}
-                  sx={{
-                    cursor: "pointer",
-                    ":hover": { backgroundColor: "#FFFAF0" },
-                  }}
+                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
                 >
                   <CardContent style={{ height: "129px" }}>
                     <Grid>
@@ -1455,45 +1490,8 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={() => navigate("/staff/exchanges")}
-                  sx={{
-                    cursor: "pointer",
-                    ":hover": { backgroundColor: "#FFFAF0" },
-                  }}
-                >
-                  <CardContent style={{ height: "129px" }}>
-                    <Grid>
-                      <Typography
-                        variant="body1"
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: "20px",
-                          color: "#00C49F",
-                        }}
-                      >
-                        Exchange
-                      </Typography>
-                      <Typography
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
-                        }}
-                      >
-                        <span>{exchangeCount}</span>
-                      </Typography>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12}>
-                <Card
                   onClick={() => navigate("/staff/refunds")}
-                  sx={{
-                    cursor: "pointer",
-                    ":hover": { backgroundColor: "#FFFAF0" },
-                  }}
+                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
                 >
                   <CardContent style={{ height: "129px" }}>
                     <Grid>
@@ -1516,6 +1514,37 @@ export default function Dashboard() {
                         }}
                       >
                         <span>{refundCount}</span>
+                      </Typography>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12}>
+                <Card
+                  onClick={() => navigate("/staff/exchanges")}
+                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                >
+                  <CardContent style={{ height: "129px" }}>
+                    <Grid>
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "20px",
+                          color: "#00C49F",
+                        }}
+                      >
+                        Exchange
+                      </Typography>
+                      <Typography
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          paddingTop: "10px",
+                          fontSize: "30px",
+                        }}
+                      >
+                        <span>{exchangeCount}</span>
                       </Typography>
                     </Grid>
                   </CardContent>
@@ -1646,6 +1675,50 @@ export default function Dashboard() {
                 </Card>
               </Grid>
             </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  style={{
+                    textAlign: "center",
+                    color: "#ff469e",
+                    fontSize: "25px",
+                  }}
+                >
+                  Monthly Data
+                </Typography>
+                <Bar
+                  data={MonthlyDataChart}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        display: true,
+                        position: "top",
+                      },
+                    },
+                    scales: {
+                      x: {
+                        beginAtZero: true,
+                        title: {
+                          display: true,
+                          text: "Months",
+                        },
+                      },
+                      y: {
+                        beginAtZero: true,
+                        title: {
+                          display: true,
+                          text: "Revenue",
+                        },
+                      },
+                    },
+                  }}
+                />
+              </CardContent>
+            </Card>
           </Grid>
           <Grid item xs={12}>
             <Card>
