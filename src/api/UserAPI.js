@@ -22,6 +22,10 @@ export const allUserApi = (params) => {
   });
 };
 
+export const getUserByIdApi = (userId) => {
+  return axiosJWT.get(`${URL_ACCOUNT}/${userId}`);
+};
+
 export const loginApi = (username, password) => {
   return axiosJWT.post(URL_LOGIN, {
     username: username,

@@ -489,6 +489,7 @@ export default function StoreDetail() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           <Box
@@ -643,6 +644,7 @@ export default function StoreDetail() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           <Box
@@ -781,8 +783,8 @@ export default function StoreDetail() {
                         "linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent)",
                       color: "white",
                       fontWeight: "bold",
-                      borderBottomLeftRadius: "10px",
-                      borderBottomRightRadius: "10px",
+                      borderBottomLeftRadius: "14px",
+                      borderBottomRightRadius: "14px",
                       textAlign: "left",
                       whiteSpace: "normal",
                       overflow: "hidden",
@@ -792,17 +794,20 @@ export default function StoreDetail() {
                       WebkitBoxOrient: "vertical",
                       lineHeight: "1.2rem",
                       height: "2.4rem",
-                      maxHeight: "2.4rem",
+                      maxHeight: "3.6rem",
                       paddingTop: "20px",
                       paddingBottom: "15px",
                     }}
                   >
-                    <span>
-                      {`\u00A0\u00A0\u00A0\u00A0${
-                        item.header.length > 40
-                          ? `${item.header.substring(0, 40)}...`
-                          : item.header
-                      }`}
+                    <span
+                      style={{
+                        color: "white",
+                        marginLeft: "1.1rem",
+                      }}
+                    >
+                      {item.header.length > 28
+                        ? `${item.header.substring(0, 28)}...`
+                        : item.header}
                     </span>
                     <br />
                     <span
@@ -1096,7 +1101,14 @@ export default function StoreDetail() {
                     const halfStar = averageRating - fullStars >= 0.5;
                     const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
                     return (
-                      <Grid item xs={12} sm={6} lg={4} key={index} sx={{ display: 'flex', flexWrap: "wrap"}}>
+                      <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        lg={4}
+                        key={index}
+                        sx={{ display: "flex", flexWrap: "wrap" }}
+                      >
                         <Tooltip
                           title={item.name}
                           enterDelay={500}

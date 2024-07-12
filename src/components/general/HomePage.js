@@ -586,6 +586,7 @@ export default function HomePage() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           <Box
@@ -738,6 +739,7 @@ export default function HomePage() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           {/* Header */}
@@ -1017,6 +1019,7 @@ export default function HomePage() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           {/* Header */}
@@ -1271,6 +1274,7 @@ export default function HomePage() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           {/* Header */}
@@ -1446,7 +1450,6 @@ export default function HomePage() {
             </IconButton>
           </Box>
         </Box>
-
         <Box
           sx={{
             display: "flex",
@@ -1456,6 +1459,7 @@ export default function HomePage() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
+            boxShadow: 2
           }}
         >
           <Box

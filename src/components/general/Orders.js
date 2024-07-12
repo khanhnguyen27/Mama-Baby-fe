@@ -45,6 +45,7 @@ import { useDispatch } from "react-redux";
 import { addExchangeApi, exchangeByUserIdApi } from "../../api/ExchangeAPI";
 import { allStoreApi } from "../../api/StoreAPI";
 import { addRefundApi, refundByUserIdApi } from "../../api/RefundAPI";
+import { allUserApi } from "../../api/UserAPI";
 
 export default function Orders() {
   window.document.title = "Your Orders";
@@ -63,6 +64,7 @@ export default function Orders() {
     CANCELLED: [],
     // RETURNED: [],
   });
+  const [userMap, setUserMap] = useState({});
   const [productMap, setProductMap] = useState({});
   const [storeMap, setStoreMap] = useState({});
   const [brandMap, setBrandMap] = useState({});
@@ -96,6 +98,7 @@ export default function Orders() {
     try {
       const [
         orderRes,
+        userRes,
         productRes,
         storeRes,
         brandRes,
@@ -105,6 +108,7 @@ export default function Orders() {
         refundRes,
       ] = await Promise.all([
         orderByUserIdApi(userId),
+        allUserApi({ limit: 1000 }),
         allProductCHApi({ limit: 1000 }),
         allStoreApi({ limit: 1000 }),
         allBrandApi(),
@@ -114,6 +118,7 @@ export default function Orders() {
         refundByUserIdApi(userId),
       ]);
       const orderData = orderRes?.data?.data || [];
+      const userData = userRes?.data?.data || [];
       const productData = productRes?.data?.data?.products || [];
       const storeData = storeRes?.data?.data?.stores || [];
       const brandData = brandRes?.data?.data || [];
@@ -146,9 +151,14 @@ export default function Orders() {
       //   categorizedOrders[status].reverse();
       // }
       setOrdersByStatus(categorizedOrders);
-
       setExchange(exchangeData);
       setRefund(refundData);
+
+      const userMap = userData.reduce((x, item) => {
+        x[item.id] = [item.full_name, item.phone_number];
+        return x;
+      }, {});
+      setUserMap(userMap);
 
       const productMap = productData.reduce((x, item) => {
         x[item.id] = [
@@ -157,7 +167,7 @@ export default function Orders() {
           item.category_id,
           item.price,
           item.image_url,
-          item.status
+          item.status,
         ];
         return x;
       }, {});
@@ -408,7 +418,7 @@ export default function Orders() {
     //   .then((res) => (
     for (const item of items) {
       const res = await productByIdApi(item.product_id);
-        if (res?.data?.data.remain > 0) {
+      if (res?.data?.data.remain > 0) {
         dispatch(
           addToCart({
             product: {
@@ -420,10 +430,13 @@ export default function Orders() {
               point: res?.data?.data.point,
               type: res?.data?.data.type,
             },
-            quantity: item.quantity > res?.data?.data.remain ? res?.data?.data.remain : item.quantity,
+            quantity:
+              item.quantity > res?.data?.data.remain
+                ? res?.data?.data.remain
+                : item.quantity,
           })
-        )};
-        
+        );
+      }
     }
     toast.success("Your order is now added to cart", { autoClose: 1000 });
     handleClose();
@@ -719,75 +732,80 @@ export default function Orders() {
                     >
                       Order No. {item.id}{" "}
                     </Typography>
-                    <Box sx={{ display: "flex"}}>
-                    {item.type === "PRE_ORDER" && (
+                    <Box sx={{ display: "flex" }}>
+                      {item.type === "PRE_ORDER" && (
                         <Tooltip
-                        title="One or more products in this order are pre-order items"
-                        enterDelay={300}
-                        leaveDelay={100}
-                        placement="left"
-                        TransitionComponent={Fade}
-                        TransitionProps={{ timeout: 250 }}
-                        componentsProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "#fff4fc",
-                              boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
-                              color: "#ff469e",
-                              borderRadius: "8px",
-                              border: "1px solid #ff469e",
-                              fontSize: "1rem",
+                          title="One or more products in this order are pre-order items"
+                          enterDelay={300}
+                          leaveDelay={100}
+                          placement="left"
+                          TransitionComponent={Fade}
+                          TransitionProps={{ timeout: 250 }}
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "#fff4fc",
+                                boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                                color: "#ff469e",
+                                borderRadius: "8px",
+                                border: "1px solid #ff469e",
+                                fontSize: "1rem",
+                              },
                             },
-                          },
-                        }}
-                      >       
-                      <Typography style={{
-                        borderRadius: "1rem",
-                        border: "1px solid #ff469e",
-                        color: "#ff469e",
-                        fontWeight: "bold",
-                        padding: "4px 8px",
-                        height: "24px",
-                        cursor: "pointer"
-                      }}>PRE-ORDER</Typography>
-                      </Tooltip>
-                    )}
-                    {item?.status_order_list[item.status_order_list.length - 1]
-                      ?.status === "COMPLETED" && (
-                      <Tooltip
-                        title="An order can only be submitted for one exchange or refund request at a time."
-                        enterDelay={300}
-                        leaveDelay={100}
-                        placement="left"
-                        TransitionComponent={Fade}
-                        TransitionProps={{ timeout: 250 }}
-                        componentsProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "#fff4fc",
-                              boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
-                              color: "#ff469e",
-                              borderRadius: "8px",
-                              border: "1px solid #ff469e",
-                              fontSize: "1rem",
-                            },
-                          },
-                        }}
-                      >
-                        <IconButton
-                          sx={{
-                            p: 0,
-                            mb: 1,
-                            ml: 1.5,
-                            color: "black",
-                            opacity: 0.3,
-                            "&:hover": { color: "#ff469e", opacity: 0.9 },
                           }}
                         >
-                          <Info sx={{ fontSize: "2rem" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                          <Typography
+                            style={{
+                              borderRadius: "1rem",
+                              border: "1px solid #ff469e",
+                              color: "#ff469e",
+                              fontWeight: "bold",
+                              padding: "4px 8px",
+                              height: "24px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            PRE-ORDER
+                          </Typography>
+                        </Tooltip>
+                      )}
+                      {item?.status_order_list[
+                        item.status_order_list.length - 1
+                      ]?.status === "COMPLETED" && (
+                        <Tooltip
+                          title="An order can only be submitted for one exchange or refund request at a time."
+                          enterDelay={300}
+                          leaveDelay={100}
+                          placement="left"
+                          TransitionComponent={Fade}
+                          TransitionProps={{ timeout: 250 }}
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "#fff4fc",
+                                boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.16)",
+                                color: "#ff469e",
+                                borderRadius: "8px",
+                                border: "1px solid #ff469e",
+                                fontSize: "1rem",
+                              },
+                            },
+                          }}
+                        >
+                          <IconButton
+                            sx={{
+                              p: 0,
+                              mb: 1,
+                              ml: 1.5,
+                              color: "black",
+                              opacity: 0.3,
+                              "&:hover": { color: "#ff469e", opacity: 0.9 },
+                            }}
+                          >
+                            <Info sx={{ fontSize: "2rem" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </Box>
                   </Box>
                   <Divider sx={{ mb: "16px" }} />
@@ -1013,6 +1031,7 @@ export default function Orders() {
                                         borderRadius: "10px",
                                       }}
                                       image={
+                                        productMap[detail.product_id][4] &&
                                         productMap[
                                           detail.product_id
                                         ][4]?.includes("Product_")
@@ -1022,6 +1041,7 @@ export default function Orders() {
                                           : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                       }
                                       onError={(e) => {
+                                        e.target.onerror = null;
                                         e.target.src =
                                           "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                       }}
@@ -1288,7 +1308,7 @@ export default function Orders() {
                         </span>{" "}
                         <Divider
                           sx={{
-                            width: "70%",
+                            width: { sm: "100%", md: "70%" },
                             my: 1,
                             borderColor: "rgba(0, 0, 0, 0.4)",
                             borderWidth: "1px",
@@ -1305,10 +1325,18 @@ export default function Orders() {
                             sx={{
                               display: "flex",
                               justifyContent: "space-between",
-                              width: "70%",
+                              width: { sm: "100%", md: "70%" },
                             }}
                           >
-                            <span style={{ opacity: 0.7 }}>Receiver:</span>
+                            <span style={{ opacity: 0.7 }}>
+                              Receiver
+                              {item.full_name === userMap[item.user_id][0] &&
+                                item.phone_number ===
+                                  userMap[item.user_id][1] && (
+                                  <span>/Buyer</span>
+                                )}
+                              :
+                            </span>
                             <span style={{ fontWeight: "600" }}>
                               {item.full_name}
                             </span>
@@ -1317,7 +1345,7 @@ export default function Orders() {
                             sx={{
                               display: "flex",
                               justifyContent: "space-between",
-                              width: "70%",
+                              width: { sm: "100%", md: "70%" },
                             }}
                           >
                             <span style={{ opacity: 0.7 }}>Contact:</span>
@@ -1329,7 +1357,7 @@ export default function Orders() {
                             sx={{
                               display: "flex",
                               justifyContent: "space-between",
-                              width: "70%",
+                              width: { sm: "100%", md: "70%" },
                             }}
                           >
                             <span style={{ opacity: 0.7 }}>Address:</span>
@@ -1337,6 +1365,44 @@ export default function Orders() {
                               {item.shipping_address}
                             </span>
                           </Box>
+                          {(item.full_name !== userMap[item.user_id][0] ||
+                            item.phone_number !== userMap[item.user_id][1]) && (
+                            <>
+                              <Divider
+                                sx={{
+                                  width: { sm: "100%", md: "70%" },
+                                  my: 0.1,
+                                  opacity: 0.2,
+                                  borderColor: "rgba(0, 0, 0, 0.4)",
+                                  borderWidth: "1px",
+                                }}
+                              />
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  width: { sm: "100%", md: "70%" },
+                                }}
+                              >
+                                <span style={{ opacity: 0.7 }}>Buyer:</span>
+                                <span style={{ fontWeight: "600" }}>
+                                  {userMap[item.user_id][0]}
+                                </span>
+                              </Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  width: { sm: "100%", md: "70%" },
+                                }}
+                              >
+                                <span style={{ opacity: 0.7 }}>Contact:</span>
+                                <span style={{ fontWeight: "600" }}>
+                                  {userMap[item.user_id][1]}
+                                </span>
+                              </Box>
+                            </>
+                          )}
                         </Box>
                       </Typography>
                     </Grid>
@@ -2239,6 +2305,9 @@ export default function Orders() {
                                             image={
                                               productMap[
                                                 detail.product_id
+                                              ][4] &&
+                                              productMap[
+                                                detail.product_id
                                               ][4]?.includes("Product_")
                                                 ? `http://localhost:8080/mamababy/products/images/${
                                                     productMap[
@@ -2248,6 +2317,7 @@ export default function Orders() {
                                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                             }
                                             onError={(e) => {
+                                              e.target.onerror = null;
                                               e.target.src =
                                                 "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                             }}
@@ -2966,6 +3036,9 @@ export default function Orders() {
                                             image={
                                               productMap[
                                                 detail.product_id
+                                              ][4] &&
+                                              productMap[
+                                                detail.product_id
                                               ][4]?.includes("Product_")
                                                 ? `http://localhost:8080/mamababy/products/images/${
                                                     productMap[
@@ -2975,6 +3048,7 @@ export default function Orders() {
                                                 : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                             }
                                             onError={(e) => {
+                                              e.target.onerror = null;
                                               e.target.src =
                                                 "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
                                             }}
