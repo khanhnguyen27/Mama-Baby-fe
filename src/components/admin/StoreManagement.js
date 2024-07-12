@@ -44,6 +44,7 @@ export default function StoreManagement() {
   const [selectedStore, setSelectedStore] = useState(null);
   const [openUpdatestore, setOpenUpdateStore] = useState(false);
   const [sortingStatus, setSortingStatus] = useState(null);
+  const [noData, setNoData] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,7 +67,12 @@ export default function StoreManagement() {
         sortedStores = sortedStores.filter((store) => !store.is_active);
       }
 
-      setStores(sortedStores);
+      if (sortedStores.length === 0) {
+        setNoData(true);
+      } else {
+        setStores(sortedStores);
+        setNoData(false);
+      }
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -153,8 +159,10 @@ export default function StoreManagement() {
       });
   };
 
-  const filteredStore = stores.filter((item) =>
-    item.name_store.toLowerCase().includes(searchKeyword.toLowerCase())
+  const filteredStore = stores.filter(
+    (item) =>
+      item.status === "APPROVED" &&
+      item.name_store.toLowerCase().includes(searchKeyword.toLowerCase())
   );
 
   const indexOfLastItem = (page + 1) * rowsPerPage;
@@ -295,6 +303,13 @@ export default function StoreManagement() {
                       value={sortingStatus}
                       onChange={handleSortingStatus}
                       label="Sorting Status"
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            marginTop: '3px',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="">Sort by Default</MenuItem>
                       <MenuItem value="active">Sort by Active</MenuItem>
@@ -305,117 +320,137 @@ export default function StoreManagement() {
               </Grid>
               <TableContainer>
                 <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        No
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Store Name
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        description
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Address
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Phone Number
-                      </TableCell>
-
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Status
-                      </TableCell>
-
-                      <TableCell
-                        align="left"
-                        sx={{ fontWeight: "bold", fontSize: "16px" }}
-                      >
-                        Actions
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {currentItems.map((item, index) => (
-                      <TableRow
-                        key={item.id}
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "#f1f1f1",
-                            cursor: "pointer",
-                          },
-                        }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {indexOfFirstItem + index + 1}
+                  {noData ? null : (
+                    <TableHead>
+                      <TableRow>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          No
                         </TableCell>
-                        <TableCell align="left">{item.name_store}</TableCell>
-                        <TableCell align="left">{item.description}</TableCell>
-                        <TableCell align="left">{item.address}</TableCell>
-                        <TableCell align="left">{item.phone}</TableCell>
-
-                        <TableCell align="left">
-                          {item.is_active ? (
-                            <CheckIcon style={{ color: "green" }} />
-                          ) : (
-                            <CloseIcon style={{ color: "red" }} />
-                          )}
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Store Name
                         </TableCell>
-                        <TableCell align="left">
-                          <IconButton onClick={() => openUpdate(item)}>
-                            <EditIcon />
-                          </IconButton>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Description
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Address
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Phone
+                        </TableCell>
+
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Status
+                        </TableCell>
+
+                        <TableCell
+                          align="left"
+                          sx={{ fontWeight: "bold", fontSize: "16px" }}
+                        >
+                          Action
                         </TableCell>
                       </TableRow>
-                    ))}
+                    </TableHead>
+                  )}
+                  <TableBody>
+                    {noData ? (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                      </TableRow>
+                    ) : (
+                      currentItems.map((item, index) => (
+                        <TableRow
+                          key={item.id}
+                          sx={{
+                            "&:hover": {
+                              backgroundColor: "#f1f1f1",
+                              cursor: "pointer",
+                            },
+                          }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {indexOfFirstItem + index + 1}
+                          </TableCell>
+                          <TableCell align="left">{item.name_store}</TableCell>
+                          <TableCell align="left">{item.description}</TableCell>
+                          <TableCell align="left">{item.address}</TableCell>
+                          <TableCell align="left">{item.phone}</TableCell>
+
+                          <TableCell align="left">
+                            {item.is_active ? (
+                              <CheckIcon style={{ color: "green" }} />
+                            ) : (
+                              <CloseIcon style={{ color: "red" }} />
+                            )}
+                          </TableCell>
+                          <TableCell align="left">
+                            <IconButton onClick={() => openUpdate(item)}>
+                              <EditIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredStore.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{
-                  justifyContent: "flex-end",
-                  backgroundColor: "f1f1f1",
-                  marginTop: "8px",
-                  marginRight: "40px"
-                }}
-                labelRowsPerPage="Rows:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}/${to} of ${count}`
-                }
-              />
+              {noData ? null : (
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredStore.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    justifyContent: "flex-end",
+                    backgroundColor: "f1f1f1",
+                    marginTop: "8px",
+                    marginRight: "40px"
+                  }}
+                  labelRowsPerPage="Rows:"
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `${from}/${to} of ${count}`
+                  }
+                />
+              )}
             </>
           )}
         </Paper>
 
         {/* Update Account Dialog */}
         {selectedStore && (
-          <Dialog open={openUpdatestore} onClose={closeUpdate}>
-            <DialogTitle>Edit Store</DialogTitle>
+          <Dialog open={openUpdatestore} onClose={closeUpdate}
+            PaperProps={{
+              style: {
+                borderRadius: 7,
+                boxShadow: "0px 2px 8px #ff469e",
+              },
+            }}>
+            <DialogTitle style={{
+              fontWeight: "bold",
+              color: "#333",
+              textAlign: "center",
+            }}>Edit Store</DialogTitle>
             <DialogContent>
               <TextField
                 label="Store Name"
@@ -448,9 +483,10 @@ export default function StoreManagement() {
             </DialogContent>
             <DialogActions>
               <Button onClick={closeUpdate} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#757575",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #757575",
@@ -463,9 +499,10 @@ export default function StoreManagement() {
                 Cancel
               </Button>
               <Button onClick={handleEdit} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#ff469e",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",

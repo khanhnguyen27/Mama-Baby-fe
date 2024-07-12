@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { environment } from "../../environments/environment";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { allAgeApi } from "../../api/AgeAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
@@ -59,7 +59,6 @@ import AddIcon from "@mui/icons-material/Add";
 export default function StaffHome() {
   const navigate = useNavigate();
   window.document.title = "Products";
-  const { state } = useLocation();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [age, setAge] = useState([]);
@@ -80,6 +79,7 @@ export default function StaffHome() {
   const statusInStock = "IN STOCK";
   const statusComingSoon = "COMING SOON";
   const [sortPrice, setSortPrice] = useState("");
+  const [sortStatus, setSortStatus] = useState("WHOLESALE");
   const countries = [
     "Afghanistan",
     "Albania",
@@ -314,6 +314,7 @@ export default function StaffHome() {
     categoryFilter,
     store.id,
     currentPage,
+    sortStatus,
     sortPrice,
   ]);
 
@@ -326,6 +327,7 @@ export default function StaffHome() {
         allCategorytApi(),
         allProductByStoreApi({
           keyword: keyword,
+          sort_status: sortStatus,
           sort_price: sortPrice,
           category_id: categoryFilter,
           brand_id: brandFilter,
@@ -830,6 +832,12 @@ export default function StaffHome() {
     }
   };
 
+  const handleStatusChange = (e, sortStatus) => {
+    if (sortStatus !== null) {
+      setSortStatus(sortStatus);
+    }
+  };
+
   if (loading) {
     window.scrollTo({ top: 0, behavior: "instant" });
     return (
@@ -1168,107 +1176,171 @@ export default function StaffHome() {
                 </Grid>
               </Box>
             </Grid>
-
             <Grid item sm={12} md={9}>
-              <Container>
-                <Box
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <ToggleButtonGroup
+                  value={sortStatus}
+                  exclusive
+                  onChange={handleStatusChange}
+                  variant="outlined"
                   sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "end",
-                    alignItems: "center",
-                  }}
-                >
-                  <ToggleButtonGroup
-                    value={sortPrice}
-                    exclusive
-                    onChange={handleSortChange}
-                    variant="outlined"
-                    sx={{
-                      height: "40px",
-                      "& .MuiToggleButton-root": {
-                        color: "black",
-                        border: "1px solid #ff469e",
-                        fontSize: "1rem",
-                        transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    height: "40px",
+                    "& .MuiToggleButton-root": {
+                      color: "black",
+                      border: "1px solid #ff469e",
+                      fontSize: "1rem",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      "&:hover": {
+                        backgroundColor: "#fff4fc",
+                        color: "#ff469e",
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        fontWeight: "600",
                         "&:hover": {
                           backgroundColor: "#fff4fc",
                           color: "#ff469e",
                         },
-                        "&.Mui-selected": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                          fontWeight: "600",
-                          "&:hover": {
-                            backgroundColor: "#fff4fc",
-                            color: "#ff469e",
-                          },
-                        },
+                      },
+                    },
+                  }}
+                >
+                  <ToggleButton
+                    value="WHOLESALE"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "20px",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
                       },
                     }}
                   >
-                    <ToggleButton
-                      value=""
-                      sx={{
-                        backgroundColor: "white",
+                    WHOLESALE
+                  </ToggleButton>
+                  <ToggleButton
+                    value="GIFT"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "20px",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    GIFT
+                  </ToggleButton>
+                </ToggleButtonGroup>
+                <ToggleButtonGroup
+                  value={sortPrice}
+                  exclusive
+                  onChange={handleSortChange}
+                  variant="outlined"
+                  sx={{
+                    height: "40px",
+                    "& .MuiToggleButton-root": {
+                      color: "black",
+                      border: "1px solid #ff469e",
+                      fontSize: "1rem",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      "&:hover": {
+                        backgroundColor: "#fff4fc",
                         color: "#ff469e",
-                        borderRadius: "20px",
-                        fontSize: "1rem",
-                        boxShadow: "none",
-                        transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        fontWeight: "600",
                         "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
+                          backgroundColor: "#fff4fc",
+                          color: "#ff469e",
                         },
-                      }}
-                    >
-                      All
-                    </ToggleButton>
-                    <ToggleButton
-                      value="ASC"
-                      sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderLeft: "1px solid #ff469e",
-                        borderRight: "1px solid #ff469e",
-                        fontSize: "1rem",
-                        boxShadow: "none",
-                        transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                        },
-                      }}
-                    >
-                      Low - High
-                    </ToggleButton>
-                    <ToggleButton
-                      value="DESC"
-                      sx={{
-                        backgroundColor: "white",
-                        color: "#ff469e",
-                        borderRadius: "20px",
-                        fontSize: "1rem",
-                        boxShadow: "none",
-                        transition:
-                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                        border: "1px solid #ff469e",
-                        "&:hover": {
-                          backgroundColor: "#ff469e",
-                          color: "white",
-                        },
-                      }}
-                    >
-                      High - Low
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
-              </Container>
+                      },
+                    },
+                  }}
+                >
+                  <ToggleButton
+                    value=""
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "20px",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    All
+                  </ToggleButton>
+                  <ToggleButton
+                    value="ASC"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderLeft: "1px solid #ff469e",
+                      borderRight: "1px solid #ff469e",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    Low - High
+                  </ToggleButton>
+                  <ToggleButton
+                    value="DESC"
+                    sx={{
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "20px",
+                      fontSize: "1rem",
+                      boxShadow: "none",
+                      transition:
+                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    High - Low
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
             </Grid>
 
             {/* Loading Spinner */}
@@ -1631,106 +1703,169 @@ export default function StaffHome() {
 
           {/* List Products */}
           <Grid item sm={12} md={9}>
-            <Container>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "end",
-                  alignItems: "center",
-                }}
-              >
-                <ToggleButtonGroup
-                  value={sortPrice}
-                  exclusive
-                  onChange={handleSortChange}
-                  variant="outlined"
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >   <ToggleButtonGroup
+              value={sortStatus}
+              exclusive
+              onChange={handleStatusChange}
+              variant="outlined"
+              sx={{
+                height: "40px",
+                "& .MuiToggleButton-root": {
+                  color: "black",
+                  border: "1px solid #ff469e",
+                  fontSize: "1rem",
+                  transition:
+                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#fff4fc",
+                    color: "#ff469e",
+                  },
+                  "&.Mui-selected": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    fontWeight: "600",
+                    "&:hover": {
+                      backgroundColor: "#fff4fc",
+                      color: "#ff469e",
+                    },
+                  },
+                },
+              }}
+            > <ToggleButton
+              value="WHOLESALE"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: "1rem",
+                boxShadow: "none",
+                transition:
+                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                },
+              }}
+            >
+                  WHOLESALE
+                </ToggleButton>
+                <ToggleButton
+                  value="GIFT"
                   sx={{
-                    mb: 4,
-                    height: "40px",
-                    "& .MuiToggleButton-root": {
-                      color: "black",
-                      border: "1px solid #ff469e",
-                      fontSize: "1rem",
-                      transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    backgroundColor: "white",
+                    color: "#ff469e",
+                    borderRadius: "20px",
+                    fontSize: "1rem",
+                    boxShadow: "none",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    border: "1px solid #ff469e",
+                    "&:hover": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                    },
+                  }}
+                >
+                  GIFT
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <ToggleButtonGroup
+                value={sortPrice}
+                exclusive
+                onChange={handleSortChange}
+                variant="outlined"
+                sx={{
+                  mb: 4,
+                  height: "40px",
+                  "& .MuiToggleButton-root": {
+                    color: "black",
+                    border: "1px solid #ff469e",
+                    fontSize: "1rem",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    "&:hover": {
+                      backgroundColor: "#fff4fc",
+                      color: "#ff469e",
+                    },
+                    "&.Mui-selected": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                      fontWeight: "600",
                       "&:hover": {
                         backgroundColor: "#fff4fc",
                         color: "#ff469e",
                       },
-                      "&.Mui-selected": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                        fontWeight: "600",
-                        "&:hover": {
-                          backgroundColor: "#fff4fc",
-                          color: "#ff469e",
-                        },
-                      },
+                    },
+                  },
+                }}
+              >
+                <ToggleButton
+                  value=""
+                  sx={{
+                    backgroundColor: "white",
+                    color: "#ff469e",
+                    borderRadius: "20px",
+                    fontSize: "1rem",
+                    boxShadow: "none",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    border: "1px solid #ff469e",
+                    "&:hover": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
                     },
                   }}
                 >
-                  <ToggleButton
-                    value=""
-                    sx={{
-                      backgroundColor: "white",
-                      color: "#ff469e",
-                      borderRadius: "20px",
-                      fontSize: "1rem",
-                      boxShadow: "none",
-                      transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                      border: "1px solid #ff469e",
-                      "&:hover": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    All
-                  </ToggleButton>
-                  <ToggleButton
-                    value="ASC"
-                    sx={{
-                      backgroundColor: "white",
-                      color: "#ff469e",
-                      borderLeft: "1px solid #ff469e",
-                      borderRight: "1px solid #ff469e",
-                      fontSize: "1rem",
-                      boxShadow: "none",
-                      transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                      border: "1px solid #ff469e",
-                      "&:hover": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    Low - High
-                  </ToggleButton>
-                  <ToggleButton
-                    value="DESC"
-                    sx={{
-                      backgroundColor: "white",
-                      color: "#ff469e",
-                      borderRadius: "20px",
-                      fontSize: "1rem",
-                      boxShadow: "none",
-                      transition:
-                        "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                      border: "1px solid #ff469e",
-                      "&:hover": {
-                        backgroundColor: "#ff469e",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    High - Low
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
-            </Container>
+                  All
+                </ToggleButton>
+                <ToggleButton
+                  value="ASC"
+                  sx={{
+                    backgroundColor: "white",
+                    color: "#ff469e",
+                    borderLeft: "1px solid #ff469e",
+                    borderRight: "1px solid #ff469e",
+                    fontSize: "1rem",
+                    boxShadow: "none",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    border: "1px solid #ff469e",
+                    "&:hover": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                    },
+                  }}
+                >
+                  Low - High
+                </ToggleButton>
+                <ToggleButton
+                  value="DESC"
+                  sx={{
+                    backgroundColor: "white",
+                    color: "#ff469e",
+                    borderRadius: "20px",
+                    fontSize: "1rem",
+                    boxShadow: "none",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    border: "1px solid #ff469e",
+                    "&:hover": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                    },
+                  }}
+                >
+                  High - Low
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
             <Grid container spacing={3}>
               {product?.products?.length === 0 ? (
                 <Grid item xs={12}>
@@ -1802,7 +1937,7 @@ export default function StaffHome() {
                           component="img"
                           image={
                             item.image_url &&
-                            item.image_url.includes("Product_")
+                              item.image_url.includes("Product_")
                               ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
                               : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           }
@@ -2197,6 +2332,7 @@ export default function StaffHome() {
                 <Select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
+                  label="Status"
                 >
                   <MenuItem value={statusInStock}>IN STOCK</MenuItem>
                   <MenuItem value={statusComingSoon}>COMING SOON</MenuItem>
@@ -2205,8 +2341,9 @@ export default function StaffHome() {
             </Grid>
             <Grid item xs={4}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Type</InputLabel>
-                <Select value={type} onChange={(e) => setType(e.target.value)}>
+                <InputLabel >Type</InputLabel>
+                <Select value={type} onChange={(e) => setType(e.target.value)}
+                  label="Type">
                   <MenuItem value={typeWHOLESALE}>WHOLESALE</MenuItem>
                   <MenuItem value={typeGIFT}>GIFT</MenuItem>
                 </Select>
@@ -2218,7 +2355,7 @@ export default function StaffHome() {
                 <Select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                >
+                  label="Category">
                   {Object.keys(categoryMap).map((key) => (
                     <MenuItem key={key} value={key}>
                       {categoryMap[key]}
@@ -2235,7 +2372,7 @@ export default function StaffHome() {
                 <Select
                   value={brandId}
                   onChange={(e) => setBrandId(e.target.value)}
-                >
+                  label="Brand">
                   {Object.keys(brandMap).map((key) => (
                     <MenuItem key={key} value={key}>
                       {brandMap[key]}
@@ -2275,7 +2412,8 @@ export default function StaffHome() {
             <Grid item xs={1.5}>
               <FormControl fullWidth margin="normal">
                 <InputLabel>Unit</InputLabel>
-                <Select value={unit} onChange={handleUnitChange}>
+                <Select value={unit} onChange={handleUnitChange}
+                  label="Unit">
                   <MenuItem value="g">g</MenuItem>
                   <MenuItem value="ml">ml</MenuItem>
                 </Select>
@@ -2527,9 +2665,9 @@ export default function StaffHome() {
                   value={
                     selectedProduct?.expiryDate
                       ? format(
-                          parseISO(selectedProduct.expiryDate),
-                          "yyyy-MM-dd"
-                        )
+                        parseISO(selectedProduct.expiryDate),
+                        "yyyy-MM-dd"
+                      )
                       : ""
                   }
                   onChange={(e) => handleChange("expiryDate", e.target.value)}
@@ -2584,6 +2722,7 @@ export default function StaffHome() {
                   <Select
                     value={selectedProduct?.status}
                     onChange={(e) => handleChange("status", e.target.value)}
+                    label="Status"
                   >
                     <MenuItem value={statusInStock}>IN STOCK</MenuItem>
                     <MenuItem value={statusComingSoon}>COMING SOON</MenuItem>
@@ -2596,6 +2735,7 @@ export default function StaffHome() {
                   <Select
                     value={selectedProduct?.type}
                     onChange={(e) => handleChange("type", e.target.value)}
+                    label="Type"
                   >
                     <MenuItem value={typeWHOLESALE}>WHOLESALE</MenuItem>
                     <MenuItem value={typeGIFT}>GIFT</MenuItem>
@@ -2610,6 +2750,7 @@ export default function StaffHome() {
                     onChange={(e) =>
                       handleChange("category_id", e.target.value)
                     }
+                    label="Category"
                   >
                     {Object.keys(categoryMap).map((key) => (
                       <MenuItem key={key} value={key}>
@@ -2627,6 +2768,7 @@ export default function StaffHome() {
                   <Select
                     value={selectedProduct?.brand_id}
                     onChange={(e) => handleChange("brand_id", e.target.value)}
+                    label="Brand"
                   >
                     {Object.keys(brandMap).map((key) => (
                       <MenuItem key={key} value={key}>
@@ -2666,7 +2808,8 @@ export default function StaffHome() {
               <Grid item xs={1.5}>
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Unit</InputLabel>
-                  <Select value={unit} onChange={handleUnitChange}>
+                  <Select value={unit} onChange={handleUnitChange}
+                    label="Brand">
                     <MenuItem value="g">g</MenuItem>
                     <MenuItem value="ml">ml</MenuItem>
                   </Select>

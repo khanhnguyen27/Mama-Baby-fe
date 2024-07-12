@@ -54,6 +54,7 @@ export default function Vouchers() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortingStatus, setSortingStatus] = useState(null);
+  const [noData, setNoData] = useState(false);
 
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
@@ -114,7 +115,12 @@ export default function Vouchers() {
         sortedVouchers = sortedVouchers.filter((voucher) => !voucher.active);
       }
 
-      setVouchers(sortedVouchers);
+      if (sortedVouchers.length === 0) {
+        setNoData(true);
+      } else {
+        setVouchers(sortedVouchers);
+        setNoData(false);
+      }
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -421,6 +427,13 @@ export default function Vouchers() {
                           value={sortingStatus}
                           onChange={handleSortingStatus}
                           label="Sorting Status"
+                          MenuProps={{
+                            PaperProps: {
+                              style: {
+                                marginTop: '3px',
+                              },
+                            },
+                          }}
                         >
                           <MenuItem value="">Sort by Default</MenuItem>
                           <MenuItem value="active">Sort by Active</MenuItem>
@@ -430,7 +443,7 @@ export default function Vouchers() {
                     </Grid>
                     <Grid item xs={1} md={2}></Grid>
                     <Grid item xs={5} md={3} container justifyContent="flex-end">
-                      <Tooltip title="Add New Voucher">
+                      <Tooltip title="Add Voucher">
                         <Button
                           style={{
                             color: "#4d4d4d",
@@ -459,127 +472,138 @@ export default function Vouchers() {
                           onClick={handleAddNew}
                           disabled={!store?.is_active}
                         >
-                          Add New Voucher
+                          Add Voucher
                         </Button>
                       </Tooltip>
                     </Grid>
                   </Grid>
                   <TableContainer>
                     <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            No
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            Code
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            Discount Value
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            Description
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            End Date
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            Status
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            sx={{ fontWeight: "bold", fontSize: "16px" }}
-                          >
-                            Actions
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {currentItems.map((item, index) => (
-                          <TableRow
-                            key={item.id}
-                            sx={{
-                              "&:hover": {
-                                backgroundColor: "#f1f1f1",
-                                cursor: "pointer",
-                              },
-                            }}
-                          >
-                            <TableCell component="th" scope="row">
-                              {indexOfFirstItem + index + 1}
+                      {noData ? null : (
+                        <TableHead>
+                          <TableRow>
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              No
                             </TableCell>
-                            <TableCell align="left">{item.code}</TableCell>
-                            <TableCell align="left">
-                              {formatCurrency(item.discount_value)}
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              Code
                             </TableCell>
-                            <TableCell align="left">{item.description}</TableCell>
-                            <TableCell align="left">
-                              {formatDate(item.endAt)}
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              Discount Value
                             </TableCell>
-                            <TableCell align="left">
-                              <Tooltip
-                                title={item.active ? "Active" : "Inactive"}
-                              >
-                                {item.active ? (
-                                  <CheckIcon style={{ color: "green" }} />
-                                ) : (
-                                  <CloseIcon style={{ color: "red" }} />
-                                )}
-                              </Tooltip>
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              Description
                             </TableCell>
-                            <TableCell align="left">
-                              <Tooltip title="Edit Voucher">
-                                <IconButton
-                                  disabled={!store?.is_active}
-                                  onClick={() => openUpdate(item)}
-                                >
-                                  <EditIcon />
-                                </IconButton>
-                              </Tooltip>
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              End Date
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              Status
+                            </TableCell>
+                            <TableCell
+                              align="left"
+                              sx={{ fontWeight: "bold", fontSize: "16px" }}
+                            >
+                              Action
                             </TableCell>
                           </TableRow>
-                        ))}
+                        </TableHead>
+                      )}
+                      <TableBody>
+                        {noData ? (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                          </TableRow>
+                        ) : (
+                          currentItems.map((item, index) => (
+                            <TableRow
+                              key={item.id}
+                              sx={{
+                                "&:hover": {
+                                  backgroundColor: "#f1f1f1",
+                                  cursor: "pointer",
+                                },
+                              }}
+                            >
+                              <TableCell component="th" scope="row">
+                                {indexOfFirstItem + index + 1}
+                              </TableCell>
+                              <TableCell align="left">{item.code}</TableCell>
+                              <TableCell align="left">
+                                {formatCurrency(item.discount_value)}
+                              </TableCell>
+                              <TableCell align="left">{item.description}</TableCell>
+                              <TableCell align="left">
+                                {formatDate(item.endAt)}
+                              </TableCell>
+                              <TableCell align="left">
+                                <Tooltip
+                                  title={item.active ? "Active" : "Inactive"}
+                                >
+                                  {item.active ? (
+                                    <CheckIcon style={{ color: "green" }} />
+                                  ) : (
+                                    <CloseIcon style={{ color: "red" }} />
+                                  )}
+                                </Tooltip>
+                              </TableCell>
+                              <TableCell align="left">
+                                <Tooltip title="Edit Voucher">
+                                  <IconButton
+                                    disabled={!store?.is_active}
+                                    onClick={() => openUpdate(item)}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={filteredVoucher.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    sx={{
-                      justifyContent: "center",
-                      backgroundColor: "f1f1f1",
-                      marginTop: "8px",
-                      marginRight: "40px"
-                    }}
-                    labelRowsPerPage="Rows:"
-                    labelDisplayedRows={({ from, to, count }) =>
-                      `${from}/${to} of ${count}`
-                    }
-                  />
-                </>)}
+                  {noData ? null : (
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      component="div"
+                      count={filteredVoucher.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                      sx={{
+                        justifyContent: "center",
+                        backgroundColor: "f1f1f1",
+                        marginTop: "8px",
+                        marginRight: "40px"
+                      }}
+                      labelRowsPerPage="Rows:"
+                      labelDisplayedRows={({ from, to, count }) =>
+                        `${from}/${to} of ${count}`
+                      }
+                    />
+                  )}
+                </>
+              )}
             </Paper>
           </Grid>
         </Grid>
@@ -613,8 +637,18 @@ export default function Vouchers() {
       </Container>
 
       {/* Dialog for Update Voucher */}
-      <Dialog open={openUpdateVoucher} onClose={closeUpdate}>
-        <DialogTitle>Edit Voucher</DialogTitle>
+      <Dialog open={openUpdateVoucher} onClose={closeUpdate}
+        PaperProps={{
+          style: {
+            borderRadius: 7,
+            boxShadow: "0px 2px 8px #ff469e",
+          },
+        }}>
+        <DialogTitle style={{
+          fontWeight: "bold",
+          color: "#333",
+          textAlign: "center",
+        }}>Edit Voucher</DialogTitle>
         <DialogContent>
           {selectedVoucher && (
             <>
@@ -670,9 +704,10 @@ export default function Vouchers() {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeUpdate} sx={{
-            backgroundColor: "white",
+            backgroundColor: "#F0F8FF",
             color: "#757575",
-            borderRadius: "7px",
+            borderRadius: "30px",
+            fontWeight: "bold",
             transition:
               "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
             border: "1px solid #757575",
@@ -685,9 +720,10 @@ export default function Vouchers() {
             Cancel
           </Button>
           <Button onClick={handleEdit} sx={{
-            backgroundColor: "white",
+            backgroundColor: "#F0F8FF",
             color: "#ff469e",
-            borderRadius: "7px",
+            borderRadius: "30px",
+            fontWeight: "bold",
             transition:
               "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
             border: "1px solid #ff469e",
@@ -703,8 +739,18 @@ export default function Vouchers() {
       </Dialog>
 
       {/* Dialog for Add Voucher */}
-      <Dialog open={openAddVoucher} onClose={handleCloseAddVoucher}>
-        <DialogTitle>Add New Voucher</DialogTitle>
+      <Dialog open={openAddVoucher} onClose={handleCloseAddVoucher}
+        PaperProps={{
+          style: {
+            borderRadius: 7,
+            boxShadow: "0px 2px 8px #ff469e",
+          },
+        }}>
+        <DialogTitle style={{
+          fontWeight: "bold",
+          color: "#333",
+          textAlign: "center",
+        }}>Add Voucher</DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
@@ -758,26 +804,27 @@ export default function Vouchers() {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddVoucher}
-            sx={{
-              backgroundColor: "white",
-              color: "#757575",
-              borderRadius: "7px",
-              transition:
-                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-              border: "1px solid #757575",
-              "&:hover": {
-                backgroundColor: "#757575",
-                color: "white",
-                border: "1px solid white",
-              },
-            }}>
+          <Button onClick={handleCloseAddVoucher} sx={{
+            backgroundColor: "#F0F8FF",
+            color: "#757575",
+            borderRadius: "30px",
+            fontWeight: "bold",
+            transition:
+              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+            border: "1px solid #757575",
+            "&:hover": {
+              backgroundColor: "#757575",
+              color: "white",
+              border: "1px solid white",
+            },
+          }}>
             Cancel
           </Button>
           <Button onClick={handleAddVoucher} sx={{
-            backgroundColor: "white",
+            backgroundColor: "#F0F8FF",
             color: "#ff469e",
-            borderRadius: "7px",
+            borderRadius: "30px",
+            fontWeight: "bold",
             transition:
               "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
             border: "1px solid #ff469e",

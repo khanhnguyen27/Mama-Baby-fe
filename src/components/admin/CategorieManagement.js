@@ -47,6 +47,7 @@ export default function CategoryManagement() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [openUpdateCategory, setOpenUpdateCategory] = useState(false);
   const [sortingStatus, setSortingStatus] = useState(null);
+  const [noData, setNoData] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,13 +63,19 @@ export default function CategoryManagement() {
     try {
       const categoryRes = await allCategoryAdminApi();
       let sortedCategory = categoryRes.data.data || [];
+
       if (sortingStatus === "active") {
         sortedCategory = sortedCategory.filter((category) => category.active);
       } else if (sortingStatus === "inactive") {
         sortedCategory = sortedCategory.filter((category) => !category.active);
       }
 
-      setCategories(sortedCategory);
+      if (sortedCategory.length === 0) {
+        setNoData(true);
+      } else {
+        setCategories(sortedCategory);
+        setNoData(false);
+      }
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -280,7 +287,8 @@ export default function CategoryManagement() {
                             >
                               <CloseIcon fontSize="small" style={{ color: "DC143C" }} />
                             </IconButton>
-                          )}
+                          )
+                          }
                         </InputAdornment>
                       ),
                     }}
@@ -325,6 +333,13 @@ export default function CategoryManagement() {
                       value={sortingStatus}
                       onChange={handleSortingStatus}
                       label="Sorting Status"
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            marginTop: '3px',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="">Sort by Default</MenuItem>
                       <MenuItem value="active">Sort by Active</MenuItem>
@@ -361,67 +376,87 @@ export default function CategoryManagement() {
                       },
                     }}
                   >
-                    Add New Category
+                    Add Category
                   </Button>
                 </Grid>
               </Grid>
               <TableContainer>
                 <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Category Name</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {currentItems.map((item, index) => (
-                      <TableRow key={item.id} sx={{ '&:hover': { backgroundColor: '#f1f1f1', cursor: 'pointer' } }}>
-                        <TableCell component="th" scope="row">
-                          {indexOfFirstItem + index + 1}
-                        </TableCell>
-                        <TableCell align="left">{item.name}</TableCell>
-                        <TableCell align="left">{item.active ? (
-                          <CheckIcon style={{ color: "green" }} />
-                        ) : (
-                          <CloseIcon style={{ color: "red" }} />
-                        )}
-                        </TableCell>
-                        <TableCell align="left">
-                          <IconButton onClick={() => openUpdate(item)}>
-                            <EditIcon />
-                          </IconButton>
-                        </TableCell>
+                  {noData ? null : (
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Category Name</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Action</TableCell>
                       </TableRow>
-                    ))}
+                    </TableHead>
+                  )}
+                  <TableBody>
+                    {noData ? (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                      </TableRow>
+                    ) : (
+                      currentItems.map((item, index) => (
+                        <TableRow key={item.id} sx={{ '&:hover': { backgroundColor: '#f1f1f1', cursor: 'pointer' } }}>
+                          <TableCell component="th" scope="row">
+                            {indexOfFirstItem + index + 1}
+                          </TableCell>
+                          <TableCell align="left">{item.name}</TableCell>
+                          <TableCell align="left">{item.active ? (
+                            <CheckIcon style={{ color: "green" }} />
+                          ) : (
+                            <CloseIcon style={{ color: "red" }} />
+                          )}
+                          </TableCell>
+                          <TableCell align="left">
+                            <IconButton onClick={() => openUpdate(item)}>
+                              <EditIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredCategories.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{
-                  justifyContent: "flex-end",
-                  backgroundColor: "f1f1f1",
-                  marginTop: "8px",
-                  marginRight: "40px"
-                }}
-                labelRowsPerPage="Rows:"
-                labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
-              />
+              {noData ? null : (
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredCategories.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    justifyContent: "flex-end",
+                    backgroundColor: "f1f1f1",
+                    marginTop: "8px",
+                    marginRight: "40px"
+                  }}
+                  labelRowsPerPage="Rows:"
+                  labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
+                />
+              )}
             </>
           )}
         </Paper>
 
         {/* Add Category Dialog */}
-        <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
-          <DialogTitle>Add New Category</DialogTitle>
+        <Dialog open={openAddDialog} onClose={handleCloseAddDialog}
+          PaperProps={{
+            style: {
+              borderRadius: 7,
+              boxShadow: "0px 2px 8px #ff469e",
+            },
+          }}>
+          <DialogTitle style={{
+            fontWeight: "bold",
+            color: "#333",
+            textAlign: "center",
+          }}>Add Category</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -435,9 +470,10 @@ export default function CategoryManagement() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAddDialog} sx={{
-              backgroundColor: "white",
+              backgroundColor: "#F0F8FF",
               color: "#757575",
-              borderRadius: "7px",
+              borderRadius: "30px",
+              fontWeight: "bold",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #757575",
@@ -450,9 +486,10 @@ export default function CategoryManagement() {
               Cancel
             </Button>
             <Button onClick={handleAddCategory} sx={{
-              backgroundColor: "white",
+              backgroundColor: "#F0F8FF",
               color: "#ff469e",
-              borderRadius: "7px",
+              borderRadius: "30px",
+              fontWeight: "bold",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #ff469e",
@@ -469,9 +506,19 @@ export default function CategoryManagement() {
 
         {/* Update Category Dialog */}
         {selectedCategory && (
-          <Dialog open={openUpdateCategory} onClose={closeUpdate}>
-            <DialogTitle>Edit Category</DialogTitle>
-            <DialogContent>
+          <Dialog open={openUpdateCategory} onClose={closeUpdate}
+            PaperProps={{
+              style: {
+                borderRadius: 7,
+                boxShadow: "0px 2px 8px #ff469e",
+              },
+            }}>
+            <DialogTitle style={{
+              fontWeight: "bold",
+              color: "#333",
+              textAlign: "center",
+            }}>Edit Category</DialogTitle>
+            <DialogContent >
               <TextField
                 label="Category Name"
                 value={selectedCategory.name}
@@ -497,9 +544,10 @@ export default function CategoryManagement() {
             </DialogContent>
             <DialogActions>
               <Button onClick={closeUpdate} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#757575",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #757575",
@@ -512,9 +560,10 @@ export default function CategoryManagement() {
                 Cancel
               </Button>
               <Button onClick={handleEdit} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#ff469e",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",
@@ -557,6 +606,6 @@ export default function CategoryManagement() {
           </IconButton>
         )}
       </Container>
-    </div>
+    </div >
   );
 }

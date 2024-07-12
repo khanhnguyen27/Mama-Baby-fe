@@ -47,6 +47,7 @@ export default function BrandManagement() {
   const [newBrandName, setNewBrandName] = useState("");
   const [openUpdateBrand, setOpenUpdateBrand] = useState(false);
   const [sortingStatus, setSortingStatus] = useState(null);
+  const [noData, setNoData] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,14 +64,18 @@ export default function BrandManagement() {
       const brandRes = await allBrandAdminApi();
       let sortedBrands = brandRes.data.data || [];
 
-      // Sorting logic based on sortingStatus state
       if (sortingStatus === "active") {
         sortedBrands = sortedBrands.filter((brand) => brand.active);
       } else if (sortingStatus === "inactive") {
         sortedBrands = sortedBrands.filter((brand) => !brand.active);
       }
 
-      setBrands(sortedBrands);
+      if (sortedBrands.length === 0) {
+        setNoData(true);
+      } else {
+        setBrands(sortedBrands);
+        setNoData(false);
+      }
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -328,6 +333,13 @@ export default function BrandManagement() {
                       value={sortingStatus}
                       onChange={handleSortingStatus}
                       label="Sorting Status"
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            marginTop: '3px',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="">Sort by Default</MenuItem>
                       <MenuItem value="active">Sort by Active</MenuItem>
@@ -364,67 +376,88 @@ export default function BrandManagement() {
                       },
                     }}
                   >
-                    Add New Brand
+                    Add Brand
                   </Button>
                 </Grid>
               </Grid>
               <TableContainer>
                 <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Brand Name</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {currentItems.map((item, index) => (
-                      <TableRow key={item.id} sx={{ '&:hover': { backgroundColor: '#f1f1f1', cursor: 'pointer' } }}>
-                        <TableCell component="th" scope="row">
-                          {indexOfFirstItem + index + 1}
-                        </TableCell>
-                        <TableCell align="left">{item.name}</TableCell>
-                        <TableCell align="left">{item.active ? (
-                          <CheckIcon style={{ color: "green" }} />
-                        ) : (
-                          <CloseIcon style={{ color: "red" }} />
-                        )}
-                        </TableCell>
-                        <TableCell align="left">
-                          <IconButton onClick={() => openUpdate(item)}>
-                            <EditIcon />
-                          </IconButton>
-                        </TableCell>
+                  {noData ? null : (
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Brand Name</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Action</TableCell>
                       </TableRow>
-                    ))}
+                    </TableHead>
+                  )}
+                  <TableBody>
+                    {noData ? (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                      </TableRow>
+                    ) : (
+
+                      currentItems.map((item, index) => (
+                        <TableRow key={item.id} sx={{ '&:hover': { backgroundColor: '#f1f1f1', cursor: 'pointer' } }}>
+                          <TableCell component="th" scope="row">
+                            {indexOfFirstItem + index + 1}
+                          </TableCell>
+                          <TableCell align="left">{item.name}</TableCell>
+                          <TableCell align="left">{item.active ? (
+                            <CheckIcon style={{ color: "green" }} />
+                          ) : (
+                            <CloseIcon style={{ color: "red" }} />
+                          )}
+                          </TableCell>
+                          <TableCell align="left">
+                            <IconButton onClick={() => openUpdate(item)}>
+                              <EditIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredBrands.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{
-                  justifyContent: "flex-end",
-                  backgroundColor: "f1f1f1",
-                  marginTop: "8px",
-                  marginRight: "40px"
-                }}
-                labelRowsPerPage="Rows:"
-                labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
-              />
+              {noData ? null : (
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredBrands.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    justifyContent: "flex-end",
+                    backgroundColor: "f1f1f1",
+                    marginTop: "8px",
+                    marginRight: "40px"
+                  }}
+                  labelRowsPerPage="Rows:"
+                  labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
+                />
+              )}
             </>
           )}
         </Paper>
 
         {/* Add Brand Dialog */}
-        <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
-          <DialogTitle>Add New Brand</DialogTitle>
+        <Dialog open={openAddDialog} onClose={handleCloseAddDialog}
+          PaperProps={{
+            style: {
+              borderRadius: 7,
+              boxShadow: "0px 2px 8px #ff469e",
+            },
+          }}>
+          <DialogTitle style={{
+            fontWeight: "bold",
+            color: "#333",
+            textAlign: "center",
+          }}>Add Brand</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -438,9 +471,10 @@ export default function BrandManagement() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAddDialog} sx={{
-              backgroundColor: "white",
+              backgroundColor: "#F0F8FF",
               color: "#757575",
-              borderRadius: "7px",
+              borderRadius: "30px",
+              fontWeight: "bold",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #757575",
@@ -453,9 +487,10 @@ export default function BrandManagement() {
               Cancel
             </Button>
             <Button onClick={handleAddBrand} sx={{
-              backgroundColor: "white",
+              backgroundColor: "#F0F8FF",
               color: "#ff469e",
-              borderRadius: "7px",
+              borderRadius: "30px",
+              fontWeight: "bold",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #ff469e",
@@ -472,8 +507,18 @@ export default function BrandManagement() {
 
         {/* Update Brand Dialog */}
         {selectedBrand && (
-          <Dialog open={openUpdateBrand} onClose={closeUpdate}>
-            <DialogTitle>Edit Brand</DialogTitle>
+          <Dialog open={openUpdateBrand} onClose={closeUpdate}
+            PaperProps={{
+              style: {
+                borderRadius: 7,
+                boxShadow: "0px 2px 8px #ff469e",
+              },
+            }}>
+            <DialogTitle style={{
+              fontWeight: "bold",
+              color: "#333",
+              textAlign: "center",
+            }}>Edit Brand</DialogTitle>
             <DialogContent>
               <TextField
                 label="Brand Name"
@@ -500,9 +545,10 @@ export default function BrandManagement() {
             </DialogContent>
             <DialogActions>
               <Button onClick={closeUpdate} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#757575",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #757575",
@@ -515,9 +561,10 @@ export default function BrandManagement() {
                 Cancel
               </Button>
               <Button onClick={handleEdit} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#ff469e",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",

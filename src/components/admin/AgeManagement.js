@@ -47,6 +47,7 @@ export default function AgeManagement() {
   const [newAgeName, setNewAgeName] = useState("");
   const [openUpdateAge, setOpenUpdateAge] = useState(false);
   const [sortingStatus, setSortingStatus] = useState(null);
+  const [noData, setNoData] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,7 +70,12 @@ export default function AgeManagement() {
         sortedAges = sortedAges.filter((age) => !age.active);
       }
 
-      setAges(sortedAges);
+      if (sortedAges.length === 0) {
+        setNoData(true);
+      } else {
+        setAges(sortedAges);
+        setNoData(false);
+      }
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -328,6 +334,13 @@ export default function AgeManagement() {
                       value={sortingStatus}
                       onChange={handleSortingStatus}
                       label="Sorting Status"
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            marginTop: '3px',
+                          },
+                        },
+                      }}
                     >
                       <MenuItem value="">Sort by Default</MenuItem>
                       <MenuItem value="active">Sort by Active</MenuItem>
@@ -364,68 +377,88 @@ export default function AgeManagement() {
                       },
                     }}
                   >
-                    Add New Range Age
+                    Add Range Age
                   </Button>
                 </Grid>
               </Grid>
               <TableContainer>
                 <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Range Age</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
-                      <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {currentItems.map((item, index) => (
-                      <TableRow key={item.id} sx={{ '&:hover': { backgroundColor: '#f1f1f1', cursor: 'pointer' } }}>
-                        <TableCell component="th" scope="row">
-                          {indexOfFirstItem + index + 1}
-                        </TableCell>
-                        <TableCell align="left">{item.rangeAge}</TableCell>
-                        <TableCell align="left">{item.active ? (
-                          <CheckIcon style={{ color: "green" }} />
-                        ) : (
-                          <CloseIcon style={{ color: "red" }} />
-                        )}
-                        </TableCell>
-                        <TableCell align="left">
-                          <IconButton onClick={() => openUpdate(item)}>
-                            <EditIcon />
-                          </IconButton>
-                        </TableCell>
+                  {noData ? null : (
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>No</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Range Age</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Status</TableCell>
+                        <TableCell align="left" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Action</TableCell>
                       </TableRow>
-                    ))}
+                    </TableHead>
+                  )}
+                  <TableBody>
+                    {noData ? (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                      </TableRow>
+                    ) : (
+                      currentItems.map((item, index) => (
+                        <TableRow key={item.id} sx={{ '&:hover': { backgroundColor: '#f1f1f1', cursor: 'pointer' } }}>
+                          <TableCell component="th" scope="row">
+                            {indexOfFirstItem + index + 1}
+                          </TableCell>
+                          <TableCell align="left">{item.rangeAge}</TableCell>
+                          <TableCell align="left">{item.active ? (
+                            <CheckIcon style={{ color: "green" }} />
+                          ) : (
+                            <CloseIcon style={{ color: "red" }} />
+                          )}
+                          </TableCell>
+                          <TableCell align="left">
+                            <IconButton onClick={() => openUpdate(item)}>
+                              <EditIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={filteredAges.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{
-                  justifyContent: "flex-end",
-                  backgroundColor: "f1f1f1",
-                  marginTop: "8px",
-                  marginRight: "40px"
-                }}
-                labelRowsPerPage="Rows:"
-                labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
-              />
+              {noData ? null : (
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredAges.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    justifyContent: "flex-end",
+                    backgroundColor: "f1f1f1",
+                    marginTop: "8px",
+                    marginRight: "40px"
+                  }}
+                  labelRowsPerPage="Rows:"
+                  labelDisplayedRows={({ from, to, count }) => `${from}/${to} of ${count}`}
+                />
+              )}
             </>
           )}
         </Paper>
 
         {/* Add Age Dialog */}
-        <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
-          <DialogTitle>Add New Range Age</DialogTitle>
-          <DialogContent  >
+        <Dialog open={openAddDialog} onClose={handleCloseAddDialog}
+          PaperProps={{
+            style: {
+              borderRadius: 7,
+              boxShadow: "0px 2px 8px #ff469e",
+            },
+          }}>
+          <DialogTitle style={{
+            fontWeight: "bold",
+            color: "#333",
+            textAlign: "center",
+          }}>Add Range Age</DialogTitle>
+          <DialogContent>
             <TextField
               autoFocus
               margin="normal"
@@ -438,9 +471,10 @@ export default function AgeManagement() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAddDialog} sx={{
-              backgroundColor: "white",
+              backgroundColor: "#F0F8FF",
               color: "#757575",
-              borderRadius: "7px",
+              borderRadius: "30px",
+              fontWeight: "bold",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #757575",
@@ -453,9 +487,10 @@ export default function AgeManagement() {
               Cancel
             </Button>
             <Button onClick={handleAddAge} sx={{
-              backgroundColor: "white",
+              backgroundColor: "#F0F8FF",
               color: "#ff469e",
-              borderRadius: "7px",
+              borderRadius: "30px",
+              fontWeight: "bold",
               transition:
                 "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
               border: "1px solid #ff469e",
@@ -472,8 +507,18 @@ export default function AgeManagement() {
 
         {/* Update Age Dialog */}
         {selectedAges && (
-          <Dialog open={openUpdateAge} onClose={closeUpdate}>
-            <DialogTitle>Edit Age</DialogTitle>
+          <Dialog open={openUpdateAge} onClose={closeUpdate}
+            PaperProps={{
+              style: {
+                borderRadius: 7,
+                boxShadow: "0px 2px 8px #ff469e",
+              },
+            }}>
+            <DialogTitle style={{
+              fontWeight: "bold",
+              color: "#333",
+              textAlign: "center",
+            }}>Edit Range Age</DialogTitle>
             <DialogContent>
               <TextField
                 label="Range Age"
@@ -500,9 +545,10 @@ export default function AgeManagement() {
             </DialogContent>
             <DialogActions>
               <Button onClick={closeUpdate} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#757575",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #757575",
@@ -515,9 +561,10 @@ export default function AgeManagement() {
                 Cancel
               </Button>
               <Button onClick={handleEdit} sx={{
-                backgroundColor: "white",
+                backgroundColor: "#F0F8FF",
                 color: "#ff469e",
-                borderRadius: "7px",
+                borderRadius: "30px",
+                fontWeight: "bold",
                 transition:
                   "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                 border: "1px solid #ff469e",

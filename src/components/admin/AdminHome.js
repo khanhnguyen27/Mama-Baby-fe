@@ -46,7 +46,6 @@ export default function AdminHome() {
   const PreviousYear = (year = currentYear()) => year - 1;
 
   const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [stores, setStores] = useState([]);
   const [refunds, setRefunds] = useState([]);
@@ -73,6 +72,7 @@ export default function AdminHome() {
   const [totalAccountYear, setTotalAccountYear] = useState(0);
   const [totalAccounts, setTotalAccounts] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [sortedMonths, setSortedMonths] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,21 +83,24 @@ export default function AdminHome() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const sortedMonths = months
-  .filter(monthYear => {
-    const [month, year] = monthYear.split("-").map(Number);
-    return year === selectedYearOrder; // Lọc các tháng trong năm được chọn
-  })
-  .sort((a, b) => {
-    const [monthA, yearA] = a.split("-").map(Number);
-    const [monthB, yearB] = b.split("-").map(Number);
+  const updateSortedMonths = (months) => {
+    const updatedSortedMonths = months
+      .filter(monthYear => {
+        const [month, year] = monthYear.split("-").map(Number);
+        return year === selectedYearOrder; // Filter by selected year
+      })
+      .sort((a, b) => {
+        const [monthA, yearA] = a.split("-").map(Number);
+        const [monthB, yearB] = b.split("-").map(Number);
 
-    // Tạo đối tượng Date từ tháng và năm
-    const dateA = new Date(yearA, monthA - 1); // Trừ 1 vì tháng trong Date bắt đầu từ 0
-    const dateB = new Date(yearB, monthB - 1);
+        const dateA = new Date(yearA, monthA - 1);
+        const dateB = new Date(yearB, monthB - 1);
 
-    return dateB - dateA; // Sắp xếp từ mới nhất đến cũ nhất
-  });
+        return dateB - dateA; // Sort from newest to oldest
+      });
+
+    setSortedMonths(updatedSortedMonths);
+  };
 
   useEffect(() => {
     fetchData();
@@ -111,21 +114,25 @@ export default function AdminHome() {
     socket.on("ordersUpdate", (newOrders) => {
       console.log("Received orders update:", newOrders);
       setOrders((prevOrders) => [...prevOrders, newOrders]);
+      updateSortedMonths(newOrders); // Update sorted months based on new orders
     });
 
     socket.on("refundsUpdate", (newRefunds) => {
       console.log("Received refunds update:", newRefunds);
       setRefunds((prevRefunds) => [...prevRefunds, newRefunds]);
+      updateSortedMonths(newRefunds); // Update sorted months based on new refunds
     });
 
     socket.on("accountsUpdate", (newAccounts) => {
       console.log("Received accounts update:", newAccounts);
       setAccounts((prevAccounts) => [...prevAccounts, newAccounts]);
+      updateSortedMonths(newAccounts); // Update sorted months based on new accounts
     });
 
     socket.on("storesUpdate", (newStores) => {
       console.log("Received store update:", newStores);
       setStores((prevStores) => [...prevStores, newStores]);
+      updateSortedMonths(newStores); // Update sorted months based on new stores
     });
 
     socket.on("disconnect", () => {
@@ -139,10 +146,9 @@ export default function AdminHome() {
     return () => {
       socket.disconnect();
     };
-  }, [sortedMonths]);
+  }, [selectedYearOrder]);
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       const orderRes = await allOrderApi();
       const storeRes = await allStoreByAdminApi();
@@ -197,8 +203,6 @@ export default function AdminHome() {
       console.log("Month Unique:", Array.from(uniqueMonths));
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -690,8 +694,6 @@ export default function AdminHome() {
   };
 
   const handleBarChartData = async (year = selectedYearOrder) => {
-    setLoading(true);
-
     try {
       let orderRes, refundRes, statusOrderRes;
 
@@ -810,13 +812,10 @@ export default function AdminHome() {
       console.log("BarData:", BarData);
     } catch (error) {
       console.error("Error fetching order and refund data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const calculatePercentage = async (month = selectedMonth) => {
-    setLoading(true);
     try {
       if (!Array.isArray(stores) || stores.length === 0) {
         setCompleteData(0);
@@ -889,8 +888,6 @@ export default function AdminHome() {
       }
     } catch (error) {
       console.error("Error fetching order and refund data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -1099,25 +1096,6 @@ export default function AdminHome() {
     } else {
       return value;
     }
-  };
-
-  const FormatMonthNames = (monthNumber) => {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    return months[monthNumber - 1];
   };
 
   const handleStorePieClick = () => {
@@ -1481,16 +1459,6 @@ export default function AdminHome() {
                     },
                   }}
                 />
-                {/* <PieChart
-                  series={[
-                    {
-                      data: [
-                        { id: 1, value: completeData, label: `Approved\n(${completeData}%)`, color: "#66CDAA" },
-                        { id: 2, value: inProgressData, label: `Pending\n(${inProgressData}%)`, color: "#FFD700" },
-                      ],
-                    },
-                  ]}
-                /> */}
               </CardContent>
             </Card>
           </Grid>
