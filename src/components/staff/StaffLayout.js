@@ -27,6 +27,8 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import Tooltip from "@mui/material/Tooltip";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import SellIcon from '@mui/icons-material/Sell';
+
 
 const drawerWidth = 260;
 const itemList = [
@@ -64,6 +66,11 @@ const itemList = [
     label: "Articles",
     Icon: ArticleIcon,
     href: "articles",
+  },
+  {
+    label: "Packages",
+    Icon: SellIcon,
+    href: "packages",
   },
 ];
 

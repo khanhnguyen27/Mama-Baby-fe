@@ -16,6 +16,15 @@ export const makePaymentApi = (finalAmount, bankCode, orderId, storeId) => {
   });
 };
 
+export const makePackagePaymentApi = (finalAmount, bankCode, packageId, storeId) => {
+  return axiosJWT.post(URL_MAKEPAYMENT, {
+    finalAmount: finalAmount,
+    bankCode: bankCode,
+    packageId: packageId,
+    storeId: storeId
+  });
+};
+
 // export const makePaymentApi = (finalAmount, bankCode) => {
 //     // const url = `${URL_MAKEPAYMENT}?finalAmount=${encodeURIComponent(finalAmount)}&bankCode=${encodeURIComponent(bankCode)}`;
 //     return axiosJWT.post(URL_MAKEPAYMENT, {

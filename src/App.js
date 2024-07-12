@@ -44,6 +44,9 @@ import Requests from "./components/general/Requests";
 import Dashboard from "./components/staff/Dashboard";
 import SuccessPayment from "./components/general/SuccessPayment";
 import FailedPayment from "./components/general/FailedPayment";
+import Packages from "./components/staff/Packages";
+import SuccessPackagePayment from "./components/staff/SuccessPackagePayment";
+import FailedPackagePayment from "./components/staff/FailedPackagePayment";
 
 const applyScrollbarStyles = () => {
   const style = document.createElement("style");
@@ -121,6 +124,9 @@ function App() {
             <Route path="vouchers" element={<VoucherManagement />} />
             <Route path="refunds" element={<RefundManagement />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="packages" element={<Packages />} />
+            <Route path="successPackagePayment" element={<SuccessPackagePayment />} />
+          <Route path="failedPackagePayment" element={<FailedPackagePayment />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
