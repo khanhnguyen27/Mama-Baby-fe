@@ -72,7 +72,7 @@ export default function AdminHome() {
   const [totalAccountYear, setTotalAccountYear] = useState(0);
   const [totalAccounts, setTotalAccounts] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [sortedMonths, setSortedMonths] = useState([]);
+  // const [sortedMonths, setSortedMonths] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,69 +83,8 @@ export default function AdminHome() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const updateSortedMonths = (months) => {
-    const updatedSortedMonths = months
-      .filter(monthYear => {
-        const [month, year] = monthYear.split("-").map(Number);
-        return year === selectedYearOrder; // Filter by selected year
-      })
-      .sort((a, b) => {
-        const [monthA, yearA] = a.split("-").map(Number);
-        const [monthB, yearB] = b.split("-").map(Number);
-
-        const dateA = new Date(yearA, monthA - 1);
-        const dateB = new Date(yearB, monthB - 1);
-
-        return dateB - dateA; // Sort from newest to oldest
-      });
-
-    setSortedMonths(updatedSortedMonths);
-  };
-
   useEffect(() => {
     fetchData();
-
-    const socket = io("http://localhost:3000");
-
-    socket.on("connect", () => {
-      console.log("Connected to server");
-    });
-
-    socket.on("ordersUpdate", (newOrders) => {
-      console.log("Received orders update:", newOrders);
-      setOrders((prevOrders) => [...prevOrders, newOrders]);
-      updateSortedMonths(newOrders); // Update sorted months based on new orders
-    });
-
-    socket.on("refundsUpdate", (newRefunds) => {
-      console.log("Received refunds update:", newRefunds);
-      setRefunds((prevRefunds) => [...prevRefunds, newRefunds]);
-      updateSortedMonths(newRefunds); // Update sorted months based on new refunds
-    });
-
-    socket.on("accountsUpdate", (newAccounts) => {
-      console.log("Received accounts update:", newAccounts);
-      setAccounts((prevAccounts) => [...prevAccounts, newAccounts]);
-      updateSortedMonths(newAccounts); // Update sorted months based on new accounts
-    });
-
-    socket.on("storesUpdate", (newStores) => {
-      console.log("Received store update:", newStores);
-      setStores((prevStores) => [...prevStores, newStores]);
-      updateSortedMonths(newStores); // Update sorted months based on new stores
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-
-    socket.on("error", (error) => {
-      console.error("Socket error:", error);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
   }, [selectedYearOrder]);
 
   const fetchData = async () => {
@@ -359,6 +298,100 @@ export default function AdminHome() {
   //Export report revenue, refund
 
   // Lọc danh sách các store có trạng thái "APPROVED"
+   // Define styles
+   const borderStyle = {
+    top: { style: "thin" },
+    left: { style: "thin" },
+    bottom: { style: "thin" },
+    right: { style: "thin" },
+  };
+
+  const headerStyle = {
+    font: { bold: true, color: { argb: "FF000000" } },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFB8CCE4" },
+    },
+    alignment: { horizontal: "center", vertical: "middle" },
+    border: borderStyle,
+  };
+
+  const monthStyle = {
+    font: { bold: true, color: { argb: "FF000000" } },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFB8CCE4" },
+    },
+    alignment: { horizontal: "center", vertical: "middle" },
+    border: borderStyle,
+  };
+
+  const headerRevenueStyle = {
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFC4D79B" },
+    },
+    border: borderStyle,
+  };
+
+  const headerRefundStyle = {
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFABF8F" },
+    },
+    border: borderStyle,
+  };
+
+  const revenueStyle = {
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFEBF1DE" },
+    },
+    border: borderStyle,
+  };
+
+  const refundStyle = {
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFDE9D9" },
+    },
+    border: borderStyle,
+  };
+
+  const infoStoreStyle1 = {
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFEEECE1" },
+    },
+    border: borderStyle,
+  };
+
+  const infoStoreStyle2 = {
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFD6D0B7" },
+    },
+    border: borderStyle,
+  };
+
+  const totalRowStyle = {
+    font: { bold: true },
+    fill: {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFFE57D" },
+    },
+    border: borderStyle,
+  };
+
   const approvedStores = stores.filter((store) => store.status === "APPROVED");
 
   const calculateMonthlyData = (storeId, month, year) => {
@@ -408,105 +441,27 @@ export default function AdminHome() {
     return { revenue, refund };
   };
 
+  const sortedMonths = months
+  .filter(monthYear => {
+    const [month, year] = monthYear.split("-").map(Number);
+    return year === selectedYearOrder; // Lọc các tháng trong năm được chọn
+  })
+  .sort((a, b) => {
+    const [monthA, yearA] = a.split("-").map(Number);
+    const [monthB, yearB] = b.split("-").map(Number);
+
+    // Tạo đối tượng Date từ tháng và năm
+    const dateA = new Date(yearA, monthA - 1); // Trừ 1 vì tháng trong Date bắt đầu từ 0
+    const dateB = new Date(yearB, monthB - 1);
+
+    return dateB - dateA; // Sắp xếp từ mới nhất đến cũ nhất
+  });
+
   const handleExportCSV = () => {
     setMonths(sortedMonths);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
-
-    // Define styles
-    const borderStyle = {
-      top: { style: "thin" },
-      left: { style: "thin" },
-      bottom: { style: "thin" },
-      right: { style: "thin" },
-    };
-
-    const headerStyle = {
-      font: { bold: true, color: { argb: "FF000000" } },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFB8CCE4" },
-      },
-      alignment: { horizontal: "center", vertical: "middle" },
-      border: borderStyle,
-    };
-
-    const monthStyle = {
-      font: { bold: true, color: { argb: "FF000000" } },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFB8CCE4" },
-      },
-      alignment: { horizontal: "center", vertical: "middle" },
-      border: borderStyle,
-    };
-
-    const headerRevenueStyle = {
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFC4D79B" },
-      },
-      border: borderStyle,
-    };
-
-    const headerRefundStyle = {
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFFABF8F" },
-      },
-      border: borderStyle,
-    };
-
-    const revenueStyle = {
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFEBF1DE" },
-      },
-      border: borderStyle,
-    };
-
-    const refundStyle = {
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFFDE9D9" },
-      },
-      border: borderStyle,
-    };
-
-    const infoStoreStyle1 = {
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFEEECE1" },
-      },
-      border: borderStyle,
-    };
-
-    const infoStoreStyle2 = {
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFD6D0B7" },
-      },
-      border: borderStyle,
-    };
-
-    const totalRowStyle = {
-      font: { bold: true },
-      fill: {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFFFE57D" },
-      },
-      border: borderStyle,
-    };
 
     // Add headers
     const headerRow1 = [
