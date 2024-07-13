@@ -28,7 +28,7 @@ import { storeByUserIdApi } from "../../api/StoreAPI";
 import Tooltip from "@mui/material/Tooltip";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import SellIcon from '@mui/icons-material/Sell';
-
+import PortraitIcon from '@mui/icons-material/Portrait';
 
 const drawerWidth = 260;
 const itemList = [
@@ -36,6 +36,11 @@ const itemList = [
     label: "Dashboard",
     Icon: Dashboard,
     href: "dashboard",
+  },
+  {
+    label: "Profile",
+    Icon: PortraitIcon,
+    href: "storeprofile",
   },
   {
     label: "Products",

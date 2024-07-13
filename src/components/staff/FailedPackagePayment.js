@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, IconButton, Button } from "@mui/material";
-import CheckCircle from "@mui/icons-material/CheckCircle";
+import Cancel from "@mui/icons-material/Cancel";
 import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { allPackageApi } from "../../api/PackagesAPI";
@@ -16,9 +16,9 @@ export default function FailedPackagePayment() {
 
   useEffect(() => {
     if (!accessToken || role !== "STAFF") {
-        window.location.replace("/staff/packages");
-        return;
-      }
+      window.location.replace("/staff/packages");
+      return;
+    }
 
     const fetchData = async () => {
       try {
@@ -52,7 +52,7 @@ export default function FailedPackagePayment() {
         alignItems: "center",
         textAlign: "center",
         // padding: "50px 0",
-        height: "75.8vh",
+        height: "100vh",
         background: "linear-gradient(to bottom, #ffe6f0 0%, #ff469e 50%) top",
       }}
     >
@@ -61,7 +61,7 @@ export default function FailedPackagePayment() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          pt: 12,
+          pt: 40,
         }}
       >
         <Box
@@ -80,7 +80,7 @@ export default function FailedPackagePayment() {
                   filter: "blur(0px)",
                 },
                 "50%": {
-                  transform: "scale(1.2) skew(0deg)"
+                  transform: "scale(1.2) skew(0deg)",
                 },
                 "100%": {
                   filter: "blur(0px)",
@@ -88,7 +88,7 @@ export default function FailedPackagePayment() {
               },
             }}
           >
-            <CheckCircle sx={{ fontSize: 90, color: "white" }} />
+            <Cancel sx={{ fontSize: 90, color: "white" }} />
           </IconButton>
           <Typography
             component="h1"
@@ -100,15 +100,15 @@ export default function FailedPackagePayment() {
               fontSize: "34px",
             }}
           >
-            Payment Successful!
+            Payment Fail!
           </Typography>
         </Box>
         <Typography
           variant="h5"
           sx={{ mt: 2, color: "white", maxWidth: "65%" }}
         >
-          Thank you for your purchase.
-          {packageMap[packageId]} has been processed successfully.
+          Something wrong happened during your payment.{" "}
+           Please contact admin to know more.
         </Typography>
         <Box
           sx={{
@@ -140,7 +140,6 @@ export default function FailedPackagePayment() {
           >
             Back To Packages Page
           </Button>
-
         </Box>
       </Box>
     </div>

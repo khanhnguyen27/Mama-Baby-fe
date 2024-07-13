@@ -47,6 +47,7 @@ import FailedPayment from "./components/general/FailedPayment";
 import Packages from "./components/staff/Packages";
 import SuccessPackagePayment from "./components/staff/SuccessPackagePayment";
 import FailedPackagePayment from "./components/staff/FailedPackagePayment";
+import StoreProfile from "./components/staff/StoreProfile";
 
 const applyScrollbarStyles = () => {
   const style = document.createElement("style");
@@ -127,6 +128,7 @@ function App() {
             <Route path="packages" element={<Packages />} />
             <Route path="successPackagePayment" element={<SuccessPackagePayment />} />
           <Route path="failedPackagePayment" element={<FailedPackagePayment />} />
+          <Route path="storeprofile" element={<StoreProfile />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
