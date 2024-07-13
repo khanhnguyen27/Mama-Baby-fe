@@ -26,6 +26,8 @@ import { environment } from "../../environments/environment";
 import { KeyboardCapslock } from "@mui/icons-material";
 import { updateStoreApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function StoreProfile() {
   const [store, setStore] = useState(null);
@@ -44,8 +46,12 @@ export default function StoreProfile() {
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
+  const validatePhoneNumber = (phone) => {
+    const reg = /^[0-9]{9,11}$/;
+    return reg.test(phone);
+  };
 
-  useEffect(() => {
+  const fetchData = async () => {
     allStoreApi()
       .then((res) => {
         const stores = res?.data?.data?.stores;
@@ -58,6 +64,9 @@ export default function StoreProfile() {
         }
       })
       .catch((err) => console.log(err));
+  };
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const handleOpenLicense = (item) => {
@@ -89,6 +98,20 @@ export default function StoreProfile() {
   };
   const updateStore = async () => {
     try {
+      if (
+        storename === "" ||
+        address === "" ||
+        description === "" ||
+        phone === ""
+      ) {
+        toast.error("Please input all fields", { autoClose: 1500 });
+        return;
+      }
+
+      if (!validatePhoneNumber(phone)) {
+        toast.error("Phone must be digit and its length is 9 - 11 characters");
+        return;
+      }
       const storeId = store.id;
       const response = await updateStoreApi(
         storeId,
@@ -98,7 +121,8 @@ export default function StoreProfile() {
         phone,
         userId
       );
-      console.log("Store updated successfully:", response.data);
+      toast.success("Store updated successfully:", { autoClose: 1500 });
+      fetchData();
       handleCloseUpdateDialog();
     } catch (error) {
       console.error("Error updating store:", error);
@@ -108,8 +132,6 @@ export default function StoreProfile() {
   const handleSave = () => {
     if (storename && address && phone && description) {
       updateStore();
-    } else {
-      alert("Please fill in all required fields");
     }
   };
 
@@ -119,7 +141,7 @@ export default function StoreProfile() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
+        minHeight: "80vh",
         marginTop: "7rem",
         backgroundColor: "#f5f7fd",
         padding: "20px",
@@ -209,7 +231,7 @@ export default function StoreProfile() {
                 </Grid>
                 <Grid item xs={12} md={8}>
                   <Grid container spacing={3}>
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12}>
                       <Typography
                         variant="h5"
                         sx={{
@@ -219,14 +241,6 @@ export default function StoreProfile() {
                           fontSize: 25,
                         }}
                       >
-                        <DescriptionIcon
-                          sx={{
-                            fontSize: 25,
-                            verticalAlign: "middle",
-                            marginRight: "8px",
-                            color: "#ff469e",
-                          }}
-                        />
                         Description:
                       </Typography>
                       <Typography
@@ -238,10 +252,17 @@ export default function StoreProfile() {
                           fontSize: 20,
                         }}
                       >
+                        <DescriptionIcon
+                          sx={{
+                            fontSize: 25,
+                            verticalAlign: "middle",
+                            marginRight: "8px",
+                            color: "#ff469e",
+                          }}
+                        />
                         {store?.description}
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} md={6}></Grid>
                     <Grid item xs={12} sm={6}>
                       <div>
                         <Typography
@@ -322,22 +343,24 @@ export default function StoreProfile() {
                   </Grid>
                 </Grid>
               </Grid>
-              <Box
+              <Grid
+                container
                 sx={{
                   display: "flex",
                   justifyContent: "flex-end",
+                  alignItems: "center",
                   mt: 2,
                 }}
               >
-                <IconButton
+                <Button
                   sx={{
+                    ml: 2,
                     backgroundColor: "white",
                     color: "#ff469e",
-                    borderRadius: "10px",
-                    fontSize: 25,
+                    borderRadius: "30px",
+                    fontSize: 15,
                     fontWeight: "bold",
-                    my: 2,
-                    mx: 1,
+                    width: "15vw",
                     transition:
                       "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                     border: "1px solid #ff469e",
@@ -350,16 +373,16 @@ export default function StoreProfile() {
                   onClick={() => handleOpenLicense(store.license_url)}
                 >
                   See The License
-                </IconButton>
-                <IconButton
+                </Button>
+                <Button
                   sx={{
+                    ml: 2,
                     backgroundColor: "white",
                     color: "#ff469e",
-                    borderRadius: "10px",
-                    fontSize: 25,
+                    borderRadius: "30px",
+                    fontSize: 15,
                     fontWeight: "bold",
-                    my: 2,
-                    mx: 1,
+                    width: "15vw",
                     transition:
                       "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                     border: "1px solid #ff469e",
@@ -372,8 +395,9 @@ export default function StoreProfile() {
                   onClick={handleOpenUpdateDialog}
                 >
                   Update Profile
-                </IconButton>
-              </Box>
+                </Button>
+              </Grid>
+
               <Dialog
                 open={openLicense}
                 onClose={handleCloseLicense}
@@ -627,48 +651,52 @@ export default function StoreProfile() {
                       }}
                     />
                   </FormControl>
-                  <FormControl sx={{ mb: 3 }} fullWidth>
-                    <Typography
-                      sx={{
-                        color: "black",
-                        textAlign: "left",
-                        paddingBottom: 1,
-                        fontWeight: "700",
-                      }}
-                    >
-                      Select The License <span style={{ color: "red" }}>*</span>
-                    </Typography>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImage}
-                      style={{ marginTop: "16px", marginBottom: "16px" }}
-                    />
-                    {image && (
-                      <FormControl fullWidth margin="normal">
-                        <InputLabel shrink>Image</InputLabel>
-                        <div
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "10px",
-                            textAlign: "center",
-                          }}
-                        >
-                          <img
-                            src={image.url}
-                            alt="Selected"
-                            style={{ width: "100%", marginTop: "16px" }}
-                          />
-                        </div>
-                      </FormControl>
-                    )}
-                  </FormControl>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={handleCloseUpdateDialog} color="primary">
+                  <Button
+                    sx={{
+                      ml: "auto",
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "30px",
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      width: "15vw",
+                      transition:
+                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        border: "1px solid white",
+                      },
+                    }}
+                    onClick={handleCloseUpdateDialog}
+                    color="primary"
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={handleSave} color="primary">
+                  <Button
+                    sx={{
+                      ml: "auto",
+                      backgroundColor: "white",
+                      color: "#ff469e",
+                      borderRadius: "30px",
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      width: "15vw",
+                      transition:
+                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                      border: "1px solid #ff469e",
+                      "&:hover": {
+                        backgroundColor: "#ff469e",
+                        color: "white",
+                        border: "1px solid white",
+                      },
+                    }}
+                    onClick={handleSave}
+                    color="primary"
+                  >
                     Save
                   </Button>
                 </DialogActions>

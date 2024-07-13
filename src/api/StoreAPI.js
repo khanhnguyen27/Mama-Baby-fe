@@ -83,25 +83,22 @@ export const deleteStoreApi = (storeId) => {
 
 export const updateStoreApi = (
   storeId,
-  storename,
+  nameStore,
   address,
   description,
   phone,
-  userId,
-  license,
+  status,
+  isActive,
+  userId
 ) => {
-  const formData = new FormData();
-  formData.append("nameStore", storename);
-  formData.append("address", address);
-  formData.append("description", description);
-  formData.append("phone", phone);
-  formData.append("userId", userId);
-  formData.append("license", license); // Thêm giá trị licenseUrl vào FormData
-  
-  return axiosJWT.put(`${URL_STORE}/${storeId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  return axiosJWT.put(`${URL_STORE}/${storeId}`, {
+    name_store: nameStore,
+    address: address,
+    description: description,
+    phone: phone,
+    status: status,
+    is_active: isActive,
+    user_id: userId,
   });
 };
 
