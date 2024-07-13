@@ -326,7 +326,7 @@ export default function Dashboard() {
   };
 
   const MonthlyDataChart
-   = {
+    = {
     labels: [
       "January",
       "February",
@@ -647,9 +647,8 @@ export default function Dashboard() {
       const monthOrders = orders
         .filter((order) => {
           const orderDate = new Date(order.order_date);
-          const monthYear = `${
-            orderDate.getMonth() + 1
-          }-${orderDate.getFullYear()}`;
+          const monthYear = `${orderDate.getMonth() + 1
+            }-${orderDate.getFullYear()}`;
           return monthYear === month;
         })
         .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
@@ -657,9 +656,8 @@ export default function Dashboard() {
       const monthRefunds = refunds
         .filter((refund) => {
           const refundDate = new Date(refund.create_date);
-          const monthYear = `${
-            refundDate.getMonth() + 1
-          }-${refundDate.getFullYear()}`;
+          const monthYear = `${refundDate.getMonth() + 1
+            }-${refundDate.getFullYear()}`;
           return monthYear === month;
         })
         .sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
@@ -667,9 +665,8 @@ export default function Dashboard() {
       const monthExchanges = exchanges
         .filter((exchange) => {
           const exchangeDate = new Date(exchange.create_date);
-          const monthYear = `${
-            exchangeDate.getMonth() + 1
-          }-${exchangeDate.getFullYear()}`;
+          const monthYear = `${exchangeDate.getMonth() + 1
+            }-${exchangeDate.getFullYear()}`;
           return monthYear === month;
         })
         .sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
@@ -1229,22 +1226,30 @@ export default function Dashboard() {
       return;
     }
 
+    // Sử dụng selectedYear từ state
+    const year = selectedYear;
+
     // Lọc dữ liệu
     const filteredOrders = orders.filter(
       (order) =>
-        order.status_order_list.some(
+        (new Date(order.order_date).getFullYear() === year) &&
+        (order.status_order_list.some(
           (status) => status.status === "COMPLETED"
         ) ||
-        (order.payment_method === "VNPAY" &&
-          order.status_order_list.some(
-            (status) => status.status === "CANCELLED"
-          ))
+          (order.payment_method === "VNPAY" &&
+            order.status_order_list.some(
+              (status) => status.status === "CANCELLED"
+            )))
     );
     const filteredRefunds = refunds.filter(
-      (refund) => refund.status === "ACCEPT"
+      (refund) =>
+        (new Date(refund.create_date).getFullYear() === year) &&
+        refund.status === "ACCEPT"
     );
     const filteredExchanges = exchanges.filter(
-      (exchange) => exchange.status === "ACCEPT"
+      (exchange) =>
+        (new Date(exchange.create_date).getFullYear() === year) &&
+        exchange.status === "ACCEPT"
     );
 
     const workbook = new ExcelJS.Workbook();
