@@ -65,7 +65,12 @@ export default function OrdersManagement() {
   const [tabValue, setTabValue] = useState(0);
   const [openOrderDetail, setOpenOrderDetail] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  console.log(productMap);
+
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store?.valid_date);
+  const isDisabled = !store?.is_active || validDate < toDay;
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -209,7 +214,9 @@ export default function OrdersManagement() {
           toast.error("Failed to update refund status.", { autoClose: 1500 });
         }
       } else {
-        toast.warn("Selected refund not found in the list", { autoClose: 1500 });
+        toast.warn("Selected refund not found in the list", {
+          autoClose: 1500,
+        });
       }
     } else {
       toast.warn("Please select a refund to approve", { autoClose: 1500 });
@@ -267,15 +274,12 @@ export default function OrdersManagement() {
     }
   };
 
-  // Tạo bản sao của mảng refund để tránh thay đổi mảng gốc
   const refundCopy = [...refund];
 
-  // Sắp xếp các mục refund theo createDate từ cũ nhất đến mới nhất
   const sortedRefunds = refundCopy.sort(
     (a, b) => new Date(b.create_date) - new Date(a.create_date)
   );
 
-  // Lọc các mục theo tabValue
   const filteredRefunds = sortedRefunds.filter((item) => {
     if (tabValue === 0) {
       return item.status === "PROCESSING";
@@ -293,7 +297,6 @@ export default function OrdersManagement() {
     setPage(value);
   };
 
-  // Tính toán các mục sẽ hiển thị trên trang hiện tại
   const paginatedRefunds = filteredRefunds.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
@@ -654,7 +657,7 @@ export default function OrdersManagement() {
                                               {
                                                 state: {
                                                   productId: detail.product_id,
-                                                  status: store?.is_active,
+                                                  status: isDisabled,
                                                 },
                                               },
                                               window.scrollTo({
@@ -866,7 +869,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpenAccept(item.id)}
-                          disabled={!store?.is_active}
+                          disabled={isDisabled}
                         >
                           ACCEPT REFUND
                         </Button>
@@ -890,7 +893,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpenRefuse(item.id)}
-                          disabled={!store?.is_active}
+                          disabled={isDisabled}
                         >
                           REFUSE REFUND
                         </Button>

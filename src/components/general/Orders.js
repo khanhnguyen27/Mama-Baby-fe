@@ -33,7 +33,7 @@ import { toast } from "react-toastify";
 import {
   allProductApi,
   productByIdApi,
-  allProductCHApi,
+  allProductHistoryApi,
 } from "../../api/ProductAPI";
 import { allBrandApi } from "../../api/BrandAPI";
 import { allCategorytApi } from "../../api/CategoryAPI";
@@ -109,7 +109,7 @@ export default function Orders() {
       ] = await Promise.all([
         orderByUserIdApi(userId),
         allUserApi({ limit: 1000 }),
-        allProductCHApi({ limit: 1000 }),
+        allProductHistoryApi({ limit: 1000 }),
         allStoreApi({ limit: 1000 }),
         allBrandApi(),
         allCategorytApi(),
@@ -2118,7 +2118,8 @@ export default function Orders() {
                         ) &&
                           !refund.some(
                             (refundItem) => refundItem.order_id === item.id
-                          ) && (
+                          ) &&
+                          item.amount > 0 && (
                             <Button
                               variant="contained"
                               sx={{
@@ -2849,7 +2850,8 @@ export default function Orders() {
                         ) &&
                           !refund.some(
                             (refundItem) => refundItem.order_id === item.id
-                          ) && (
+                          ) &&
+                          item.amount > 0 && (
                             <Button
                               variant="contained"
                               sx={{
