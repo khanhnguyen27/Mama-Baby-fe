@@ -37,7 +37,6 @@ const RegistStore = () => {
     url: "",
   });
 
-  // Hàm kiểm tra phone có phải là số không
   const validatePhoneNumber = (phone) => {
     const reg = /^[0-9]+$/;
     return reg.test(phone);
@@ -77,7 +76,6 @@ const RegistStore = () => {
       return;
     }
 
-    // Nếu điều kiện hợp lệ, thực hiện gọi API
     setLoading(true);
     regisStoreApi(storename, address, description, phone, userId, image.file)
       .then((res) => {
