@@ -16,6 +16,7 @@ import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import {
   TextField,
+  Modal,
   Select,
   MenuItem,
   InputLabel,
@@ -80,6 +81,11 @@ export default function StaffHome() {
   const statusComingSoon = "COMING SOON";
   const [sortPrice, setSortPrice] = useState("");
   const [sortStatus, setSortStatus] = useState("WHOLESALE");
+
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store.valid_date);
+  const isDisabled = !store.is_active || validDate < toDay;
   const countries = [
     "Afghanistan",
     "Albania",
@@ -428,6 +434,7 @@ export default function StaffHome() {
 
   //Add Product
   const [openAddProduct, setOpenAddProduct] = useState(false);
+  const [openConfirmAdd, setOpenConfirmAdd] = useState(false);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [point, setPoint] = useState("");
@@ -472,6 +479,18 @@ export default function StaffHome() {
     setOpenAddProduct(false);
   };
 
+  const handOpenConfirmAdd = () => {
+    if (status === statusComingSoon) {
+      setOpenConfirmAdd(true);
+    } else {
+      handleAddProduct();
+    }
+  };
+
+  const handleCloseConfirmAdd = () => {
+    setOpenConfirmAdd(false);
+  };
+
   const handleAddProduct = () => {
     if (
       !name ||
@@ -491,42 +510,71 @@ export default function StaffHome() {
       return;
     } else if (status !== statusComingSoon && remain <= 0) {
       toast.error(
-        "If the status is in stock, the remain must be greater than 0.", { autoClose: 1500 }
+        "If the status is in stock, the remain must be greater than 0.",
+        { autoClose: 1500 }
       );
       return;
-    } else if (status !== statusInStock && remain <= 0) {
-      toast.error(
-        "If the status is coming soon, the remain must be greater than or equal to 0.", { autoClose: 1500 }
-      );
-      return;
+    } else if (status !== statusInStock) {
+      if (remain < 0 || remain > 0) {
+        toast.error("If the status is coming soon, the remain must be 0.", {
+          autoClose: 1500,
+        });
+        return;
+      } else if (type === typeGIFT) {
+        toast.error("Gifts cannot have a coming soon status.", {
+          autoClose: 1500,
+        });
+        return;
+      } else if (type === typeWHOLESALE) {
+        if (price <= 0) {
+          toast.error(
+            "If the type is wholesale, the point must be greater than 0 and the price must be 0.",
+            { autoClose: 1500 }
+          );
+          return;
+        }
+        if (point < 0 || point > 0) {
+          toast.error(
+            "If the type is wholesale, the point must be greater than 0 and the price must be 0.",
+            { autoClose: 1500 }
+          );
+          return;
+        }
+      }
     } else if (type === typeWHOLESALE) {
       if (price <= 0) {
         toast.error(
-          "If the type is wholesale, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
       if (point < 0 || point > 0) {
         toast.error(
-          "If the type is wholesale, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
+          "If the type is wholesale, the point must be greater than 0 and the price must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
     } else if (type === typeGIFT) {
       if (point <= 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
+          "If the type is gift, the point must be greater than 0 and the price must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
       if (price < 0 || price > 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
+          "If the type is gift, the point must be greater than 0 and the price must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
       if (status === statusComingSoon) {
-        toast.error("Gifts cannot have a coming soon status.", { autoClose: 1500 });
+        toast.error("Gifts cannot have a coming soon status.", {
+          autoClose: 1500,
+        });
         return;
       }
     }
@@ -539,12 +587,14 @@ export default function StaffHome() {
       (product) => product.name === name
     );
     if (isDuplicateName) {
-      toast.error("Product with this name already exists.", { autoClose: 1500 });
+      toast.error("Product with this name already exists.", {
+        autoClose: 1500,
+      });
       return;
     }
 
     const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${ingredient}|${usageInstructions}|${storageInstructions}`;
-    setDescription(fullDescription);
+
     addProductApi(
       image.file,
       name,
@@ -552,7 +602,7 @@ export default function StaffHome() {
       point,
       remain,
       status,
-      description,
+      fullDescription,
       expiryDate,
       type,
       brandId,
@@ -564,11 +614,14 @@ export default function StaffHome() {
       .then((response) => {
         fetchData(currentPage);
         handleCloseAddProduct();
+        handleCloseConfirmAdd();
         toast.success("Product added successfully!", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error adding product:", error);
-        toast.error("Failed to add product. Please try again later.", { autoClose: 1500 });
+        toast.error("Failed to add product. Please try again later.", {
+          autoClose: 1500,
+        });
       });
   };
 
@@ -598,6 +651,7 @@ export default function StaffHome() {
 
   //Update product
   const [open, setOpen] = useState(false);
+  const [openConfirmUpdate, setOpenConfirmUpdate] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   //const [selectedImage, setSelectedImage] = useState("");
 
@@ -634,6 +688,18 @@ export default function StaffHome() {
     }));
   };
 
+  const handOpenConfirmUpdate = () => {
+    if (selectedProduct?.status === statusComingSoon) {
+      setOpenConfirmUpdate(true);
+    } else {
+      handleUpdate();
+    }
+  };
+
+  const handleCloseConfirmUpdate = () => {
+    setOpenConfirmUpdate(false);
+  };
+
   const handleUpdate = () => {
     debugger;
     if (
@@ -656,45 +722,71 @@ export default function StaffHome() {
       selectedProduct?.remain <= 0
     ) {
       toast.error(
-        "If the status is in stock, the remain must be greater than 0.", { autoClose: 1500 }
+        "If the status is in stock, the remain must be greater than 0.",
+        { autoClose: 1500 }
       );
       return;
-    } else if (
-      selectedProduct?.status !== statusInStock &&
-      selectedProduct?.remain <= 0
-    ) {
-      toast.error(
-        "If the status is coming soon, the remain must be greater than or equal to 0.", { autoClose: 1500 }
-      );
-      return;
+    } else if (selectedProduct?.status !== statusInStock) {
+      if (selectedProduct?.remain < 0 || selectedProduct?.remain > 0) {
+        toast.error("If the status is coming soon, the remain must be 0.", {
+          autoClose: 1500,
+        });
+        return;
+      } else if (selectedProduct?.type === typeGIFT) {
+        toast.error("Gifts cannot have a coming soon status.", {
+          autoClose: 1500,
+        });
+        return;
+      } else if (selectedProduct?.type === typeWHOLESALE) {
+        if (selectedProduct?.price <= 0) {
+          toast.error(
+            "If the type is wholesale, the price must be greater than 0 and the point must be 0.",
+            { autoClose: 1500 }
+          );
+          return;
+        }
+        if (selectedProduct?.point < 0 || selectedProduct?.point > 0) {
+          toast.error(
+            "If the type is wholesale, the price must be greater than 0 and the point must be 0.",
+            { autoClose: 1500 }
+          );
+          return;
+        }
+      }
     } else if (selectedProduct?.type === typeWHOLESALE) {
       if (selectedProduct?.price <= 0) {
         toast.error(
-          "If the type is wholesale, the price must be greater than 0 and the point must be 0.", { autoClose: 1500 }
+          "If the type is wholesale, the price must be greater than 0 and the point must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
       if (selectedProduct?.point < 0 || selectedProduct?.point > 0) {
         toast.error(
-          "If the type is wholesale, the price must be greater than 0 and the point must be 0.", { autoClose: 1500 }
+          "If the type is wholesale, the price must be greater than 0 and the point must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
     } else if (selectedProduct?.type === typeGIFT) {
       if (selectedProduct?.point <= 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
+          "If the type is gift, the point must be greater than 0 and the price must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
       if (selectedProduct?.price < 0 || selectedProduct?.price > 0) {
         toast.error(
-          "If the type is gift, the point must be greater than 0 and the price must be 0.", { autoClose: 1500 }
+          "If the type is gift, the point must be greater than 0 and the price must be 0.",
+          { autoClose: 1500 }
         );
         return;
       }
       if (status === statusComingSoon) {
-        toast.error("Gifts cannot have a coming soon status.", { autoClose: 1500 });
+        toast.error("Gifts cannot have a coming soon status.", {
+          autoClose: 1500,
+        });
         return;
       }
     }
@@ -709,12 +801,14 @@ export default function StaffHome() {
         product.id !== selectedProduct.id
     );
     if (isDuplicateName) {
-      toast.error("Product with this name already exists.", { autoClose: 1500 });
+      toast.error("Product with this name already exists.", {
+        autoClose: 1500,
+      });
       return;
     }
 
     const fullDescription = `${weight}|${unit}|${brandOrigin}|${manufacturedAt}|${manufacturer}|${ingredient}|${usageInstructions}|${storageInstructions}`;
-    setDescription(fullDescription);
+
     selectedProduct.description = fullDescription;
 
     //Handle product updates
@@ -740,11 +834,14 @@ export default function StaffHome() {
         // Close the product update dialog
         fetchData(currentPage);
         handleClose();
+        handleCloseConfirmUpdate();
         toast.success("Product updated successfully!", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating product:", error);
-        toast.error("Failed to update product. Please try again later.", { autoClose: 1500 });
+        toast.error("Failed to update product. Please try again later.", {
+          autoClose: 1500,
+        });
         // if (error.response) {
         //   console.error("Error response data:", error.response.data);
         //   console.error("Error response status:", error.response.status);
@@ -954,7 +1051,7 @@ export default function StaffHome() {
               <Button
                 variant="contained"
                 color="primary"
-                disabled={!store.is_active}
+                disabled={isDisabled}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -1472,7 +1569,7 @@ export default function StaffHome() {
             <Button
               variant="contained"
               color="primary"
-              disabled={!store.is_active}
+              disabled={isDisabled}
               sx={{
                 display: "flex",
                 justifyContent: "center",
@@ -1709,51 +1806,55 @@ export default function StaffHome() {
                 flexDirection: "row",
                 justifyContent: "space-between",
               }}
-            >   <ToggleButtonGroup
-              value={sortStatus}
-              exclusive
-              onChange={handleStatusChange}
-              variant="outlined"
-              sx={{
-                height: "40px",
-                "& .MuiToggleButton-root": {
-                  color: "black",
-                  border: "1px solid #ff469e",
-                  fontSize: "1rem",
-                  transition:
-                    "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                  "&:hover": {
-                    backgroundColor: "#fff4fc",
-                    color: "#ff469e",
-                  },
-                  "&.Mui-selected": {
-                    backgroundColor: "#ff469e",
-                    color: "white",
-                    fontWeight: "600",
+            >
+              {" "}
+              <ToggleButtonGroup
+                value={sortStatus}
+                exclusive
+                onChange={handleStatusChange}
+                variant="outlined"
+                sx={{
+                  height: "40px",
+                  "& .MuiToggleButton-root": {
+                    color: "black",
+                    border: "1px solid #ff469e",
+                    fontSize: "1rem",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
                     "&:hover": {
                       backgroundColor: "#fff4fc",
                       color: "#ff469e",
                     },
+                    "&.Mui-selected": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                      fontWeight: "600",
+                      "&:hover": {
+                        backgroundColor: "#fff4fc",
+                        color: "#ff469e",
+                      },
+                    },
                   },
-                },
-              }}
-            > <ToggleButton
-              value="WHOLESALE"
-              sx={{
-                backgroundColor: "white",
-                color: "#ff469e",
-                borderRadius: "20px",
-                fontSize: "1rem",
-                boxShadow: "none",
-                transition:
-                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                border: "1px solid #ff469e",
-                "&:hover": {
-                  backgroundColor: "#ff469e",
-                  color: "white",
-                },
-              }}
-            >
+                }}
+              >
+                {" "}
+                <ToggleButton
+                  value="WHOLESALE"
+                  sx={{
+                    backgroundColor: "white",
+                    color: "#ff469e",
+                    borderRadius: "20px",
+                    fontSize: "1rem",
+                    boxShadow: "none",
+                    transition:
+                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                    border: "1px solid #ff469e",
+                    "&:hover": {
+                      backgroundColor: "#ff469e",
+                      color: "white",
+                    },
+                  }}
+                >
                   WHOLESALE
                 </ToggleButton>
                 <ToggleButton
@@ -1878,7 +1979,14 @@ export default function StaffHome() {
                 </Grid>
               ) : (
                 product?.products?.map((item, index) => (
-                  <Grid item xs={12} sm={6} lg={4} key={index} sx={{ display: "flex", flexWrap: "wrap" }}>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    lg={4}
+                    key={index}
+                    sx={{ display: "flex", flexWrap: "wrap" }}
+                  >
                     <Tooltip
                       title={item.name}
                       enterDelay={500}
@@ -1937,7 +2045,7 @@ export default function StaffHome() {
                           component="img"
                           image={
                             item.image_url &&
-                              item.image_url.includes("Product_")
+                            item.image_url.includes("Product_")
                               ? `http://localhost:8080/mamababy/products/images/${item.image_url}`
                               : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                           }
@@ -1974,7 +2082,7 @@ export default function StaffHome() {
                               {
                                 state: {
                                   productId: item.id,
-                                  status: store.is_active,
+                                  status: isDisabled,
                                 },
                               },
                               window.scrollTo({
@@ -1993,7 +2101,7 @@ export default function StaffHome() {
                               {
                                 state: {
                                   productId: item.id,
-                                  status: store.is_active,
+                                  status: isDisabled,
                                 },
                               },
                               window.scrollTo({
@@ -2098,7 +2206,7 @@ export default function StaffHome() {
                         </CardContent>
                         <Divider sx={{ mt: 0.5, mb: 2 }} />
                         <Button
-                          disabled={!store.is_active}
+                          disabled={isDisabled}
                           variant="contained"
                           sx={{
                             ml: "auto",
@@ -2341,9 +2449,12 @@ export default function StaffHome() {
             </Grid>
             <Grid item xs={4}>
               <FormControl fullWidth margin="normal">
-                <InputLabel >Type</InputLabel>
-                <Select value={type} onChange={(e) => setType(e.target.value)}
-                  label="Type">
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  label="Type"
+                >
                   <MenuItem value={typeWHOLESALE}>WHOLESALE</MenuItem>
                   <MenuItem value={typeGIFT}>GIFT</MenuItem>
                 </Select>
@@ -2355,7 +2466,8 @@ export default function StaffHome() {
                 <Select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  label="Category">
+                  label="Category"
+                >
                   {Object.keys(categoryMap).map((key) => (
                     <MenuItem key={key} value={key}>
                       {categoryMap[key]}
@@ -2372,7 +2484,8 @@ export default function StaffHome() {
                 <Select
                   value={brandId}
                   onChange={(e) => setBrandId(e.target.value)}
-                  label="Brand">
+                  label="Brand"
+                >
                   {Object.keys(brandMap).map((key) => (
                     <MenuItem key={key} value={key}>
                       {brandMap[key]}
@@ -2412,8 +2525,7 @@ export default function StaffHome() {
             <Grid item xs={1.5}>
               <FormControl fullWidth margin="normal">
                 <InputLabel>Unit</InputLabel>
-                <Select value={unit} onChange={handleUnitChange}
-                  label="Unit">
+                <Select value={unit} onChange={handleUnitChange} label="Unit">
                   <MenuItem value="g">g</MenuItem>
                   <MenuItem value="ml">ml</MenuItem>
                 </Select>
@@ -2593,7 +2705,7 @@ export default function StaffHome() {
             Close
           </Button>
           <Button
-            onClick={handleAddProduct}
+            onClick={handOpenConfirmAdd}
             sx={{
               backgroundColor: "#F0F8FF",
               color: "#ff469e",
@@ -2615,6 +2727,95 @@ export default function StaffHome() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Modal
+        open={openConfirmAdd}
+        onClose={handleCloseConfirmAdd}
+        slotProps={{
+          backdrop: {
+            style: {
+              backgroundColor: "rgba(0, 0, 0, 0.1)",
+            },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            borderRadius: "20px",
+            backgroundColor: "#fff4fc",
+            border: "2px solid #ff469e",
+            boxShadow: 10,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Confirm Add Product
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            This product is coming soon, please ensure availability within 15
+            days from the date the customer places the order, to provide the
+            best purchasing experience.
+          </Typography>
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: 16,
+                fontWeight: "bold",
+                my: 0.2,
+                mx: 1,
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+              onClick={handleAddProduct}
+            >
+              Yes
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: 16,
+                fontWeight: "bold",
+                my: 0.2,
+                mx: 1,
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+              onClick={handleCloseConfirmAdd}
+            >
+              No
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
 
       {selectedProduct && (
         <Dialog
@@ -2665,9 +2866,9 @@ export default function StaffHome() {
                   value={
                     selectedProduct?.expiryDate
                       ? format(
-                        parseISO(selectedProduct.expiryDate),
-                        "yyyy-MM-dd"
-                      )
+                          parseISO(selectedProduct.expiryDate),
+                          "yyyy-MM-dd"
+                        )
                       : ""
                   }
                   onChange={(e) => handleChange("expiryDate", e.target.value)}
@@ -2808,8 +3009,11 @@ export default function StaffHome() {
               <Grid item xs={1.5}>
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Unit</InputLabel>
-                  <Select value={unit} onChange={handleUnitChange}
-                    label="Brand">
+                  <Select
+                    value={unit}
+                    onChange={handleUnitChange}
+                    label="Brand"
+                  >
                     <MenuItem value="g">g</MenuItem>
                     <MenuItem value="ml">ml</MenuItem>
                   </Select>
@@ -3042,7 +3246,7 @@ export default function StaffHome() {
             </Button>
             <Button
               variant="contained"
-              onClick={handleUpdate}
+              onClick={handOpenConfirmUpdate}
               sx={{
                 backgroundColor: "#F0F8FF",
                 color: "#ff469e",
@@ -3065,6 +3269,95 @@ export default function StaffHome() {
           </DialogActions>
         </Dialog>
       )}
+      <Modal
+        open={openConfirmUpdate}
+        onClose={handleCloseConfirmUpdate}
+        slotProps={{
+          backdrop: {
+            style: {
+              backgroundColor: "rgba(0, 0, 0, 0.1)",
+            },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            borderRadius: "20px",
+            backgroundColor: "#fff4fc",
+            border: "2px solid #ff469e",
+            boxShadow: 10,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Confirm Update Product
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            This product is coming soon, please ensure availability within 15
+            days from the date the customer places the order, to provide the
+            best purchasing experience.
+          </Typography>
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: 16,
+                fontWeight: "bold",
+                my: 0.2,
+                mx: 1,
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+              onClick={handleUpdate}
+            >
+              Yes
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "white",
+                color: "#ff469e",
+                borderRadius: "20px",
+                fontSize: 16,
+                fontWeight: "bold",
+                my: 0.2,
+                mx: 1,
+                transition:
+                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                border: "1px solid #ff469e",
+                "&:hover": {
+                  backgroundColor: "#ff469e",
+                  color: "white",
+                  border: "1px solid white",
+                },
+              }}
+              onClick={handleCloseConfirmUpdate}
+            >
+              No
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 }

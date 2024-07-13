@@ -64,6 +64,11 @@ export default function OrdersManagement() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [actionType, setActionType] = useState("");
 
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store.valid_date);
+  const isDisabled = !store.is_active || validDate < toDay;
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -1112,7 +1117,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Reject", item.id)}
-                          disabled={!store.is_active}
+                          disabled={isDisabled}
                         >
                           REJECT ORDER
                         </Button>
@@ -1120,10 +1125,12 @@ export default function OrdersManagement() {
                           variant="contained"
                           disabled={
                             (item.type === "PRE_ORDER" &&
-                            item.order_detail_list.some(
-                              (item) =>
-                                productMap[item.product_id][5] === "COMING SOON"
-                            )) || !store.is_active
+                              item.order_detail_list.some(
+                                (item) =>
+                                  productMap[item.product_id][5] ===
+                                  "COMING SOON"
+                              )) ||
+                            isDisabled
                           }
                           sx={{
                             backgroundColor: "white",
@@ -1274,7 +1281,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Deliver", item.id)}
-                          disabled={!store.is_active}
+                          disabled={isDisabled}
                         >
                           READY TO DELIVER
                         </Button>

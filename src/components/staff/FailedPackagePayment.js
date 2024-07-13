@@ -61,7 +61,7 @@ export default function FailedPackagePayment() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          pt: 40,
+          pt: 25,
         }}
       >
         <Box
@@ -107,8 +107,8 @@ export default function FailedPackagePayment() {
           variant="h5"
           sx={{ mt: 2, color: "white", maxWidth: "65%" }}
         >
-          Something wrong happened during your payment.{" "}
-           Please contact admin to know more.
+          Something wrong happened during your payment. Please contact admin to
+          know more.
         </Typography>
         <Box
           sx={{

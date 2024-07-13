@@ -17,7 +17,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Typography } from "@mui/material";
+import { Typography, Badge } from "@mui/material";
 import { toast } from "react-toastify";
 import Edit from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -27,8 +27,9 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import { storeByUserIdApi } from "../../api/StoreAPI";
 import Tooltip from "@mui/material/Tooltip";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import SellIcon from '@mui/icons-material/Sell';
-import PortraitIcon from '@mui/icons-material/Portrait';
+import SellIcon from "@mui/icons-material/Sell";
+import PortraitIcon from "@mui/icons-material/Portrait";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 
 const drawerWidth = 260;
 const itemList = [
@@ -88,6 +89,11 @@ export default function StaffLayout() {
   const userId = decodedAccessToken.UserID;
   const [store, setStore] = useState([]);
 
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store.valid_date);
+  const isDisabled = validDate < toDay;
+
   useEffect(() => {
     setTimeout(() => {}, 1000);
     storeByUserIdApi(userId).then((res) => {
@@ -105,6 +111,24 @@ export default function StaffLayout() {
       console.log("Logout successfully");
     }, 1000);
   };
+
+  const [open, setOpen] = useState(false);
+
+  const handleIconClick = () => {
+    setOpen(!open);
+  };
+
+  const notifications = [];
+  if (!store.is_active) {
+    notifications.push(
+      "Your store is currently blocked, you cannot use current services."
+    );
+  }
+  if (isDisabled) {
+    notifications.push(
+      "Your sales service package has expired! Please renew or upgrade your service package to continue using it."
+    );
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -182,21 +206,41 @@ export default function StaffLayout() {
             >
               Welcome, <span style={{ fontWeight: "bold" }}>{username}</span>
             </Typography>
-            {!store.is_active && (
-              <Tooltip title="Your store is currently blocked" arrow>
-                <ErrorOutlineIcon
-                  sx={{
-                    fontSize: "1.5rem",
-                    color: "yellow",
-                    ml: 1,
-                    cursor: "pointer",
-                    borderRadius: "50%",
-                    border: "2px solid yellow",
-                    padding: "2px",
-                  }}
-                />
-              </Tooltip>
-            )}
+            <Typography>
+              <Badge badgeContent={notifications.length} color="secondary">
+                <Tooltip
+                  title={
+                    <List>
+                      {notifications.length > 0 ? (
+                        notifications.map((notification, index) => (
+                          <ListItem key={index}>
+                            <ListItemText primary={notification} />
+                          </ListItem>
+                        ))
+                      ) : (
+                        <ListItem>
+                          <ListItemText primary="No notifications" />
+                        </ListItem>
+                      )}
+                    </List>
+                  }
+                  arrow
+                  open={open}
+                  onClose={() => setOpen(false)}
+                >
+                  <NotificationsNoneIcon
+                    onClick={handleIconClick}
+                    sx={{
+                      fontSize: "2rem",
+                      color: "yellow",
+                      ml: 1,
+                      cursor: "pointer",
+                      padding: "2px",
+                    }}
+                  />
+                </Tooltip>
+              </Badge>
+            </Typography>
           </Box>
         </Box>
         <List>

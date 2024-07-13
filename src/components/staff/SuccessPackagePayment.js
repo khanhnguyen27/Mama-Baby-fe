@@ -16,9 +16,9 @@ export default function SuccessPackagePayment() {
 
   useEffect(() => {
     if (!accessToken || role !== "STAFF") {
-        window.location.replace("/");
-        return;
-      }
+      window.location.replace("/");
+      return;
+    }
 
     const fetchData = async () => {
       try {
@@ -61,7 +61,7 @@ export default function SuccessPackagePayment() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          pt: 40,
+          pt: 25,
         }}
       >
         <Box
@@ -80,7 +80,7 @@ export default function SuccessPackagePayment() {
                   filter: "blur(0px)",
                 },
                 "50%": {
-                  transform: "scale(1.2) skew(0deg)"
+                  transform: "scale(1.2) skew(0deg)",
                 },
                 "100%": {
                   filter: "blur(0px)",
@@ -107,8 +107,8 @@ export default function SuccessPackagePayment() {
           variant="h5"
           sx={{ mt: 2, color: "white", maxWidth: "65%" }}
         >
-          Thank you for your purchase.{" "}
-          {packageMap[packageId]} has been processed successfully.
+          Thank you for your purchase. {packageMap[packageId]} has been
+          processed successfully.
         </Typography>
         <Box
           sx={{
@@ -140,7 +140,6 @@ export default function SuccessPackagePayment() {
           >
             Back To Packages Page
           </Button>
-
         </Box>
       </Box>
     </div>

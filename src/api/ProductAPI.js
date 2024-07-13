@@ -11,7 +11,7 @@ export const allProductApi = (params) => {
   });
 };
 
-export const allProductCHApi = (params) => {
+export const allProductHistoryApi = (params) => {
   return axiosJWT.get(`${URL_PRODUCT}/comment_history`, {
     params: params,
   });

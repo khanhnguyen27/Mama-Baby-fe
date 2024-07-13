@@ -38,7 +38,7 @@ import { ClearAll, KeyboardCapslock } from "@mui/icons-material";
 import Cart from "@mui/icons-material/ShoppingCart";
 import { useDispatch } from "react-redux";
 import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
-import { allProductCHApi } from "../../api/ProductAPI";
+import { allProductHistoryApi } from "../../api/ProductAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
@@ -62,6 +62,11 @@ export default function Articles() {
   const [currentPage, setCurrentPage] = useState(1);
   const [minDate, setMinDate] = useState(null);
   const [maxDate, setMaxDate] = useState(null);
+
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store?.valid_date);
+  const isDisabled = !store?.is_active || validDate < toDay;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,7 +104,7 @@ export default function Articles() {
             ? dayjs(maxDate).endOf("day").format("YYYY-MM-DD HH:mm:ss")
             : null,
         }),
-        allProductCHApi({
+        allProductHistoryApi({
           type: "WHOLESALE",
         }),
       ]);
@@ -179,7 +184,9 @@ export default function Articles() {
 
   const handleAddArticle = () => {
     if (!header || !content || !image.file) {
-      toast.warn("Please fill in all fields and select a file.", { autoClose: 1500 });
+      toast.warn("Please fill in all fields and select a file.", {
+        autoClose: 1500,
+      });
       return;
     }
 
@@ -187,7 +194,9 @@ export default function Articles() {
       (article) => article.header === header
     );
     if (isDuplicateHeader) {
-      toast.error("Article with this name already exists.", { autoClose: 1500 });
+      toast.error("Article with this name already exists.", {
+        autoClose: 1500,
+      });
       return;
     }
 
@@ -206,7 +215,9 @@ export default function Articles() {
       })
       .catch((error) => {
         console.error("Error adding article:", error);
-        toast.error("Failed to add article. Please try again later.", { autoClose: 1500 });
+        toast.error("Failed to add article. Please try again later.", {
+          autoClose: 1500,
+        });
       });
   };
 
@@ -234,7 +245,9 @@ export default function Articles() {
 
   const handleUpdate = () => {
     if (!selectedArticle.header || !selectedArticle.content) {
-      toast.warn("Please fill in all fields and select a file.", { autoClose: 1500 });
+      toast.warn("Please fill in all fields and select a file.", {
+        autoClose: 1500,
+      });
       return;
     }
 
@@ -244,7 +257,9 @@ export default function Articles() {
         article.id !== selectedArticle.id
     );
     if (isDuplicateHeader) {
-      toast.error("Article with this name already exists.", { autoClose: 1500 });
+      toast.error("Article with this name already exists.", {
+        autoClose: 1500,
+      });
       return;
     }
 
@@ -261,11 +276,13 @@ export default function Articles() {
       .then((res) => {
         fetchData(minDate, maxDate);
         handleClose();
-        toast.success("Article updated successfully", ), { autoClose: 1500 };
+        toast.success("Article updated successfully", { autoClose: 1500 });
       })
       .catch((error) => {
         console.error("Error updating article:", error);
-        toast.error("Failed to update article. Please try again later.", { autoClose: 1500 });
+        toast.error("Failed to update article. Please try again later.", {
+          autoClose: 1500,
+        });
 
         // if (error.response) {
         //   console.error("Error response data:", error.response.data);
@@ -512,7 +529,7 @@ export default function Articles() {
               <Button
                 variant="contained"
                 color="primary"
-                disabled={!store.is_active}
+                disabled={isDisabled}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -696,7 +713,7 @@ export default function Articles() {
             <Button
               variant="contained"
               color="primary"
-              disabled={!store.is_active}
+              disabled={isDisabled}
               sx={{
                 display: "flex",
                 justifyContent: "center",
@@ -802,7 +819,7 @@ export default function Articles() {
                             border: "1px solid #ff469e",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                           },
-                          pointerEvents: store.is_active ? "auto" : "none",
+                          pointerEvents: isDisabled ? "none" : "auto",
                         }}
                       >
                         <Box

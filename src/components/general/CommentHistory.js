@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import { commentByUserIdApi } from "../../api/CommentAPI";
 import PersonIcon from "@mui/icons-material/Person";
-import { allProductCHApi } from "../../api/ProductAPI";
+import { allProductHistoryApi } from "../../api/ProductAPI";
 export default function CommentHistory() {
   window.document.title = "Comment History";
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default function CommentHistory() {
     try {
       const [commentRes, productRes] = await Promise.all([
         commentByUserIdApi(userId),
-        allProductCHApi({
+        allProductHistoryApi({
           type: "WHOLESALE",
         }),
       ]);
@@ -276,14 +276,20 @@ export default function CommentHistory() {
             ))
           ) : (
             <Grid item xs={12}>
-              <Box sx={{ height: "11.5vh", justifyContent: "center", alignItems: "center"}}>
-              <Typography
-                variant="h6"
-                color="textSecondary"
-                sx={{ textAlign: "center" }}
+              <Box
+                sx={{
+                  height: "11.5vh",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
-                No comments available.
-              </Typography>
+                <Typography
+                  variant="h6"
+                  color="textSecondary"
+                  sx={{ textAlign: "center" }}
+                >
+                  No comments available.
+                </Typography>
               </Box>
             </Grid>
           )}

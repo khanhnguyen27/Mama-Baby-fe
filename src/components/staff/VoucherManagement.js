@@ -56,6 +56,11 @@ export default function Vouchers() {
   const [sortingStatus, setSortingStatus] = useState(null);
   const [noData, setNoData] = useState(false);
 
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store?.valid_date);
+  const isDisabled = !store?.is_active || validDate < toDay;
+
   const accessToken = localStorage.getItem("accessToken");
   const decodedAccessToken = jwtDecode(accessToken);
   const userId = decodedAccessToken.UserID;
@@ -192,7 +197,9 @@ export default function Vouchers() {
       })
       .catch((error) => {
         console.error("Error updating voucher:", error);
-        toast.error("Failed to update voucher. Please try again later.", { autoClose: 1500 });
+        toast.error("Failed to update voucher. Please try again later.", {
+          autoClose: 1500,
+        });
       });
   };
 
@@ -283,7 +290,9 @@ export default function Vouchers() {
       })
       .catch((error) => {
         console.error("Error adding voucher:", error);
-        toast.error("Failed to add voucher. Please try again later.", { autoClose: 1500 });
+        toast.error("Failed to add voucher. Please try again later.", {
+          autoClose: 1500,
+        });
       });
   };
 
@@ -320,10 +329,7 @@ export default function Vouchers() {
               </Typography>
               {loading ? (
                 <div style={{ textAlign: "center" }}>
-                  <CircularProgress
-                    sx={{ color: "#ff469e" }}
-                    size={50}
-                  />
+                  <CircularProgress sx={{ color: "#ff469e" }} size={50} />
                 </div>
               ) : (
                 <>
@@ -366,7 +372,10 @@ export default function Vouchers() {
                           startAdornment: (
                             <InputAdornment position="start">
                               <IconButton>
-                                <SearchIcon fontSize="small" style={{ color: "FF1493" }} />
+                                <SearchIcon
+                                  fontSize="small"
+                                  style={{ color: "FF1493" }}
+                                />
                               </IconButton>
                             </InputAdornment>
                           ),
@@ -377,7 +386,10 @@ export default function Vouchers() {
                                   onClick={() => setSearchKeyword("")}
                                   size="small"
                                 >
-                                  <CloseIcon fontSize="small" style={{ color: "DC143C" }} />
+                                  <CloseIcon
+                                    fontSize="small"
+                                    style={{ color: "DC143C" }}
+                                  />
                                 </IconButton>
                               )}
                             </InputAdornment>
@@ -388,29 +400,29 @@ export default function Vouchers() {
                     <Grid item xs={3} md={3}>
                       <FormControl
                         sx={{
-                          width: '170px',
-                          border: '2px solid #ff469e',
-                          borderRadius: '7px',
-                          backgroundColor: 'white',
-                          transition: '0.2s ease-in-out',
-                          '&:hover': {
-                            borderColor: '#ff469e',
+                          width: "170px",
+                          border: "2px solid #ff469e",
+                          borderRadius: "7px",
+                          backgroundColor: "white",
+                          transition: "0.2s ease-in-out",
+                          "&:hover": {
+                            borderColor: "#ff469e",
                           },
-                          '&:focus': {
-                            backgroundColor: '#F8F8F8',
+                          "&:focus": {
+                            backgroundColor: "#F8F8F8",
                           },
-                          '&.Mui-focused': {
-                            border: '2px solid #ff469e',
-                            backgroundColor: '#F8F8F8',
-                            boxShadow: 'inset 0px 2px 4px rgba(0, 0, 0, 0.32)',
-                            outline: 'none',
+                          "&.Mui-focused": {
+                            border: "2px solid #ff469e",
+                            backgroundColor: "#F8F8F8",
+                            boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                            outline: "none",
                           },
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            border: 'none',
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            border: "none",
                           },
-                          '& .MuiInputLabel-root': {
-                            top: '-1px',
-                            backgroundColor: 'white',
+                          "& .MuiInputLabel-root": {
+                            top: "-1px",
+                            backgroundColor: "white",
                           },
                         }}
                         size="small"
@@ -430,7 +442,7 @@ export default function Vouchers() {
                           MenuProps={{
                             PaperProps: {
                               style: {
-                                marginTop: '3px',
+                                marginTop: "3px",
                               },
                             },
                           }}
@@ -442,7 +454,13 @@ export default function Vouchers() {
                       </FormControl>
                     </Grid>
                     <Grid item xs={1} md={2}></Grid>
-                    <Grid item xs={5} md={3} container justifyContent="flex-end">
+                    <Grid
+                      item
+                      xs={5}
+                      md={3}
+                      container
+                      justifyContent="flex-end"
+                    >
                       <Tooltip title="Add Voucher">
                         <Button
                           style={{
@@ -460,7 +478,8 @@ export default function Vouchers() {
                             "&.Mui-focused": {
                               border: "1px solid #ff469e",
                               backgroundColor: "#F8F8F8",
-                              boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                              boxShadow:
+                                "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
                               outline: "none",
                             },
                             "& .MuiOutlinedInput-notchedOutline": {
@@ -470,7 +489,7 @@ export default function Vouchers() {
                           variant="contained"
                           startIcon={<AddIcon style={{ color: "	FF1493" }} />}
                           onClick={handleAddNew}
-                          disabled={!store?.is_active}
+                          disabled={isDisabled}
                         >
                           Add Voucher
                         </Button>
@@ -530,7 +549,13 @@ export default function Vouchers() {
                       <TableBody>
                         {noData ? (
                           <TableRow>
-                            <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                            <TableCell
+                              colSpan={4}
+                              align="center"
+                              style={{ color: "#ff469e", fontSize: "35px" }}
+                            >
+                              There's no items of this status
+                            </TableCell>
                           </TableRow>
                         ) : (
                           currentItems.map((item, index) => (
@@ -550,7 +575,9 @@ export default function Vouchers() {
                               <TableCell align="left">
                                 {formatCurrency(item.discount_value)}
                               </TableCell>
-                              <TableCell align="left">{item.description}</TableCell>
+                              <TableCell align="left">
+                                {item.description}
+                              </TableCell>
                               <TableCell align="left">
                                 {formatDate(item.endAt)}
                               </TableCell>
@@ -594,7 +621,7 @@ export default function Vouchers() {
                         justifyContent: "center",
                         backgroundColor: "f1f1f1",
                         marginTop: "8px",
-                        marginRight: "40px"
+                        marginRight: "40px",
                       }}
                       labelRowsPerPage="Rows:"
                       labelDisplayedRows={({ from, to, count }) =>
@@ -637,18 +664,25 @@ export default function Vouchers() {
       </Container>
 
       {/* Dialog for Update Voucher */}
-      <Dialog open={openUpdateVoucher} onClose={closeUpdate}
+      <Dialog
+        open={openUpdateVoucher}
+        onClose={closeUpdate}
         PaperProps={{
           style: {
             borderRadius: 7,
             boxShadow: "0px 2px 8px #ff469e",
           },
-        }}>
-        <DialogTitle style={{
-          fontWeight: "bold",
-          color: "#333",
-          textAlign: "center",
-        }}>Edit Voucher</DialogTitle>
+        }}
+      >
+        <DialogTitle
+          style={{
+            fontWeight: "bold",
+            color: "#333",
+            textAlign: "center",
+          }}
+        >
+          Edit Voucher
+        </DialogTitle>
         <DialogContent>
           {selectedVoucher && (
             <>
@@ -703,54 +737,67 @@ export default function Vouchers() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeUpdate} sx={{
-            backgroundColor: "#F0F8FF",
-            color: "#757575",
-            borderRadius: "30px",
-            fontWeight: "bold",
-            transition:
-              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-            border: "1px solid #757575",
-            "&:hover": {
-              backgroundColor: "#757575",
-              color: "white",
-              border: "1px solid white",
-            },
-          }}>
+          <Button
+            onClick={closeUpdate}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#757575",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleEdit} sx={{
-            backgroundColor: "#F0F8FF",
-            color: "#ff469e",
-            borderRadius: "30px",
-            fontWeight: "bold",
-            transition:
-              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-            border: "1px solid #ff469e",
-            "&:hover": {
-              backgroundColor: "#ff469e",
-              color: "white",
-              border: "1px solid white",
-            },
-          }}>
+          <Button
+            onClick={handleEdit}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#ff469e",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #ff469e",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
             Save
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog for Add Voucher */}
-      <Dialog open={openAddVoucher} onClose={handleCloseAddVoucher}
+      <Dialog
+        open={openAddVoucher}
+        onClose={handleCloseAddVoucher}
         PaperProps={{
           style: {
             borderRadius: 7,
             boxShadow: "0px 2px 8px #ff469e",
           },
-        }}>
-        <DialogTitle style={{
-          fontWeight: "bold",
-          color: "#333",
-          textAlign: "center",
-        }}>Add Voucher</DialogTitle>
+        }}
+      >
+        <DialogTitle
+          style={{
+            fontWeight: "bold",
+            color: "#333",
+            textAlign: "center",
+          }}
+        >
+          Add Voucher
+        </DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
@@ -804,40 +851,46 @@ export default function Vouchers() {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddVoucher} sx={{
-            backgroundColor: "#F0F8FF",
-            color: "#757575",
-            borderRadius: "30px",
-            fontWeight: "bold",
-            transition:
-              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-            border: "1px solid #757575",
-            "&:hover": {
-              backgroundColor: "#757575",
-              color: "white",
-              border: "1px solid white",
-            },
-          }}>
+          <Button
+            onClick={handleCloseAddVoucher}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#757575",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #757575",
+              "&:hover": {
+                backgroundColor: "#757575",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleAddVoucher} sx={{
-            backgroundColor: "#F0F8FF",
-            color: "#ff469e",
-            borderRadius: "30px",
-            fontWeight: "bold",
-            transition:
-              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-            border: "1px solid #ff469e",
-            "&:hover": {
-              backgroundColor: "#ff469e",
-              color: "white",
-              border: "1px solid white",
-            },
-          }}>
+          <Button
+            onClick={handleAddVoucher}
+            sx={{
+              backgroundColor: "#F0F8FF",
+              color: "#ff469e",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              transition:
+                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+              border: "1px solid #ff469e",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+                border: "1px solid white",
+              },
+            }}
+          >
             Add
           </Button>
         </DialogActions>
       </Dialog>
-    </div >
+    </div>
   );
 }

@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { articleByIdApi, getArticlesNoPageApi } from "../../api/ArticleAPI";
-import { allProductCHApi } from "../../api/ProductAPI";
+import { allProductHistoryApi } from "../../api/ProductAPI";
 import { storeByIdApi } from "../../api/StoreAPI";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -40,7 +40,7 @@ export default function ArticleDetail() {
       const [articleRes, allArticleRes, productRes] = await Promise.all([
         articleByIdApi(articleId),
         getArticlesNoPageApi(),
-        allProductCHApi({
+        allProductHistoryApi({
           type: "WHOLESALE",
         }),
       ]);

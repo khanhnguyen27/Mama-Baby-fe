@@ -91,7 +91,9 @@ export default function ProductDetailsManagement() {
         })
         .catch((e) => {
           console.log(e);
-          toast.error("Failed to lock comment. Please try again later.", { autoClose: 1500 });
+          toast.error("Failed to lock comment. Please try again later.", {
+            autoClose: 1500,
+          });
         });
     } else {
       updateCommentStatusApi(item.id, "false")
@@ -102,7 +104,9 @@ export default function ProductDetailsManagement() {
         })
         .catch((e) => {
           console.log(e);
-          toast.error("Failed to unlock comment. Please try again later.", { autoClose: 1500 });
+          toast.error("Failed to unlock comment. Please try again later.", {
+            autoClose: 1500,
+          });
         });
     }
   };
@@ -482,7 +486,7 @@ export default function ProductDetailsManagement() {
           <IconButton
             size="large"
             sx={{
-              zIndex:"2",
+              zIndex: "2",
               position: "fixed",
               right: 25,
               bottom: 25,
@@ -934,7 +938,7 @@ export default function ProductDetailsManagement() {
                   </Grid>
                   <>
                     <IconButton
-                      disabled={!statusStore}
+                      disabled={statusStore}
                       aria-label="more"
                       aria-controls="long-menu"
                       aria-haspopup="true"

@@ -58,6 +58,11 @@ export default function ExchangeManagement() {
   const [open, setOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("-");
 
+  const toDay = new Date();
+  toDay.setHours(toDay.getHours() + 7);
+  const validDate = new Date(store.valid_date);
+  const isDisabled = !store.is_active || validDate < toDay;
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -543,7 +548,7 @@ export default function ExchangeManagement() {
                             disabled={
                               item.status === "ACCEPT" ||
                               item.status === "REFUSE" ||
-                              store.is_active === false
+                              isDisabled === true
                             }
                             sx={{
                               backgroundColor: "#fff4fc",
