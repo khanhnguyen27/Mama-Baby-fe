@@ -20,7 +20,6 @@ import {
     DialogActions,
 } from "@mui/material";
 import { allPackageApi, updatePackageApi } from "../../api/PackagesAPI";
-import { allStorePackageApi } from "../../api/StorePackageAPI";
 
 export default function PackageManagement() {
     window.document.title = "Package Management";

@@ -48,12 +48,12 @@ const itemList = [
   {
     label: "Package",
     Icon: InventoryIcon,
-    href: "packages",
+    href: "package",
   },
   {
     label: "Age",
     Icon: PersonIcon,
-    href: "age",
+    href: "ages",
   },
   {
     label: "Brands",

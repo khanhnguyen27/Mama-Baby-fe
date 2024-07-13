@@ -33,6 +33,7 @@ import VoucherManagement from "./components/staff/VoucherManagement";
 import RequestStore from "./components/admin/RequestStore";
 import StoreManagement from "./components/admin/StoreManagement";
 import AccountManagement from "./components/admin/AccountManagement";
+import PackageManagement from "./components/admin/PackageManagement";
 import OrdersManagement from "./components/staff/OrdersManagement";
 import ExchangesManagement from "./components/staff/ExchangesManagement";
 import RefundManagement from "./components/staff/RefundManagement";
@@ -48,7 +49,6 @@ import Packages from "./components/staff/Packages";
 import SuccessPackagePayment from "./components/staff/SuccessPackagePayment";
 import FailedPackagePayment from "./components/staff/FailedPackagePayment";
 import StoreProfile from "./components/staff/StoreProfile";
-import PackageManagement from "./components/admin/PackageManagement";
 
 const applyScrollbarStyles = () => {
   const style = document.createElement("style");
@@ -139,11 +139,11 @@ function App() {
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="categories" element={<CategorieManagement />} />
             <Route path="brands" element={<BrandManagement />} />
-            <Route path="age" element={<AgeManagement />} />
+            <Route path="ages" element={<AgeManagement />} />
             <Route path="requeststore" element={<RequestStore />} />
             <Route path="stores" element={<StoreManagement />} />
             <Route path="accounts" element={<AccountManagement />} />
-            <Route path="packages" element={<PackageManagement />} />
+            <Route path="package" element={<PackageManagement />} />
           </Route>
         </Route>
       </Routes>

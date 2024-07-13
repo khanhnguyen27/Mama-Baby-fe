@@ -2851,7 +2851,7 @@ export default function Orders() {
                           !refund.some(
                             (refundItem) => refundItem.order_id === item.id
                           ) &&
-                          item.amount > 0 && (
+                          item.amount > 0  && (
                             <Button
                               variant="contained"
                               sx={{
