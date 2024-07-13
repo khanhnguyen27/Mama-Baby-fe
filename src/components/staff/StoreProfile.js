@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { allStoreApi } from "../../api/StoreAPI";
+import { allStoreApi,storeByUserIdApi } from "../../api/StoreAPI";
 import {
   Card,
   CardContent,
@@ -52,19 +52,22 @@ export default function StoreProfile() {
   };
 
   const fetchData = async () => {
-    allStoreApi()
-      .then((res) => {
-        const stores = res?.data?.data?.stores;
-        if (stores && stores.length > 0) {
-          setStore(stores[0]);
-          setStorename(stores[0].name_store);
-          setAddress(stores[0].address);
-          setPhone(stores[0].phone);
-          setDescription(stores[0].description);
-        }
-      })
-      .catch((err) => console.log(err));
+    try {
+      const res = await storeByUserIdApi(userId);
+      const stores = res?.data?.data;
+      if (stores) {
+        setStore(stores);
+        setStorename(stores.name_store);
+        setAddress(stores.address);
+        setPhone(stores.phone);
+        setDescription(stores.description);
+      }
+      console.log(stores);
+    } catch (err) {
+      console.log(err);
+    }
   };
+
   useEffect(() => {
     fetchData();
   }, []);
