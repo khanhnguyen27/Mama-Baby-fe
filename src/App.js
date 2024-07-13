@@ -48,6 +48,7 @@ import Packages from "./components/staff/Packages";
 import SuccessPackagePayment from "./components/staff/SuccessPackagePayment";
 import FailedPackagePayment from "./components/staff/FailedPackagePayment";
 import StoreProfile from "./components/staff/StoreProfile";
+import PackageManagement from "./components/admin/PackageManagement";
 
 const applyScrollbarStyles = () => {
   const style = document.createElement("style");
@@ -142,6 +143,7 @@ function App() {
             <Route path="requeststore" element={<RequestStore />} />
             <Route path="stores" element={<StoreManagement />} />
             <Route path="accounts" element={<AccountManagement />} />
+            <Route path="packages" element={<PackageManagement />} />
           </Route>
         </Route>
       </Routes>
