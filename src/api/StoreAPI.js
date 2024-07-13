@@ -76,6 +76,32 @@ export const requestStoreApi = (
     user_id: userId,
   });
 };
+
 export const deleteStoreApi = (storeId) => {
   return axiosJWT.delete(`${URL_STORE}/${storeId}`);
 };
+
+export const updateStoreApi = (
+  storeId,
+  storename,
+  address,
+  description,
+  phone,
+  userId,
+  license,
+) => {
+  const formData = new FormData();
+  formData.append("nameStore", storename);
+  formData.append("address", address);
+  formData.append("description", description);
+  formData.append("phone", phone);
+  formData.append("userId", userId);
+  formData.append("license", license); // Thêm giá trị licenseUrl vào FormData
+  
+  return axiosJWT.put(`${URL_STORE}/${storeId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
