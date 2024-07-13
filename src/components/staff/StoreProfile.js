@@ -30,6 +30,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function StoreProfile() {
+  window.document.title = "Store Profile"
   const [store, setStore] = useState(null);
   const [openLicense, setOpenLicense] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);

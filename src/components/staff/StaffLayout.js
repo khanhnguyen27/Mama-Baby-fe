@@ -17,7 +17,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Typography, Badge } from "@mui/material";
+import { Typography, Badge, IconButton } from "@mui/material";
 import { toast } from "react-toastify";
 import Edit from "@mui/icons-material/Edit";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -38,11 +38,11 @@ const itemList = [
     Icon: Dashboard,
     href: "dashboard",
   },
-  {
-    label: "Profile",
-    Icon: PortraitIcon,
-    href: "storeprofile",
-  },
+  // {
+  //   label: "Profile",
+  //   Icon: PortraitIcon,
+  //   href: "storeprofile",
+  // },
   {
     label: "Products",
     Icon: Inventory2Icon,
@@ -190,11 +190,14 @@ export default function StaffLayout() {
             }}
             alt="logo"
           />
+          <IconButton onClick={() => navigate("/staff/storeprofile")} sx={{ color: "white", "&:hover": { backgroundColor: "white", color: "#ff469e"}}}>
+              <PortraitIcon />
+            </IconButton>
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              mt: 2,
+              mt: 0,
             }}
           >
             <Typography

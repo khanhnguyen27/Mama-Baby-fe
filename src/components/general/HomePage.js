@@ -218,7 +218,7 @@ export default function HomePage() {
 
       setCategoryMap(categoryMap);
 
-      const storeMap = storeData.reduce((x, item) => {
+      const storeMap = storeData?.stores?.reduce((x, item) => {
         x[item.id] = item.name;
         return x;
       }, {});
