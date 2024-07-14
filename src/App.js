@@ -128,8 +128,8 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="packages" element={<Packages />} />
             <Route path="successPackagePayment" element={<SuccessPackagePayment />} />
-          <Route path="failedPackagePayment" element={<FailedPackagePayment />} />
-          <Route path="storeprofile" element={<StoreProfile />} />
+            <Route path="failedPackagePayment" element={<FailedPackagePayment />} />
+            <Route path="storeprofile" element={<StoreProfile />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute allowedRole={"ADMIN"} />}>
