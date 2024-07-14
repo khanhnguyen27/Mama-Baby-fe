@@ -12,11 +12,12 @@ import {
   IconButton,
 } from "@mui/material";
 import { allPackageApi } from "../../api/PackagesAPI";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import KeyboardCapslockIcon from "@mui/icons-material/KeyboardCapslock";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 import { makePackagePaymentApi } from "../../api/VNPayAPI";
 import { storeByUserIdApi } from "../../api/StoreAPI";
+import { createStorePackageApi } from "../../api/StorePackageAPI";
 
 export default function Package() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export default function Package() {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
 
-const handleCheckout = (pkg) => {
+  const handleCheckout = (pkg) => {
     if (!accessToken) {
       toast.warn("Please login to continue your purchase", { autoClose: 1000 });
       setTimeout(() => {
@@ -81,29 +82,28 @@ const handleCheckout = (pkg) => {
       toast.error("No store found for this user. Please try again later.");
       return;
     }
-
-    const finalAmount = pkg.price;
-    const bankCode = "VNBANK";
-    const packageId = pkg.id;
-    console.log("Package ID:", packageId); // Kiểm tra packageId
-    console.log("User ID:", userId); // Kiểm tra userId
-    console.log("Store ID:", storeId); // Kiểm tra storeId
-
-    makePackagePaymentApi(finalAmount, bankCode, packageId, storeId) // Thêm storeId vào hàm này
+    createStorePackageApi(pkg.id, storeId, pkg.price)
       .then((res) => {
-        console.log("Payment initiation response:", res.data);
-        toast.success("Now moving to payment page!", { autoClose: 1000 });
-        setTimeout(() => {
-          window.location.replace(res.data?.data?.payment_url);
-        }, 1);
+        const storePackageId = res?.data?.data?.id;
+
+        const finalAmount = pkg.price;
+        const bankCode = "VNBANK";
+        makePackagePaymentApi(finalAmount, bankCode, storePackageId)
+          .then((res) => {
+            console.log("Payment initiation response:", res.data);
+            toast.success("Now moving to payment page!", { autoClose: 1000 });
+            setTimeout(() => {
+              window.location.replace(res.data?.data?.payment_url);
+            }, 1);
+          })
+          .catch((error) => {
+            console.error("There was an error initiating the payment!", error);
+            console.error("Response data:", error.response.data);
+            toast.error("Unable to initiate payment. Please try again later.");
+          });
       })
-      .catch((error) => {
-        console.error("There was an error initiating the payment!", error);
-        console.error("Response data:", error.response.data);
-        toast.error("Unable to initiate payment. Please try again later.");
-      });
+      .catch((error) => console.log(error));
   };
-  
 
   if (loading) {
     return (
