@@ -683,73 +683,117 @@ const Navigation = () => {
                 sx={{
                   textDecoration: "none",
                   display: { xs: "none", sm: "none", md: "flex" },
+                  color: "white",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  transition: "color 0.2s ease-in-out, scale 0.3s ease-in-out",
+                  fontSize: "1.15rem",
+                  "&:hover": {
+                    scale: "1.1",
+                  },
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: 2,
+                    backgroundColor: "white",
+                    transform: "scaleX(0)",
+                    transformOrigin: "bottom right",
+                    transition: "transform 0.3s ease-in-out",
+                  },
+                  "&:hover::before": {
+                    transform: "scaleX(1)",
+                    transformOrigin: "bottom left",
+                  },
                 }}
               >
-                <Typography
-                  sx={{
-                    color: "white",
-                    cursor: "pointer",
-                    transition:
-                      "color 0.2s ease-in-out, scale 0.3s ease-in-out",
-                    fontSize: 20,
-                    "&:hover": {
-                      textDecoration: "underline",
-                      scale: "1.1",
-                      fontWeight: "500",
-                    },
-                  }}
-                >
-                  Introduction
-                </Typography>
+                Introduction
+              </Typography>
+              <Typography
+                sx={{
+                  paddingBottom: "4px",
+                  fontWeight: "600",
+                  display: { xs: "none", sm: "none", md: "flex" },
+                }}
+              >
+                |
               </Typography>
               <Typography
                 onClick={() => navigate("/promotion")}
                 sx={{
                   textDecoration: "none",
                   display: { xs: "none", sm: "none", md: "flex" },
+                  color: "white",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  transition: "color 0.2s ease-in-out, scale 0.3s ease-in-out",
+                  fontSize: "1.15rem",
+                  "&:hover": {
+                    scale: "1.1",
+                  },
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: 2,
+                    backgroundColor: "white",
+                    transform: "scaleX(0)",
+                    transformOrigin: "bottom right",
+                    transition: "transform 0.3s ease-in-out",
+                  },
+                  "&:hover::before": {
+                    transform: "scaleX(1)",
+                    transformOrigin: "bottom left",
+                  },
                 }}
               >
-                <Typography
-                  sx={{
-                    color: "white",
-                    cursor: "pointer",
-                    transition:
-                      "color 0.2s ease-in-out, scale 0.3s ease-in-out",
-                    fontSize: 20,
-                    "&:hover": {
-                      textDecoration: "underline",
-                      scale: "1.1",
-                      fontWeight: "500",
-                    },
-                  }}
-                >
-                  Promotion
-                </Typography>
+                Promotion
+              </Typography>
+              <Typography
+                sx={{
+                  paddingBottom: "4px",
+                  fontWeight: "600",
+                  display: { xs: "none", sm: "none", md: "flex" },
+                }}
+              >
+                |
               </Typography>
               <Typography
                 onClick={() => navigate("/policy")}
                 sx={{
                   textDecoration: "none",
-                  fontWeight: "600",
                   display: { xs: "none", sm: "none", md: "flex" },
+                  color: "white",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  transition: "color 0.2s ease-in-out, scale 0.3s ease-in-out",
+                  fontSize: "1.15rem",
+                  "&:hover": {
+                    scale: "1.1",
+                  },
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: "100%",
+                    height: 2,
+                    backgroundColor: "white",
+                    transform: "scaleX(0)",
+                    transformOrigin: "bottom right",
+                    transition: "transform 0.3s ease-in-out",
+                  },
+                  "&:hover::before": {
+                    transform: "scaleX(1)",
+                    transformOrigin: "bottom left",
+                  },
                 }}
               >
-                <Typography
-                  sx={{
-                    color: "white",
-                    cursor: "pointer",
-                    transition:
-                      "color 0.2s ease-in-out, scale 0.3s ease-in-out",
-                    fontSize: 20,
-                    "&:hover": {
-                      textDecoration: "underline",
-                      scale: "1.1",
-                      fontWeight: "500",
-                    },
-                  }}
-                >
-                  Warranty Policy
-                </Typography>
+                Warranty Policy
               </Typography>
             </Box>
             <Box
@@ -761,69 +805,44 @@ const Navigation = () => {
               }}
             >
               <PhoneInTalk />
-              <Typography sx={{ padding: "5px 10px", fontWeight: "600", display: { xs: "none", md: "block" } }}>
+              <Typography
+                sx={{
+                  padding: "5px 10px",
+                  fontWeight: "600",
+                  display: { xs: "none", md: "block" },
+                }}
+              >
                 Customer care: 1900 0019
               </Typography>
-              <Typography sx={{ padding: "5px 10px", fontWeight: "600", display: { xs: "block", md: "none" } }}>
+              <Typography
+                sx={{
+                  padding: "5px 10px",
+                  fontWeight: "600",
+                  display: { xs: "block", md: "none" },
+                }}
+              >
                 : 1900 0019
               </Typography>
             </Box>
-            <Box sx={{ display: { xs: "flex" } }}>
-              <>
-                {/* Phần AppBar và Toolbar */}
-                <Box sx={{ display: "flex", flexGrow: 1 }}>
-                  <div>
-                    {isLoggedIn && (
-                      <>
-                        <IconButton
-                          size="large"
-                          edge="end"
-                          aria-label="account of current user"
-                          aria-haspopup="true"
-                          color="inherit"
-                          onClick={handleLogoutMenuOpen}
-                          sx={{
-                            borderRadius: 2,
-                            height: 40,
-                            transition:
-                              "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
-                            "&:hover": {
-                              backgroundColor: "white",
-                              color: "#ff469e",
-                            },
-                          }}
-                        >
-                          <AccountCircle />
-                          <Typography
-                            style={{
-                              color: "inherit",
-                              paddingLeft: 10,
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {username}
-                          </Typography>
-                        </IconButton>
-                        {/* Render menu Logout */}
-                        {renderLogoutMenu}
-                      </>
-                    )}
-                    {!isLoggedIn && (
+            <Box>
+              <Box sx={{ display: { xs: "flex" }, flexGrow: 1 }}>
+                <div>
+                  {isLoggedIn && (
+                    <>
                       <IconButton
                         size="large"
                         edge="end"
                         aria-label="account of current user"
                         aria-haspopup="true"
                         color="inherit"
-                        component={Link}
-                        to="signin"
+                        onClick={handleLogoutMenuOpen}
                         sx={{
                           borderRadius: 2,
                           height: 40,
                           transition:
                             "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
                           "&:hover": {
-                            backgroundColor: "white",
+                            backgroundColor: "#fff4fc",
                             color: "#ff469e",
                           },
                         }}
@@ -836,13 +855,47 @@ const Navigation = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          Login
+                          {username}
                         </Typography>
                       </IconButton>
-                    )}
-                  </div>
-                </Box>
-              </>
+                      {/* Render menu Logout */}
+                      {renderLogoutMenu}
+                    </>
+                  )}
+                  {!isLoggedIn && (
+                    <IconButton
+                      size="large"
+                      edge="end"
+                      aria-label="account of current user"
+                      aria-haspopup="true"
+                      color="inherit"
+                      component={Link}
+                      to="signin"
+                      sx={{
+                        borderRadius: 2,
+                        height: 40,
+                        transition:
+                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out",
+                        "&:hover": {
+                          backgroundColor: "#fff4fc",
+                          color: "#ff469e",
+                        },
+                      }}
+                    >
+                      <AccountCircle />
+                      <Typography
+                        style={{
+                          color: "inherit",
+                          paddingLeft: 10,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Login
+                      </Typography>
+                    </IconButton>
+                  )}
+                </div>
+              </Box>
             </Box>
           </Container>
         </AppBar>

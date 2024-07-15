@@ -240,15 +240,7 @@ export default function HomePage() {
   const listRef2 = useRef(null);
   const listRef3 = useRef(null);
   const listRef4 = useRef(null);
-  const listRef6 = useRef(null);
-
-  const scrollLeft6 = () => {
-    listRef6.current.scrollBy({ left: -460, behavior: "smooth" });
-  };
-
-  const scrollRight6 = () => {
-    listRef6.current.scrollBy({ left: 460, behavior: "smooth" });
-  };
+  const listRef5 = useRef(null);
 
   const scrollLeft1 = () => {
     listRef1.current.scrollBy({ left: -460, behavior: "smooth" });
@@ -257,6 +249,7 @@ export default function HomePage() {
   const scrollRight1 = () => {
     listRef1.current.scrollBy({ left: 460, behavior: "smooth" });
   };
+
   const scrollLeft2 = () => {
     listRef2.current.scrollBy({ left: -340, behavior: "smooth" });
   };
@@ -264,6 +257,7 @@ export default function HomePage() {
   const scrollRight2 = () => {
     listRef2.current.scrollBy({ left: 340, behavior: "smooth" });
   };
+
   const scrollLeft3 = () => {
     listRef3.current.scrollBy({ left: -340, behavior: "smooth" });
   };
@@ -271,12 +265,21 @@ export default function HomePage() {
   const scrollRight3 = () => {
     listRef3.current.scrollBy({ left: 340, behavior: "smooth" });
   };
+
   const scrollLeft4 = () => {
     listRef4.current.scrollBy({ left: -460, behavior: "smooth" });
   };
 
   const scrollRight4 = () => {
     listRef4.current.scrollBy({ left: 460, behavior: "smooth" });
+  };
+
+  const scrollLeft5 = () => {
+    listRef5.current.scrollBy({ left: -460, behavior: "smooth" });
+  };
+
+  const scrollRight5 = () => {
+    listRef5.current.scrollBy({ left: 460, behavior: "smooth" });
   };
 
   return (
@@ -1505,7 +1508,7 @@ export default function HomePage() {
             }}
           >
             <IconButton
-              onClick={scrollLeft6}
+              onClick={scrollLeft5}
               size="small"
               sx={{
                 position: "absolute",
@@ -1529,7 +1532,7 @@ export default function HomePage() {
               <ArrowLeft />
             </IconButton>
             <Box
-              ref={listRef6}
+              ref={listRef5}
               sx={{
                 display: "flex",
                 overflowX: "hidden",
@@ -1631,7 +1634,7 @@ export default function HomePage() {
               ))}
             </Box>
             <IconButton
-              onClick={scrollRight6}
+              onClick={scrollRight5}
               size="small"
               sx={{
                 position: "absolute",

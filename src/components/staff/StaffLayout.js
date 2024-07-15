@@ -153,18 +153,6 @@ export default function StaffLayout() {
         variant="permanent"
         anchor="left"
       >
-        {/* <div
-          style={{ display: "flex", flexDirection: "row", textAlign: "center" }}
-        >
-          <img
-            src={Logo}
-            style={{ width: "80px", height: "80px", my: 1, pt: 1 }}
-            alt="logo"
-          />
-          <Typography sx={{ alignSelf: "center" }}>
-            Welcome, {username}
-          </Typography>
-        </div> */}
         <Box
           sx={{
             display: "flex",
@@ -179,45 +167,40 @@ export default function StaffLayout() {
             borderBottom: "1px solid #ff469e",
           }}
         >
-          <img
-            src={Logo2}
-            style={{
-              width: "90px",
-              height: "90px",
-              my: 1,
-              pt: 1,
-              borderRadius: "10px",
-            }}
-            alt="logo"
-          />
-          <IconButton
-            onClick={() => navigate("/staff/storeprofile")}
-            sx={{
-              color: "white",
-              "&:hover": { backgroundColor: "white", color: "#ff469e" },
-            }}
-          >
-            <PortraitIcon />
-          </IconButton>
           <Box
             sx={{
+              position: "relative",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              mt: 0,
+              width: "100%",
+              height: "100px",
             }}
           >
-            <Typography
+            <IconButton
+              onClick={() => navigate("/staff/storeprofile")}
               sx={{
-                textAlign: "center",
-                fontSize: "1.25rem",
+                position: "absolute",
+                top: 0,
+                right: 0,
                 color: "white",
+                "&:hover": { backgroundColor: "white", color: "#ff469e" },
               }}
             >
-              Welcome, <span style={{ fontWeight: "bold" }}>{username}</span>
-            </Typography>
-            <Typography>
-              <Badge badgeContent={notifications.length} color="secondary">
+              <PortraitIcon />
+            </IconButton>
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: 40,
+                right: 0,
+                color: "white",
+                "&:hover": { backgroundColor: "white", color: "#ff469e" },
+              }}
+            >
+              <Badge badgeContent={notifications.length}>
                 <Tooltip
+                placement="right"
                   title={
                     <List>
                       {notifications.length > 0 ? (
@@ -240,15 +223,38 @@ export default function StaffLayout() {
                   <NotificationsNoneIcon
                     onClick={handleIconClick}
                     sx={{
-                      fontSize: "2rem",
-                      color: "yellow",
-                      ml: 1,
+                      color: "inherit",
                       cursor: "pointer",
-                      padding: "2px",
                     }}
                   />
                 </Tooltip>
               </Badge>
+            </IconButton>
+            <img
+              src={Logo2}
+              style={{
+                width: "90px",
+                height: "90px",
+                borderRadius: "10px",
+              }}
+              alt="logo"
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mt: 0,
+            }}
+          >
+            <Typography
+              sx={{
+                textAlign: "center",
+                fontSize: "1.25rem",
+                color: "white",
+              }}
+            >
+              Welcome, <span style={{ fontWeight: "bold" }}>{username}</span>
             </Typography>
           </Box>
         </Box>

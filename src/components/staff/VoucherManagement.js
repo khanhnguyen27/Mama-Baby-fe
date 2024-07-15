@@ -552,7 +552,7 @@ export default function Vouchers() {
                             <TableCell
                               colSpan={4}
                               align="center"
-                              style={{ color: "#ff469e", fontSize: "35px" }}
+                              style={{ color: "#ff469e", fontSize: '24px' }}
                             >
                               There's no items of this status
                             </TableCell>

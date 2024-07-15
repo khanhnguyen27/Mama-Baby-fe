@@ -18,15 +18,21 @@ import {
   Tabs,
   Tab,
   makeStyles,
+  Input,
 } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import SettingsIcon from "@mui/icons-material/Settings";
+import Eye from "@mui/icons-material/Visibility";
+import EyeSlash from "@mui/icons-material/VisibilityOff";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { clearCart } from "../../redux/CartSlice";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [user, setUser] = useState(null);
   const [openSetting, setOpenSetting] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
@@ -36,10 +42,15 @@ export default function Profile() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [rotate, setRotate] = useState(false);
 
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const fetchData = async () => {
@@ -81,20 +92,22 @@ export default function Profile() {
     const phoneNumberRegex = /^[0-9]{10}$/;
 
     if (!selectUser.full_name) {
-      toast.error("Full Name is required");
+      toast.error("Full Name is required", { autoClose: 1500 });
       return;
     }
     if (!selectUser.address) {
-      toast.error("Address is required");
+      toast.error("Address is required", { autoClose: 1500 });
       return;
     }
     if (!selectUser.phone_number) {
-      toast.error("Phone Number is required");
+      toast.error("Phone Number is required", { autoClose: 1500 });
       return;
     }
 
     if (!phoneNumberRegex.test(selectUser.phone_number)) {
-      toast.error("Phone Number must be a 10-digit number");
+      toast.error("Phone Number must be a 10-digit number", {
+        autoClose: 1500,
+      });
       return;
     }
     updateAccount(
@@ -105,14 +118,15 @@ export default function Profile() {
       selectUser.phone_number
     )
       .then((res) => {
-        toast.success("Update successfully");
+        toast.success("Update successfully", { autoClose: 1500 });
         fetchData();
+        setOpenSetting(false);
       })
       .catch((err) => {
         if (err.response && err.response.data) {
-          toast.error(err.response.data);
+          toast.error(err.response.data, { autoClose: 1500 });
         } else {
-          toast.error("Update failed");
+          toast.error("Update failed", { autoClose: 1500 });
         }
         console.log(err);
       });
@@ -120,23 +134,25 @@ export default function Profile() {
 
   const handleChangePassword = () => {
     if (!passwords.currentPassword) {
-      toast.warn("Current password is required!");
+      toast.warn("Current password is required!", { autoClose: 1500 });
       return;
     }
     if (!passwords.newPassword) {
-      toast.warn("New password is required!");
+      toast.warn("New password is required!", { autoClose: 1500 });
       return;
     }
     if (!passwords.confirmPassword) {
-      toast.warn("Confirm password is required!");
+      toast.warn("Confirm password is required!", { autoClose: 1500 });
       return;
     }
     if (passwords.newPassword.length < 8) {
-      toast.warn("New password must be at least 8 characters!");
+      toast.warn("New password must be at least 8 characters!", {
+        autoClose: 1500,
+      });
       return;
     }
     if (passwords.newPassword !== passwords.confirmPassword) {
-      toast.warn("New passwords do not match!");
+      toast.warn("New passwords do not match!", { autoClose: 1500 });
       return;
     }
     const pass = passwords.currentPassword + "|" + passwords.confirmPassword;
@@ -148,16 +164,24 @@ export default function Profile() {
       selectUser.phone_number
     )
       .then((res) => {
-        toast.success("Changing password successfully");
+        toast.success("Changing password successfully", { autoClose: 1500 });
         passwords.currentPassword = "";
         passwords.newPassword = "";
         passwords.confirmPassword = "";
+        setOpenSetting(false);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("username");
+        dispatch(clearCart());
+        setTimeout(() => {
+          navigate("/");
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }, 1000);
       })
       .catch((err) => {
         if (err.response && err.response.data) {
-          toast.error(err.response.data);
+          toast.error(err.response.data, { autoClose: 1500 });
         } else {
-          toast.error("Update failed");
+          toast.error("Update failed", { autoClose: 1500 });
         }
         console.log(err);
       });
@@ -350,8 +374,11 @@ export default function Profile() {
             onClick={handleOpenSetting}
             sx={{
               fontSize: "2rem",
-              transform: rotate ? "rotate(360deg)" : "rotate(0deg)",
+              transform: rotate ? "rotate(180deg)" : "rotate(0deg)",
               transition: "transform 0.5s ease-in-out",
+              "&:hover": {
+                color: "#ff469e",
+              },
             }}
           />
         </IconButton>
@@ -620,8 +647,13 @@ export default function Profile() {
         >
           Profile Settings
         </DialogTitle>
-        <DialogContent>
-          <Tabs value={tabIndex} onChange={handleTabChange} centered>
+        <DialogContent sx={{ color: "#ff469e" }}>
+          <Tabs
+            value={tabIndex}
+            onChange={handleTabChange}
+            centered
+            textColor="inherit"
+          >
             <Tab label="Basic Info" />
             <Tab label="Change Password" />
           </Tabs>
@@ -668,37 +700,166 @@ export default function Profile() {
           )}
           {tabIndex === 1 && (
             <Box mt={2}>
-              <TextField
+              <Input
                 margin="normal"
-                label="Current Password"
-                type="password"
+                placeholder="Current Password"
+                type={showPassword ? "text" : "password"}
                 fullWidth
+                disableUnderline
                 onChange={(e) =>
                   setPasswords({
                     ...passwords,
                     currentPassword: e.target.value,
                   })
                 }
+                sx={{
+                  border: "1px solid #ff469e",
+                  my: 1.2,
+                  padding: "5px 14px",
+                  fontSize: "18px",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  backgroundColor: "#fff",
+                  boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+                  transition: "box-shadow 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "#F8F8F8",
+                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.24)",
+                    animation: `glow 1.5s infinite`,
+                  },
+                  "&.Mui-focused": {
+                    backgroundColor: "#F8F8F8",
+                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.32)",
+                    animation: `glow 1.5s infinite`,
+                    outline: "none",
+                  },
+                  "@keyframes glow": {
+                    "0%": {
+                      boxShadow: "0 0 3px #ff469e",
+                    },
+                    "50%": {
+                      boxShadow: "0 0 5px #ff469e",
+                    },
+                    "100%": {
+                      boxShadow: "0 0 3px #ff469e",
+                    },
+                  },
+                }}
+                endAdornment={
+                  <IconButton
+                    sx={{ color: "#ff469e" }}
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <EyeSlash /> : <Eye />}
+                  </IconButton>
+                }
               />
-              <TextField
+              <Input
                 margin="normal"
-                label="New Password"
-                type="password"
+                placeholder="New Password"
+                type={showPassword ? "text" : "password"}
                 fullWidth
+                disableUnderline
                 onChange={(e) =>
                   setPasswords({ ...passwords, newPassword: e.target.value })
                 }
+                sx={{
+                  border: "1px solid #ff469e",
+                  my: 1.2,
+                  padding: "5px 14px",
+                  fontSize: "18px",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  backgroundColor: "#fff",
+                  boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+                  transition: "box-shadow 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "#F8F8F8",
+                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.24)",
+                    animation: `glow 1.5s infinite`,
+                  },
+                  "&.Mui-focused": {
+                    backgroundColor: "#F8F8F8",
+                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.32)",
+                    animation: `glow 1.5s infinite`,
+                    outline: "none",
+                  },
+                  "@keyframes glow": {
+                    "0%": {
+                      boxShadow: "0 0 3px #ff469e",
+                    },
+                    "50%": {
+                      boxShadow: "0 0 5px #ff469e",
+                    },
+                    "100%": {
+                      boxShadow: "0 0 3px #ff469e",
+                    },
+                  },
+                }}
+                endAdornment={
+                  <IconButton
+                    sx={{ color: "#ff469e" }}
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <EyeSlash /> : <Eye />}
+                  </IconButton>
+                }
               />
-              <TextField
+              <Input
                 margin="normal"
-                label="Confirm New Password"
-                type="password"
+                placeholder="Confirm New Password"
+                type={showPassword ? "text" : "password"}
                 fullWidth
+                disableUnderline
                 onChange={(e) =>
                   setPasswords({
                     ...passwords,
                     confirmPassword: e.target.value,
                   })
+                }
+                sx={{
+                  border: "1px solid #ff469e",
+                  my: 1.2,
+                  padding: "5px 14px",
+                  fontSize: "18px",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  backgroundColor: "#fff",
+                  boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+                  transition: "box-shadow 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "#F8F8F8",
+                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.24)",
+                    animation: `glow 1.5s infinite`,
+                  },
+                  "&.Mui-focused": {
+                    backgroundColor: "#F8F8F8",
+                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.32)",
+                    animation: `glow 1.5s infinite`,
+                    outline: "none",
+                  },
+                  "@keyframes glow": {
+                    "0%": {
+                      boxShadow: "0 0 3px #ff469e",
+                    },
+                    "50%": {
+                      boxShadow: "0 0 5px #ff469e",
+                    },
+                    "100%": {
+                      boxShadow: "0 0 3px #ff469e",
+                    },
+                  },
+                }}
+                endAdornment={
+                  <IconButton
+                    sx={{ color: "#ff469e" }}
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <EyeSlash /> : <Eye />}
+                  </IconButton>
                 }
               />
             </Box>

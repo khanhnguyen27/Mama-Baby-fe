@@ -146,7 +146,6 @@ export default function StoreProfile() {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "80vh",
-        marginTop: "7rem",
         backgroundColor: "#f5f7fd",
         padding: "20px",
         position: "relative",
@@ -169,7 +168,7 @@ export default function StoreProfile() {
               borderRadius: "0 4px 4px 0",
               padding: "5px 10px",
               position: "absolute",
-              top: "80px",
+              top: "160px",
               right: "-25px",
               boxShadow: "0 0 0 3px white",
             },
@@ -185,6 +184,7 @@ export default function StoreProfile() {
               padding: "20px",
               maxWidth: "1000px",
               width: "100%",
+              marginTop: "5rem",
               position: "relative",
             }}
           >
@@ -281,7 +281,6 @@ export default function StoreProfile() {
                         <Typography
                           sx={{
                             color: "black",
-                            fontSize: 25,
                           }}
                         >
                           <LocationOnIcon
