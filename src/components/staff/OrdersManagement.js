@@ -715,9 +715,7 @@ export default function OrdersManagement() {
                                         borderRadius: "10px",
                                       }}
                                       image={
-                                        productMap[
-                                          detail.product_id
-                                        ][4] &&
+                                        productMap[detail.product_id][4] &&
                                         productMap[
                                           detail.product_id
                                         ][4]?.includes("Product_")
@@ -1123,15 +1121,15 @@ export default function OrdersManagement() {
                         </Button>
                         <Button
                           variant="contained"
-                          disabled={
-                            (item.type === "PRE_ORDER" &&
-                              item.order_detail_list.some(
-                                (item) =>
-                                  productMap[item.product_id][5] ===
-                                  "COMING SOON"
-                              )) ||
-                            isDisabled
-                          }
+                          // disabled={
+                          //   (item.type === "PRE_ORDER" &&
+                          //     item.order_detail_list.some(
+                          //       (item) =>
+                          //         productMap[item.product_id][5] ===
+                          //         "COMING SOON"
+                          //     )) ||
+                          //   isDisabled
+                          // }
                           sx={{
                             backgroundColor: "white",
                             color: "#ff469e",
