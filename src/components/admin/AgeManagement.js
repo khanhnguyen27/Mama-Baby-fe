@@ -396,7 +396,7 @@ export default function AgeManagement() {
                   <TableBody>
                     {noData ? (
                       <TableRow>
-                        <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '35px' }}>There's no items of this status</TableCell>
+                        <TableCell colSpan={4} align="center" style={{ color: '#ff469e', fontSize: '24px' }}>There's no items of this status</TableCell>
                       </TableRow>
                     ) : (
                       currentItems.map((item, index) => (

@@ -62,7 +62,7 @@ const Promotion = () => {
             animation: "slideIn 1.5s ease-in-out",
             "@keyframes slideIn": {
               from: {
-                transform: "translateY(60%)",
+                transform: "translateY(50%)",
               },
               to: {
                 transform: "translateY(0)",

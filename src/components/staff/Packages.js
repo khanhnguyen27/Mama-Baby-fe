@@ -163,6 +163,7 @@ export default function Package() {
                   borderRadius: "20px",
                   boxShadow: 4,
                   transition: "0.3s ease-in-out",
+                  border: "1px solid white",
                   "&:hover": {
                     boxShadow: 6,
                     transform: "scale(1.02)",
@@ -183,11 +184,12 @@ export default function Package() {
                     gutterBottom
                     sx={{ fontWeight: "bold" }}
                   >
-                    {formatCurrency(pkg.price)}/{pkg.month} month
+                    {formatCurrency(pkg.price)} / {pkg.month} month
                   </Typography>
                   <Typography variant="body1" gutterBottom>
                     {pkg.description}
                   </Typography>
+                  <Box sx={{ width: "100%", textAlign: "right"}}>
                   <Button
                     variant="outlined"
                     sx={{
@@ -212,6 +214,7 @@ export default function Package() {
                   >
                     Buy Package
                   </Button>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>
