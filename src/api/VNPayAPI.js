@@ -16,12 +16,11 @@ export const makePaymentApi = (finalAmount, bankCode, orderId, storeId) => {
   });
 };
 
-export const makePackagePaymentApi = (finalAmount, bankCode, packageId, storeId) => {
+export const makePackagePaymentApi = (finalAmount, bankCode, storePackageId) => {
   return axiosJWT.post(URL_MAKEPAYMENT, {
     finalAmount: finalAmount,
     bankCode: bankCode,
-    packageId: packageId,
-    storeId: storeId
+    storePackageId: storePackageId,
   });
 };
 
