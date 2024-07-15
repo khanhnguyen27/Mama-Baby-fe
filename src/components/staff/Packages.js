@@ -94,7 +94,7 @@ export default function Package() {
             toast.success("Now moving to payment page!", { autoClose: 1000 });
             setTimeout(() => {
               window.location.replace(res.data?.data?.payment_url);
-            }, 1);
+            }, 1500);
           })
           .catch((error) => {
             console.error("There was an error initiating the payment!", error);
@@ -183,7 +183,7 @@ export default function Package() {
                     gutterBottom
                     sx={{ fontWeight: "bold" }}
                   >
-                    {formatCurrency(pkg.price)} /{pkg.month} month
+                    {formatCurrency(pkg.price)}/{pkg.month} month
                   </Typography>
                   <Typography variant="body1" gutterBottom>
                     {pkg.description}
@@ -191,12 +191,21 @@ export default function Package() {
                   <Button
                     variant="outlined"
                     sx={{
-                      textAlign: "right",
+                      ml: "auto",
+                      backgroundColor: "white",
                       color: "#ff469e",
+                      borderRadius: "30px",
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      mt: 2,
+                      width: "10vw",
+                      transition:
+                        "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                       border: "1px solid #ff469e",
                       "&:hover": {
                         backgroundColor: "#ff469e",
                         color: "white",
+                        border: "1px solid white",
                       },
                     }}
                     onClick={() => handleCheckout(pkg)}

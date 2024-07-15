@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { allStoreApi,storeByUserIdApi } from "../../api/StoreAPI";
+import { allStoreApi, storeByUserIdApi } from "../../api/StoreAPI";
 import {
   Card,
   CardContent,
@@ -30,7 +30,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function StoreProfile() {
-  window.document.title = "Store Profile"
+  window.document.title = "Store Profile";
   const [store, setStore] = useState(null);
   const [openLicense, setOpenLicense] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -659,36 +659,33 @@ export default function StoreProfile() {
                 <DialogActions>
                   <Button
                     sx={{
-                      ml: "auto",
-                      backgroundColor: "white",
-                      color: "#ff469e",
+                      backgroundColor: "#F0F8FF",
+                      color: "#757575",
                       borderRadius: "30px",
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: "bold",
-                      width: "15vw",
+                      width: "10vw",
                       transition:
                         "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                      border: "1px solid #ff469e",
+                      border: "1px solid #757575",
                       "&:hover": {
-                        backgroundColor: "#ff469e",
+                        backgroundColor: "#757575",
                         color: "white",
                         border: "1px solid white",
                       },
                     }}
                     onClick={handleCloseUpdateDialog}
-                    color="primary"
                   >
                     Cancel
                   </Button>
                   <Button
                     sx={{
-                      ml: "auto",
-                      backgroundColor: "white",
+                      backgroundColor: "#F0F8FF",
                       color: "#ff469e",
                       borderRadius: "30px",
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: "bold",
-                      width: "15vw",
+                      width: "10vw",
                       transition:
                         "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                       border: "1px solid #ff469e",
@@ -699,7 +696,6 @@ export default function StoreProfile() {
                       },
                     }}
                     onClick={handleSave}
-                    color="primary"
                   >
                     Save
                   </Button>
