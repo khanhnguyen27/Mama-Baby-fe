@@ -190,9 +190,15 @@ export default function StaffLayout() {
             }}
             alt="logo"
           />
-          <IconButton onClick={() => navigate("/staff/storeprofile")} sx={{ color: "white", "&:hover": { backgroundColor: "white", color: "#ff469e"}}}>
-              <PortraitIcon />
-            </IconButton>
+          <IconButton
+            onClick={() => navigate("/staff/storeprofile")}
+            sx={{
+              color: "white",
+              "&:hover": { backgroundColor: "white", color: "#ff469e" },
+            }}
+          >
+            <PortraitIcon />
+          </IconButton>
           <Box
             sx={{
               display: "flex",
