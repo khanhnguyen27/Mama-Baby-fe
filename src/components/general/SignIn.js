@@ -89,7 +89,7 @@ const SignIn = () => {
           style={{
             backgroundImage:
               "url('https://png.pngtree.com/thumb_back/fh260/background/20190221/ourmid/pngtree-simple-cartoon-childlike-mother-and-baby-image_11542.jpg')",
-            height: "77vh",
+            height: "85vh",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",

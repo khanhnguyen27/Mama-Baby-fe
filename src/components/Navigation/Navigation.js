@@ -626,7 +626,7 @@ const Navigation = () => {
   return (
     <>
       <Box
-        sx={{ flexGrow: 1, margin: "0", height: "60px", marginBottom: "8px" }}
+        sx={{ flexGrow: 1, margin: "0", height: visible ? "10.5rem" : "60px", marginBottom: "8px" }}
       >
         <AppBar
           position="static"
@@ -906,8 +906,9 @@ const Navigation = () => {
           sx={{
             backgroundColor: "white",
             color: "black",
-            padding: "10px 40px",
+            padding: "10px 0px",
             boxShadow: 1,
+            opacity: visible ? 0.98 : 1
           }}
         >
           <Container

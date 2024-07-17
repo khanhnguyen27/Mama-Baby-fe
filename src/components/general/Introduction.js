@@ -31,6 +31,7 @@ const Introduction = () => {
           <Breadcrumbs separator=">" sx={{ color: "black", pt: 4 }}>
             <Link
               to="/"
+              onClick={() => window.scrollTo(0, 0)}
               style={{
                 textDecoration: "none",
               }}
