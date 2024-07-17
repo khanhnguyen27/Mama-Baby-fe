@@ -582,12 +582,13 @@ export default function Cart() {
         padding: "20px",
       }}
     >
-      <Container sx={{ my: 4 }}>
+      <Container sx={{ my: 4, minHeight: "62vh" }}>
         <Card
           sx={{
             backgroundColor: "#fff4fc",
             border: "3px solid #ff469e",
             borderRadius: "20px",
+            minHeight: "60vh",
           }}
         >
           <Typography
@@ -685,7 +686,6 @@ export default function Cart() {
                                 justifyContent: "space-between",
                                 alignItems: "center",
                                 height: "100%",
-                                mt: 1,
                               }}
                             >
                               <Tabs
@@ -694,15 +694,72 @@ export default function Cart() {
                                   handleTabChange(storeId, event, newValue)
                                 }
                                 centered
-                                textColor="inherit"
-                                sx={{
-                                  "& .MuiTabs-indicator": {
-                                    display: "none",
-                                  },
+                                scrollButtons="auto"
+                                TabIndicatorProps={{
+                                  style: { display: "none" },
                                 }}
+                                sx={{ mt: 1.25}}
                               >
-                                <Tab label="WholeSale" sx={{ padding: 0 }} />
-                                <Tab label="PreOrder" sx={{ padding: 0 }} />
+                                <Tab
+                                  label="WholeSale"
+                                  sx={{
+                                    backgroundColor:
+                                      tabStates[storeId] === "WholeSale"
+                                        ? "#ff469e"
+                                        : "#fff4fc",
+                                    color:
+                                      tabStates[storeId] === "WholeSale"
+                                        ? "white"
+                                        : "#ff469e",
+                                    borderRadius: "20px",
+                                    minHeight: "30px",
+                                    minWidth: "100px",
+                                    m: 0.25,
+                                    fontWeight: "bold",
+                                    boxShadow: "none",
+                                    transition:
+                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                    "&.Mui-selected": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                  }}
+                                />
+                                <Tab
+                                  label="PreOrder"
+                                  sx={{
+                                    backgroundColor:
+                                      tabStates[storeId] === "PreOrder"
+                                        ? "#ff469e"
+                                        : "#fff4fc",
+                                    color:
+                                      tabStates[storeId] === "PreOrder"
+                                        ? "white"
+                                        : "#ff469e",
+                                    borderRadius: "20px",
+                                    minHeight: "30px",
+                                    minWidth: "100px",
+                                    m: 0.25,
+                                    fontWeight: "bold",
+                                    boxShadow: "none",
+                                    transition:
+                                      "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                    "&.Mui-selected": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                    },
+                                  }}
+                                />
                               </Tabs>
                             </Typography>
                             {(tabStates[storeId] || 0) === 0 ? (
@@ -719,7 +776,7 @@ export default function Cart() {
                                     fontSize: "1rem",
                                     fontWeight: "bold",
                                     mt: 1.5,
-                                    minWidth: "12vw",
+                                    minWidth: "10vw",
                                     transition:
                                       "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                                     border: "1px solid #ff469e",
@@ -1821,7 +1878,7 @@ export default function Cart() {
                                     fontSize: "1rem",
                                     fontWeight: "bold",
                                     mt: 1.5,
-                                    minWidth: "12vw",
+                                    minWidth: "10vw",
                                     transition:
                                       "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
                                     border: "1px solid #ff469e",
@@ -3355,8 +3412,9 @@ export default function Cart() {
                                 <Typography
                                   sx={{
                                     fontSize: "1.25rem",
-                                    fontWeight: "bold",
+                                    fontWeight: "600",
                                     textAlign: "center",
+                                    color: "#ff469e",
                                     mt: 3,
                                   }}
                                 >

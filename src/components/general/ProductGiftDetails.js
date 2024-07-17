@@ -237,6 +237,7 @@ export default function ProductDetails() {
         <Breadcrumbs separator=">" sx={{ color: "black" }}>
           <Link
             to="/"
+            onClick={() => window.scrollTo(0, 0)}
             style={{
               textDecoration: "none",
             }}
@@ -433,7 +434,14 @@ export default function ProductDetails() {
                             mt: 1,
                           }}
                         >
-                          <Typography variant="h5" sx={{ textAlign: "left", color: "#ff469e", fontWeight: "bold" }}>
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              textAlign: "left",
+                              color: "#ff469e",
+                              fontWeight: "bold",
+                            }}
+                          >
                             {formatCurrencyPoint(product.point)}
                           </Typography>
                           <Typography
@@ -554,7 +562,9 @@ export default function ProductDetails() {
                           </Button>
                           <Button
                             variant="contained"
-                            disabled={quantity >= 99 || quantity >= product.remain}
+                            disabled={
+                              quantity >= 99 || quantity >= product.remain
+                            }
                             onClick={() => setQuantity(quantity + 1)}
                             sx={{
                               backgroundColor: "white",
@@ -575,7 +585,9 @@ export default function ProductDetails() {
                           </Button>
                           <Button
                             variant="contained"
-                            disabled={quantity >= 99 || quantity >= product.remain}
+                            disabled={
+                              quantity >= 99 || quantity >= product.remain
+                            }
                             onClick={() =>
                               setQuantity((prevQuantity) =>
                                 Math.min(99, product.remain, prevQuantity + 10)

@@ -173,6 +173,7 @@ export default function ArticleDetail() {
           <Breadcrumbs separator=">" sx={{ color: "black" }}>
             <Link
               to="/"
+              onClick={() => window.scrollTo(0, 0)}
               style={{
                 textDecoration: "none",
               }}

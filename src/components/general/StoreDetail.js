@@ -225,6 +225,7 @@ export default function StoreDetail() {
         <Breadcrumbs separator=">" sx={{ color: "black" }}>
           <Link
             to="/"
+            onClick={() => window.scrollTo(0, 0)}
             style={{
               textDecoration: "none",
             }}
@@ -489,7 +490,7 @@ export default function StoreDetail() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
-            boxShadow: 2
+            boxShadow: 2,
           }}
         >
           <Box
@@ -644,7 +645,7 @@ export default function StoreDetail() {
             background: "white",
             padding: "1rem",
             marginTop: "3rem",
-            boxShadow: 2
+            boxShadow: 2,
           }}
         >
           <Box
