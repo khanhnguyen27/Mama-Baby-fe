@@ -155,6 +155,13 @@ export default function Profile() {
       toast.warn("New passwords do not match!", { autoClose: 1500 });
       return;
     }
+    if (passwords.newPassword === passwords.currentPassword) {
+      toast.warn(
+        "The new password must not be the same as the current password!",
+        { autoClose: 1500 }
+      );
+      return;
+    }
     const pass = passwords.currentPassword + "|" + passwords.confirmPassword;
     updateAccount(
       selectUser.username,

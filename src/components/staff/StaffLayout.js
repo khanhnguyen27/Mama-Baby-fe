@@ -200,7 +200,7 @@ export default function StaffLayout() {
             >
               <Badge badgeContent={notifications.length}>
                 <Tooltip
-                placement="right"
+                  placement="right"
                   title={
                     <List>
                       {notifications.length > 0 ? (

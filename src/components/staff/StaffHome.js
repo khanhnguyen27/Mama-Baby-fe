@@ -3009,11 +3009,7 @@ export default function StaffHome() {
               <Grid item xs={1.5}>
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Unit</InputLabel>
-                  <Select
-                    value={unit}
-                    onChange={handleUnitChange}
-                    label="Brand"
-                  >
+                  <Select value={unit} onChange={handleUnitChange} label="Unit">
                     <MenuItem value="g">g</MenuItem>
                     <MenuItem value="ml">ml</MenuItem>
                   </Select>

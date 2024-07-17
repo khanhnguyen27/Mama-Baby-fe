@@ -16,6 +16,8 @@ import {
   Modal,
   TextField,
   FormControl,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { Close, KeyboardCapslock } from "@mui/icons-material";
 import {
@@ -72,6 +74,7 @@ export default function Cart() {
   const statusComingSoon = "COMING SOON";
   const statusInStock = "IN STOCK";
   const prepayPercent = 30 / 100;
+  const [tabStates, setTabStates] = useState({});
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -144,8 +147,6 @@ export default function Cart() {
     }
     return acc;
   }, {});
-
-  console.log(groupedCartItems);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
@@ -243,6 +244,11 @@ export default function Cart() {
       [storeId]: !prevStores[storeId],
     }));
 
+    if (!groupedCartItems[storeId]?.comingSoon.length > 0) {
+      toast.warn("There are currently no products!");
+      return;
+    }
+
     if (typeof updatedState?.then === "function") {
       updatedState.then(() => {
         !isEmptyCart && handleOpen();
@@ -259,6 +265,11 @@ export default function Cart() {
       ...prevStores,
       [storeId]: !prevStores[storeId],
     }));
+
+    if (!groupedCartItems[storeId]?.inStock.length > 0) {
+      toast.warn("There are currently no products!");
+      return;
+    }
 
     if (typeof updatedState?.then === "function") {
       updatedState.then(() => {
@@ -557,6 +568,11 @@ export default function Cart() {
     });
     return finalAmount;
   };
+
+  const handleTabChange = (storeId, event, newValue) => {
+    setTabStates((prevState) => ({ ...prevState, [storeId]: newValue }));
+  };
+
   return (
     <div
       style={{
@@ -629,7 +645,8 @@ export default function Cart() {
                           </Typography>
                         }
                       /> */}
-                      {groupedCartItems[storeId].comingSoon.length > 0 && (
+                      {(groupedCartItems[storeId].comingSoon.length > 0 ||
+                        groupedCartItems[storeId].inStock.length > 0) && (
                         <>
                           <Box
                             sx={{
@@ -643,11 +660,8 @@ export default function Cart() {
                                 fontSize: "1.5rem",
                                 color: "#ff469e",
                                 fontWeight: "bold",
-                                mt: 2, // marginTop: "1rem"
-                                ml: 3, // marginLeft: "1.5rem"
-                                // "&:hover": {
-                                //   transform: "scale(1.05)",
-                                // },
+                                mt: 2,
+                                ml: 3,
                               }}
                               onClick={() =>
                                 navigate(
@@ -662,348 +676,354 @@ export default function Cart() {
                             >
                               {storeMap[storeId]}
                             </Typography>
-                            <Button
-                              variant="contained"
-                              onClick={() => handleStoreChange(storeId)}
+                            <Typography
                               sx={{
-                                backgroundColor: "white",
-                                color: "#ff469e",
-                                borderRadius: "10px",
-                                fontSize: "1rem",
+                                cursor: "pointer",
+                                fontSize: "1.5rem",
                                 fontWeight: "bold",
-                                mt: 1.5,
-                                minWidth: "12vw",
-                                transition:
-                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                border: "1px solid #ff469e",
-                                "&:hover": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  border: "1px solid white",
-                                },
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                height: "100%",
+                                mt: 1,
                               }}
                             >
-                              Checkout
-                            </Button>
-                            <Modal
-                              open={open}
-                              onClose={handleClose}
-                              slotProps={{
-                                backdrop: {
-                                  style: {
-                                    backgroundColor: "rgba(0, 0, 0, 0.1)",
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
+                              <Tabs
+                                value={tabStates[storeId] || 0}
+                                onChange={(event, newValue) =>
+                                  handleTabChange(storeId, event, newValue)
+                                }
+                                centered
+                                textColor="inherit"
                                 sx={{
-                                  position: "absolute",
-                                  top: "50%",
-                                  left: "50%",
-                                  transform: "translate(-50%, -50%)",
-                                  width: "90%",
-                                  borderRadius: "10px",
-                                  maxWidth: 1000,
-                                  maxHeight: "85vh",
-                                  overflowY: "auto",
-                                  backgroundColor: "#fff4fc",
-                                  border: "2px solid #ff469e",
-                                  boxShadow: 20,
-                                  p: 4,
-                                  "&::-webkit-scrollbar": {
-                                    width: "0.6rem",
-                                  },
-                                  "&::-webkit-scrollbar-track": {
-                                    background: "#f5f7fd",
-                                    borderRadius: "0.6rem",
-                                    my: 0.25,
-                                  },
-                                  "&::-webkit-scrollbar-thumb": {
-                                    background: "#ff469e",
-                                    borderRadius: "0.6rem",
-                                  },
-                                  "&::-webkit-scrollbar-thumb:hover": {
-                                    background: "#ffbbd0",
+                                  "& .MuiTabs-indicator": {
+                                    display: "none",
                                   },
                                 }}
                               >
-                                <div style={{ textAlign: "right" }}>
-                                  <IconButton onClick={handleClose}>
-                                    <Close
-                                      fontSize="large"
-                                      sx={{
-                                        color: "#ff469e",
-                                        borderRadius: "30px",
-                                        boxShadow: "none",
-                                        transition: "0.3s ease-in-out",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                          transform: "scale(1.1)",
-                                        },
-                                      }}
-                                    />
-                                  </IconButton>
-                                </div>
-                                <Grid container spacing={2} sx={{ mb: 3 }}>
-                                  <Grid item xs={12} md={8}>
-                                    <Box>
-                                      <Typography
-                                        sx={{
-                                          fontWeight: "bold",
-                                          fontSize: "1.25rem",
-                                        }}
-                                      >
-                                        Your Information:
-                                      </Typography>
-
-                                      <div
-                                        style={{ margin: "0.25rem 0.25rem" }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            fontWeight: "600",
-                                          }}
-                                        >
-                                          Full Name:
-                                        </span>
-                                        <TextField
-                                          fullWidth
-                                          onChange={handleFullNameChange}
-                                          value={fullName}
-                                          placeholder="Enter your full name"
-                                          size="small"
-                                          variant="outlined"
-                                          InputProps={{
-                                            sx: {
-                                              padding: 0,
-                                              border: "1px solid #ff469e",
-                                              borderRadius: "7px",
-                                              backgroundColor: "white",
-                                              transition: "0.2s ease-in-out",
-                                              "&:hover": {
-                                                border: "1px solid #ff469e",
-                                              },
-                                              "&:focus": {
-                                                backgroundColor: "#F8F8F8",
-                                              },
-                                              "&.Mui-focused": {
-                                                border: "1px solid #ff469e",
-                                                backgroundColor: "#F8F8F8",
-                                                boxShadow:
-                                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                                outline: "none",
-                                              },
-                                              "& .MuiOutlinedInput-notchedOutline":
-                                                {
-                                                  border: "none",
-                                                },
-                                            },
-                                          }}
-                                        />
-                                      </div>
-
-                                      <div
-                                        style={{ margin: "0.25rem 0.25rem" }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            fontWeight: "600",
-                                          }}
-                                        >
-                                          Phone:
-                                        </span>
-                                        <TextField
-                                          fullWidth
-                                          onChange={handlePhoneChange}
-                                          value={phone}
-                                          placeholder="Enter your phone"
-                                          size="small"
-                                          variant="outlined"
-                                          InputProps={{
-                                            sx: {
-                                              padding: 0,
-                                              border: "1px solid #ff469e",
-                                              borderRadius: "7px",
-                                              backgroundColor: "white",
-                                              transition: "0.2s ease-in-out",
-                                              "&:hover": {
-                                                border: "1px solid #ff469e",
-                                              },
-                                              "&:focus": {
-                                                backgroundColor: "#F8F8F8",
-                                              },
-                                              "&.Mui-focused": {
-                                                border: "1px solid #ff469e",
-                                                backgroundColor: "#F8F8F8",
-                                                boxShadow:
-                                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                                outline: "none",
-                                              },
-                                              "& .MuiOutlinedInput-notchedOutline":
-                                                {
-                                                  border: "none",
-                                                },
-                                            },
-                                          }}
-                                        />
-                                      </div>
-
-                                      <div
-                                        style={{ margin: "0.25rem 0.25rem" }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            fontWeight: "600",
-                                          }}
-                                        >
-                                          Address:
-                                        </span>
-                                        <TextField
-                                          fullWidth
-                                          onChange={handleAdressChange}
-                                          value={address}
-                                          placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
-                                          size="small"
-                                          variant="outlined"
-                                          InputProps={{
-                                            sx: {
-                                              padding: 0,
-                                              border: "1px solid #ff469e",
-                                              borderRadius: "7px",
-                                              backgroundColor: "white",
-                                              transition: "0.2s ease-in-out",
-                                              "&:hover": {
-                                                border: "1px solid #ff469e",
-                                              },
-                                              "&:focus": {
-                                                backgroundColor: "#F8F8F8",
-                                              },
-                                              "&.Mui-focused": {
-                                                border: "1px solid #ff469e",
-                                                backgroundColor: "#F8F8F8",
-                                                boxShadow:
-                                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                                outline: "none",
-                                              },
-                                              "& .MuiOutlinedInput-notchedOutline":
-                                                {
-                                                  border: "none",
-                                                },
-                                            },
-                                          }}
-                                        />
-                                      </div>
-                                    </Box>
-                                  </Grid>
-                                  <Grid item xs={12} md={4} lg={4}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: "bold",
-                                        fontSize: "1.25rem",
-                                      }}
-                                    >
-                                      Choose a voucher:
-                                    </Typography>
-                                    <Box
-                                      sx={{
-                                        py: 2,
-                                        px: 2,
-                                        mt: 3,
-                                        backgroundColor: "white",
-                                        borderRadius: "20px",
-                                        border: "1px solid #ff469e",
-                                        boxShadow:
-                                          "0px 1px 3px rgba(0, 0, 0.16)",
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="h6"
-                                        sx={{ mb: 2 }}
-                                      ></Typography>
-                                      <Select
-                                        fullWidth
-                                        displayEmpty
-                                        defaultValue=""
-                                        value={selectedVoucher}
-                                        onChange={handleVoucherChange}
-                                        sx={{
-                                          backgroundColor: "#fff4fc",
-                                          color: "#ff469e",
-                                          borderRadius: "20px",
-                                          fontSize: "20px",
-                                          border: "1px solid #ff469e",
-                                          boxShadow:
-                                            "0 3px 6px rgba(0, 0, 0, 0.16)",
-                                          transition:
-                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                                          "&:hover": {
-                                            color: "white",
-                                            backgroundColor: "#ff469e",
-                                            border: "1px solid white",
-                                          },
-                                          "& .MuiOutlinedInput-notchedOutline":
-                                            {
-                                              border: "none",
-                                            },
-                                          "& .MuiSvgIcon-root": {
-                                            color: "inherit",
-                                          },
-                                        }}
-                                        MenuProps={{
-                                          sx: {
-                                            "& .MuiMenu-list": {
-                                              backgroundColor: "white",
-                                              borderRadius: "10px",
-                                              boxShadow:
-                                                "0 2px 8px rgba(0, 0, 0, 0.16)",
-                                            },
-                                          },
-                                        }}
-                                      >
-                                        <MenuItem
-                                          key={null}
-                                          value={""}
+                                <Tab label="WholeSale" sx={{ padding: 0 }} />
+                                <Tab label="PreOrder" sx={{ padding: 0 }} />
+                              </Tabs>
+                            </Typography>
+                            {(tabStates[storeId] || 0) === 0 ? (
+                              <>
+                                <Button
+                                  variant="contained"
+                                  onClick={() =>
+                                    handleStoreChangeForInStock(storeId)
+                                  }
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "10px",
+                                    fontSize: "1rem",
+                                    fontWeight: "bold",
+                                    mt: 1.5,
+                                    minWidth: "12vw",
+                                    transition:
+                                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                      border: "1px solid white",
+                                    },
+                                  }}
+                                >
+                                  Checkout
+                                </Button>
+                                <Modal
+                                  open={openInStock}
+                                  onClose={handleCloseInStock}
+                                  slotProps={{
+                                    backdrop: {
+                                      style: {
+                                        backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      top: "50%",
+                                      left: "50%",
+                                      transform: "translate(-50%, -50%)",
+                                      width: "90%",
+                                      borderRadius: "10px",
+                                      maxWidth: 1000,
+                                      maxHeight: "85vh",
+                                      overflowY: "auto",
+                                      backgroundColor: "#fff4fc",
+                                      border: "2px solid #ff469e",
+                                      boxShadow: 20,
+                                      p: 4,
+                                      "&::-webkit-scrollbar": {
+                                        width: "0.6rem",
+                                      },
+                                      "&::-webkit-scrollbar-track": {
+                                        background: "#f5f7fd",
+                                        borderRadius: "0.6rem",
+                                        my: 0.25,
+                                      },
+                                      "&::-webkit-scrollbar-thumb": {
+                                        background: "#ff469e",
+                                        borderRadius: "0.6rem",
+                                      },
+                                      "&::-webkit-scrollbar-thumb:hover": {
+                                        background: "#ffbbd0",
+                                      },
+                                    }}
+                                  >
+                                    <div style={{ textAlign: "right" }}>
+                                      <IconButton onClick={handleCloseInStock}>
+                                        <Close
+                                          fontSize="large"
                                           sx={{
-                                            color: "black",
-                                            fontSize: "18px",
-                                            transition:
-                                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                            color: "#ff469e",
+                                            borderRadius: "30px",
+                                            boxShadow: "none",
+                                            transition: "0.3s ease-in-out",
                                             "&:hover": {
-                                              backgroundColor: "#fff4fc",
-                                              color: "#ff469e",
-                                            },
-                                            "&.Mui-selected": {
                                               backgroundColor: "#ff469e",
                                               color: "white",
-                                              "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
-                                              },
+                                              transform: "scale(1.1)",
                                             },
                                           }}
+                                        />
+                                      </IconButton>
+                                    </div>
+                                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                                      <Grid item xs={12} md={8}>
+                                        <Box>
+                                          <Typography
+                                            sx={{
+                                              fontWeight: "bold",
+                                              fontSize: "1.25rem",
+                                            }}
+                                          >
+                                            Your Information:
+                                          </Typography>
+
+                                          <div
+                                            style={{
+                                              margin: "0.25rem 0.25rem",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontSize: "1.05rem",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Full Name:
+                                            </span>
+                                            <TextField
+                                              fullWidth
+                                              onChange={handleFullNameChange}
+                                              value={fullName}
+                                              placeholder="Enter your full name"
+                                              size="small"
+                                              variant="outlined"
+                                              InputProps={{
+                                                sx: {
+                                                  padding: 0,
+                                                  border: "1px solid #ff469e",
+                                                  borderRadius: "7px",
+                                                  backgroundColor: "white",
+                                                  transition:
+                                                    "0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    border: "1px solid #ff469e",
+                                                  },
+                                                  "&:focus": {
+                                                    backgroundColor: "#F8F8F8",
+                                                  },
+                                                  "&.Mui-focused": {
+                                                    border: "1px solid #ff469e",
+                                                    backgroundColor: "#F8F8F8",
+                                                    boxShadow:
+                                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                                    outline: "none",
+                                                  },
+                                                  "& .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      border: "none",
+                                                    },
+                                                },
+                                              }}
+                                            />
+                                          </div>
+
+                                          <div
+                                            style={{
+                                              margin: "0.25rem 0.25rem",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontSize: "1.05rem",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Phone:
+                                            </span>
+                                            <TextField
+                                              fullWidth
+                                              onChange={handlePhoneChange}
+                                              value={phone}
+                                              placeholder="Enter your phone"
+                                              size="small"
+                                              variant="outlined"
+                                              InputProps={{
+                                                sx: {
+                                                  padding: 0,
+                                                  border: "1px solid #ff469e",
+                                                  borderRadius: "7px",
+                                                  backgroundColor: "white",
+                                                  transition:
+                                                    "0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    border: "1px solid #ff469e",
+                                                  },
+                                                  "&:focus": {
+                                                    backgroundColor: "#F8F8F8",
+                                                  },
+                                                  "&.Mui-focused": {
+                                                    border: "1px solid #ff469e",
+                                                    backgroundColor: "#F8F8F8",
+                                                    boxShadow:
+                                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                                    outline: "none",
+                                                  },
+                                                  "& .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      border: "none",
+                                                    },
+                                                },
+                                              }}
+                                            />
+                                          </div>
+
+                                          <div
+                                            style={{
+                                              margin: "0.25rem 0.25rem",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontSize: "1.05rem",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Address:
+                                            </span>
+                                            <TextField
+                                              fullWidth
+                                              onChange={handleAdressChange}
+                                              value={address}
+                                              placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
+                                              size="small"
+                                              variant="outlined"
+                                              InputProps={{
+                                                sx: {
+                                                  padding: 0,
+                                                  border: "1px solid #ff469e",
+                                                  borderRadius: "7px",
+                                                  backgroundColor: "white",
+                                                  transition:
+                                                    "0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    border: "1px solid #ff469e",
+                                                  },
+                                                  "&:focus": {
+                                                    backgroundColor: "#F8F8F8",
+                                                  },
+                                                  "&.Mui-focused": {
+                                                    border: "1px solid #ff469e",
+                                                    backgroundColor: "#F8F8F8",
+                                                    boxShadow:
+                                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                                    outline: "none",
+                                                  },
+                                                  "& .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      border: "none",
+                                                    },
+                                                },
+                                              }}
+                                            />
+                                          </div>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} md={4} lg={4}>
+                                        <Typography
+                                          sx={{
+                                            fontWeight: "bold",
+                                            fontSize: "1.25rem",
+                                          }}
                                         >
-                                          -
-                                        </MenuItem>
-                                        {voucher
-                                          .filter(
-                                            (item) =>
-                                              !active.some(
-                                                (activeItem) =>
-                                                  activeItem.userId ===
-                                                    userId &&
-                                                  activeItem.voucherId ===
-                                                    item.id
-                                              )
-                                          )
-                                          .map((item) => (
+                                          Choose a voucher:
+                                        </Typography>
+                                        <Box
+                                          sx={{
+                                            py: 2,
+                                            px: 2,
+                                            mt: 3,
+                                            backgroundColor: "white",
+                                            borderRadius: "20px",
+                                            border: "1px solid #ff469e",
+                                            boxShadow:
+                                              "0px 1px 3px rgba(0, 0, 0.16)",
+                                          }}
+                                        >
+                                          <Typography
+                                            variant="h6"
+                                            sx={{ mb: 2 }}
+                                          ></Typography>
+                                          <Select
+                                            fullWidth
+                                            displayEmpty
+                                            defaultValue=""
+                                            value={selectedVoucher}
+                                            onChange={handleVoucherChange}
+                                            sx={{
+                                              backgroundColor: "#fff4fc",
+                                              color: "#ff469e",
+                                              borderRadius: "20px",
+                                              fontSize: "20px",
+                                              border: "1px solid #ff469e",
+                                              boxShadow:
+                                                "0 3px 6px rgba(0, 0, 0, 0.16)",
+                                              transition:
+                                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
+                                              "&:hover": {
+                                                color: "white",
+                                                backgroundColor: "#ff469e",
+                                                border: "1px solid white",
+                                              },
+                                              "& .MuiOutlinedInput-notchedOutline":
+                                                {
+                                                  border: "none",
+                                                },
+                                              "& .MuiSvgIcon-root": {
+                                                color: "inherit",
+                                              },
+                                            }}
+                                            MenuProps={{
+                                              sx: {
+                                                "& .MuiMenu-list": {
+                                                  backgroundColor: "white",
+                                                  borderRadius: "10px",
+                                                  boxShadow:
+                                                    "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                                },
+                                              },
+                                            }}
+                                          >
                                             <MenuItem
-                                              key={item.id}
-                                              value={item.discount_value}
+                                              key={null}
+                                              value={""}
                                               sx={{
                                                 color: "black",
                                                 fontSize: "18px",
@@ -1023,191 +1043,251 @@ export default function Cart() {
                                                 },
                                               }}
                                             >
-                                              {item.code}
+                                              -
                                             </MenuItem>
-                                          ))}
-                                      </Select>
-                                    </Box>
-                                  </Grid>
-                                </Grid>
-                                <Grid container spacing={4}>
-                                  <Grid item xs={12} md={8}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: "bold",
-                                        fontSize: "20px",
-                                      }}
-                                    >
-                                      Your Order:
-                                    </Typography>
-                                    <Card
-                                      sx={{
-                                        pl: 2,
-                                        pr: 0,
-                                        border: "1px solid #ff469e",
-                                        borderRadius: "1rem",
-                                        my: 2.4,
-                                        minHeight: "120px",
-                                        maxHeight: "260px",
-                                        overflow: "hidden",
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          overflowY: "auto",
-                                          maxHeight: "260px",
-                                          pr: 0.5,
-                                          // "&::-webkit-scrollbar": { // Remove scrollbar
-                                          //   display: "none",
-                                          // },
-                                          "&::-webkit-scrollbar": {
-                                            width: "0.65rem",
-                                          },
-                                          "&::-webkit-scrollbar-track": {
-                                            background: "#f5f7fd",
-                                          },
-                                          "&::-webkit-scrollbar-thumb": {
-                                            background: "#ff469e",
-                                            borderRadius: "0.8rem",
-                                          },
-                                          "&::-webkit-scrollbar-thumb:hover": {
-                                            background: "#ffbbd0",
-                                          },
-                                        }}
-                                      >
-                                        {selectedStoreProducts?.map(
-                                          (item, index) => (
-                                            <div
-                                              key={index}
-                                              style={{
-                                                display: "flex",
-                                                marginBottom: "10px",
-                                              }}
-                                            >
-                                              <CardMedia
-                                                component="img"
-                                                sx={{
-                                                  width: "70px",
-                                                  height: "70px",
-                                                  justifyContent: "center",
-                                                  alignSelf: "center",
-                                                  borderRadius: "10px",
-                                                }}
-                                                image={
-                                                  item.product.image_url &&
-                                                  item.product.image_url?.includes(
-                                                    "Product_"
+                                            {typeWholeSale
+                                              ? voucher
+                                                  .filter(
+                                                    (item) =>
+                                                      !active.some(
+                                                        (activeItem) =>
+                                                          activeItem.userId ===
+                                                            userId &&
+                                                          activeItem.voucherId ===
+                                                            item.id
+                                                      )
                                                   )
-                                                    ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
-                                                    : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                                }
-                                                onError={(e) => {
-                                                  e.target.onerror = null;
-                                                  e.target.src =
-                                                    "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                                                }}
-                                                title={item.product.name}
-                                              />
-                                              <CardContent
-                                                sx={{
-                                                  flex: "1 0 auto",
-                                                  ml: 2,
-                                                  borderBottom:
-                                                    "1px dashed black",
-                                                }}
-                                              >
-                                                <Box
-                                                  sx={{
-                                                    display: "flex",
-                                                    flexDirection: "row",
-                                                    justifyContent:
-                                                      "space-between",
-                                                    mt: 2,
-                                                  }}
-                                                >
-                                                  <Typography
-                                                    sx={{
-                                                      fontWeight: "600",
-                                                      fontSize: "1.25rem",
-                                                      whiteSpace: "normal",
-                                                      overflow: "hidden",
-                                                      textOverflow: "ellipsis",
-                                                      display: "-webkit-box",
-                                                      WebkitLineClamp: 2,
-                                                      WebkitBoxOrient:
-                                                        "vertical",
-                                                      maxWidth: "100%",
-                                                      "&:hover": {
-                                                        cursor: "pointer",
-                                                        color: "#ff469e",
-                                                      },
-                                                    }}
-                                                    onClick={() =>
-                                                      navigate(
-                                                        `/products/${item.product.name
-                                                          .toLowerCase()
-                                                          .replace(
-                                                            /\s/g,
-                                                            "-"
-                                                          )}`,
-                                                        {
-                                                          state: {
-                                                            productId:
-                                                              item.product.id,
+                                                  .map((item) => (
+                                                    <MenuItem
+                                                      key={item.id}
+                                                      value={
+                                                        item.discount_value
+                                                      }
+                                                      sx={{
+                                                        color: "black",
+                                                        fontSize: "18px",
+                                                        transition:
+                                                          "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                        "&:hover": {
+                                                          backgroundColor:
+                                                            "#fff4fc",
+                                                          color: "#ff469e",
+                                                        },
+                                                        "&.Mui-selected": {
+                                                          backgroundColor:
+                                                            "#ff469e",
+                                                          color: "white",
+                                                          "&:hover": {
+                                                            backgroundColor:
+                                                              "#fff4fc",
+                                                            color: "#ff469e",
                                                           },
                                                         },
-                                                        window.scrollTo({
-                                                          top: 0,
-                                                          behavior: "smooth",
-                                                        })
-                                                      )
-                                                    }
-                                                  >
-                                                    {item.product.name.length >
-                                                    28
-                                                      ? `${item.product.name.substring(
-                                                          0,
-                                                          28
-                                                        )}...`
-                                                      : item.product.name}
-                                                  </Typography>
-                                                  <Typography
+                                                      }}
+                                                    >
+                                                      {item.code}
+                                                    </MenuItem>
+                                                  ))
+                                              : null}
+                                          </Select>
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                    <Grid container spacing={4}>
+                                      <Grid item xs={12} md={8}>
+                                        <Typography
+                                          sx={{
+                                            fontWeight: "bold",
+                                            fontSize: "20px",
+                                          }}
+                                        >
+                                          Your Order:
+                                        </Typography>
+                                        <Card
+                                          sx={{
+                                            pl: 2,
+                                            pr: 0,
+                                            border: "1px solid #ff469e",
+                                            borderRadius: "1rem",
+                                            my: 2.4,
+                                            minHeight: "120px",
+                                            maxHeight: "260px",
+                                            overflow: "hidden",
+                                          }}
+                                        >
+                                          <Box
+                                            sx={{
+                                              overflowY: "auto",
+                                              maxHeight: "260px",
+                                              pr: 0.5,
+                                              // "&::-webkit-scrollbar": { // Remove scrollbar
+                                              //   display: "none",
+                                              // },
+                                              "&::-webkit-scrollbar": {
+                                                width: "0.65rem",
+                                              },
+                                              "&::-webkit-scrollbar-track": {
+                                                background: "#f5f7fd",
+                                              },
+                                              "&::-webkit-scrollbar-thumb": {
+                                                background: "#ff469e",
+                                                borderRadius: "0.8rem",
+                                              },
+                                              "&::-webkit-scrollbar-thumb:hover":
+                                                {
+                                                  background: "#ffbbd0",
+                                                },
+                                            }}
+                                          >
+                                            {selectedStoreProducts?.map(
+                                              (item, index) => (
+                                                <div
+                                                  key={index}
+                                                  style={{
+                                                    display: "flex",
+                                                    marginBottom: "10px",
+                                                  }}
+                                                >
+                                                  <CardMedia
+                                                    component="img"
                                                     sx={{
-                                                      fontWeight: "600",
-                                                      fontSize: "1.15rem",
+                                                      width: "70px",
+                                                      height: "70px",
+                                                      justifyContent: "center",
+                                                      alignSelf: "center",
+                                                      borderRadius: "10px",
+                                                    }}
+                                                    image={
+                                                      item.product.image_url &&
+                                                      item.product.image_url?.includes(
+                                                        "Product_"
+                                                      )
+                                                        ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                                        : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                                    }
+                                                    onError={(e) => {
+                                                      e.target.onerror = null;
+                                                      e.target.src =
+                                                        "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                                    }}
+                                                    title={item.product.name}
+                                                  />
+                                                  <CardContent
+                                                    sx={{
+                                                      flex: "1 0 auto",
+                                                      ml: 2,
+                                                      borderBottom:
+                                                        "1px dashed black",
                                                     }}
                                                   >
                                                     <Box
                                                       sx={{
                                                         display: "flex",
-                                                        alignItems: "center",
+                                                        flexDirection: "row",
+                                                        justifyContent:
+                                                          "space-between",
+                                                        mt: 2,
                                                       }}
                                                     >
-                                                      {formatCurrency(
-                                                        item.product.price
-                                                      )}
-                                                      <span
-                                                        style={{
-                                                          fontSize: "1.05rem",
-                                                          opacity: 0.4,
-                                                          marginLeft: "4px",
+                                                      <Typography
+                                                        sx={{
+                                                          fontWeight: "600",
+                                                          fontSize: "1.25rem",
+                                                          whiteSpace: "normal",
+                                                          overflow: "hidden",
+                                                          textOverflow:
+                                                            "ellipsis",
+                                                          display:
+                                                            "-webkit-box",
+                                                          WebkitLineClamp: 2,
+                                                          WebkitBoxOrient:
+                                                            "vertical",
+                                                          maxWidth: "100%",
+                                                          "&:hover": {
+                                                            cursor: "pointer",
+                                                            color: "#ff469e",
+                                                          },
+                                                        }}
+                                                        onClick={() =>
+                                                          navigate(
+                                                            `/products/${item.product.name
+                                                              .toLowerCase()
+                                                              .replace(
+                                                                /\s/g,
+                                                                "-"
+                                                              )}`,
+                                                            {
+                                                              state: {
+                                                                productId:
+                                                                  item.product
+                                                                    .id,
+                                                              },
+                                                            },
+                                                            window.scrollTo({
+                                                              top: 0,
+                                                              behavior:
+                                                                "smooth",
+                                                            })
+                                                          )
+                                                        }
+                                                      >
+                                                        {item.product.name
+                                                          .length > 28
+                                                          ? `${item.product.name.substring(
+                                                              0,
+                                                              28
+                                                            )}...`
+                                                          : item.product.name}
+                                                      </Typography>
+                                                      <Typography
+                                                        sx={{
+                                                          fontWeight: "600",
+                                                          fontSize: "1.15rem",
                                                         }}
                                                       >
-                                                        x{item.quantity}
-                                                      </span>
+                                                        <Box
+                                                          sx={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                              "center",
+                                                          }}
+                                                        >
+                                                          {item.product.type ===
+                                                          typeWHOLESALE
+                                                            ? formatCurrency(
+                                                                item.product
+                                                                  .price
+                                                              )
+                                                            : formatCurrencyPoint(
+                                                                Math.round(
+                                                                  item.product
+                                                                    .point
+                                                                )
+                                                              )}
+
+                                                          <span
+                                                            style={{
+                                                              fontSize:
+                                                                "1.05rem",
+                                                              opacity: 0.4,
+                                                              marginLeft: "4px",
+                                                            }}
+                                                          >
+                                                            x{item.quantity}
+                                                          </span>
+                                                        </Box>
+                                                      </Typography>
                                                     </Box>
-                                                  </Typography>
-                                                </Box>
-                                                <Box
-                                                  sx={{
-                                                    display: "flex",
-                                                    flexDirection: "row",
-                                                    justifyContent:
-                                                      "space-between",
-                                                    mt: 1,
-                                                  }}
-                                                >
-                                                  <Typography
+                                                    <Box
+                                                      sx={{
+                                                        display: "flex",
+                                                        flexDirection: "row",
+                                                        justifyContent:
+                                                          "space-between",
+                                                        mt: 1,
+                                                      }}
+                                                    >
+                                                      {/* <Typography
                                                     sx={{ opacity: 0.9 }}
                                                   >
                                                     {item.product.status ===
@@ -1220,1292 +1300,854 @@ export default function Cart() {
                                                         (Pre-order product)
                                                       </span>
                                                     )}
-                                                  </Typography>
-                                                  <Typography
-                                                    sx={{ opacity: 0.8 }}
-                                                  >
-                                                    <Box
-                                                      sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        fontWeight: "bold",
-                                                        fontSize: "1.25rem",
-                                                      }}
-                                                    >
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                          fontSize: "1.25rem",
-                                                          marginRight: "4px",
-                                                        }}
+                                                  </Typography> */}
+                                                      <Typography
+                                                        sx={{ opacity: 0.8 }}
                                                       >
-                                                        ={" "}
-                                                      </span>
-                                                      {item.product.type ===
-                                                      typeWHOLESALE
-                                                        ? formatCurrency(
-                                                            Math.round(
-                                                              item.product
-                                                                .price *
-                                                                item.quantity
-                                                            )
-                                                          )
-                                                        : formatCurrencyPoint(
-                                                            Math.round(
-                                                              item.product
-                                                                .point *
-                                                                item.quantity
-                                                            )
-                                                          )}
+                                                        <Box
+                                                          sx={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                              "center",
+                                                            fontWeight: "bold",
+                                                            fontSize: "1.25rem",
+                                                          }}
+                                                        >
+                                                          <span
+                                                            style={{
+                                                              fontWeight:
+                                                                "bold",
+                                                              fontSize:
+                                                                "1.25rem",
+                                                              marginRight:
+                                                                "4px",
+                                                            }}
+                                                          >
+                                                            ={" "}
+                                                          </span>
+                                                          {item.product.type ===
+                                                          typeWHOLESALE
+                                                            ? formatCurrency(
+                                                                Math.round(
+                                                                  item.product
+                                                                    .price *
+                                                                    item.quantity
+                                                                )
+                                                              )
+                                                            : formatCurrencyPoint(
+                                                                Math.round(
+                                                                  item.product
+                                                                    .point *
+                                                                    item.quantity
+                                                                )
+                                                              )}
+                                                        </Box>
+                                                      </Typography>
                                                     </Box>
-                                                  </Typography>
-                                                </Box>
-                                              </CardContent>
-                                            </div>
-                                          )
-                                        )}
-                                      </Box>
-                                    </Card>
-                                  </Grid>
+                                                  </CardContent>
+                                                </div>
+                                              )
+                                            )}
+                                          </Box>
+                                        </Card>
+                                      </Grid>
 
-                                  <Grid
-                                    item
-                                    xs={12}
-                                    md={4}
-                                    lg={4}
-                                    sx={{ textAlign: "right" }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        mb: "5px",
-                                        fontWeight: "medium",
-                                        textAlign: "left",
-                                        fontSize: "1.25rem",
-                                      }}
-                                    >
-                                      <span
-                                        style={{
-                                          display: "block",
-                                          fontWeight: "bold",
-                                        }}
+                                      <Grid
+                                        item
+                                        xs={12}
+                                        md={4}
+                                        lg={4}
+                                        sx={{ textAlign: "right" }}
                                       >
-                                        Order Summary:
-                                      </span>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          margin: "12px 0",
-                                        }}
-                                      >
-                                        <span>Subtotal:</span>
-                                        <span>
-                                          {formatCurrency(
-                                            getFinalAmountForComingSoon()
-                                          )}
-                                        </span>
-                                      </Box>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          opacity: 0.7,
-                                          margin: "6px 0",
-                                        }}
-                                      >
-                                        <span>
-                                          Discount:{" "}
-                                          <span style={{ fontSize: "1.05rem" }}>
-                                            {" "}
-                                          </span>
-                                        </span>
-                                        <span>
-                                          - {formatCurrency(selectedVoucher)}
-                                        </span>
-                                      </Box>
-
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "flex-end",
-                                        }}
-                                      >
-                                        <Divider
+                                        <Typography
                                           sx={{
-                                            borderStyle: "dashed",
-                                            borderColor: "rgba(0, 0, 0, 0.7)",
-                                            borderWidth: "1px",
-                                            my: 1.5,
-                                            width: "100%",
+                                            mb: "5px",
+                                            fontWeight: "medium",
+                                            textAlign: "left",
+                                            fontSize: "1.25rem",
+                                          }}
+                                        >
+                                          <span
+                                            style={{
+                                              display: "block",
+                                              fontWeight: "bold",
+                                            }}
+                                          >
+                                            Order Summary:
+                                          </span>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              margin: "12px 0",
+                                            }}
+                                          >
+                                            <span>Subtotal:</span>
+                                            <span>
+                                              {formatCurrency(
+                                                getFinalAmountForInStock()
+                                              )}
+                                            </span>
+                                          </Box>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              opacity: 0.7,
+                                              margin: "6px 0",
+                                            }}
+                                          >
+                                            <span>
+                                              Discount:{" "}
+                                              <span
+                                                style={{ fontSize: "1.05rem" }}
+                                              >
+                                                {" "}
+                                              </span>
+                                            </span>
+                                            <span>
+                                              -{" "}
+                                              {formatCurrency(selectedVoucher)}
+                                            </span>
+                                          </Box>
+                                          {typeGift ? (
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                opacity: 0.7,
+                                                margin: "6px 0",
+                                              }}
+                                            >
+                                              <span>
+                                                Points used:{" "}
+                                                <span
+                                                  style={{
+                                                    fontSize: "1.05rem",
+                                                  }}
+                                                >
+                                                  {" "}
+                                                </span>
+                                              </span>
+                                              {formatCurrencyPoint(
+                                                getFinalPoint()
+                                              )}
+                                            </Box>
+                                          ) : null}
+
+                                          {typeGift && userId !== 0 ? (
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                opacity: 0.7,
+                                                margin: "6px 0",
+                                              }}
+                                            >
+                                              <span>
+                                                Your point:{" "}
+                                                <span
+                                                  style={{
+                                                    fontSize: "1.05rem",
+                                                  }}
+                                                >
+                                                  {" "}
+                                                </span>
+                                              </span>
+                                              <Box
+                                                sx={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                }}
+                                              >
+                                                {formatCurrencyPoint(
+                                                  userInfo.accumulated_points
+                                                )}
+                                              </Box>
+                                            </Box>
+                                          ) : null}
+
+                                          {typeGift && userId !== 0 ? (
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                opacity: 0.7,
+                                                margin: "6px 0",
+                                              }}
+                                            >
+                                              <span>
+                                                Points remaining:{" "}
+                                                <span
+                                                  style={{
+                                                    fontSize: "1.05rem",
+                                                  }}
+                                                >
+                                                  {" "}
+                                                </span>
+                                              </span>
+                                              <Box
+                                                sx={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                }}
+                                              >
+                                                {formatCurrencyPoint(
+                                                  userInfo.accumulated_points >
+                                                    getFinalPoint()
+                                                    ? userInfo.accumulated_points -
+                                                        getFinalPoint()
+                                                    : userInfo.accumulated_points
+                                                )}
+                                              </Box>
+                                            </Box>
+                                          ) : null}
+
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "flex-end",
+                                            }}
+                                          >
+                                            <Divider
+                                              sx={{
+                                                borderStyle: "dashed",
+                                                borderColor:
+                                                  "rgba(0, 0, 0, 0.7)",
+                                                borderWidth: "1px",
+                                                my: 1.5,
+                                                width: "100%",
+                                              }}
+                                            />
+                                          </Box>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              marginBottom: "4px",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontWeight: "bold",
+                                                fontSize: "1.45rem",
+                                              }}
+                                            >
+                                              Total:
+                                            </span>
+                                            <span
+                                              style={{
+                                                fontWeight: "bold",
+                                                fontSize: "1.5rem",
+                                                color: "#ff469e",
+                                              }}
+                                            >
+                                              <span>
+                                                {formatCurrency(
+                                                  getDiscountedTotalForInStock()
+                                                )}
+                                              </span>
+                                            </span>
+                                          </Box>
+                                        </Typography>
+
+                                        <FormControl fullWidth>
+                                          <Typography
+                                            variant="h6"
+                                            sx={{
+                                              fontWeight: "bold",
+                                              fontSize: "1.25rem",
+                                              mt: 2,
+                                              textAlign: "left",
+                                            }}
+                                          >
+                                            Select Payment Method:
+                                          </Typography>
+                                          <Select
+                                            fullWidth
+                                            displayEmpty
+                                            defaultValue=""
+                                            value={paymentMethod}
+                                            onChange={(e) =>
+                                              setPaymentMethod(e.target.value)
+                                            }
+                                            sx={{
+                                              backgroundColor: "#fff4fc",
+                                              color: "#ff469e",
+                                              borderRadius: "20px",
+                                              mt: 2.4,
+                                              mb: 1,
+                                              fontSize: "16px",
+                                              textAlign: "left",
+                                              border: "1px solid #ff469e",
+                                              boxShadow:
+                                                "0 3px 6px rgba(0, 0, 0, 0.16)",
+                                              transition:
+                                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
+                                              "&:hover": {
+                                                color: "white",
+                                                backgroundColor: "#ff469e",
+                                                border: "1px solid white",
+                                              },
+                                              "& .MuiOutlinedInput-notchedOutline":
+                                                {
+                                                  border: "none",
+                                                },
+                                              "& .MuiSvgIcon-root": {
+                                                color: "inherit",
+                                              },
+                                            }}
+                                            MenuProps={{
+                                              sx: {
+                                                "& .MuiMenu-list": {
+                                                  backgroundColor: "white",
+                                                  borderRadius: "10px",
+                                                  boxShadow:
+                                                    "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                                },
+                                              },
+                                            }}
+                                          >
+                                            <MenuItem
+                                              key={null}
+                                              value={""}
+                                              sx={{
+                                                color: "black",
+                                                fontSize: "18px",
+                                                transition:
+                                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                "&:hover": {
+                                                  backgroundColor: "#fff4fc",
+                                                  color: "#ff469e",
+                                                },
+                                                "&.Mui-selected": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                },
+                                              }}
+                                            >
+                                              -
+                                            </MenuItem>
+                                            <MenuItem
+                                              value={"COD"}
+                                              sx={{
+                                                color: "black",
+                                                fontSize: "18px",
+                                                transition:
+                                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                "&:hover": {
+                                                  backgroundColor: "#fff4fc",
+                                                  color: "#ff469e",
+                                                },
+                                                "&.Mui-selected": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                },
+                                              }}
+                                            >
+                                              COD
+                                            </MenuItem>
+                                            {typeWholeSale ? (
+                                              <MenuItem
+                                                value={"VNPAY"}
+                                                sx={{
+                                                  color: "black",
+                                                  fontSize: "18px",
+                                                  transition:
+                                                    "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                  "&.Mui-selected": {
+                                                    backgroundColor: "#ff469e",
+                                                    color: "white",
+                                                    "&:hover": {
+                                                      backgroundColor:
+                                                        "#fff4fc",
+                                                      color: "#ff469e",
+                                                    },
+                                                  },
+                                                }}
+                                              >
+                                                VNPAY
+                                              </MenuItem>
+                                            ) : null}
+                                          </Select>
+                                        </FormControl>
+
+                                        <Button
+                                          variant="contained"
+                                          fullWidth
+                                          onClick={() => handleOpenConfirm()}
+                                          sx={{
+                                            backgroundColor: "white",
+                                            color: "#ff469e",
+                                            borderRadius: "10px",
+                                            fontSize: 16,
+                                            fontWeight: "bold",
+                                            mt: 3,
+                                            transition:
+                                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                            border: "1px solid #ff469e",
+                                            "&:hover": {
+                                              backgroundColor: "#ff469e",
+                                              color: "white",
+                                              border: "1px solid white",
+                                            },
+                                          }}
+                                        >
+                                          Payment Check
+                                        </Button>
+                                        <Modal
+                                          open={openConfirm}
+                                          onClose={handleCloseConfirm}
+                                          slotProps={{
+                                            backdrop: {
+                                              style: {
+                                                backgroundColor:
+                                                  "rgba(0, 0, 0, 0.1)",
+                                              },
+                                            },
+                                          }}
+                                        >
+                                          <Box
+                                            sx={{
+                                              position: "absolute",
+                                              top: "50%",
+                                              left: "50%",
+                                              transform:
+                                                "translate(-50%, -50%)",
+                                              width: 400,
+                                              borderRadius: "20px",
+                                              backgroundColor: "#fff4fc",
+                                              border: "2px solid #ff469e",
+                                              boxShadow: 10,
+                                              p: 4,
+                                            }}
+                                          >
+                                            <Typography
+                                              id="modal-modal-title"
+                                              variant="h6"
+                                              component="h2"
+                                            >
+                                              Confirm Checkout
+                                            </Typography>
+                                            <Typography
+                                              id="modal-modal-description"
+                                              sx={{ mt: 2 }}
+                                            >
+                                              Are you sure you want to checkout
+                                              for this order?
+                                            </Typography>
+                                            <Box
+                                              sx={{
+                                                mt: 2,
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                              }}
+                                            >
+                                              <Button
+                                                variant="contained"
+                                                sx={{
+                                                  backgroundColor: "white",
+                                                  color: "#ff469e",
+                                                  borderRadius: "20px",
+                                                  fontSize: 16,
+                                                  fontWeight: "bold",
+                                                  my: 0.2,
+                                                  mx: 1,
+                                                  transition:
+                                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                                  border: "1px solid #ff469e",
+                                                  "&:hover": {
+                                                    backgroundColor: "#ff469e",
+                                                    color: "white",
+                                                    border: "1px solid white",
+                                                  },
+                                                }}
+                                                onClick={handleCheckout}
+                                              >
+                                                Yes
+                                              </Button>
+                                              <Button
+                                                variant="contained"
+                                                sx={{
+                                                  backgroundColor: "white",
+                                                  color: "#ff469e",
+                                                  borderRadius: "20px",
+                                                  fontSize: 16,
+                                                  fontWeight: "bold",
+                                                  my: 0.2,
+                                                  mx: 1,
+                                                  transition:
+                                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                                  border: "1px solid #ff469e",
+                                                  "&:hover": {
+                                                    backgroundColor: "#ff469e",
+                                                    color: "white",
+                                                    border: "1px solid white",
+                                                  },
+                                                }}
+                                                onClick={handleCloseConfirm}
+                                              >
+                                                No
+                                              </Button>
+                                            </Box>
+                                          </Box>
+                                        </Modal>
+                                      </Grid>
+                                    </Grid>
+                                  </Box>
+                                </Modal>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  variant="contained"
+                                  onClick={() => handleStoreChange(storeId)}
+                                  sx={{
+                                    backgroundColor: "white",
+                                    color: "#ff469e",
+                                    borderRadius: "10px",
+                                    fontSize: "1rem",
+                                    fontWeight: "bold",
+                                    mt: 1.5,
+                                    minWidth: "12vw",
+                                    transition:
+                                      "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                    border: "1px solid #ff469e",
+                                    "&:hover": {
+                                      backgroundColor: "#ff469e",
+                                      color: "white",
+                                      border: "1px solid white",
+                                    },
+                                  }}
+                                >
+                                  Checkout
+                                </Button>
+                                <Modal
+                                  open={open}
+                                  onClose={handleClose}
+                                  slotProps={{
+                                    backdrop: {
+                                      style: {
+                                        backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      top: "50%",
+                                      left: "50%",
+                                      transform: "translate(-50%, -50%)",
+                                      width: "90%",
+                                      borderRadius: "10px",
+                                      maxWidth: 1000,
+                                      maxHeight: "85vh",
+                                      overflowY: "auto",
+                                      backgroundColor: "#fff4fc",
+                                      border: "2px solid #ff469e",
+                                      boxShadow: 20,
+                                      p: 4,
+                                      "&::-webkit-scrollbar": {
+                                        width: "0.6rem",
+                                      },
+                                      "&::-webkit-scrollbar-track": {
+                                        background: "#f5f7fd",
+                                        borderRadius: "0.6rem",
+                                        my: 0.25,
+                                      },
+                                      "&::-webkit-scrollbar-thumb": {
+                                        background: "#ff469e",
+                                        borderRadius: "0.6rem",
+                                      },
+                                      "&::-webkit-scrollbar-thumb:hover": {
+                                        background: "#ffbbd0",
+                                      },
+                                    }}
+                                  >
+                                    <div style={{ textAlign: "right" }}>
+                                      <IconButton onClick={handleClose}>
+                                        <Close
+                                          fontSize="large"
+                                          sx={{
+                                            color: "#ff469e",
+                                            borderRadius: "30px",
+                                            boxShadow: "none",
+                                            transition: "0.3s ease-in-out",
+                                            "&:hover": {
+                                              backgroundColor: "#ff469e",
+                                              color: "white",
+                                              transform: "scale(1.1)",
+                                            },
                                           }}
                                         />
-                                      </Box>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          marginBottom: "4px",
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.45rem",
-                                          }}
-                                        >
-                                          Total:
-                                        </span>
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.5rem",
-                                            color: "#ff469e",
-                                          }}
-                                        >
-                                          <span>
-                                            {formatCurrency(
-                                              getDiscountedTotalForComingSoon()
-                                            )}
-                                          </span>
-                                        </span>
-                                      </Box>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          marginBottom: "4px",
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.45rem",
-                                          }}
-                                        >
-                                          Prepay:
-                                        </span>
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.5rem",
-                                            color: "#ff469e",
-                                          }}
-                                        >
-                                          <span>
-                                            {formatCurrency(
-                                              getDiscountedTotalForComingSoon() *
-                                                prepayPercent
-                                            )}
-                                          </span>
-                                        </span>
-                                      </Box>
-                                    </Typography>
+                                      </IconButton>
+                                    </div>
+                                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                                      <Grid item xs={12} md={8}>
+                                        <Box>
+                                          <Typography
+                                            sx={{
+                                              fontWeight: "bold",
+                                              fontSize: "1.25rem",
+                                            }}
+                                          >
+                                            Your Information:
+                                          </Typography>
 
-                                    <FormControl fullWidth>
-                                      <Typography
-                                        variant="h6"
-                                        sx={{
-                                          fontWeight: "bold",
-                                          fontSize: "1.25rem",
-                                          mt: 2,
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        Select Payment Method:
-                                      </Typography>
-                                      <Select
-                                        fullWidth
-                                        displayEmpty
-                                        defaultValue=""
-                                        value={paymentMethod}
-                                        onChange={(e) =>
-                                          setPaymentMethod(e.target.value)
-                                        }
-                                        sx={{
-                                          backgroundColor: "#fff4fc",
-                                          color: "#ff469e",
-                                          borderRadius: "20px",
-                                          mt: 2.4,
-                                          mb: 1,
-                                          fontSize: "16px",
-                                          textAlign: "left",
-                                          border: "1px solid #ff469e",
-                                          boxShadow:
-                                            "0 3px 6px rgba(0, 0, 0, 0.16)",
-                                          transition:
-                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                                          "&:hover": {
-                                            color: "white",
-                                            backgroundColor: "#ff469e",
-                                            border: "1px solid white",
-                                          },
-                                          "& .MuiOutlinedInput-notchedOutline":
-                                            {
-                                              border: "none",
-                                            },
-                                          "& .MuiSvgIcon-root": {
-                                            color: "inherit",
-                                          },
-                                        }}
-                                        MenuProps={{
-                                          sx: {
-                                            "& .MuiMenu-list": {
-                                              backgroundColor: "white",
-                                              borderRadius: "10px",
-                                              boxShadow:
-                                                "0 2px 8px rgba(0, 0, 0, 0.16)",
-                                            },
-                                          },
-                                        }}
-                                      >
-                                        <MenuItem
-                                          key={null}
-                                          value={""}
-                                          sx={{
-                                            color: "black",
-                                            fontSize: "18px",
-                                            transition:
-                                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                            "&:hover": {
-                                              backgroundColor: "#fff4fc",
-                                              color: "#ff469e",
-                                            },
-                                            "&.Mui-selected": {
-                                              backgroundColor: "#ff469e",
-                                              color: "white",
-                                              "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
-                                              },
-                                            },
-                                          }}
-                                        >
-                                          -
-                                        </MenuItem>
-                                        {/* <MenuItem
-                                          value={"COD"}
-                                          sx={{
-                                            color: "black",
-                                            fontSize: "18px",
-                                            transition:
-                                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                            "&:hover": {
-                                              backgroundColor: "#fff4fc",
-                                              color: "#ff469e",
-                                            },
-                                            "&.Mui-selected": {
-                                              backgroundColor: "#ff469e",
-                                              color: "white",
-                                              "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
-                                              },
-                                            },
-                                          }}
-                                        >
-                                          COD
-                                        </MenuItem> */}
-                                        <MenuItem
-                                          value={"VNPAY"}
-                                          sx={{
-                                            color: "black",
-                                            fontSize: "18px",
-                                            transition:
-                                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                            "&:hover": {
-                                              backgroundColor: "#fff4fc",
-                                              color: "#ff469e",
-                                            },
-                                            "&.Mui-selected": {
-                                              backgroundColor: "#ff469e",
-                                              color: "white",
-                                              "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
-                                              },
-                                            },
-                                          }}
-                                        >
-                                          VNPAY
-                                        </MenuItem>
-                                      </Select>
-                                    </FormControl>
+                                          <div
+                                            style={{
+                                              margin: "0.25rem 0.25rem",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontSize: "1.05rem",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Full Name:
+                                            </span>
+                                            <TextField
+                                              fullWidth
+                                              onChange={handleFullNameChange}
+                                              value={fullName}
+                                              placeholder="Enter your full name"
+                                              size="small"
+                                              variant="outlined"
+                                              InputProps={{
+                                                sx: {
+                                                  padding: 0,
+                                                  border: "1px solid #ff469e",
+                                                  borderRadius: "7px",
+                                                  backgroundColor: "white",
+                                                  transition:
+                                                    "0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    border: "1px solid #ff469e",
+                                                  },
+                                                  "&:focus": {
+                                                    backgroundColor: "#F8F8F8",
+                                                  },
+                                                  "&.Mui-focused": {
+                                                    border: "1px solid #ff469e",
+                                                    backgroundColor: "#F8F8F8",
+                                                    boxShadow:
+                                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                                    outline: "none",
+                                                  },
+                                                  "& .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      border: "none",
+                                                    },
+                                                },
+                                              }}
+                                            />
+                                          </div>
 
-                                    <Button
-                                      variant="contained"
-                                      fullWidth
-                                      onClick={() => handleOpenConfirm()}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        borderRadius: "10px",
-                                        fontSize: 16,
-                                        fontWeight: "bold",
-                                        mt: 3,
-                                        transition:
-                                          "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                          border: "1px solid white",
-                                        },
-                                      }}
-                                    >
-                                      Payment Check
-                                    </Button>
-                                    <Modal
-                                      open={openConfirm}
-                                      onClose={handleCloseConfirm}
-                                      slotProps={{
-                                        backdrop: {
-                                          style: {
-                                            backgroundColor:
-                                              "rgba(0, 0, 0, 0.1)",
-                                          },
-                                        },
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          position: "absolute",
-                                          top: "50%",
-                                          left: "50%",
-                                          transform: "translate(-50%, -50%)",
-                                          width: 400,
-                                          borderRadius: "20px",
-                                          backgroundColor: "#fff4fc",
-                                          border: "2px solid #ff469e",
-                                          boxShadow: 10,
-                                          p: 4,
-                                        }}
-                                      >
+                                          <div
+                                            style={{
+                                              margin: "0.25rem 0.25rem",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontSize: "1.05rem",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Phone:
+                                            </span>
+                                            <TextField
+                                              fullWidth
+                                              onChange={handlePhoneChange}
+                                              value={phone}
+                                              placeholder="Enter your phone"
+                                              size="small"
+                                              variant="outlined"
+                                              InputProps={{
+                                                sx: {
+                                                  padding: 0,
+                                                  border: "1px solid #ff469e",
+                                                  borderRadius: "7px",
+                                                  backgroundColor: "white",
+                                                  transition:
+                                                    "0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    border: "1px solid #ff469e",
+                                                  },
+                                                  "&:focus": {
+                                                    backgroundColor: "#F8F8F8",
+                                                  },
+                                                  "&.Mui-focused": {
+                                                    border: "1px solid #ff469e",
+                                                    backgroundColor: "#F8F8F8",
+                                                    boxShadow:
+                                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                                    outline: "none",
+                                                  },
+                                                  "& .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      border: "none",
+                                                    },
+                                                },
+                                              }}
+                                            />
+                                          </div>
+
+                                          <div
+                                            style={{
+                                              margin: "0.25rem 0.25rem",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                fontSize: "1.05rem",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Address:
+                                            </span>
+                                            <TextField
+                                              fullWidth
+                                              onChange={handleAdressChange}
+                                              value={address}
+                                              placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
+                                              size="small"
+                                              variant="outlined"
+                                              InputProps={{
+                                                sx: {
+                                                  padding: 0,
+                                                  border: "1px solid #ff469e",
+                                                  borderRadius: "7px",
+                                                  backgroundColor: "white",
+                                                  transition:
+                                                    "0.2s ease-in-out",
+                                                  "&:hover": {
+                                                    border: "1px solid #ff469e",
+                                                  },
+                                                  "&:focus": {
+                                                    backgroundColor: "#F8F8F8",
+                                                  },
+                                                  "&.Mui-focused": {
+                                                    border: "1px solid #ff469e",
+                                                    backgroundColor: "#F8F8F8",
+                                                    boxShadow:
+                                                      "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                                                    outline: "none",
+                                                  },
+                                                  "& .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      border: "none",
+                                                    },
+                                                },
+                                              }}
+                                            />
+                                          </div>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} md={4} lg={4}>
                                         <Typography
-                                          id="modal-modal-title"
-                                          variant="h6"
-                                          component="h2"
+                                          sx={{
+                                            fontWeight: "bold",
+                                            fontSize: "1.25rem",
+                                          }}
                                         >
-                                          Confirm Checkout
-                                        </Typography>
-                                        <Typography
-                                          id="modal-modal-description"
-                                          sx={{ mt: 2 }}
-                                        >
-                                          Are you sure you want to checkout for
-                                          this order?
+                                          Choose a voucher:
                                         </Typography>
                                         <Box
                                           sx={{
-                                            mt: 2,
-                                            display: "flex",
-                                            justifyContent: "flex-end",
+                                            py: 2,
+                                            px: 2,
+                                            mt: 3,
+                                            backgroundColor: "white",
+                                            borderRadius: "20px",
+                                            border: "1px solid #ff469e",
+                                            boxShadow:
+                                              "0px 1px 3px rgba(0, 0, 0.16)",
                                           }}
                                         >
-                                          <Button
-                                            variant="contained"
+                                          <Typography
+                                            variant="h6"
+                                            sx={{ mb: 2 }}
+                                          ></Typography>
+                                          <Select
+                                            fullWidth
+                                            displayEmpty
+                                            defaultValue=""
+                                            value={selectedVoucher}
+                                            onChange={handleVoucherChange}
                                             sx={{
-                                              backgroundColor: "white",
-                                              color: "#ff469e",
-                                              borderRadius: "20px",
-                                              fontSize: 16,
-                                              fontWeight: "bold",
-                                              my: 0.2,
-                                              mx: 1,
-                                              transition:
-                                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                              border: "1px solid #ff469e",
-                                              "&:hover": {
-                                                backgroundColor: "#ff469e",
-                                                color: "white",
-                                                border: "1px solid white",
-                                              },
-                                            }}
-                                            onClick={handleCheckout}
-                                          >
-                                            Yes
-                                          </Button>
-                                          <Button
-                                            variant="contained"
-                                            sx={{
-                                              backgroundColor: "white",
-                                              color: "#ff469e",
-                                              borderRadius: "20px",
-                                              fontSize: 16,
-                                              fontWeight: "bold",
-                                              my: 0.2,
-                                              mx: 1,
-                                              transition:
-                                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                              border: "1px solid #ff469e",
-                                              "&:hover": {
-                                                backgroundColor: "#ff469e",
-                                                color: "white",
-                                                border: "1px solid white",
-                                              },
-                                            }}
-                                            onClick={handleCloseConfirm}
-                                          >
-                                            No
-                                          </Button>
-                                        </Box>
-                                      </Box>
-                                    </Modal>
-                                  </Grid>
-                                </Grid>
-                              </Box>
-                            </Modal>
-                          </Box>
-                          {groupedCartItems[storeId].comingSoon.map((item) => (
-                            <Card
-                              sx={{
-                                display: "flex",
-                                px: 2,
-                                border: "1px solid #ff469e",
-                                borderRadius: "20px",
-                                my: 2,
-                                minHeight: "180px",
-                              }}
-                            >
-                              <CardMedia
-                                component="img"
-                                sx={{
-                                  width: "100px",
-                                  height: "100px",
-                                  justifyContent: "center",
-                                  alignSelf: "center",
-                                }}
-                                image={
-                                  item.product.image_url &&
-                                  item.product.image_url?.includes("Product_")
-                                    ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
-                                    : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                }
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src =
-                                    "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                                }}
-                                title={item.product.name}
-                              />
-                              <CardContent sx={{ flex: "1 0 auto", ml: 2 }}>
-                                <Box
-                                  sx={{
-                                    height: "30px",
-                                    ...(item.product.status === "COMING SOON"
-                                      ? {
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                        }
-                                      : { textAlign: "right" }),
-                                    my: 0.5,
-                                  }}
-                                >
-                                  {item.product.status === "COMING SOON" && (
-                                    <Typography
-                                      sx={{
-                                        color: "#ff469e",
-                                        fontSize: "1rem",
-                                      }}
-                                    >
-                                      (Pre-order product)
-                                    </Typography>
-                                  )}
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => (
-                                      dispatch(removeFromCart(item.product)),
-                                      toast.info(
-                                        `Removed ${item.product.name} out of cart`,
-                                        { autoClose: 1000 }
-                                      )
-                                    )}
-                                  >
-                                    <Close
-                                      fontSize="large"
-                                      sx={{
-                                        color: "#ff469e",
-                                        borderRadius: "30px",
-                                        boxShadow: "none",
-                                        transition: "0.3s ease-in-out",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                          transform: "scale(1.1)",
-                                        },
-                                      }}
-                                    />
-                                  </IconButton>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  {item.product.price > 0 ? (
-                                    <Typography
-                                      gutterBottom
-                                      noWrap
-                                      sx={{
-                                        fontSize: "22px",
-                                        fontWeight: "bold",
-                                        whiteSpace: "normal",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: "vertical",
-                                        maxWidth: "100%",
-                                        "&:hover": {
-                                          cursor: "pointer",
-                                          color: "#ff469e",
-                                        },
-                                      }}
-                                      onClick={() =>
-                                        navigate(
-                                          `/products/${item.product.name
-                                            .toLowerCase()
-                                            .replace(/\s/g, "-")}`,
-                                          {
-                                            state: {
-                                              productId: item.product.id,
-                                            },
-                                          },
-                                          window.scrollTo({
-                                            top: 0,
-                                            behavior: "smooth",
-                                          })
-                                        )
-                                      }
-                                    >
-                                      {item.product.name.length > 40
-                                        ? `${item.product.name.substring(
-                                            0,
-                                            40
-                                          )}...`
-                                        : item.product.name}
-                                    </Typography>
-                                  ) : (
-                                    <Typography
-                                      gutterBottom
-                                      noWrap
-                                      sx={{
-                                        fontSize: "22px",
-                                        fontWeight: "bold",
-                                        whiteSpace: "normal",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: "vertical",
-                                        maxWidth: "100%",
-                                        "&:hover": {
-                                          cursor: "pointer",
-                                          color: "#ff469e",
-                                        },
-                                      }}
-                                      onClick={() =>
-                                        navigate(
-                                          `/productgiftdetail/${item.product.name
-                                            .toLowerCase()
-                                            .replace(/\s/g, "-")}`,
-                                          {
-                                            state: {
-                                              productId: item.product.id,
-                                            },
-                                          },
-                                          window.scrollTo({
-                                            top: 0,
-                                            behavior: "smooth",
-                                          })
-                                        )
-                                      }
-                                    >
-                                      {item.product.name.length > 40
-                                        ? `${item.product.name.substring(
-                                            0,
-                                            40
-                                          )}...`
-                                        : item.product.name}
-                                    </Typography>
-                                  )}
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    my: 1,
-                                  }}
-                                >
-                                  <Grid xs={3}>
-                                    <Typography
-                                      sx={{
-                                        fontSize: "20px",
-                                        fontWeight: "600",
-                                      }}
-                                    >
-                                      {item.product.type === typeWHOLESALE
-                                        ? "Unit Price"
-                                        : "Unit Point"}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid xs={6}>
-                                    <Typography
-                                      sx={{
-                                        fontSize: "20px",
-                                        textAlign: "center",
-                                        fontWeight: "600",
-                                        mr: 1.5,
-                                      }}
-                                    >
-                                      Quantity
-                                    </Typography>
-                                  </Grid>
-                                  <Grid xs={3}>
-                                    <Typography
-                                      sx={{
-                                        fontSize: "20px",
-                                        textAlign: "right",
-                                        fontWeight: "600",
-                                      }}
-                                    >
-                                      Total Amount
-                                    </Typography>
-                                  </Grid>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    mt: 1.5,
-                                  }}
-                                >
-                                  {item.product.type === typeWHOLESALE ? (
-                                    <Typography sx={{ fontSize: "20px" }}>
-                                      {formatCurrency(item.product.price)}
-                                    </Typography>
-                                  ) : (
-                                    <Typography sx={{ fontSize: "20px" }}>
-                                      {formatCurrencyPoint(item.product.point)}
-                                    </Typography>
-                                  )}
-
-                                  <ButtonGroup
-                                    variant="outlined"
-                                    aria-label="outlined button group"
-                                    style={{ height: "2rem" }}
-                                  >
-                                    <Button
-                                      variant="contained"
-                                      disabled={item.quantity <= 1}
-                                      // onClick={() => {
-                                      //   const newQuantity =
-                                      //     item.quantity >= 11
-                                      //       ? -10
-                                      //       : -(item.quantity - 1);
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: newQuantity,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity >= 11
-                                            ? -10
-                                            : -(item.quantity - 1);
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        borderRadius: "20px",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      --
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      disabled={item.quantity <= 1}
-                                      // onClick={() => {
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: -1,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity >= 2
-                                            ? -1
-                                            : -(item.quantity - 1);
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      -
-                                    </Button>
-                                    <Button
-                                      disableRipple
-                                      style={{
-                                        backgroundColor: "white",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-
-                                        width: "3rem",
-                                        cursor: "default",
-                                        border: "1px solid #ff469e",
-                                        color: "black",
-                                      }}
-                                    >
-                                      {item.quantity}
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      disabled={
-                                        item.quantity >= 99 ||
-                                        (item.product.status === "COMING SOON"
-                                          ? item.quantity >= 99
-                                          : item.quantity >=
-                                            item.product.remain)
-                                        // item.quantity >= item.product.remain
-                                      }
-                                      // onClick={() => {
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: 1,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity <= 98
-                                            ? 1
-                                            : item.quantity + 1;
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      +
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      disabled={
-                                        item.quantity >= 99 ||
-                                        (item.product.status === "COMING SOON"
-                                          ? item.quantity >= 99
-                                          : item.quantity >=
-                                            item.product.remain)
-                                      }
-                                      // onClick={() => {
-                                      //   const newQuantity =
-                                      //     item.quantity <= 89
-                                      //       ? 10
-                                      //       : 99 - item.quantity;
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: newQuantity,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity <= 89
-                                            ? Math.min(
-                                                10,
-                                                item.product.status ===
-                                                  "COMING SOON"
-                                                  ? 10
-                                                  : item.product.remain -
-                                                      item.quantity
-                                              )
-                                            : 99 - item.quantity;
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        borderRadius: "20px",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      ++
-                                    </Button>
-                                  </ButtonGroup>
-                                  <Typography sx={{ fontSize: "20px" }}>
-                                    {item.product.type === typeWHOLESALE
-                                      ? formatCurrency(
-                                          Math.round(
-                                            item.product.price * item.quantity
-                                          )
-                                        )
-                                      : formatCurrencyPoint(
-                                          Math.round(
-                                            item.product.point * item.quantity
-                                          )
-                                        )}
-                                  </Typography>
-                                </Box>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </>
-                      )}
-                      {groupedCartItems[storeId].inStock.length > 0 && (
-                        <>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                cursor: "pointer",
-                                fontSize: "1.5rem",
-                                color: "#ff469e",
-                                fontWeight: "bold",
-                                mt: 2, // marginTop: "1rem"
-                                ml: 3, // marginLeft: "1.5rem"
-                                // "&:hover": {
-                                //   transform: "scale(1.05)",
-                                // },
-                              }}
-                              onClick={() =>
-                                navigate(
-                                  `/stores/${storeId}`,
-                                  { state: { storeId: storeId } },
-                                  window.scrollTo({
-                                    top: 0,
-                                    behavior: "smooth",
-                                  })
-                                )
-                              }
-                            >
-                              {storeMap[storeId]}
-                            </Typography>
-                            <Button
-                              variant="contained"
-                              onClick={() =>
-                                handleStoreChangeForInStock(storeId)
-                              }
-                              sx={{
-                                backgroundColor: "white",
-                                color: "#ff469e",
-                                borderRadius: "10px",
-                                fontSize: "1rem",
-                                fontWeight: "bold",
-                                mt: 1.5,
-                                minWidth: "12vw",
-                                transition:
-                                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                border: "1px solid #ff469e",
-                                "&:hover": {
-                                  backgroundColor: "#ff469e",
-                                  color: "white",
-                                  border: "1px solid white",
-                                },
-                              }}
-                            >
-                              Checkout
-                            </Button>
-                            <Modal
-                              open={openInStock}
-                              onClose={handleCloseInStock}
-                              slotProps={{
-                                backdrop: {
-                                  style: {
-                                    backgroundColor: "rgba(0, 0, 0, 0.1)",
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  top: "50%",
-                                  left: "50%",
-                                  transform: "translate(-50%, -50%)",
-                                  width: "90%",
-                                  borderRadius: "10px",
-                                  maxWidth: 1000,
-                                  maxHeight: "85vh",
-                                  overflowY: "auto",
-                                  backgroundColor: "#fff4fc",
-                                  border: "2px solid #ff469e",
-                                  boxShadow: 20,
-                                  p: 4,
-                                  "&::-webkit-scrollbar": {
-                                    width: "0.6rem",
-                                  },
-                                  "&::-webkit-scrollbar-track": {
-                                    background: "#f5f7fd",
-                                    borderRadius: "0.6rem",
-                                    my: 0.25,
-                                  },
-                                  "&::-webkit-scrollbar-thumb": {
-                                    background: "#ff469e",
-                                    borderRadius: "0.6rem",
-                                  },
-                                  "&::-webkit-scrollbar-thumb:hover": {
-                                    background: "#ffbbd0",
-                                  },
-                                }}
-                              >
-                                <div style={{ textAlign: "right" }}>
-                                  <IconButton onClick={handleCloseInStock}>
-                                    <Close
-                                      fontSize="large"
-                                      sx={{
-                                        color: "#ff469e",
-                                        borderRadius: "30px",
-                                        boxShadow: "none",
-                                        transition: "0.3s ease-in-out",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                          transform: "scale(1.1)",
-                                        },
-                                      }}
-                                    />
-                                  </IconButton>
-                                </div>
-                                <Grid container spacing={2} sx={{ mb: 3 }}>
-                                  <Grid item xs={12} md={8}>
-                                    <Box>
-                                      <Typography
-                                        sx={{
-                                          fontWeight: "bold",
-                                          fontSize: "1.25rem",
-                                        }}
-                                      >
-                                        Your Information:
-                                      </Typography>
-
-                                      <div
-                                        style={{ margin: "0.25rem 0.25rem" }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            fontWeight: "600",
-                                          }}
-                                        >
-                                          Full Name:
-                                        </span>
-                                        <TextField
-                                          fullWidth
-                                          onChange={handleFullNameChange}
-                                          value={fullName}
-                                          placeholder="Enter your full name"
-                                          size="small"
-                                          variant="outlined"
-                                          InputProps={{
-                                            sx: {
-                                              padding: 0,
-                                              border: "1px solid #ff469e",
-                                              borderRadius: "7px",
-                                              backgroundColor: "white",
-                                              transition: "0.2s ease-in-out",
-                                              "&:hover": {
-                                                border: "1px solid #ff469e",
-                                              },
-                                              "&:focus": {
-                                                backgroundColor: "#F8F8F8",
-                                              },
-                                              "&.Mui-focused": {
-                                                border: "1px solid #ff469e",
-                                                backgroundColor: "#F8F8F8",
-                                                boxShadow:
-                                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                                outline: "none",
-                                              },
-                                              "& .MuiOutlinedInput-notchedOutline":
-                                                {
-                                                  border: "none",
-                                                },
-                                            },
-                                          }}
-                                        />
-                                      </div>
-
-                                      <div
-                                        style={{ margin: "0.25rem 0.25rem" }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            fontWeight: "600",
-                                          }}
-                                        >
-                                          Phone:
-                                        </span>
-                                        <TextField
-                                          fullWidth
-                                          onChange={handlePhoneChange}
-                                          value={phone}
-                                          placeholder="Enter your phone"
-                                          size="small"
-                                          variant="outlined"
-                                          InputProps={{
-                                            sx: {
-                                              padding: 0,
-                                              border: "1px solid #ff469e",
-                                              borderRadius: "7px",
-                                              backgroundColor: "white",
-                                              transition: "0.2s ease-in-out",
-                                              "&:hover": {
-                                                border: "1px solid #ff469e",
-                                              },
-                                              "&:focus": {
-                                                backgroundColor: "#F8F8F8",
-                                              },
-                                              "&.Mui-focused": {
-                                                border: "1px solid #ff469e",
-                                                backgroundColor: "#F8F8F8",
-                                                boxShadow:
-                                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                                outline: "none",
-                                              },
-                                              "& .MuiOutlinedInput-notchedOutline":
-                                                {
-                                                  border: "none",
-                                                },
-                                            },
-                                          }}
-                                        />
-                                      </div>
-
-                                      <div
-                                        style={{ margin: "0.25rem 0.25rem" }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontSize: "1.05rem",
-                                            fontWeight: "600",
-                                          }}
-                                        >
-                                          Address:
-                                        </span>
-                                        <TextField
-                                          fullWidth
-                                          onChange={handleAdressChange}
-                                          value={address}
-                                          placeholder="Enter your delivery address. E.g: 123 To Hoai Street, District 1, Ho Chi Minh City"
-                                          size="small"
-                                          variant="outlined"
-                                          InputProps={{
-                                            sx: {
-                                              padding: 0,
-                                              border: "1px solid #ff469e",
-                                              borderRadius: "7px",
-                                              backgroundColor: "white",
-                                              transition: "0.2s ease-in-out",
-                                              "&:hover": {
-                                                border: "1px solid #ff469e",
-                                              },
-                                              "&:focus": {
-                                                backgroundColor: "#F8F8F8",
-                                              },
-                                              "&.Mui-focused": {
-                                                border: "1px solid #ff469e",
-                                                backgroundColor: "#F8F8F8",
-                                                boxShadow:
-                                                  "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                                                outline: "none",
-                                              },
-                                              "& .MuiOutlinedInput-notchedOutline":
-                                                {
-                                                  border: "none",
-                                                },
-                                            },
-                                          }}
-                                        />
-                                      </div>
-                                    </Box>
-                                  </Grid>
-                                  <Grid item xs={12} md={4} lg={4}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: "bold",
-                                        fontSize: "1.25rem",
-                                      }}
-                                    >
-                                      Choose a voucher:
-                                    </Typography>
-                                    <Box
-                                      sx={{
-                                        py: 2,
-                                        px: 2,
-                                        mt: 3,
-                                        backgroundColor: "white",
-                                        borderRadius: "20px",
-                                        border: "1px solid #ff469e",
-                                        boxShadow:
-                                          "0px 1px 3px rgba(0, 0, 0.16)",
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="h6"
-                                        sx={{ mb: 2 }}
-                                      ></Typography>
-                                      <Select
-                                        fullWidth
-                                        displayEmpty
-                                        defaultValue=""
-                                        value={selectedVoucher}
-                                        onChange={handleVoucherChange}
-                                        sx={{
-                                          backgroundColor: "#fff4fc",
-                                          color: "#ff469e",
-                                          borderRadius: "20px",
-                                          fontSize: "20px",
-                                          border: "1px solid #ff469e",
-                                          boxShadow:
-                                            "0 3px 6px rgba(0, 0, 0, 0.16)",
-                                          transition:
-                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                                          "&:hover": {
-                                            color: "white",
-                                            backgroundColor: "#ff469e",
-                                            border: "1px solid white",
-                                          },
-                                          "& .MuiOutlinedInput-notchedOutline":
-                                            {
-                                              border: "none",
-                                            },
-                                          "& .MuiSvgIcon-root": {
-                                            color: "inherit",
-                                          },
-                                        }}
-                                        MenuProps={{
-                                          sx: {
-                                            "& .MuiMenu-list": {
-                                              backgroundColor: "white",
-                                              borderRadius: "10px",
-                                              boxShadow:
-                                                "0 2px 8px rgba(0, 0, 0, 0.16)",
-                                            },
-                                          },
-                                        }}
-                                      >
-                                        <MenuItem
-                                          key={null}
-                                          value={""}
-                                          sx={{
-                                            color: "black",
-                                            fontSize: "18px",
-                                            transition:
-                                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                            "&:hover": {
                                               backgroundColor: "#fff4fc",
                                               color: "#ff469e",
-                                            },
-                                            "&.Mui-selected": {
-                                              backgroundColor: "#ff469e",
-                                              color: "white",
+                                              borderRadius: "20px",
+                                              fontSize: "20px",
+                                              border: "1px solid #ff469e",
+                                              boxShadow:
+                                                "0 3px 6px rgba(0, 0, 0, 0.16)",
+                                              transition:
+                                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
                                               "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
+                                                color: "white",
+                                                backgroundColor: "#ff469e",
+                                                border: "1px solid white",
                                               },
-                                            },
-                                          }}
-                                        >
-                                          -
-                                        </MenuItem>
-                                        {typeWholeSale
-                                          ? voucher
+                                              "& .MuiOutlinedInput-notchedOutline":
+                                                {
+                                                  border: "none",
+                                                },
+                                              "& .MuiSvgIcon-root": {
+                                                color: "inherit",
+                                              },
+                                            }}
+                                            MenuProps={{
+                                              sx: {
+                                                "& .MuiMenu-list": {
+                                                  backgroundColor: "white",
+                                                  borderRadius: "10px",
+                                                  boxShadow:
+                                                    "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                                },
+                                              },
+                                            }}
+                                          >
+                                            <MenuItem
+                                              key={null}
+                                              value={""}
+                                              sx={{
+                                                color: "black",
+                                                fontSize: "18px",
+                                                transition:
+                                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                "&:hover": {
+                                                  backgroundColor: "#fff4fc",
+                                                  color: "#ff469e",
+                                                },
+                                                "&.Mui-selected": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                },
+                                              }}
+                                            >
+                                              -
+                                            </MenuItem>
+                                            {voucher
                                               .filter(
                                                 (item) =>
                                                   !active.some(
@@ -2544,527 +2186,479 @@ export default function Cart() {
                                                 >
                                                   {item.code}
                                                 </MenuItem>
-                                              ))
-                                          : null}
-                                      </Select>
-                                    </Box>
-                                  </Grid>
-                                </Grid>
-                                <Grid container spacing={4}>
-                                  <Grid item xs={12} md={8}>
-                                    <Typography
-                                      sx={{
-                                        fontWeight: "bold",
-                                        fontSize: "20px",
-                                      }}
-                                    >
-                                      Your Order:
-                                    </Typography>
-                                    <Card
-                                      sx={{
-                                        pl: 2,
-                                        pr: 0,
-                                        border: "1px solid #ff469e",
-                                        borderRadius: "1rem",
-                                        my: 2.4,
-                                        minHeight: "120px",
-                                        maxHeight: "260px",
-                                        overflow: "hidden",
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          overflowY: "auto",
-                                          maxHeight: "260px",
-                                          pr: 0.5,
-                                          // "&::-webkit-scrollbar": { // Remove scrollbar
-                                          //   display: "none",
-                                          // },
-                                          "&::-webkit-scrollbar": {
-                                            width: "0.65rem",
-                                          },
-                                          "&::-webkit-scrollbar-track": {
-                                            background: "#f5f7fd",
-                                          },
-                                          "&::-webkit-scrollbar-thumb": {
-                                            background: "#ff469e",
-                                            borderRadius: "0.8rem",
-                                          },
-                                          "&::-webkit-scrollbar-thumb:hover": {
-                                            background: "#ffbbd0",
-                                          },
-                                        }}
+                                              ))}
+                                          </Select>
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                    <Grid container spacing={4}>
+                                      <Grid item xs={12} md={8}>
+                                        <Typography
+                                          sx={{
+                                            fontWeight: "bold",
+                                            fontSize: "20px",
+                                          }}
+                                        >
+                                          Your Order:
+                                        </Typography>
+                                        <Card
+                                          sx={{
+                                            pl: 2,
+                                            pr: 0,
+                                            border: "1px solid #ff469e",
+                                            borderRadius: "1rem",
+                                            my: 2.4,
+                                            minHeight: "120px",
+                                            maxHeight: "260px",
+                                            overflow: "hidden",
+                                          }}
+                                        >
+                                          <Box
+                                            sx={{
+                                              overflowY: "auto",
+                                              maxHeight: "260px",
+                                              pr: 0.5,
+                                              // "&::-webkit-scrollbar": { // Remove scrollbar
+                                              //   display: "none",
+                                              // },
+                                              "&::-webkit-scrollbar": {
+                                                width: "0.65rem",
+                                              },
+                                              "&::-webkit-scrollbar-track": {
+                                                background: "#f5f7fd",
+                                              },
+                                              "&::-webkit-scrollbar-thumb": {
+                                                background: "#ff469e",
+                                                borderRadius: "0.8rem",
+                                              },
+                                              "&::-webkit-scrollbar-thumb:hover":
+                                                {
+                                                  background: "#ffbbd0",
+                                                },
+                                            }}
+                                          >
+                                            {selectedStoreProducts?.map(
+                                              (item, index) => (
+                                                <div
+                                                  key={index}
+                                                  style={{
+                                                    display: "flex",
+                                                    marginBottom: "10px",
+                                                  }}
+                                                >
+                                                  <CardMedia
+                                                    component="img"
+                                                    sx={{
+                                                      width: "70px",
+                                                      height: "70px",
+                                                      justifyContent: "center",
+                                                      alignSelf: "center",
+                                                      borderRadius: "10px",
+                                                    }}
+                                                    image={
+                                                      item.product.image_url &&
+                                                      item.product.image_url?.includes(
+                                                        "Product_"
+                                                      )
+                                                        ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                                        : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                                    }
+                                                    onError={(e) => {
+                                                      e.target.onerror = null;
+                                                      e.target.src =
+                                                        "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                                    }}
+                                                    title={item.product.name}
+                                                  />
+                                                  <CardContent
+                                                    sx={{
+                                                      flex: "1 0 auto",
+                                                      ml: 2,
+                                                      borderBottom:
+                                                        "1px dashed black",
+                                                    }}
+                                                  >
+                                                    <Box
+                                                      sx={{
+                                                        display: "flex",
+                                                        flexDirection: "row",
+                                                        justifyContent:
+                                                          "space-between",
+                                                        mt: 2,
+                                                      }}
+                                                    >
+                                                      <Typography
+                                                        sx={{
+                                                          fontWeight: "600",
+                                                          fontSize: "1.25rem",
+                                                          whiteSpace: "normal",
+                                                          overflow: "hidden",
+                                                          textOverflow:
+                                                            "ellipsis",
+                                                          display:
+                                                            "-webkit-box",
+                                                          WebkitLineClamp: 2,
+                                                          WebkitBoxOrient:
+                                                            "vertical",
+                                                          maxWidth: "100%",
+                                                          "&:hover": {
+                                                            cursor: "pointer",
+                                                            color: "#ff469e",
+                                                          },
+                                                        }}
+                                                        onClick={() =>
+                                                          navigate(
+                                                            `/products/${item.product.name
+                                                              .toLowerCase()
+                                                              .replace(
+                                                                /\s/g,
+                                                                "-"
+                                                              )}`,
+                                                            {
+                                                              state: {
+                                                                productId:
+                                                                  item.product
+                                                                    .id,
+                                                              },
+                                                            },
+                                                            window.scrollTo({
+                                                              top: 0,
+                                                              behavior:
+                                                                "smooth",
+                                                            })
+                                                          )
+                                                        }
+                                                      >
+                                                        {item.product.name
+                                                          .length > 28
+                                                          ? `${item.product.name.substring(
+                                                              0,
+                                                              28
+                                                            )}...`
+                                                          : item.product.name}
+                                                      </Typography>
+                                                      <Typography
+                                                        sx={{
+                                                          fontWeight: "600",
+                                                          fontSize: "1.15rem",
+                                                        }}
+                                                      >
+                                                        <Box
+                                                          sx={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                              "center",
+                                                          }}
+                                                        >
+                                                          {formatCurrency(
+                                                            item.product.price
+                                                          )}
+                                                          <span
+                                                            style={{
+                                                              fontSize:
+                                                                "1.05rem",
+                                                              opacity: 0.4,
+                                                              marginLeft: "4px",
+                                                            }}
+                                                          >
+                                                            x{item.quantity}
+                                                          </span>
+                                                        </Box>
+                                                      </Typography>
+                                                    </Box>
+                                                    <Box
+                                                      sx={{
+                                                        display: "flex",
+                                                        flexDirection: "row",
+                                                        justifyContent:
+                                                          "space-between",
+                                                        mt: 1,
+                                                      }}
+                                                    >
+                                                      <Typography
+                                                        sx={{ opacity: 0.9 }}
+                                                      >
+                                                        {item.product.status ===
+                                                          "COMING SOON" && (
+                                                          <span
+                                                            style={{
+                                                              color: "#ff469e",
+                                                            }}
+                                                          >
+                                                            (Pre-order product)
+                                                          </span>
+                                                        )}
+                                                      </Typography>
+                                                      <Typography
+                                                        sx={{ opacity: 0.8 }}
+                                                      >
+                                                        <Box
+                                                          sx={{
+                                                            display: "flex",
+                                                            alignItems:
+                                                              "center",
+                                                            fontWeight: "bold",
+                                                            fontSize: "1.25rem",
+                                                          }}
+                                                        >
+                                                          <span
+                                                            style={{
+                                                              fontWeight:
+                                                                "bold",
+                                                              fontSize:
+                                                                "1.25rem",
+                                                              marginRight:
+                                                                "4px",
+                                                            }}
+                                                          >
+                                                            ={" "}
+                                                          </span>
+                                                          {item.product.type ===
+                                                          typeWHOLESALE
+                                                            ? formatCurrency(
+                                                                Math.round(
+                                                                  item.product
+                                                                    .price *
+                                                                    item.quantity
+                                                                )
+                                                              )
+                                                            : formatCurrencyPoint(
+                                                                Math.round(
+                                                                  item.product
+                                                                    .point *
+                                                                    item.quantity
+                                                                )
+                                                              )}
+                                                        </Box>
+                                                      </Typography>
+                                                    </Box>
+                                                  </CardContent>
+                                                </div>
+                                              )
+                                            )}
+                                          </Box>
+                                        </Card>
+                                      </Grid>
+
+                                      <Grid
+                                        item
+                                        xs={12}
+                                        md={4}
+                                        lg={4}
+                                        sx={{ textAlign: "right" }}
                                       >
-                                        {selectedStoreProducts?.map(
-                                          (item, index) => (
-                                            <div
-                                              key={index}
+                                        <Typography
+                                          sx={{
+                                            mb: "5px",
+                                            fontWeight: "medium",
+                                            textAlign: "left",
+                                            fontSize: "1.25rem",
+                                          }}
+                                        >
+                                          <span
+                                            style={{
+                                              display: "block",
+                                              fontWeight: "bold",
+                                            }}
+                                          >
+                                            Order Summary:
+                                          </span>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              margin: "12px 0",
+                                            }}
+                                          >
+                                            <span>Subtotal:</span>
+                                            <span>
+                                              {formatCurrency(
+                                                getFinalAmountForComingSoon()
+                                              )}
+                                            </span>
+                                          </Box>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              opacity: 0.7,
+                                              margin: "6px 0",
+                                            }}
+                                          >
+                                            <span>
+                                              Discount:{" "}
+                                              <span
+                                                style={{ fontSize: "1.05rem" }}
+                                              >
+                                                {" "}
+                                              </span>
+                                            </span>
+                                            <span>
+                                              -{" "}
+                                              {formatCurrency(selectedVoucher)}
+                                            </span>
+                                          </Box>
+
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "flex-end",
+                                            }}
+                                          >
+                                            <Divider
+                                              sx={{
+                                                borderStyle: "dashed",
+                                                borderColor:
+                                                  "rgba(0, 0, 0, 0.7)",
+                                                borderWidth: "1px",
+                                                my: 1.5,
+                                                width: "100%",
+                                              }}
+                                            />
+                                          </Box>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              marginBottom: "4px",
+                                            }}
+                                          >
+                                            <span
                                               style={{
-                                                display: "flex",
-                                                marginBottom: "10px",
+                                                fontWeight: "bold",
+                                                fontSize: "1.45rem",
                                               }}
                                             >
-                                              <CardMedia
-                                                component="img"
-                                                sx={{
-                                                  width: "70px",
-                                                  height: "70px",
-                                                  justifyContent: "center",
-                                                  alignSelf: "center",
-                                                  borderRadius: "10px",
-                                                }}
-                                                image={
-                                                  item.product.image_url &&
-                                                  item.product.image_url?.includes(
-                                                    "Product_"
-                                                  )
-                                                    ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
-                                                    : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                                }
-                                                onError={(e) => {
-                                                  e.target.onerror = null;
-                                                  e.target.src =
-                                                    "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                                                }}
-                                                title={item.product.name}
-                                              />
-                                              <CardContent
-                                                sx={{
-                                                  flex: "1 0 auto",
-                                                  ml: 2,
-                                                  borderBottom:
-                                                    "1px dashed black",
-                                                }}
-                                              >
-                                                <Box
-                                                  sx={{
-                                                    display: "flex",
-                                                    flexDirection: "row",
-                                                    justifyContent:
-                                                      "space-between",
-                                                    mt: 2,
-                                                  }}
-                                                >
-                                                  <Typography
-                                                    sx={{
-                                                      fontWeight: "600",
-                                                      fontSize: "1.25rem",
-                                                      whiteSpace: "normal",
-                                                      overflow: "hidden",
-                                                      textOverflow: "ellipsis",
-                                                      display: "-webkit-box",
-                                                      WebkitLineClamp: 2,
-                                                      WebkitBoxOrient:
-                                                        "vertical",
-                                                      maxWidth: "100%",
-                                                      "&:hover": {
-                                                        cursor: "pointer",
-                                                        color: "#ff469e",
-                                                      },
-                                                    }}
-                                                    onClick={() =>
-                                                      navigate(
-                                                        `/products/${item.product.name
-                                                          .toLowerCase()
-                                                          .replace(
-                                                            /\s/g,
-                                                            "-"
-                                                          )}`,
-                                                        {
-                                                          state: {
-                                                            productId:
-                                                              item.product.id,
-                                                          },
-                                                        },
-                                                        window.scrollTo({
-                                                          top: 0,
-                                                          behavior: "smooth",
-                                                        })
-                                                      )
-                                                    }
-                                                  >
-                                                    {item.product.name.length >
-                                                    28
-                                                      ? `${item.product.name.substring(
-                                                          0,
-                                                          28
-                                                        )}...`
-                                                      : item.product.name}
-                                                  </Typography>
-                                                  <Typography
-                                                    sx={{
-                                                      fontWeight: "600",
-                                                      fontSize: "1.15rem",
-                                                    }}
-                                                  >
-                                                    <Box
-                                                      sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                      }}
-                                                    >
-                                                      {item.product.type ===
-                                                      typeWHOLESALE
-                                                        ? formatCurrency(
-                                                            item.product.price
-                                                          )
-                                                        : formatCurrencyPoint(
-                                                            Math.round(
-                                                              item.product.point
-                                                            )
-                                                          )}
-
-                                                      <span
-                                                        style={{
-                                                          fontSize: "1.05rem",
-                                                          opacity: 0.4,
-                                                          marginLeft: "4px",
-                                                        }}
-                                                      >
-                                                        x{item.quantity}
-                                                      </span>
-                                                    </Box>
-                                                  </Typography>
-                                                </Box>
-                                                <Box
-                                                  sx={{
-                                                    display: "flex",
-                                                    flexDirection: "row",
-                                                    justifyContent:
-                                                      "space-between",
-                                                    mt: 1,
-                                                  }}
-                                                >
-                                                  {/* <Typography
-                                                    sx={{ opacity: 0.9 }}
-                                                  >
-                                                    {item.product.status ===
-                                                      "COMING SOON" && (
-                                                      <span
-                                                        style={{
-                                                          color: "#ff469e",
-                                                        }}
-                                                      >
-                                                        (Pre-order product)
-                                                      </span>
-                                                    )}
-                                                  </Typography> */}
-                                                  <Typography
-                                                    sx={{ opacity: 0.8 }}
-                                                  >
-                                                    <Box
-                                                      sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        fontWeight: "bold",
-                                                        fontSize: "1.25rem",
-                                                      }}
-                                                    >
-                                                      <span
-                                                        style={{
-                                                          fontWeight: "bold",
-                                                          fontSize: "1.25rem",
-                                                          marginRight: "4px",
-                                                        }}
-                                                      >
-                                                        ={" "}
-                                                      </span>
-                                                      {item.product.type ===
-                                                      typeWHOLESALE
-                                                        ? formatCurrency(
-                                                            Math.round(
-                                                              item.product
-                                                                .price *
-                                                                item.quantity
-                                                            )
-                                                          )
-                                                        : formatCurrencyPoint(
-                                                            Math.round(
-                                                              item.product
-                                                                .point *
-                                                                item.quantity
-                                                            )
-                                                          )}
-                                                    </Box>
-                                                  </Typography>
-                                                </Box>
-                                              </CardContent>
-                                            </div>
-                                          )
-                                        )}
-                                      </Box>
-                                    </Card>
-                                  </Grid>
-
-                                  <Grid
-                                    item
-                                    xs={12}
-                                    md={4}
-                                    lg={4}
-                                    sx={{ textAlign: "right" }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        mb: "5px",
-                                        fontWeight: "medium",
-                                        textAlign: "left",
-                                        fontSize: "1.25rem",
-                                      }}
-                                    >
-                                      <span
-                                        style={{
-                                          display: "block",
-                                          fontWeight: "bold",
-                                        }}
-                                      >
-                                        Order Summary:
-                                      </span>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          margin: "12px 0",
-                                        }}
-                                      >
-                                        <span>Subtotal:</span>
-                                        <span>
-                                          {formatCurrency(
-                                            getFinalAmountForInStock()
-                                          )}
-                                        </span>
-                                      </Box>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          opacity: 0.7,
-                                          margin: "6px 0",
-                                        }}
-                                      >
-                                        <span>
-                                          Discount:{" "}
-                                          <span style={{ fontSize: "1.05rem" }}>
-                                            {" "}
-                                          </span>
-                                        </span>
-                                        <span>
-                                          - {formatCurrency(selectedVoucher)}
-                                        </span>
-                                      </Box>
-                                      {typeGift ? (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            opacity: 0.7,
-                                            margin: "6px 0",
-                                          }}
-                                        >
-                                          <span>
-                                            Points used:{" "}
-                                            <span
-                                              style={{ fontSize: "1.05rem" }}
-                                            >
-                                              {" "}
+                                              Total:
                                             </span>
-                                          </span>
-                                          {formatCurrencyPoint(getFinalPoint())}
-                                        </Box>
-                                      ) : null}
-
-                                      {typeGift && userId !== 0 ? (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            opacity: 0.7,
-                                            margin: "6px 0",
-                                          }}
-                                        >
-                                          <span>
-                                            Your point:{" "}
                                             <span
-                                              style={{ fontSize: "1.05rem" }}
+                                              style={{
+                                                fontWeight: "bold",
+                                                fontSize: "1.5rem",
+                                                color: "#ff469e",
+                                              }}
                                             >
-                                              {" "}
+                                              <span>
+                                                {formatCurrency(
+                                                  getDiscountedTotalForComingSoon()
+                                                )}
+                                              </span>
                                             </span>
-                                          </span>
+                                          </Box>
                                           <Box
                                             sx={{
                                               display: "flex",
-                                              alignItems: "center",
+                                              justifyContent: "space-between",
+                                              marginBottom: "4px",
                                             }}
                                           >
-                                            {formatCurrencyPoint(
-                                              userInfo.accumulated_points
-                                            )}
-                                          </Box>
-                                        </Box>
-                                      ) : null}
-
-                                      {typeGift && userId !== 0 ? (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            opacity: 0.7,
-                                            margin: "6px 0",
-                                          }}
-                                        >
-                                          <span>
-                                            Points remaining:{" "}
                                             <span
-                                              style={{ fontSize: "1.05rem" }}
+                                              style={{
+                                                fontWeight: "bold",
+                                                fontSize: "1.45rem",
+                                              }}
                                             >
-                                              {" "}
+                                              Prepay:
                                             </span>
-                                          </span>
-                                          <Box
+                                            <span
+                                              style={{
+                                                fontWeight: "bold",
+                                                fontSize: "1.5rem",
+                                                color: "#ff469e",
+                                              }}
+                                            >
+                                              <span>
+                                                {formatCurrency(
+                                                  getDiscountedTotalForComingSoon() *
+                                                    prepayPercent
+                                                )}
+                                              </span>
+                                            </span>
+                                          </Box>
+                                        </Typography>
+
+                                        <FormControl fullWidth>
+                                          <Typography
+                                            variant="h6"
                                             sx={{
-                                              display: "flex",
-                                              alignItems: "center",
+                                              fontWeight: "bold",
+                                              fontSize: "1.25rem",
+                                              mt: 2,
+                                              textAlign: "left",
                                             }}
                                           >
-                                            {formatCurrencyPoint(
-                                              userInfo.accumulated_points >
-                                                getFinalPoint()
-                                                ? userInfo.accumulated_points -
-                                                    getFinalPoint()
-                                                : userInfo.accumulated_points
-                                            )}
-                                          </Box>
-                                        </Box>
-                                      ) : null}
-
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "flex-end",
-                                        }}
-                                      >
-                                        <Divider
-                                          sx={{
-                                            borderStyle: "dashed",
-                                            borderColor: "rgba(0, 0, 0, 0.7)",
-                                            borderWidth: "1px",
-                                            my: 1.5,
-                                            width: "100%",
-                                          }}
-                                        />
-                                      </Box>
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          marginBottom: "4px",
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.45rem",
-                                          }}
-                                        >
-                                          Total:
-                                        </span>
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            fontSize: "1.5rem",
-                                            color: "#ff469e",
-                                          }}
-                                        >
-                                          <span>
-                                            {formatCurrency(
-                                              getDiscountedTotalForInStock()
-                                            )}
-                                          </span>
-                                        </span>
-                                      </Box>
-                                    </Typography>
-
-                                    <FormControl fullWidth>
-                                      <Typography
-                                        variant="h6"
-                                        sx={{
-                                          fontWeight: "bold",
-                                          fontSize: "1.25rem",
-                                          mt: 2,
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        Select Payment Method:
-                                      </Typography>
-                                      <Select
-                                        fullWidth
-                                        displayEmpty
-                                        defaultValue=""
-                                        value={paymentMethod}
-                                        onChange={(e) =>
-                                          setPaymentMethod(e.target.value)
-                                        }
-                                        sx={{
-                                          backgroundColor: "#fff4fc",
-                                          color: "#ff469e",
-                                          borderRadius: "20px",
-                                          mt: 2.4,
-                                          mb: 1,
-                                          fontSize: "16px",
-                                          textAlign: "left",
-                                          border: "1px solid #ff469e",
-                                          boxShadow:
-                                            "0 3px 6px rgba(0, 0, 0, 0.16)",
-                                          transition:
-                                            "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
-                                          "&:hover": {
-                                            color: "white",
-                                            backgroundColor: "#ff469e",
-                                            border: "1px solid white",
-                                          },
-                                          "& .MuiOutlinedInput-notchedOutline":
-                                            {
-                                              border: "none",
-                                            },
-                                          "& .MuiSvgIcon-root": {
-                                            color: "inherit",
-                                          },
-                                        }}
-                                        MenuProps={{
-                                          sx: {
-                                            "& .MuiMenu-list": {
-                                              backgroundColor: "white",
-                                              borderRadius: "10px",
-                                              boxShadow:
-                                                "0 2px 8px rgba(0, 0, 0, 0.16)",
-                                            },
-                                          },
-                                        }}
-                                      >
-                                        <MenuItem
-                                          key={null}
-                                          value={""}
-                                          sx={{
-                                            color: "black",
-                                            fontSize: "18px",
-                                            transition:
-                                              "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                            "&:hover": {
+                                            Select Payment Method:
+                                          </Typography>
+                                          <Select
+                                            fullWidth
+                                            displayEmpty
+                                            defaultValue=""
+                                            value={paymentMethod}
+                                            onChange={(e) =>
+                                              setPaymentMethod(e.target.value)
+                                            }
+                                            sx={{
                                               backgroundColor: "#fff4fc",
                                               color: "#ff469e",
-                                            },
-                                            "&.Mui-selected": {
-                                              backgroundColor: "#ff469e",
-                                              color: "white",
+                                              borderRadius: "20px",
+                                              mt: 2.4,
+                                              mb: 1,
+                                              fontSize: "16px",
+                                              textAlign: "left",
+                                              border: "1px solid #ff469e",
+                                              boxShadow:
+                                                "0 3px 6px rgba(0, 0, 0, 0.16)",
+                                              transition:
+                                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out, border 0.3s ease-in-out",
                                               "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
+                                                color: "white",
+                                                backgroundColor: "#ff469e",
+                                                border: "1px solid white",
                                               },
-                                            },
-                                          }}
-                                        >
-                                          -
-                                        </MenuItem>
-                                        <MenuItem
+                                              "& .MuiOutlinedInput-notchedOutline":
+                                                {
+                                                  border: "none",
+                                                },
+                                              "& .MuiSvgIcon-root": {
+                                                color: "inherit",
+                                              },
+                                            }}
+                                            MenuProps={{
+                                              sx: {
+                                                "& .MuiMenu-list": {
+                                                  backgroundColor: "white",
+                                                  borderRadius: "10px",
+                                                  boxShadow:
+                                                    "0 2px 8px rgba(0, 0, 0, 0.16)",
+                                                },
+                                              },
+                                            }}
+                                          >
+                                            <MenuItem
+                                              key={null}
+                                              value={""}
+                                              sx={{
+                                                color: "black",
+                                                fontSize: "18px",
+                                                transition:
+                                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+                                                "&:hover": {
+                                                  backgroundColor: "#fff4fc",
+                                                  color: "#ff469e",
+                                                },
+                                                "&.Mui-selected": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                },
+                                              }}
+                                            >
+                                              -
+                                            </MenuItem>
+                                            {/* <MenuItem
                                           value={"COD"}
                                           sx={{
                                             color: "black",
@@ -3086,205 +2680,216 @@ export default function Cart() {
                                           }}
                                         >
                                           COD
-                                        </MenuItem>
-                                        {typeWholeSale ? (
-                                          <MenuItem
-                                            value={"VNPAY"}
-                                            sx={{
-                                              color: "black",
-                                              fontSize: "18px",
-                                              transition:
-                                                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
-                                              "&:hover": {
-                                                backgroundColor: "#fff4fc",
-                                                color: "#ff469e",
-                                              },
-                                              "&.Mui-selected": {
-                                                backgroundColor: "#ff469e",
-                                                color: "white",
+                                        </MenuItem> */}
+                                            <MenuItem
+                                              value={"VNPAY"}
+                                              sx={{
+                                                color: "black",
+                                                fontSize: "18px",
+                                                transition:
+                                                  "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
                                                 "&:hover": {
                                                   backgroundColor: "#fff4fc",
                                                   color: "#ff469e",
                                                 },
-                                              },
-                                            }}
-                                          >
-                                            VNPAY
-                                          </MenuItem>
-                                        ) : null}
-                                      </Select>
-                                    </FormControl>
+                                                "&.Mui-selected": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  "&:hover": {
+                                                    backgroundColor: "#fff4fc",
+                                                    color: "#ff469e",
+                                                  },
+                                                },
+                                              }}
+                                            >
+                                              VNPAY
+                                            </MenuItem>
+                                          </Select>
+                                        </FormControl>
 
-                                    <Button
-                                      variant="contained"
-                                      fullWidth
-                                      onClick={() => handleOpenConfirm()}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        borderRadius: "10px",
-                                        fontSize: 16,
-                                        fontWeight: "bold",
-                                        mt: 3,
-                                        transition:
-                                          "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                          border: "1px solid white",
-                                        },
-                                      }}
-                                    >
-                                      Payment Check
-                                    </Button>
-                                    <Modal
-                                      open={openConfirm}
-                                      onClose={handleCloseConfirm}
-                                      slotProps={{
-                                        backdrop: {
-                                          style: {
-                                            backgroundColor:
-                                              "rgba(0, 0, 0, 0.1)",
-                                          },
-                                        },
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          position: "absolute",
-                                          top: "50%",
-                                          left: "50%",
-                                          transform: "translate(-50%, -50%)",
-                                          width: 400,
-                                          borderRadius: "20px",
-                                          backgroundColor: "#fff4fc",
-                                          border: "2px solid #ff469e",
-                                          boxShadow: 10,
-                                          p: 4,
-                                        }}
-                                      >
-                                        <Typography
-                                          id="modal-modal-title"
-                                          variant="h6"
-                                          component="h2"
-                                        >
-                                          Confirm Checkout
-                                        </Typography>
-                                        <Typography
-                                          id="modal-modal-description"
-                                          sx={{ mt: 2 }}
-                                        >
-                                          Are you sure you want to checkout for
-                                          this order?
-                                        </Typography>
-                                        <Box
+                                        <Button
+                                          variant="contained"
+                                          fullWidth
+                                          onClick={() => handleOpenConfirm()}
                                           sx={{
-                                            mt: 2,
-                                            display: "flex",
-                                            justifyContent: "flex-end",
+                                            backgroundColor: "white",
+                                            color: "#ff469e",
+                                            borderRadius: "10px",
+                                            fontSize: 16,
+                                            fontWeight: "bold",
+                                            mt: 3,
+                                            transition:
+                                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                            border: "1px solid #ff469e",
+                                            "&:hover": {
+                                              backgroundColor: "#ff469e",
+                                              color: "white",
+                                              border: "1px solid white",
+                                            },
                                           }}
                                         >
-                                          <Button
-                                            variant="contained"
-                                            sx={{
-                                              backgroundColor: "white",
-                                              color: "#ff469e",
-                                              borderRadius: "20px",
-                                              fontSize: 16,
-                                              fontWeight: "bold",
-                                              my: 0.2,
-                                              mx: 1,
-                                              transition:
-                                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                              border: "1px solid #ff469e",
-                                              "&:hover": {
-                                                backgroundColor: "#ff469e",
-                                                color: "white",
-                                                border: "1px solid white",
+                                          Payment Check
+                                        </Button>
+                                        <Modal
+                                          open={openConfirm}
+                                          onClose={handleCloseConfirm}
+                                          slotProps={{
+                                            backdrop: {
+                                              style: {
+                                                backgroundColor:
+                                                  "rgba(0, 0, 0, 0.1)",
                                               },
-                                            }}
-                                            onClick={handleCheckout}
-                                          >
-                                            Yes
-                                          </Button>
-                                          <Button
-                                            variant="contained"
+                                            },
+                                          }}
+                                        >
+                                          <Box
                                             sx={{
-                                              backgroundColor: "white",
-                                              color: "#ff469e",
+                                              position: "absolute",
+                                              top: "50%",
+                                              left: "50%",
+                                              transform:
+                                                "translate(-50%, -50%)",
+                                              width: 400,
                                               borderRadius: "20px",
-                                              fontSize: 16,
-                                              fontWeight: "bold",
-                                              my: 0.2,
-                                              mx: 1,
-                                              transition:
-                                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                                              border: "1px solid #ff469e",
-                                              "&:hover": {
-                                                backgroundColor: "#ff469e",
-                                                color: "white",
-                                                border: "1px solid white",
-                                              },
+                                              backgroundColor: "#fff4fc",
+                                              border: "2px solid #ff469e",
+                                              boxShadow: 10,
+                                              p: 4,
                                             }}
-                                            onClick={handleCloseConfirm}
                                           >
-                                            No
-                                          </Button>
-                                        </Box>
-                                      </Box>
-                                    </Modal>
-                                  </Grid>
-                                </Grid>
-                              </Box>
-                            </Modal>
+                                            <Typography
+                                              id="modal-modal-title"
+                                              variant="h6"
+                                              component="h2"
+                                            >
+                                              Confirm Checkout
+                                            </Typography>
+                                            <Typography
+                                              id="modal-modal-description"
+                                              sx={{ mt: 2 }}
+                                            >
+                                              Are you sure you want to checkout
+                                              for this order?
+                                            </Typography>
+                                            <Box
+                                              sx={{
+                                                mt: 2,
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                              }}
+                                            >
+                                              <Button
+                                                variant="contained"
+                                                sx={{
+                                                  backgroundColor: "white",
+                                                  color: "#ff469e",
+                                                  borderRadius: "20px",
+                                                  fontSize: 16,
+                                                  fontWeight: "bold",
+                                                  my: 0.2,
+                                                  mx: 1,
+                                                  transition:
+                                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                                  border: "1px solid #ff469e",
+                                                  "&:hover": {
+                                                    backgroundColor: "#ff469e",
+                                                    color: "white",
+                                                    border: "1px solid white",
+                                                  },
+                                                }}
+                                                onClick={handleCheckout}
+                                              >
+                                                Yes
+                                              </Button>
+                                              <Button
+                                                variant="contained"
+                                                sx={{
+                                                  backgroundColor: "white",
+                                                  color: "#ff469e",
+                                                  borderRadius: "20px",
+                                                  fontSize: 16,
+                                                  fontWeight: "bold",
+                                                  my: 0.2,
+                                                  mx: 1,
+                                                  transition:
+                                                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                                                  border: "1px solid #ff469e",
+                                                  "&:hover": {
+                                                    backgroundColor: "#ff469e",
+                                                    color: "white",
+                                                    border: "1px solid white",
+                                                  },
+                                                }}
+                                                onClick={handleCloseConfirm}
+                                              >
+                                                No
+                                              </Button>
+                                            </Box>
+                                          </Box>
+                                        </Modal>
+                                      </Grid>
+                                    </Grid>
+                                  </Box>
+                                </Modal>
+                              </>
+                            )}
                           </Box>
-                          {groupedCartItems[storeId].inStock.map((item) => (
-                            <Card
-                              sx={{
-                                display: "flex",
-                                px: 2,
-                                border: "1px solid #ff469e",
-                                borderRadius: "20px",
-                                my: 2,
-                                minHeight: "180px",
-                              }}
-                            >
-                              <CardMedia
-                                component="img"
-                                sx={{
-                                  width: "100px",
-                                  height: "100px",
-                                  justifyContent: "center",
-                                  alignSelf: "center",
-                                }}
-                                image={
-                                  item.product.image_url &&
-                                  item.product.image_url?.includes("Product_")
-                                    ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
-                                    : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
-                                }
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src =
-                                    "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
-                                }}
-                                title={item.product.name}
-                              />
-                              <CardContent sx={{ flex: "1 0 auto", ml: 2 }}>
-                                <Box
-                                  sx={{
-                                    height: "30px",
-                                    ...(item.product.status === "COMING SOON"
-                                      ? {
-                                          display: "flex",
-                                          justifyContent: "space-between",
+                          {(tabStates[storeId] || 0) === 0 ? (
+                            groupedCartItems[storeId].inStock.length > 0 ? (
+                              <>
+                                {groupedCartItems[storeId].inStock.map(
+                                  (item) => (
+                                    <Card
+                                      sx={{
+                                        display: "flex",
+                                        px: 2,
+                                        border: "1px solid #ff469e",
+                                        borderRadius: "20px",
+                                        my: 2,
+                                        minHeight: "180px",
+                                      }}
+                                    >
+                                      <CardMedia
+                                        component="img"
+                                        sx={{
+                                          width: "100px",
+                                          height: "100px",
+                                          justifyContent: "center",
+                                          alignSelf: "center",
+                                        }}
+                                        image={
+                                          item.product.image_url &&
+                                          item.product.image_url?.includes(
+                                            "Product_"
+                                          )
+                                            ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                            : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
                                         }
-                                      : { textAlign: "right" }),
-                                    my: 0.5,
-                                  }}
-                                >
-                                  {/* {item.product.status === "COMING SOON" && (
+                                        onError={(e) => {
+                                          e.target.onerror = null;
+                                          e.target.src =
+                                            "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                        }}
+                                        title={item.product.name}
+                                      />
+                                      <CardContent
+                                        sx={{ flex: "1 0 auto", ml: 2 }}
+                                      >
+                                        <Box
+                                          sx={{
+                                            height: "30px",
+                                            ...(item.product.status ===
+                                            "COMING SOON"
+                                              ? {
+                                                  display: "flex",
+                                                  justifyContent:
+                                                    "space-between",
+                                                }
+                                              : { textAlign: "right" }),
+                                            my: 0.5,
+                                          }}
+                                        >
+                                          {/* {item.product.status === "COMING SOON" && (
                                     <Typography
                                       sx={{
                                         color: "#ff469e",
@@ -3294,436 +2899,990 @@ export default function Cart() {
                                       (Pre-order product)
                                     </Typography>
                                   )} */}
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => (
-                                      dispatch(removeFromCart(item.product)),
-                                      toast.info(
-                                        `Removed ${item.product.name} out of cart`,
-                                        { autoClose: 1000 }
-                                      )
-                                    )}
-                                  >
-                                    <Close
-                                      fontSize="large"
-                                      sx={{
-                                        color: "#ff469e",
-                                        borderRadius: "30px",
-                                        boxShadow: "none",
-                                        transition: "0.3s ease-in-out",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                          transform: "scale(1.1)",
-                                        },
-                                      }}
-                                    />
-                                  </IconButton>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  {item.product.price > 0 ? (
-                                    <Typography
-                                      gutterBottom
-                                      noWrap
-                                      sx={{
-                                        fontSize: "22px",
-                                        fontWeight: "bold",
-                                        whiteSpace: "normal",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: "vertical",
-                                        maxWidth: "100%",
-                                        "&:hover": {
-                                          cursor: "pointer",
-                                          color: "#ff469e",
-                                        },
-                                      }}
-                                      onClick={() =>
-                                        navigate(
-                                          `/products/${item.product.name
-                                            .toLowerCase()
-                                            .replace(/\s/g, "-")}`,
-                                          {
-                                            state: {
-                                              productId: item.product.id,
-                                            },
-                                          },
-                                          window.scrollTo({
-                                            top: 0,
-                                            behavior: "smooth",
-                                          })
-                                        )
-                                      }
-                                    >
-                                      {item.product.name.length > 40
-                                        ? `${item.product.name.substring(
-                                            0,
-                                            40
-                                          )}...`
-                                        : item.product.name}
-                                    </Typography>
-                                  ) : (
-                                    <Typography
-                                      gutterBottom
-                                      noWrap
-                                      sx={{
-                                        fontSize: "22px",
-                                        fontWeight: "bold",
-                                        whiteSpace: "normal",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: "vertical",
-                                        maxWidth: "100%",
-                                        "&:hover": {
-                                          cursor: "pointer",
-                                          color: "#ff469e",
-                                        },
-                                      }}
-                                      onClick={() =>
-                                        navigate(
-                                          `/productgiftdetail/${item.product.name
-                                            .toLowerCase()
-                                            .replace(/\s/g, "-")}`,
-                                          {
-                                            state: {
-                                              productId: item.product.id,
-                                            },
-                                          },
-                                          window.scrollTo({
-                                            top: 0,
-                                            behavior: "smooth",
-                                          })
-                                        )
-                                      }
-                                    >
-                                      {item.product.name.length > 40
-                                        ? `${item.product.name.substring(
-                                            0,
-                                            40
-                                          )}...`
-                                        : item.product.name}
-                                    </Typography>
-                                  )}
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    my: 1,
-                                  }}
-                                >
-                                  <Grid xs={3}>
-                                    <Typography
-                                      sx={{
-                                        fontSize: "20px",
-                                        fontWeight: "600",
-                                      }}
-                                    >
-                                      {item.product.type === typeWHOLESALE
-                                        ? "Unit Price"
-                                        : "Unit Point"}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid xs={6}>
-                                    <Typography
-                                      sx={{
-                                        fontSize: "20px",
-                                        textAlign: "center",
-                                        fontWeight: "600",
-                                        mr: 1.5,
-                                      }}
-                                    >
-                                      Quantity
-                                    </Typography>
-                                  </Grid>
-                                  <Grid xs={3}>
-                                    <Typography
-                                      sx={{
-                                        fontSize: "20px",
-                                        textAlign: "right",
-                                        fontWeight: "600",
-                                      }}
-                                    >
-                                      Total Amount
-                                    </Typography>
-                                  </Grid>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    mt: 1.5,
-                                  }}
-                                >
-                                  {item.product.type === typeWHOLESALE ? (
-                                    <Typography sx={{ fontSize: "20px" }}>
-                                      {formatCurrency(item.product.price)}
-                                    </Typography>
-                                  ) : (
-                                    <Typography sx={{ fontSize: "20px" }}>
-                                      {formatCurrencyPoint(item.product.point)}
-                                    </Typography>
-                                  )}
-
-                                  <ButtonGroup
-                                    variant="outlined"
-                                    aria-label="outlined button group"
-                                    style={{ height: "2rem" }}
-                                  >
-                                    <Button
-                                      variant="contained"
-                                      disabled={item.quantity <= 1}
-                                      // onClick={() => {
-                                      //   const newQuantity =
-                                      //     item.quantity >= 11
-                                      //       ? -10
-                                      //       : -(item.quantity - 1);
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: newQuantity,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity >= 11
-                                            ? -10
-                                            : -(item.quantity - 1);
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        borderRadius: "20px",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      --
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      disabled={item.quantity <= 1}
-                                      // onClick={() => {
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: -1,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity >= 2
-                                            ? -1
-                                            : -(item.quantity - 1);
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      -
-                                    </Button>
-                                    <Button
-                                      disableRipple
-                                      style={{
-                                        backgroundColor: "white",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-
-                                        width: "3rem",
-                                        cursor: "default",
-                                        border: "1px solid #ff469e",
-                                        color: "black",
-                                      }}
-                                    >
-                                      {item.quantity}
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      disabled={
-                                        item.quantity >= 99 ||
-                                        (item.product.status === "COMING SOON"
-                                          ? item.quantity >= 99
-                                          : item.quantity >=
-                                            item.product.remain)
-                                        // item.quantity >= item.product.remain
-                                      }
-                                      // onClick={() => {
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: 1,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity <= 98
-                                            ? 1
-                                            : item.quantity + 1;
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
-                                      sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
-                                      }}
-                                    >
-                                      +
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      disabled={
-                                        item.quantity >= 99 ||
-                                        (item.product.status === "COMING SOON"
-                                          ? item.quantity >= 99
-                                          : item.quantity >=
-                                            item.product.remain)
-                                      }
-                                      // onClick={() => {
-                                      //   const newQuantity =
-                                      //     item.quantity <= 89
-                                      //       ? 10
-                                      //       : 99 - item.quantity;
-                                      //   dispatch(
-                                      //     addToCart({
-                                      //       product: item.product,
-                                      //       quantity: newQuantity,
-                                      //     })
-                                      //   );
-                                      // }}
-                                      onClick={() => {
-                                        const newQuantity =
-                                          item.quantity <= 89
-                                            ? Math.min(
-                                                10,
-                                                item.product.status ===
-                                                  "COMING SOON"
-                                                  ? 10
-                                                  : item.product.remain -
-                                                      item.quantity
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => (
+                                              dispatch(
+                                                removeFromCart(item.product)
+                                              ),
+                                              toast.info(
+                                                `Removed ${item.product.name} out of cart`,
+                                                { autoClose: 1000 }
                                               )
-                                            : 99 - item.quantity;
-                                        dispatch(
-                                          updateQuantityCart({
-                                            product: item.product,
-                                            quantityChange: newQuantity,
-                                          })
-                                        );
-                                        updateQuantity(
-                                          item.product,
-                                          newQuantity
-                                        );
-                                      }}
+                                            )}
+                                          >
+                                            <Close
+                                              fontSize="large"
+                                              sx={{
+                                                color: "#ff469e",
+                                                borderRadius: "30px",
+                                                boxShadow: "none",
+                                                transition: "0.3s ease-in-out",
+                                                "&:hover": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                  transform: "scale(1.1)",
+                                                },
+                                              }}
+                                            />
+                                          </IconButton>
+                                        </Box>
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                          }}
+                                        >
+                                          {item.product.price > 0 ? (
+                                            <Typography
+                                              gutterBottom
+                                              noWrap
+                                              sx={{
+                                                fontSize: "22px",
+                                                fontWeight: "bold",
+                                                whiteSpace: "normal",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                display: "-webkit-box",
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: "vertical",
+                                                maxWidth: "100%",
+                                                "&:hover": {
+                                                  cursor: "pointer",
+                                                  color: "#ff469e",
+                                                },
+                                              }}
+                                              onClick={() =>
+                                                navigate(
+                                                  `/products/${item.product.name
+                                                    .toLowerCase()
+                                                    .replace(/\s/g, "-")}`,
+                                                  {
+                                                    state: {
+                                                      productId:
+                                                        item.product.id,
+                                                    },
+                                                  },
+                                                  window.scrollTo({
+                                                    top: 0,
+                                                    behavior: "smooth",
+                                                  })
+                                                )
+                                              }
+                                            >
+                                              {item.product.name.length > 40
+                                                ? `${item.product.name.substring(
+                                                    0,
+                                                    40
+                                                  )}...`
+                                                : item.product.name}
+                                            </Typography>
+                                          ) : (
+                                            <Typography
+                                              gutterBottom
+                                              noWrap
+                                              sx={{
+                                                fontSize: "22px",
+                                                fontWeight: "bold",
+                                                whiteSpace: "normal",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                display: "-webkit-box",
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: "vertical",
+                                                maxWidth: "100%",
+                                                "&:hover": {
+                                                  cursor: "pointer",
+                                                  color: "#ff469e",
+                                                },
+                                              }}
+                                              onClick={() =>
+                                                navigate(
+                                                  `/productgiftdetail/${item.product.name
+                                                    .toLowerCase()
+                                                    .replace(/\s/g, "-")}`,
+                                                  {
+                                                    state: {
+                                                      productId:
+                                                        item.product.id,
+                                                    },
+                                                  },
+                                                  window.scrollTo({
+                                                    top: 0,
+                                                    behavior: "smooth",
+                                                  })
+                                                )
+                                              }
+                                            >
+                                              {item.product.name.length > 40
+                                                ? `${item.product.name.substring(
+                                                    0,
+                                                    40
+                                                  )}...`
+                                                : item.product.name}
+                                            </Typography>
+                                          )}
+                                        </Box>
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            my: 1,
+                                          }}
+                                        >
+                                          <Grid xs={3}>
+                                            <Typography
+                                              sx={{
+                                                fontSize: "20px",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              {item.product.type ===
+                                              typeWHOLESALE
+                                                ? "Unit Price"
+                                                : "Unit Point"}
+                                            </Typography>
+                                          </Grid>
+                                          <Grid xs={6}>
+                                            <Typography
+                                              sx={{
+                                                fontSize: "20px",
+                                                textAlign: "center",
+                                                fontWeight: "600",
+                                                mr: 1.5,
+                                              }}
+                                            >
+                                              Quantity
+                                            </Typography>
+                                          </Grid>
+                                          <Grid xs={3}>
+                                            <Typography
+                                              sx={{
+                                                fontSize: "20px",
+                                                textAlign: "right",
+                                                fontWeight: "600",
+                                              }}
+                                            >
+                                              Total Amount
+                                            </Typography>
+                                          </Grid>
+                                        </Box>
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            mt: 1.5,
+                                          }}
+                                        >
+                                          {item.product.type ===
+                                          typeWHOLESALE ? (
+                                            <Typography
+                                              sx={{ fontSize: "20px" }}
+                                            >
+                                              {formatCurrency(
+                                                item.product.price
+                                              )}
+                                            </Typography>
+                                          ) : (
+                                            <Typography
+                                              sx={{ fontSize: "20px" }}
+                                            >
+                                              {formatCurrencyPoint(
+                                                item.product.point
+                                              )}
+                                            </Typography>
+                                          )}
+
+                                          <ButtonGroup
+                                            variant="outlined"
+                                            aria-label="outlined button group"
+                                            style={{ height: "2rem" }}
+                                          >
+                                            <Button
+                                              variant="contained"
+                                              disabled={item.quantity <= 1}
+                                              // onClick={() => {
+                                              //   const newQuantity =
+                                              //     item.quantity >= 11
+                                              //       ? -10
+                                              //       : -(item.quantity - 1);
+                                              //   dispatch(
+                                              //     addToCart({
+                                              //       product: item.product,
+                                              //       quantity: newQuantity,
+                                              //     })
+                                              //   );
+                                              // }}
+                                              onClick={() => {
+                                                const newQuantity =
+                                                  item.quantity >= 11
+                                                    ? -10
+                                                    : -(item.quantity - 1);
+                                                dispatch(
+                                                  updateQuantityCart({
+                                                    product: item.product,
+                                                    quantityChange: newQuantity,
+                                                  })
+                                                );
+                                                updateQuantity(
+                                                  item.product,
+                                                  newQuantity
+                                                );
+                                              }}
+                                              sx={{
+                                                backgroundColor: "white",
+                                                color: "#ff469e",
+                                                borderRadius: "20px",
+                                                fontSize: "1rem",
+                                                width: "2.9rem",
+
+                                                fontWeight: "bold",
+                                                boxShadow: "none",
+                                                transition:
+                                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                border: "1px solid #ff469e",
+                                                "&:hover": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                },
+                                              }}
+                                            >
+                                              --
+                                            </Button>
+                                            <Button
+                                              variant="contained"
+                                              disabled={item.quantity <= 1}
+                                              // onClick={() => {
+                                              //   dispatch(
+                                              //     addToCart({
+                                              //       product: item.product,
+                                              //       quantity: -1,
+                                              //     })
+                                              //   );
+                                              // }}
+                                              onClick={() => {
+                                                const newQuantity =
+                                                  item.quantity >= 2
+                                                    ? -1
+                                                    : -(item.quantity - 1);
+                                                dispatch(
+                                                  updateQuantityCart({
+                                                    product: item.product,
+                                                    quantityChange: newQuantity,
+                                                  })
+                                                );
+                                                updateQuantity(
+                                                  item.product,
+                                                  newQuantity
+                                                );
+                                              }}
+                                              sx={{
+                                                backgroundColor: "white",
+                                                color: "#ff469e",
+                                                fontSize: "1rem",
+                                                width: "2.9rem",
+                                                fontWeight: "bold",
+                                                boxShadow: "none",
+                                                transition:
+                                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                border: "1px solid #ff469e",
+                                                "&:hover": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                },
+                                              }}
+                                            >
+                                              -
+                                            </Button>
+                                            <Button
+                                              disableRipple
+                                              style={{
+                                                backgroundColor: "white",
+                                                fontSize: "1rem",
+                                                width: "2.9rem",
+
+                                                width: "3rem",
+                                                cursor: "default",
+                                                border: "1px solid #ff469e",
+                                                color: "black",
+                                              }}
+                                            >
+                                              {item.quantity}
+                                            </Button>
+                                            <Button
+                                              variant="contained"
+                                              disabled={
+                                                item.quantity >= 99 ||
+                                                (item.product.status ===
+                                                "COMING SOON"
+                                                  ? item.quantity >= 99
+                                                  : item.quantity >=
+                                                    item.product.remain)
+                                                // item.quantity >= item.product.remain
+                                              }
+                                              // onClick={() => {
+                                              //   dispatch(
+                                              //     addToCart({
+                                              //       product: item.product,
+                                              //       quantity: 1,
+                                              //     })
+                                              //   );
+                                              // }}
+                                              onClick={() => {
+                                                const newQuantity =
+                                                  item.quantity <= 98
+                                                    ? 1
+                                                    : item.quantity + 1;
+                                                dispatch(
+                                                  updateQuantityCart({
+                                                    product: item.product,
+                                                    quantityChange: newQuantity,
+                                                  })
+                                                );
+                                                updateQuantity(
+                                                  item.product,
+                                                  newQuantity
+                                                );
+                                              }}
+                                              sx={{
+                                                backgroundColor: "white",
+                                                color: "#ff469e",
+                                                fontSize: "1rem",
+                                                width: "2.9rem",
+                                                fontWeight: "bold",
+                                                boxShadow: "none",
+                                                transition:
+                                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                border: "1px solid #ff469e",
+                                                "&:hover": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                },
+                                              }}
+                                            >
+                                              +
+                                            </Button>
+                                            <Button
+                                              variant="contained"
+                                              disabled={
+                                                item.quantity >= 99 ||
+                                                (item.product.status ===
+                                                "COMING SOON"
+                                                  ? item.quantity >= 99
+                                                  : item.quantity >=
+                                                    item.product.remain)
+                                              }
+                                              // onClick={() => {
+                                              //   const newQuantity =
+                                              //     item.quantity <= 89
+                                              //       ? 10
+                                              //       : 99 - item.quantity;
+                                              //   dispatch(
+                                              //     addToCart({
+                                              //       product: item.product,
+                                              //       quantity: newQuantity,
+                                              //     })
+                                              //   );
+                                              // }}
+                                              onClick={() => {
+                                                const newQuantity =
+                                                  item.quantity <= 89
+                                                    ? Math.min(
+                                                        10,
+                                                        item.product.status ===
+                                                          "COMING SOON"
+                                                          ? 10
+                                                          : item.product
+                                                              .remain -
+                                                              item.quantity
+                                                      )
+                                                    : 99 - item.quantity;
+                                                dispatch(
+                                                  updateQuantityCart({
+                                                    product: item.product,
+                                                    quantityChange: newQuantity,
+                                                  })
+                                                );
+                                                updateQuantity(
+                                                  item.product,
+                                                  newQuantity
+                                                );
+                                              }}
+                                              sx={{
+                                                backgroundColor: "white",
+                                                color: "#ff469e",
+                                                borderRadius: "20px",
+                                                fontSize: "1rem",
+                                                width: "2.9rem",
+                                                fontWeight: "bold",
+                                                boxShadow: "none",
+                                                transition:
+                                                  "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                                border: "1px solid #ff469e",
+                                                "&:hover": {
+                                                  backgroundColor: "#ff469e",
+                                                  color: "white",
+                                                },
+                                              }}
+                                            >
+                                              ++
+                                            </Button>
+                                          </ButtonGroup>
+                                          <Typography sx={{ fontSize: "20px" }}>
+                                            {item.product.type === typeWHOLESALE
+                                              ? formatCurrency(
+                                                  Math.round(
+                                                    item.product.price *
+                                                      item.quantity
+                                                  )
+                                                )
+                                              : formatCurrencyPoint(
+                                                  Math.round(
+                                                    item.product.point *
+                                                      item.quantity
+                                                  )
+                                                )}
+                                          </Typography>
+                                        </Box>
+                                      </CardContent>
+                                    </Card>
+                                  )
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <Typography
+                                  sx={{
+                                    fontSize: "1.25rem",
+                                    fontWeight: "bold",
+                                    textAlign: "center",
+                                    mt: 3,
+                                  }}
+                                >
+                                  There are currently no products
+                                </Typography>
+                              </>
+                            )
+                          ) : groupedCartItems[storeId].comingSoon.length >
+                            0 ? (
+                            <>
+                              {groupedCartItems[storeId].comingSoon.map(
+                                (item) => (
+                                  <Card
+                                    sx={{
+                                      display: "flex",
+                                      px: 2,
+                                      border: "1px solid #ff469e",
+                                      borderRadius: "20px",
+                                      my: 2,
+                                      minHeight: "180px",
+                                    }}
+                                  >
+                                    <CardMedia
+                                      component="img"
                                       sx={{
-                                        backgroundColor: "white",
-                                        color: "#ff469e",
-                                        borderRadius: "20px",
-                                        fontSize: "1rem",
-                                        width: "2.9rem",
-                                        fontWeight: "bold",
-                                        boxShadow: "none",
-                                        transition:
-                                          "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
-                                        border: "1px solid #ff469e",
-                                        "&:hover": {
-                                          backgroundColor: "#ff469e",
-                                          color: "white",
-                                        },
+                                        width: "100px",
+                                        height: "100px",
+                                        justifyContent: "center",
+                                        alignSelf: "center",
                                       }}
-                                    >
-                                      ++
-                                    </Button>
-                                  </ButtonGroup>
-                                  <Typography sx={{ fontSize: "20px" }}>
-                                    {item.product.type === typeWHOLESALE
-                                      ? formatCurrency(
-                                          Math.round(
-                                            item.product.price * item.quantity
-                                          )
+                                      image={
+                                        item.product.image_url &&
+                                        item.product.image_url?.includes(
+                                          "Product_"
                                         )
-                                      : formatCurrencyPoint(
-                                          Math.round(
-                                            item.product.point * item.quantity
-                                          )
+                                          ? `http://localhost:8080/mamababy/products/images/${item.product.image_url}`
+                                          : "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid"
+                                      }
+                                      onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src =
+                                          "https://cdn-icons-png.freepik.com/256/2652/2652218.png?semt=ais_hybrid";
+                                      }}
+                                      title={item.product.name}
+                                    />
+                                    <CardContent
+                                      sx={{ flex: "1 0 auto", ml: 2 }}
+                                    >
+                                      <Box
+                                        sx={{
+                                          height: "30px",
+                                          ...(item.product.status ===
+                                          "COMING SOON"
+                                            ? {
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                              }
+                                            : { textAlign: "right" }),
+                                          my: 0.5,
+                                        }}
+                                      >
+                                        {item.product.status ===
+                                          "COMING SOON" && (
+                                          <Typography
+                                            sx={{
+                                              color: "#ff469e",
+                                              fontSize: "1rem",
+                                            }}
+                                          >
+                                            (Pre-order product)
+                                          </Typography>
                                         )}
-                                  </Typography>
-                                </Box>
-                              </CardContent>
-                            </Card>
-                          ))}
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => (
+                                            dispatch(
+                                              removeFromCart(item.product)
+                                            ),
+                                            toast.info(
+                                              `Removed ${item.product.name} out of cart`,
+                                              { autoClose: 1000 }
+                                            )
+                                          )}
+                                        >
+                                          <Close
+                                            fontSize="large"
+                                            sx={{
+                                              color: "#ff469e",
+                                              borderRadius: "30px",
+                                              boxShadow: "none",
+                                              transition: "0.3s ease-in-out",
+                                              "&:hover": {
+                                                backgroundColor: "#ff469e",
+                                                color: "white",
+                                                transform: "scale(1.1)",
+                                              },
+                                            }}
+                                          />
+                                        </IconButton>
+                                      </Box>
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                        }}
+                                      >
+                                        {item.product.price > 0 ? (
+                                          <Typography
+                                            gutterBottom
+                                            noWrap
+                                            sx={{
+                                              fontSize: "22px",
+                                              fontWeight: "bold",
+                                              whiteSpace: "normal",
+                                              overflow: "hidden",
+                                              textOverflow: "ellipsis",
+                                              display: "-webkit-box",
+                                              WebkitLineClamp: 2,
+                                              WebkitBoxOrient: "vertical",
+                                              maxWidth: "100%",
+                                              "&:hover": {
+                                                cursor: "pointer",
+                                                color: "#ff469e",
+                                              },
+                                            }}
+                                            onClick={() =>
+                                              navigate(
+                                                `/products/${item.product.name
+                                                  .toLowerCase()
+                                                  .replace(/\s/g, "-")}`,
+                                                {
+                                                  state: {
+                                                    productId: item.product.id,
+                                                  },
+                                                },
+                                                window.scrollTo({
+                                                  top: 0,
+                                                  behavior: "smooth",
+                                                })
+                                              )
+                                            }
+                                          >
+                                            {item.product.name.length > 40
+                                              ? `${item.product.name.substring(
+                                                  0,
+                                                  40
+                                                )}...`
+                                              : item.product.name}
+                                          </Typography>
+                                        ) : (
+                                          <Typography
+                                            gutterBottom
+                                            noWrap
+                                            sx={{
+                                              fontSize: "22px",
+                                              fontWeight: "bold",
+                                              whiteSpace: "normal",
+                                              overflow: "hidden",
+                                              textOverflow: "ellipsis",
+                                              display: "-webkit-box",
+                                              WebkitLineClamp: 2,
+                                              WebkitBoxOrient: "vertical",
+                                              maxWidth: "100%",
+                                              "&:hover": {
+                                                cursor: "pointer",
+                                                color: "#ff469e",
+                                              },
+                                            }}
+                                            onClick={() =>
+                                              navigate(
+                                                `/productgiftdetail/${item.product.name
+                                                  .toLowerCase()
+                                                  .replace(/\s/g, "-")}`,
+                                                {
+                                                  state: {
+                                                    productId: item.product.id,
+                                                  },
+                                                },
+                                                window.scrollTo({
+                                                  top: 0,
+                                                  behavior: "smooth",
+                                                })
+                                              )
+                                            }
+                                          >
+                                            {item.product.name.length > 40
+                                              ? `${item.product.name.substring(
+                                                  0,
+                                                  40
+                                                )}...`
+                                              : item.product.name}
+                                          </Typography>
+                                        )}
+                                      </Box>
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          my: 1,
+                                        }}
+                                      >
+                                        <Grid xs={3}>
+                                          <Typography
+                                            sx={{
+                                              fontSize: "20px",
+                                              fontWeight: "600",
+                                            }}
+                                          >
+                                            {item.product.type === typeWHOLESALE
+                                              ? "Unit Price"
+                                              : "Unit Point"}
+                                          </Typography>
+                                        </Grid>
+                                        <Grid xs={6}>
+                                          <Typography
+                                            sx={{
+                                              fontSize: "20px",
+                                              textAlign: "center",
+                                              fontWeight: "600",
+                                              mr: 1.5,
+                                            }}
+                                          >
+                                            Quantity
+                                          </Typography>
+                                        </Grid>
+                                        <Grid xs={3}>
+                                          <Typography
+                                            sx={{
+                                              fontSize: "20px",
+                                              textAlign: "right",
+                                              fontWeight: "600",
+                                            }}
+                                          >
+                                            Total Amount
+                                          </Typography>
+                                        </Grid>
+                                      </Box>
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "space-between",
+                                          mt: 1.5,
+                                        }}
+                                      >
+                                        {item.product.type === typeWHOLESALE ? (
+                                          <Typography sx={{ fontSize: "20px" }}>
+                                            {formatCurrency(item.product.price)}
+                                          </Typography>
+                                        ) : (
+                                          <Typography sx={{ fontSize: "20px" }}>
+                                            {formatCurrencyPoint(
+                                              item.product.point
+                                            )}
+                                          </Typography>
+                                        )}
+
+                                        <ButtonGroup
+                                          variant="outlined"
+                                          aria-label="outlined button group"
+                                          style={{ height: "2rem" }}
+                                        >
+                                          <Button
+                                            variant="contained"
+                                            disabled={item.quantity <= 1}
+                                            // onClick={() => {
+                                            //   const newQuantity =
+                                            //     item.quantity >= 11
+                                            //       ? -10
+                                            //       : -(item.quantity - 1);
+                                            //   dispatch(
+                                            //     addToCart({
+                                            //       product: item.product,
+                                            //       quantity: newQuantity,
+                                            //     })
+                                            //   );
+                                            // }}
+                                            onClick={() => {
+                                              const newQuantity =
+                                                item.quantity >= 11
+                                                  ? -10
+                                                  : -(item.quantity - 1);
+                                              dispatch(
+                                                updateQuantityCart({
+                                                  product: item.product,
+                                                  quantityChange: newQuantity,
+                                                })
+                                              );
+                                              updateQuantity(
+                                                item.product,
+                                                newQuantity
+                                              );
+                                            }}
+                                            sx={{
+                                              backgroundColor: "white",
+                                              color: "#ff469e",
+                                              borderRadius: "20px",
+                                              fontSize: "1rem",
+                                              width: "2.9rem",
+
+                                              fontWeight: "bold",
+                                              boxShadow: "none",
+                                              transition:
+                                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                              border: "1px solid #ff469e",
+                                              "&:hover": {
+                                                backgroundColor: "#ff469e",
+                                                color: "white",
+                                              },
+                                            }}
+                                          >
+                                            --
+                                          </Button>
+                                          <Button
+                                            variant="contained"
+                                            disabled={item.quantity <= 1}
+                                            // onClick={() => {
+                                            //   dispatch(
+                                            //     addToCart({
+                                            //       product: item.product,
+                                            //       quantity: -1,
+                                            //     })
+                                            //   );
+                                            // }}
+                                            onClick={() => {
+                                              const newQuantity =
+                                                item.quantity >= 2
+                                                  ? -1
+                                                  : -(item.quantity - 1);
+                                              dispatch(
+                                                updateQuantityCart({
+                                                  product: item.product,
+                                                  quantityChange: newQuantity,
+                                                })
+                                              );
+                                              updateQuantity(
+                                                item.product,
+                                                newQuantity
+                                              );
+                                            }}
+                                            sx={{
+                                              backgroundColor: "white",
+                                              color: "#ff469e",
+                                              fontSize: "1rem",
+                                              width: "2.9rem",
+                                              fontWeight: "bold",
+                                              boxShadow: "none",
+                                              transition:
+                                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                              border: "1px solid #ff469e",
+                                              "&:hover": {
+                                                backgroundColor: "#ff469e",
+                                                color: "white",
+                                              },
+                                            }}
+                                          >
+                                            -
+                                          </Button>
+                                          <Button
+                                            disableRipple
+                                            style={{
+                                              backgroundColor: "white",
+                                              fontSize: "1rem",
+                                              width: "2.9rem",
+
+                                              width: "3rem",
+                                              cursor: "default",
+                                              border: "1px solid #ff469e",
+                                              color: "black",
+                                            }}
+                                          >
+                                            {item.quantity}
+                                          </Button>
+                                          <Button
+                                            variant="contained"
+                                            disabled={
+                                              item.quantity >= 99 ||
+                                              (item.product.status ===
+                                              "COMING SOON"
+                                                ? item.quantity >= 99
+                                                : item.quantity >=
+                                                  item.product.remain)
+                                              // item.quantity >= item.product.remain
+                                            }
+                                            // onClick={() => {
+                                            //   dispatch(
+                                            //     addToCart({
+                                            //       product: item.product,
+                                            //       quantity: 1,
+                                            //     })
+                                            //   );
+                                            // }}
+                                            onClick={() => {
+                                              const newQuantity =
+                                                item.quantity <= 98
+                                                  ? 1
+                                                  : item.quantity + 1;
+                                              dispatch(
+                                                updateQuantityCart({
+                                                  product: item.product,
+                                                  quantityChange: newQuantity,
+                                                })
+                                              );
+                                              updateQuantity(
+                                                item.product,
+                                                newQuantity
+                                              );
+                                            }}
+                                            sx={{
+                                              backgroundColor: "white",
+                                              color: "#ff469e",
+                                              fontSize: "1rem",
+                                              width: "2.9rem",
+                                              fontWeight: "bold",
+                                              boxShadow: "none",
+                                              transition:
+                                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                              border: "1px solid #ff469e",
+                                              "&:hover": {
+                                                backgroundColor: "#ff469e",
+                                                color: "white",
+                                              },
+                                            }}
+                                          >
+                                            +
+                                          </Button>
+                                          <Button
+                                            variant="contained"
+                                            disabled={
+                                              item.quantity >= 99 ||
+                                              (item.product.status ===
+                                              "COMING SOON"
+                                                ? item.quantity >= 99
+                                                : item.quantity >=
+                                                  item.product.remain)
+                                            }
+                                            // onClick={() => {
+                                            //   const newQuantity =
+                                            //     item.quantity <= 89
+                                            //       ? 10
+                                            //       : 99 - item.quantity;
+                                            //   dispatch(
+                                            //     addToCart({
+                                            //       product: item.product,
+                                            //       quantity: newQuantity,
+                                            //     })
+                                            //   );
+                                            // }}
+                                            onClick={() => {
+                                              const newQuantity =
+                                                item.quantity <= 89
+                                                  ? Math.min(
+                                                      10,
+                                                      item.product.status ===
+                                                        "COMING SOON"
+                                                        ? 10
+                                                        : item.product.remain -
+                                                            item.quantity
+                                                    )
+                                                  : 99 - item.quantity;
+                                              dispatch(
+                                                updateQuantityCart({
+                                                  product: item.product,
+                                                  quantityChange: newQuantity,
+                                                })
+                                              );
+                                              updateQuantity(
+                                                item.product,
+                                                newQuantity
+                                              );
+                                            }}
+                                            sx={{
+                                              backgroundColor: "white",
+                                              color: "#ff469e",
+                                              borderRadius: "20px",
+                                              fontSize: "1rem",
+                                              width: "2.9rem",
+                                              fontWeight: "bold",
+                                              boxShadow: "none",
+                                              transition:
+                                                "background-color 0.3s ease-in-out, color 0.3s ease-in-out, border 0.3s ease-in-out",
+                                              border: "1px solid #ff469e",
+                                              "&:hover": {
+                                                backgroundColor: "#ff469e",
+                                                color: "white",
+                                              },
+                                            }}
+                                          >
+                                            ++
+                                          </Button>
+                                        </ButtonGroup>
+                                        <Typography sx={{ fontSize: "20px" }}>
+                                          {item.product.type === typeWHOLESALE
+                                            ? formatCurrency(
+                                                Math.round(
+                                                  item.product.price *
+                                                    item.quantity
+                                                )
+                                              )
+                                            : formatCurrencyPoint(
+                                                Math.round(
+                                                  item.product.point *
+                                                    item.quantity
+                                                )
+                                              )}
+                                        </Typography>
+                                      </Box>
+                                    </CardContent>
+                                  </Card>
+                                )
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <Typography
+                                sx={{
+                                  fontSize: "1.25rem",
+                                  fontWeight: "bold",
+                                  textAlign: "center",
+                                  mt: 3,
+                                }}
+                              >
+                                There are currently no products
+                              </Typography>
+                            </>
+                          )}
                         </>
                       )}
 

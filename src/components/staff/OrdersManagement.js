@@ -63,6 +63,7 @@ export default function OrdersManagement() {
   const [open, setOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [actionType, setActionType] = useState("");
+  const prepayPercent = 30 / 100;
 
   const toDay = new Date();
   toDay.setHours(toDay.getHours() + 7);
@@ -1087,6 +1088,58 @@ export default function OrdersManagement() {
                             style={{ fontWeight: "bold", fontSize: "1.5rem" }}
                           >
                             {formatCurrency(item.final_amount)}
+                          </span>
+                        </Box>
+                        {item.type === "PRE_ORDER" && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight: "bold",
+                                fontSize: "1.35rem",
+                              }}
+                            >
+                              Prepay:
+                            </span>
+                            <span
+                              style={{ fontWeight: "bold", fontSize: "1.5rem" }}
+                            >
+                              {formatCurrency(
+                                item.final_amount * prepayPercent
+                              )}
+                            </span>
+                          </Box>
+                        )}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontWeight: "bold",
+                              fontSize: "1.35rem",
+                            }}
+                          >
+                            COD:
+                          </span>
+                          <span
+                            style={{ fontWeight: "bold", fontSize: "1.5rem" }}
+                          >
+                            {item.type === "PRE_ORDER"
+                              ? formatCurrency(
+                                  item.final_amount * (1 - prepayPercent)
+                                )
+                              : item.payment_method === "VNPAY"
+                              ? formatCurrency(0)
+                              : formatCurrency(item.final_amount)}
                           </span>
                         </Box>
                       </Typography>
