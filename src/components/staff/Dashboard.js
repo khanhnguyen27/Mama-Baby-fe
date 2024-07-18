@@ -15,11 +15,11 @@ import {
   Card,
   CardContent,
   Paper,
-  Button,
   Menu,
 } from "@mui/material";
 import { Bar, Pie } from "react-chartjs-2";
-import MenuIcon from "@mui/icons-material/Menu";
+import SummarizeIcon from "@mui/icons-material/Summarize";
+import { KeyboardCapslock } from "@mui/icons-material";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -54,7 +54,7 @@ ChartJS.register(
 export default function Dashboard() {
   window.document.title = "Dashboard";
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [orders, setOrders] = useState([]);
   const [refunds, setRefunds] = useState([]);
   const [exchanges, setExchanges] = useState([]);
@@ -81,6 +81,15 @@ export default function Dashboard() {
   const [monthlyRevenueData, setMonthlyRevenueData] = useState([]);
 
   useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      setVisible(scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
     const fetchStoreData = async () => {
       try {
         const res = await storeByUserIdApi(userId);
@@ -96,7 +105,6 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     if (!storeId) return;
-    setLoading(true);
     try {
       const orderRes = await orderByStoreIdApi(storeId);
       const exchangeRes = await exchangeByStoreIdApi(storeId);
@@ -132,8 +140,6 @@ export default function Dashboard() {
       );
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -207,7 +213,6 @@ export default function Dashboard() {
     year = selectedYear
   ) => {
     if (!storeId) return;
-    setLoading(true);
     try {
       const orderRes = await orderByStoreIdApi(storeId);
       const exchangeRes = await exchangeByStoreIdApi(storeId);
@@ -288,8 +293,6 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error fetching order and refund data:", error);
-    } finally {
-      setLoading(false);
     }
   };
   useEffect(() => {
@@ -430,6 +433,7 @@ export default function Dashboard() {
       },
     ],
   };
+
   const yearlyBarOptions = {
     scales: {
       y: {
@@ -1312,10 +1316,11 @@ export default function Dashboard() {
       }}
     >
       <Paper
-        elevation={3}
+        elevation={2}
         sx={{
           position: "sticky",
           marginTop: "20px",
+          marginBottom: "20px",
           padding: "16px",
           border: "1px solid #ff469e",
           borderRadius: "10px",
@@ -1324,11 +1329,11 @@ export default function Dashboard() {
       >
         <Typography
           sx={{
-            padding: "8px",
+            padding: "11px",
             background: "#ff469e",
             color: "white",
             fontWeight: "bold",
-            fontSize: "18px",
+            fontSize: "20px",
             borderRadius: "4px",
             textAlign: "center",
             marginBottom: "16px",
@@ -1340,7 +1345,7 @@ export default function Dashboard() {
           style={{ position: "absolute", top: 18, right: 15, color: "white" }}
           onClick={handleMenuClick}
         >
-          <MenuIcon />
+          <SummarizeIcon />
         </IconButton>
         <Menu
           anchorEl={anchorEl}
@@ -1365,109 +1370,108 @@ export default function Dashboard() {
           </MenuItem>
         </Menu>
         <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <FormControl fullWidth>
-              <InputLabel>Month</InputLabel>
-              <Select
-                value={selectedMonth}
-                label="Month"
-                onChange={handleMonthChange}
-              >
-                {Array.from({ length: 12 }, (_, index) => (
-                  <MenuItem key={index + 1} value={index + 1}>
-                    {new Date(0, index).toLocaleString("en-US", {
-                      month: "long",
-                    })}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={3}>
-            <FormControl fullWidth>
-              <InputLabel>Year</InputLabel>
-              <Select
-                value={selectedYear}
-                label="Year"
-                onChange={handleYearChange}
-              >
-                {yearOptions.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={8}>
+          <Grid item xs={8} md={8}>
             <Card
-              sx={{
-                marginLeft: "25px",
-                boxShadow: 5,
-              }}
+              style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}
             >
-              <CardContent>
+              <CardContent style={{ height: "780px" }}>
                 <Typography
                   variant="h6"
-                  style={{
+                  sx={{
                     fontSize: "25px",
                     fontWeight: "bold",
                     color: "#ff469e",
                     textAlign: "center",
                     paddingTop: "10px",
+                    "&:hover": {
+                      cursor: "pointer",
+                      color: "#E9967A",
+                    },
                   }}
+                  onClick={handlePieChartClick}
                 >
-                  Orders
+                  Orders of Store
                 </Typography>
-                <Grid container justifyContent="center">
-                  <Pie
-                    data={pieData}
-                    options={{
-                      plugins: {
-                        legend: {
-                          display: true,
-                          position: "right",
+                <Pie
+                  data={pieData}
+                  options={{
+                    plugins: {
+                      datalabels: {
+                        formatter: (value, ctx) => {
+                          if (value === 0) {
+                            return '';
+                          }
+                          let sum = 0;
+                          let dataArr = ctx.chart.data.datasets[0].data;
+                          dataArr.forEach((data) => {
+                            sum += data;
+                          });
+                          let percentage =
+                            ((value / sum) * 100).toFixed(2) + "%";
+                          return percentage;
                         },
-                        datalabels: {
-                          formatter: (value, ctx) => {
-                            let sum = 0;
-                            let dataArr = ctx.chart.data.datasets[0].data;
-                            dataArr.forEach((data) => {
-                              sum += data;
-                            });
-                            let percentage =
-                              ((value / sum) * 100).toFixed(2) + "%";
-                            return percentage;
-                          },
-                          color: "#fff",
-                          font: {
-                            weight: "bold",
-                            size: 16,
-                          },
+                        color: "#fff",
+                        font: {
+                          weight: "bold",
+                          size: 16,
                         },
                       },
-                      elements: {
-                        arc: {
-                          borderWidth: 0,
-                        },
+                      legend: {
+                        display: true,
+                        position: "right",
                       },
-                    }}
-                    width={400}
-                    height={300}
-                  />
-                </Grid>
+                    },
+                    elements: {
+                      arc: {
+                        borderWidth: 0,
+                      },
+                    },
+                  }}
+                />
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={4}>
-            <Grid container spacing={2} direction="column">
+          <Grid item xs={4} md={4}>
+            <Grid container spacing={2} direction="row">
+              <Grid item xs={6} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Month</InputLabel>
+                  <Select
+                    value={selectedMonth}
+                    label="Month"
+                    onChange={handleMonthChange}
+                  >
+                    {Array.from({ length: 12 }, (_, index) => (
+                      <MenuItem key={index + 1} value={index + 1}>
+                        {new Date(0, index).toLocaleString("en-US", {
+                          month: "long",
+                        })}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={6} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Year</InputLabel>
+                  <Select
+                    value={selectedYear}
+                    label="Year"
+                    onChange={handleYearChange}
+                  >
+                    {yearOptions.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={handlePieChartClick}
-                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                  style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}
                 >
-                  <CardContent style={{ height: "129px" }}>
+                  <CardContent style={{ height: "225px" }}>
                     <Grid>
                       <Typography
                         variant="body1"
@@ -1483,8 +1487,8 @@ export default function Dashboard() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
+                          paddingTop: "40px",
+                          fontSize: "35px",
                         }}
                       >
                         <span>{orderCount}</span>
@@ -1495,10 +1499,9 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={() => navigate("/staff/refunds")}
-                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                  style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}
                 >
-                  <CardContent style={{ height: "129px" }}>
+                  <CardContent style={{ height: "225px" }}>
                     <Grid>
                       <Typography
                         variant="body1"
@@ -1514,8 +1517,8 @@ export default function Dashboard() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
+                          paddingTop: "40px",
+                          fontSize: "35px",
                         }}
                       >
                         <span>{refundCount}</span>
@@ -1526,10 +1529,9 @@ export default function Dashboard() {
               </Grid>
               <Grid item xs={12}>
                 <Card
-                  onClick={() => navigate("/staff/exchanges")}
-                  sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}
+                  style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}
                 >
-                  <CardContent style={{ height: "129px" }}>
+                  <CardContent style={{ height: "225px" }}>
                     <Grid>
                       <Typography
                         variant="body1"
@@ -1545,8 +1547,8 @@ export default function Dashboard() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
+                          paddingTop: "40px",
+                          fontSize: "35px",
                         }}
                       >
                         <span>{exchangeCount}</span>
@@ -1557,25 +1559,24 @@ export default function Dashboard() {
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
 
-        {/* Financial Summary */}
-        <Grid container spacing={2} sx={{ marginTop: "20px" }}>
+          {/* Financial Summary */}
           <Grid item xs={8}>
-            <Card>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  style={{
-                    fontSize: "25px",
-                    fontWeight: "bold",
-                    color: "#ff469e",
-                    textAlign: "center",
-                    paddingTop: "10px",
-                  }}
-                >
-                  Financial Summary
-                </Typography>
+            <Card
+              style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}
+            >
+              <Typography
+                variant="h6"
+                style={{
+                  textAlign: "center",
+                  color: "#ff469e",
+                  fontSize: "25px",
+                  fontWeight: "bold",
+                }}
+              >
+                Financial Summary
+              </Typography>
+              <CardContent style={{ height: "595px", display: "flex" }}>
                 <Grid container justifyContent="center">
                   <Bar
                     data={barData}
@@ -1592,8 +1593,8 @@ export default function Dashboard() {
           <Grid item xs={4}>
             <Grid container spacing={2} direction="column">
               <Grid item xs={12}>
-                <Card sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}>
-                  <CardContent style={{ height: "129px" }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
+                  <CardContent style={{ height: "201px" }}>
                     <Grid>
                       <Typography
                         variant="body1"
@@ -1609,8 +1610,8 @@ export default function Dashboard() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
+                          paddingTop: "40px",
+                          fontSize: "35px",
                         }}
                       >
                         <span>
@@ -1622,8 +1623,8 @@ export default function Dashboard() {
                 </Card>
               </Grid>
               <Grid item xs={12}>
-                <Card sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}>
-                  <CardContent style={{ height: "129px" }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
+                  <CardContent style={{ height: "201px" }}>
                     <Grid>
                       <Typography
                         variant="body1"
@@ -1639,8 +1640,8 @@ export default function Dashboard() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
+                          paddingTop: "40px",
+                          fontSize: "35px",
                         }}
                       >
                         <span>
@@ -1652,8 +1653,8 @@ export default function Dashboard() {
                 </Card>
               </Grid>
               <Grid item xs={12}>
-                <Card sx={{ ":hover": { backgroundColor: "#FFFAF0" } }}>
-                  <CardContent style={{ height: "129px" }}>
+                <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
+                  <CardContent style={{ height: "201px" }}>
                     <Grid>
                       <Typography
                         variant="body1"
@@ -1669,8 +1670,8 @@ export default function Dashboard() {
                         style={{
                           display: "flex",
                           justifyContent: "center",
-                          paddingTop: "10px",
-                          fontSize: "30px",
+                          paddingTop: "40px",
+                          fontSize: "35px",
                         }}
                       >
                         <span>{totalRevenue.toLocaleString("vi-VN")} VND</span>
@@ -1682,7 +1683,7 @@ export default function Dashboard() {
             </Grid>
           </Grid>
           <Grid item xs={12}>
-            <Card>
+            <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
               <CardContent>
                 <Typography
                   variant="h6"
@@ -1690,9 +1691,10 @@ export default function Dashboard() {
                     textAlign: "center",
                     color: "#ff469e",
                     fontSize: "25px",
+                    fontWeight: "bold",
                   }}
                 >
-                  Monthly Data
+                  Monthly Profit
                 </Typography>
                 <Bar
                   data={MonthlyDataChart}
@@ -1726,7 +1728,7 @@ export default function Dashboard() {
             </Card>
           </Grid>
           <Grid item xs={12}>
-            <Card>
+            <Card style={{ boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
               <CardContent>
                 <Typography
                   variant="h6"
@@ -1734,9 +1736,10 @@ export default function Dashboard() {
                     textAlign: "center",
                     color: "#ff469e",
                     fontSize: "25px",
+                    fontWeight: "bold",
                   }}
                 >
-                  Yearly Data
+                  Yearly Profit
                 </Typography>
                 <Bar data={yearlyBarData} options={yearlyBarOptions} />
               </CardContent>
@@ -1744,6 +1747,35 @@ export default function Dashboard() {
           </Grid>
         </Grid>
       </Paper>
-    </Container>
+      {
+        visible && (
+          <IconButton
+            size="large"
+            sx={{
+              position: "fixed",
+              right: 25,
+              bottom: 25,
+              border: "1px solid #ff469e",
+              backgroundColor: "#fff4fc",
+              color: "#ff469e",
+              transition:
+                "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#ff469e",
+                color: "white",
+              },
+            }}
+            onClick={() =>
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              })
+            }
+          >
+            <KeyboardCapslock />
+          </IconButton>
+        )
+      }
+    </Container >
   );
 }
