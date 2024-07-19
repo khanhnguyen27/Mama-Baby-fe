@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Box,
   IconButton,
+  Modal,
 } from "@mui/material";
 import { allPackageApi } from "../../api/PackagesAPI";
 import { jwtDecode } from "jwt-decode";
@@ -29,6 +30,8 @@ export default function Package() {
   const [loading, setLoading] = useState(false);
   const [packages, setPackages] = useState([]);
   const [store, setStore] = useState(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,6 +71,13 @@ export default function Package() {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " VND";
   };
+  const handleOpenConfirm = (pkg) => {
+    setSelectedPackage(pkg);
+    setOpenConfirm(true);
+  };
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+  };
 
   const handleCheckout = (pkg) => {
     if (!accessToken) {
@@ -82,11 +92,11 @@ export default function Package() {
       toast.error("No store found for this user. Please try again later.");
       return;
     }
-    createStorePackageApi(pkg.id, storeId, pkg.price)
+    createStorePackageApi(selectedPackage.id, storeId, selectedPackage.price)
       .then((res) => {
         const storePackageId = res?.data?.data?.id;
 
-        const finalAmount = pkg.price;
+        const finalAmount = selectedPackage.price;
         const bankCode = "VNBANK";
         makePackagePaymentApi(finalAmount, bankCode, storePackageId)
           .then((res) => {
@@ -210,11 +220,102 @@ export default function Package() {
                         border: "1px solid white",
                       },
                     }}
-                    onClick={() => handleCheckout(pkg)}
+                    onClick={() => handleOpenConfirm(pkg)}
                   >
                     Buy Package
                   </Button>
                   </Box>
+                  <Modal
+                    open={openConfirm}
+                    onClose={handleCloseConfirm}
+                    slotProps={{
+                      backdrop: {
+                        style: {
+                          backgroundColor: "rgba(0, 0, 0, 0.1)",
+                        },
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: 400,
+                        borderRadius: "20px",
+                        backgroundColor: "#fff4fc",
+                        border: "2px solid #ff469e",
+                        boxShadow: 10,
+                        p: 4,
+                      }}
+                    >
+                      <Typography
+                        id="modal-modal-title"
+                        variant="h6"
+                        component="h2"
+                      >
+                        Confirm Checkout
+                      </Typography>
+                      <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        Are you sure you want to checkout for this order?
+                      </Typography>
+                      <Box
+                        sx={{
+                          mt: 2,
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "20px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 0.2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={handleCheckout}
+                        >
+                          Yes
+                        </Button>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "white",
+                            color: "#ff469e",
+                            borderRadius: "20px",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                            my: 0.2,
+                            mx: 1,
+                            transition:
+                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                            border: "1px solid #ff469e",
+                            "&:hover": {
+                              backgroundColor: "#ff469e",
+                              color: "white",
+                              border: "1px solid white",
+                            },
+                          }}
+                          onClick={handleCloseConfirm}
+                        >
+                          No
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Modal>
                 </CardContent>
               </Card>
             </Grid>

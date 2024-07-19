@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { regisStoreApi } from "../../api/StoreAPI";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -404,11 +404,14 @@ const RegistStore = () => {
                 <Link
                   to="#"
                   onClick={handleClickOpen}
-                  style={{ textDecoration: "underline", color: "#385898" }}
+                  style={{
+                    textDecoration: "underline",
+                    color: "#FF469e",
+                  }}
                 >
                   Find out more
                 </Link>
-                <Dialog open={open} onClose={handleClose}>
+                <Dialog open={open} onClose={handleClose} maxWidth="md">
                   <DialogTitle
                     style={{ backgroundColor: "#ff469e", color: "white" }}
                   >
@@ -416,36 +419,198 @@ const RegistStore = () => {
                   </DialogTitle>
                   <DialogContent>
                     <DialogContentText
-                      style={{ fontSize: "16px", lineHeight: "1.5" }}
+                      style={{ fontSize: "18px", lineHeight: "1.5" }}
                     >
-                      Alerts are urgent interruptions, requiring
-                      acknowledgement, that inform the user about a situation.
-                      Most alerts don't need titles. They summarize a decision
-                      in a sentence or two by either:
-                      <ul>
-                        <li>
-                          Asking a question (for example "Delete this
-                          conversation?")
-                        </li>
-                        <li>
-                          Making a statement related to the action buttons
-                        </li>
-                      </ul>
-                      Use title bar alerts only for high-risk situations, such
-                      as the potential loss of connectivity. Users should be
-                      able to understand the choices based on the title and
-                      button text alone.
-                      <br />
-                      <br />
-                      If a title is required:
-                      <ul>
-                        <li>
-                          Use a clear question or statement with an explanation
-                          in the content area, such as "Erase USB storage?"
-                        </li>
-                      </ul>
-                      Avoid apologies, ambiguity, or questions, such as
-                      "Warning!" or "Are you sure?"
+                      <Container sx={{ mt: 2 }}>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "600", color: "#ff469e" }}
+                        >
+                          I.Subscription Terms and Conditions:
+                        </Typography>
+                        <br />
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            1/ Requirements and conditions to become a seller on
+                            the platform:
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - Fill in accurate and up-to-date information in
+                              the online registration form..
+                            </Typography>
+                            <Typography>
+                              - Agree to the platform's terms and conditions,
+                              privacy policy, and merchant agreements.
+                            </Typography>
+                          </Box>
+                          <br />
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            2/ Necessary documents and information when
+                            registering (business license).
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - Must have a valid business license if sold as a
+                              business.
+                            </Typography>
+                            <Typography>
+                              - Provide necessary documents, including proof of
+                              identity and business license (if applicable)
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <br />
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "600", color: "#ff469e" }}
+                        >
+                          II. Sales Policy:
+                        </Typography>
+                        <br />
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            1/ Product listing process and order processing.
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - Products must be properly labeled with
+                              nutritional information, expiration dates, and any
+                              allergen warnings.
+                            </Typography>
+                            <Typography>
+                              - Sellers need to provide detailed information
+                              about the products to be sold, including
+                              descriptions, images, prices, and other
+                              information.
+                            </Typography>
+                            <br />
+                          </Box>
+                        </Box>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "600", color: "#ff469e" }}
+                        >
+                          III. Fees and Payments:
+                        </Typography>
+                        <br />
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            1/ Details of applicable fees (packages fee).
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - For newly registered and approved stores, there
+                              will be 2 months of platform experience. After the
+                              end of the 2 months, stores are required to
+                              purchase the platform's sales service packages.
+                            </Typography>
+                            <br />
+                          </Box>
+                        </Box>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "600", color: "#ff469e" }}
+                        >
+                          V. Privacy Policy:
+                        </Typography>
+                        <br />
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            1/ Committed to protecting the seller's personal and
+                            business information.
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - By using the Services, registering for an
+                              account with us or accessing the platform, you
+                              acknowledge and agree that you accept the
+                              practices, requirements and/or policies described
+                              in the Privacy Policy. this Privacy Policy, and
+                              you hereby confirm that you have your full
+                              knowledge and consent to our collection, use,
+                              disclosure and/or processing of your personal data
+                              as described herein. IF YOU DO NOT AGREE TO THE
+                              PROCESSING OF YOUR PERSONAL DATA AS DESCRIBED IN
+                              THIS POLICY, PLEASE DO NOT USE OUR SERVICES OR
+                              ACCESS THE NOTES PLATFORM OR WEBSITE. If we change
+                              our Privacy Policy, we will notify you including
+                              by posting those changes or the revised Privacy
+                              Policy on our platform. To the extent permitted by
+                              law, your continued use of the Services or
+                              Platform, including your transactions, constitutes
+                              your acknowledgment and agreement to the changes
+                              in this Privacy Policy.
+                            </Typography>
+                            <br />
+                          </Box>
+                        </Box>
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            2/ Seller's obligation to comply with platform
+                            regulations, ensure product quality and customer
+                            service.
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - You agree not to provide us with any information
+                              that is inaccurate or misleading and that you will
+                              notify us of any inaccuracies or changes to the
+                              information. We reserve the right in our sole
+                              discretion to request other documents necessary to
+                              verify any information you provide.
+                            </Typography>
+                            <br />
+                          </Box>
+                        </Box>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "600", color: "#ff469e" }}
+                        >
+                          VI. Refund Policy:
+                        </Typography>
+                        <br />
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            1/ Scope and subjects of application.
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              -This Return and Refund Policy stipulates the
+                              rights and obligations of the Buyer to request a
+                              return or refund as well as the rights and
+                              obligations of Mamababy, the Seller, or relevant
+                              parties in the process of resolving the request.
+                              Buyer's request.
+                            </Typography>
+                            <br />
+                          </Box>
+                        </Box>
+                        <Box sx={{ ml: 2 }}>
+                          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+                            2/ No refunds on products that are gifts.
+                          </Typography>
+                          <Box sx={{ ml: 2, mt: 1 }}>
+                            <Typography>
+                              - Mamababy's refund policy does not apply to
+                              products that are given as gifts.
+                            </Typography>
+                            <br />
+                          </Box>
+                        </Box>
+                        <Box sx={{ py: 4 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              color: "#ff469e",
+                              fontWeight: "600",
+                              textAlign: "right",
+                            }}
+                          >
+                            Mama-Baby is very pleasure to serve you!
+                          </Typography>
+                        </Box>
+                      </Container>
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions
@@ -487,7 +652,7 @@ const RegistStore = () => {
                     },
                   }}
                 >
-                  Regist Store
+                  Register
                 </Button>
                 <div
                   style={{
