@@ -1201,6 +1201,7 @@ export default function OrdersManagement() {
                             },
                           }}
                           onClick={() => handleOpen("Accept", item.id)}
+                          disabled={isDisabled}
                         >
                           ACCEPT ORDER
                         </Button>

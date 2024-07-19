@@ -698,7 +698,7 @@ export default function Cart() {
                                 TabIndicatorProps={{
                                   style: { display: "none" },
                                 }}
-                                sx={{ mt: 1.25}}
+                                sx={{ mt: 1.25 }}
                               >
                                 <Tab
                                   label="WholeSale"
