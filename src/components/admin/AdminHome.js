@@ -95,13 +95,9 @@ export default function AdminHome() {
       const accountRes = await allUserForAdApi();
 
       setOrders(orderRes.data.data || []);
-      console.log("orderRes", orderRes);
       setStores(storeRes.data.data.stores || []);
-      console.log("storeRes", storeRes);
       setRefunds(refundRes.data.data.refunds || []);
-      console.log("refundRes", refundRes);
       setAccounts(accountRes.data.data || []);
-      console.log("accountRes", accountRes);
 
       const userRes = await allUserForAdApi();
       const ordersData = orderRes.data.data || [];
@@ -116,30 +112,21 @@ export default function AdminHome() {
       // Group months available
       const uniqueMonths = new Set();
       // Xử lý dữ liệu đơn hàng
-      console.log("order data: ", ordersData);
       ordersData.forEach((order) => {
         const orderDate = new Date(order.order_date);
         const month = orderDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
         const year = orderDate.getFullYear();
         uniqueMonths.add(`${month}-${year}`);
-        console.log(
-          `Order Date: ${order.order_date}, Month-Year: ${month}-${year}`
-        );
       });
 
       // Xử lý dữ liệu hoàn tiền
-      console.log("refund data: ", refundData);
       refundData.forEach((refundItem) => {
         const refundDate = new Date(refundItem.create_date);
         const month = refundDate.getMonth() + 1; // getMonth() trả về giá trị từ 0-11 nên cần +1
         const year = refundDate.getFullYear();
         uniqueMonths.add(`${month}-${year}`);
-        console.log(
-          `Refund Date: ${refundItem.create_date}, Month-Year: ${month}-${year}`
-        );
       });
       setMonths(Array.from(uniqueMonths));
-      console.log("Month Unique:", Array.from(uniqueMonths));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -149,7 +136,6 @@ export default function AdminHome() {
     const fetchYears = async () => {
       const years = await fetchYearsOrderFromDatabase(orders);
       setYearsListOrder(years);
-      console.log("Years list Order:", years);
 
       if (years.length > 0 && !years.includes(selectedYearOrder)) {
         setSelectedYearOrder(years[0]);
@@ -163,7 +149,6 @@ export default function AdminHome() {
     const fetchYears = async () => {
       const years = await fetchYearsAccountFromDatabase(accounts);
       setYearsListAccount(years);
-      console.log("Years list Account:", years);
 
       if (years.length > 0 && !years.includes(selectedYearAccount)) {
         setSelectedYearAccount(years[0]);
@@ -225,7 +210,6 @@ export default function AdminHome() {
       });
 
       const yearsArray = Array.from(yearsSet).sort();
-      console.log("Years fetched:", yearsArray);
       return yearsArray;
     } catch (error) {
       console.error("Error fetching years:", error);
@@ -244,7 +228,6 @@ export default function AdminHome() {
       });
 
       const yearsArray = Array.from(yearsSet).sort();
-      console.log("Years fetched:", yearsArray);
       return yearsArray;
     } catch (error) {
       console.error("Error fetching years:", error);
@@ -272,19 +255,16 @@ export default function AdminHome() {
   const handleYearOrderChange = (event) => {
     const selectedYearOrder = parseInt(event.target.value);
     setSelectedYearOrder(selectedYearOrder);
-    console.log("selectedYearOrder", selectedYearOrder);
   };
 
   const handleYearAccountChange = (event) => {
     const selectedYearAccount = parseInt(event.target.value);
     setSelectedYearAccount(selectedYearAccount);
-    console.log("selectedYearAccount", selectedYearAccount);
   };
 
   const handleMonthChange = (event) => {
     const selectedMonth = parseInt(event.target.value);
     setSelectedMonth(selectedMonth);
-    console.log("selectedMonth", selectedMonth);
   };
 
   const handleMenuClick = (event) => {
@@ -667,10 +647,6 @@ export default function AdminHome() {
         setSelectedYearOrder(previousYear);
       }
 
-      console.log("orderRes:", orderRes);
-      console.log("refundRes:", refundRes);
-      console.log("statusOrderRes:", statusOrderRes);
-
       const ordersData = orderRes?.data?.data || [];
       const refundsData = refundRes?.data?.data || [];
       const statusOrders = statusOrderRes?.data?.data || [];
@@ -686,9 +662,6 @@ export default function AdminHome() {
           (statusOrder) => statusOrder.status.toUpperCase() === "COMPLETED"
         )
         .map((statusOrder) => statusOrder.order_id);
-
-      console.log("BarOrderIdsWithCancelStatus:", orderIdsWithCancelStatus);
-      console.log("BarOrderIdsWithCompleteStatus:", orderIdsWithCompleteStatus);
 
       const monthlyData = {
         Jan: { Revenue: 0, Refund: 0 },
@@ -760,11 +733,6 @@ export default function AdminHome() {
       setTotalRevenue(totalRev);
       setTotalRefund(totalRef);
 
-      console.log("ordersData", ordersData);
-      console.log("refundsData", refundsData);
-      console.log("totalRev", totalRev);
-      console.log("totalRef", totalRef);
-      console.log("BarData:", BarData);
     } catch (error) {
       console.error("Error fetching order and refund data:", error);
     }
@@ -799,8 +767,6 @@ export default function AdminHome() {
           return;
         }
       }
-
-      console.log("storeMonth:", storeMonth);
 
       const storeData = storeMonth?.data?.data || [];
 
@@ -880,10 +846,7 @@ export default function AdminHome() {
         setSelectedYearAccount(previousYear);
       }
 
-      console.log("accountRes:", accountRes);
-
       const accountsData = accountRes?.data?.data || [];
-      console.log("accountsData:", accountsData);
 
       const totalAccountsYear = accountsData.reduce((sum, account) => {
         if (account.role_id.id !== 3) {
@@ -907,8 +870,6 @@ export default function AdminHome() {
         month: index + 1,
         Account,
       }));
-
-      console.log("lineChartAccountsData:", lineChartAccountsData);
 
       setAccountLineChartData(lineChartAccountsData);
     } catch (error) {
@@ -960,8 +921,6 @@ export default function AdminHome() {
     try {
       const statusOrderRes = await allStatusOrderApi();
 
-      console.log("statusOrderRes:", statusOrderRes);
-
       const statusOrders = statusOrderRes?.data?.data || [];
 
       const orderIdsWithCancelStatus = statusOrders
@@ -975,12 +934,6 @@ export default function AdminHome() {
           (statusOrder) => statusOrder.status.toUpperCase() === "COMPLETED"
         )
         .map((statusOrder) => statusOrder.order_id);
-
-      console.log("LineOrderIdsWithCancelStatus:", orderIdsWithCancelStatus);
-      console.log(
-        "LineOrderIdsWithCompleteStatus:",
-        orderIdsWithCompleteStatus
-      );
 
       const yearlyRevenue = orders.reduce((acc, order) => {
         if (
@@ -1022,7 +975,6 @@ export default function AdminHome() {
         Refund: yearlyRefund[year] || 0,
       }));
 
-      console.log("LineChartReData:", LineChartReData);
       setReLineChartData(LineChartReData);
     } catch (error) {
       console.error("Error handling line chart data:", error);

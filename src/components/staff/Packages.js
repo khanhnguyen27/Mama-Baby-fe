@@ -258,7 +258,7 @@ export default function Package() {
                         Confirm Checkout
                       </Typography>
                       <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        Are you sure you want to checkout for this order?
+                        Are you sure you want to checkout for this package?
                       </Typography>
                       <Box
                         sx={{
