@@ -56,6 +56,7 @@ import { storeByUserIdApi } from "../../api/StoreAPI";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
+import { orderByStoreIdApi } from "../../api/OrderAPI";
 
 export default function StaffHome() {
   const navigate = useNavigate();
@@ -284,6 +285,28 @@ export default function StaffHome() {
     "Zimbabwe",
   ];
 
+  const [ordersByStatus, setOrdersByStatus] = useState({
+    PENDING: [],
+    PREPARING: [],
+    DELIVERING: [],
+    COMPLETED: [],
+    CANCELLED: [],
+    // RETURNED: [],
+  });
+  console.log(ordersByStatus.PENDING);
+
+  const countPreOrder = (productId) => {
+    let count = 0;
+    ordersByStatus?.PENDING?.forEach((order) => {
+      order.order_detail_list.forEach((product) => {
+        if (product.product_id === productId) {
+          count += product.quantity;
+        }
+      });
+    });
+    return count;
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -327,26 +350,53 @@ export default function StaffHome() {
   const storeId = store.id;
   const fetchData = async () => {
     try {
-      const [ageRes, brandRes, categoryRes, productRes] = await Promise.all([
-        allAgeApi(),
-        allBrandApi(),
-        allCategorytApi(),
-        allProductByStoreApi({
-          keyword: keyword,
-          sort_status: sortStatus,
-          sort_price: sortPrice,
-          category_id: categoryFilter,
-          brand_id: brandFilter,
-          age_id: ageFilter,
-          store_id: store.id,
-          page: currentPage - 1,
-        }),
-      ]);
+      const [ageRes, brandRes, categoryRes, productRes, orderRes] =
+        await Promise.all([
+          allAgeApi(),
+          allBrandApi(),
+          allCategorytApi(),
+          allProductByStoreApi({
+            keyword: keyword,
+            sort_status: sortStatus,
+            sort_price: sortPrice,
+            category_id: categoryFilter,
+            brand_id: brandFilter,
+            age_id: ageFilter,
+            store_id: store.id,
+            page: currentPage - 1,
+          }),
+          orderByStoreIdApi(storeId),
+        ]);
 
       const ageData = ageRes?.data?.data || [];
       const brandData = brandRes?.data?.data || [];
       const categoryData = categoryRes?.data?.data || [];
       const productData = productRes?.data?.data || [];
+      const orderData = orderRes?.data?.data || [];
+
+      const categorizedOrders = {
+        PENDING: [],
+        PREPARING: [],
+        DELIVERING: [],
+        COMPLETED: [],
+        CANCELLED: [],
+        // RETURNED: [],
+      };
+
+      orderData.forEach((order) => {
+        const latestStatus =
+          order.status_order_list[order.status_order_list.length - 1].status;
+        categorizedOrders[latestStatus]?.unshift(order);
+      });
+      for (const status in categorizedOrders) {
+        categorizedOrders[status].sort(
+          (a, b) => new Date(b.order_date) - new Date(a.order_date)
+        );
+      }
+      // for (const status in categorizedOrders) {
+      //   categorizedOrders[status].reverse();
+      // }
+      setOrdersByStatus(categorizedOrders);
 
       setAge(ageData);
       setBrand(brandData);
@@ -2170,30 +2220,34 @@ export default function StaffHome() {
                                 </Box>
                               )}
                             </Typography>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  color: "gray",
-                                  fontSize: 14, // Adjust the font size as needed
-                                  textAlign: "left",
-                                  mr: 1,
-                                }}
+                            {item.status === statusComingSoon ? null : (
+                              <Box
+                                sx={{ display: "flex", alignItems: "center" }}
                               >
-                                Qty:
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  color: "#333",
-                                  fontWeight: "bold",
-                                  fontSize: 16,
-                                  textAlign: "left",
-                                }}
-                              >
-                                {item.remain}
-                              </Typography>
-                            </Box>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: "gray",
+                                    fontSize: 14, // Adjust the font size as needed
+                                    textAlign: "left",
+                                    mr: 1,
+                                  }}
+                                >
+                                  Qty:
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: "#333",
+                                    fontWeight: "bold",
+                                    fontSize: 16,
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  {item.remain}
+                                </Typography>
+                              </Box>
+                            )}
                           </Box>
 
                           <Typography
@@ -2205,30 +2259,43 @@ export default function StaffHome() {
                           </Typography>
                         </CardContent>
                         <Divider sx={{ mt: 0.5, mb: 2 }} />
-                        <Button
-                          disabled={isDisabled}
-                          variant="contained"
+                        <Grid
                           sx={{
-                            ml: "auto",
-                            backgroundColor: "white",
-                            color: "#ff469e",
-                            borderRadius: "30px",
-                            fontSize: 15,
-                            fontWeight: "bold",
-                            width: "7vw",
-                            transition:
-                              "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                            border: "1px solid #ff469e",
-                            "&:hover": {
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              border: "1px solid white",
-                            },
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
                           }}
-                          onClick={() => handleOpen(item)}
                         >
-                          Update
-                        </Button>
+                          {item.status === statusComingSoon && (
+                            <Box sx={{ ml: 2 }}>
+                              POQ: {countPreOrder(item.id)}
+                            </Box>
+                          )}
+                          <Button
+                            disabled={isDisabled}
+                            variant="contained"
+                            sx={{
+                              ml: "auto",
+                              backgroundColor: "white",
+                              color: "#ff469e",
+                              borderRadius: "30px",
+                              fontSize: 15,
+                              fontWeight: "bold",
+                              width: "7vw",
+                              transition:
+                                "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                              border: "1px solid #ff469e",
+                              "&:hover": {
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                border: "1px solid white",
+                              },
+                            }}
+                            onClick={() => handleOpen(item)}
+                          >
+                            Update
+                          </Button>
+                        </Grid>
                       </Card>
                     </Tooltip>
                   </Grid>
