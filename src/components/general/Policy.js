@@ -37,17 +37,22 @@ export default function Policy() {
           </Typography>
         </Breadcrumbs>
       </Container>
-      <Container sx={{ mt: 2, animation: "fadeInPolicy 1.5s ease-in-out",
-            "@keyframes fadeInPolicy ": {
-              from: {
-                opacity: 0,
-                transform: "translateY(10%)",
-              },
-              to: {
-                opacity: 1,
-                transform: "translateY(0)",
-              },
-            }, }}>
+      <Container
+        sx={{
+          mt: 2,
+          animation: "fadeInPolicy 1.5s ease-in-out",
+          "@keyframes fadeInPolicy ": {
+            from: {
+              opacity: 0,
+              transform: "translateY(10%)",
+            },
+            to: {
+              opacity: 1,
+              transform: "translateY(0)",
+            },
+          },
+        }}
+      >
         <Typography
           variant="h4"
           sx={{ fontWeight: "bold", textAlign: "center" }}
@@ -66,7 +71,11 @@ export default function Policy() {
             <Typography>
               -{" "}
               <span
-                style={{ color: "#ff469e", cursor: "pointer", fontWeight: "600" }}
+                style={{
+                  color: "#ff469e",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
                 onClick={() => navigate("/signin")}
               >
                 Login
@@ -76,7 +85,11 @@ export default function Policy() {
               spaces, while your password is at least 8 characters). Please sign
               up at{" "}
               <span
-                style={{ color: "#ff469e", cursor: "pointer", fontWeight: "600" }}
+                style={{
+                  color: "#ff469e",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
                 onClick={() => navigate("/signup")}
               >
                 here
@@ -119,7 +132,50 @@ export default function Policy() {
         </Box>
         <br />
         <Typography variant="h5" sx={{ fontWeight: "600", color: "#ff469e" }}>
-          II/ Exchange and Refund Policy:
+          II/ How to Pre-order:
+        </Typography>
+        <br />
+        <Box sx={{ ml: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+            1/ What is Pre-order product:
+          </Typography>
+          <Box sx={{ ml: 2, mt: 1 }}>
+            <Typography>
+              - These are products shown as "COMING SOON" status in product
+              list, have a long preparation time, the expected delivery date is
+              maximum 15 days. Pre-order products are mainly items that are
+              specifically ordered according to the Buyer's request or products
+              that require special handling.
+            </Typography>
+            <br />
+          </Box>
+          <Typography variant="h6" sx={{ fontWeight: "600" }}>
+            2/ Pre-order process:
+          </Typography>
+          <Box sx={{ ml: 2, mt: 1 }}>
+            <Typography>
+              • Step 1: Customers contact the store to initiate a pre-order
+              request. A staff from the store that has products you want to
+              pre-order will assist you. process.
+              <br />
+              • Step 2: Customers must make a prepayment of 30% of the total
+              price for the pre-order.
+              <br />
+              • Step 3: The pre-order will be processed, and an estimated
+              delivery date will be provided. Please note that the delivery will
+              typically occur after 15 days.
+              <br />
+              • Step 4: Mama-Baby will keep customers updated on the status of
+              their pre-order.
+              <br />• Step 5: Customers will receive their pre-ordered product
+              as per the estimated delivery date.
+            </Typography>
+            <br />
+          </Box>
+        </Box>
+        <br />
+        <Typography variant="h5" sx={{ fontWeight: "600", color: "#ff469e" }}>
+          III/ Exchange and Refund Policy:
         </Typography>
         <br />
         <Box sx={{ ml: 2 }}>
@@ -185,18 +241,19 @@ export default function Policy() {
               to customers
               <br />+ One or several products in the order cannot be delivered
               to the customer (refund a portion equivalent to the item value)
-              <br />
-              + If refund all of products from an order that using a voucher, the maximum value we refund will equal to the final amount of that order, not the total amount of all products
+              <br />+ If refund all of products from an order that using a
+              voucher, the maximum value we refund will equal to the final
+              amount of that order, not the total amount of all products
             </Typography>
           </Box>
         </Box>
-        <Box sx={{ py: 4}}>
-        <Typography
-          variant="h6"
-          sx={{ color: "#ff469e", fontWeight: "600", textAlign: "right" }}
-        >
-          Mama-Baby is very pleasure to serve you!
-        </Typography>
+        <Box sx={{ py: 4 }}>
+          <Typography
+            variant="h6"
+            sx={{ color: "#ff469e", fontWeight: "600", textAlign: "right" }}
+          >
+            Mama-Baby is very pleasure to serve you!
+          </Typography>
         </Box>
       </Container>
     </div>

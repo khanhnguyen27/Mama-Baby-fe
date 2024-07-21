@@ -355,6 +355,16 @@ export default function Cart() {
       }, 2000);
       return;
     }
+    if(fullName == "" || phone == "" || address == ""){
+      toast.warn("Please input receiver information", { autoClose: 1500 })
+      return;
+    }
+    if (phone.length < 9 || phone.length > 11 || !/^\d+$/.test(phone)) {
+      toast.error("Phone must be digit and its length is 9 - 11 characters", {
+        autoClose: 1500,
+      });
+      return;
+    }
     if (userInfo.accumulated_points < getFinalPoint() && typeGift === true) {
       toast.warn("You don't have enough points to redeem the gift");
       return;
@@ -859,7 +869,7 @@ export default function Cart() {
                                               fontSize: "1.25rem",
                                             }}
                                           >
-                                            Your Information:
+                                            Receiver Information:
                                           </Typography>
 
                                           <div
@@ -1961,7 +1971,7 @@ export default function Cart() {
                                               fontSize: "1.25rem",
                                             }}
                                           >
-                                            Your Information:
+                                            Receiver Information:
                                           </Typography>
 
                                           <div
