@@ -101,7 +101,7 @@ const Promotion = () => {
                 gutterBottom
                 sx={{ fontWeight: "bold" }}
               >
-                Special Promotion: Nutritious Milk for Moms & Babies
+                Special Promotion
               </Typography>
               <Typography variant="body1" gutterBottom>
                 Nourish yourself and your little one with our exclusive offer on
@@ -111,9 +111,29 @@ const Promotion = () => {
                 <br />
                 <br />
                 Our innovative program allows you to provide essential nutrition
-                for both you and your baby without any upfront costs. Instead of
-                paying the full amount immediately, enjoy convenient 0% interest
-                installments over periods of 3, 6, or 9 months.
+                for both you and your baby without any upfront costs. Enjoy
+                convenient 0% interest installments over periods of 3, 6, or 9
+                months.
+                <br />
+                <br />
+                But that's not all! As part of this promotion, we're excited to
+                offer additional benefits:
+                <br />
+                <br />
+                • **Exclusive Vouchers:** Receive vouchers worth up to 20% off
+                on your next purchase when you participate in our MOM & BABY
+                ESSENTIALS program.
+                <br />
+                <br />
+                • **Sales Events:** Join us for our special sales events where
+                you can find amazing discounts on a wide range of products
+                tailored for moms and babies.
+                <br />
+                <br />
+                • **Gift Exchange Program:** Earn points with every purchase and
+                exchange them for exciting gifts. Accumulate points faster by
+                shopping during promotional periods and unlock a variety of baby
+                essentials and special items for moms.
                 <br />
                 <br />
                 Say goodbye to financial worries and embrace the journey of
@@ -122,8 +142,8 @@ const Promotion = () => {
                 moms and their precious little ones.
                 <br />
                 <br />
-                Don't let this opportunity slip away to ensure a healthy start
-                for you and your baby. Join us now and take the first step
+                Don't miss out on this fantastic opportunity to ensure a healthy
+                start for you and your baby. Join us now and take the first step
                 towards providing the best nutrition for your growing family!
               </Typography>
               <Button

@@ -126,7 +126,7 @@ export default function Products() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 2000);
     fetchData();
   }, [keyword, sortPrice, ageFilter, brandFilter, categoryFilter, currentPage]);
 
