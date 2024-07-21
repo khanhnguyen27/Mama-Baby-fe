@@ -282,7 +282,7 @@ const Navigation = () => {
               fontWeight: "bold",
             }}
           >
-            Regist Store
+            Register Store
           </Typography>
         </ListItemText>
       </MenuItem>
