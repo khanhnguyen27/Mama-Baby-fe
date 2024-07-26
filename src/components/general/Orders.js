@@ -411,8 +411,6 @@ export default function Orders() {
     }, 1500);
   };
 
-  console.log(ordersByStatus);
-
   // Helper function to format date as "yyyy-mm-dd"
   const formatDate = (date) => {
     const d = new Date(date);

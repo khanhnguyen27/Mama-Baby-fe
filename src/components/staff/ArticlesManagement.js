@@ -422,180 +422,177 @@ export default function Articles() {
         }}
       >
         <Container sx={{ my: 4 }}>
-        <Grid container justifyContent="center" spacing={2}>
-          {/* Grid item for ArticleSearch and Add Article button */}
-          <Grid
-            item
-            xs={12}
-            lg={6.5}
-            sx={{ display: "flex", alignItems: "center" }}
-          >
-            {/* ArticleSearch */}
-            <div style={{ position: "relative", zIndex: "99" }}>
-              <TextField
-                placeholder="What do you want to find?"
-                size="small"
-                variant="outlined"
-                value={keyword}
-                onKeyDown={handleKeyDown}
-                onChange={(e) => setKeyword(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {loading ? (
-                        <CircularProgress
-                          sx={{ color: "#ff469e", mx: 2 }}
-                          size={24}
-                        />
-                      ) : (
-                        <>
-                          {keyword && (
-                            <IconButton
-                              onClick={() => setKeyword("")}
-                              size="small"
-                            >
-                              <Close fontSize="small" />
-                            </IconButton>
-                          )}
-                          <Button
-                            onClick={handleSearch}
-                            sx={{
-                              backgroundColor: "#ff469e",
-                              color: "white",
-                              height: "40px",
-                              marginRight: "0px",
-                              borderRadius: "5px",
-                              boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
-                              transition: "0.2s ease-in-out",
-                              "&:hover": {
-                                backgroundColor: "#ff469e",
-                                opacity: 0.8,
-                                color: "white",
-                                boxShadow: "inset 1px 1px 3px rgba(0, 0, 0.16)",
-                              },
-                              "&:active": {
-                                backgroundColor: "white",
-                                color: "#ff469e",
-                                boxShadow:
-                                  "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
-                              },
-                            }}
-                          >
-                            <SearchIcon
+          <Grid container justifyContent="center" spacing={2}>
+            {/* Grid item for ArticleSearch and Add Article button */}
+            <Grid
+              item
+              xs={12}
+              lg={6.5}
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              {/* ArticleSearch */}
+              <div style={{ position: "relative", zIndex: "99" }}>
+                <TextField
+                  placeholder="What do you want to find?"
+                  size="small"
+                  variant="outlined"
+                  value={keyword}
+                  onKeyDown={handleKeyDown}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {loading ? (
+                          <CircularProgress
+                            sx={{ color: "#ff469e", mx: 2 }}
+                            size={24}
+                          />
+                        ) : (
+                          <>
+                            {keyword && (
+                              <IconButton
+                                onClick={() => setKeyword("")}
+                                size="small"
+                              >
+                                <Close fontSize="small" />
+                              </IconButton>
+                            )}
+                            <Button
+                              onClick={handleSearch}
                               sx={{
-                                color: "inherit",
-                                cursor: "pointer",
-                                fontSize: "35px",
+                                backgroundColor: "#ff469e",
+                                color: "white",
+                                height: "40px",
+                                marginRight: "0px",
+                                borderRadius: "5px",
+                                boxShadow: "1px 1px 3px rgba(0, 0, 0.16)",
+                                transition: "0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "#ff469e",
+                                  opacity: 0.8,
+                                  color: "white",
+                                  boxShadow:
+                                    "inset 1px 1px 3px rgba(0, 0, 0.16)",
+                                },
+                                "&:active": {
+                                  backgroundColor: "white",
+                                  color: "#ff469e",
+                                  boxShadow:
+                                    "inset 1px 1px 3px rgba(255, 70, 158, 0.8)",
+                                },
                               }}
-                            />
-                          </Button>
-                        </>
-                      )}
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    width: { md: "400px" },
-                    padding: 0,
-                    border: "2px solid #ff469e",
-                    borderRadius: "7px",
-                    backgroundColor: "white",
-                    transition: "0.2s ease-in-out",
-                    "&:hover": {
+                            >
+                              <SearchIcon
+                                sx={{
+                                  color: "inherit",
+                                  cursor: "pointer",
+                                  fontSize: "35px",
+                                }}
+                              />
+                            </Button>
+                          </>
+                        )}
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      width: { md: "400px" },
+                      padding: 0,
                       border: "2px solid #ff469e",
+                      borderRadius: "7px",
+                      backgroundColor: "white",
+                      transition: "0.2s ease-in-out",
+                      "&:hover": {
+                        border: "2px solid #ff469e",
+                      },
+                      "&:focus": {
+                        backgroundColor: "#F8F8F8",
+                      },
+                      "&.Mui-focused": {
+                        border: "1px solid #ff469e",
+                        backgroundColor: "#F8F8F8",
+                        boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
+                        outline: "none",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
                     },
-                    "&:focus": {
-                      backgroundColor: "#F8F8F8",
-                    },
-                    "&.Mui-focused": {
-                      border: "1px solid #ff469e",
-                      backgroundColor: "#F8F8F8",
-                      boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.32)",
-                      outline: "none",
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      border: "none",
-                    },
-                  },
-                }}
-              />
-            </div>
-
-            {/* Add Article button */}
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={isDisabled}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "white",
-                color: "#ff469e",
-                borderRadius: "30px",
-                fontWeight: "bold",
-                fontSize: 10,
-                width: "40px",
-                height: "40px",
-                transition:
-                  "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
-                border: "1px solid #ff469e",
-                "&:hover": {
-                  backgroundColor: "#ff469e",
-                  color: "white",
-                  border: "1px solid white",
-                },
-                ml: 2,
-              }}
-              onClick={handleOpenAddArticle}
-            >
-              <AddIcon style={{ fontSize: "2rem" }} />
-            </Button>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            lg={5.5}
-            sx={{ display: "flex", alignItems: "center" }}
-          >
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="start"
-            >
-              {/* Date pickers */}
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DateRangePicker
-                  startText="Min Date"
-                  endText="Max Date"
-                  value={[minDate, maxDate]}
-                  onChange={handleDateChange}
-                  renderInput={(startProps, endProps) => (
-                    <>
-                      <TextField
-                        {...startProps}
-                        size="small"
-                        variant="outlined"
-                      />
-                      <TextField
-                        {...endProps}
-                        size="small"
-                        variant="outlined"
-                      />
-                    </>
-                  )}
-                  inputFormat="YYYY-MM-DD"
+                  }}
                 />
-              </LocalizationProvider>
-              {/* Custom button or icon */}
-              <Tooltip title="You need to select both start and end dates to filter. Selecting only one will not work.">
-                <IconButton>
-                  <DateRangeIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
+              </div>
+
+              {/* Add Article button */}
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isDisabled}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                  color: "#ff469e",
+                  borderRadius: "30px",
+                  fontWeight: "bold",
+                  fontSize: 10,
+                  width: "40px",
+                  height: "40px",
+                  transition:
+                    "background-color 0.4s ease-in-out, color 0.4s ease-in-out, border 0.3s ease-in-out",
+                  border: "1px solid #ff469e",
+                  "&:hover": {
+                    backgroundColor: "#ff469e",
+                    color: "white",
+                    border: "1px solid white",
+                  },
+                  ml: 2,
+                }}
+                onClick={handleOpenAddArticle}
+              >
+                <AddIcon style={{ fontSize: "2rem" }} />
+              </Button>
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              lg={5.5}
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <Box display="flex" alignItems="center" justifyContent="start">
+                {/* Date pickers */}
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DateRangePicker
+                    startText="Min Date"
+                    endText="Max Date"
+                    value={[minDate, maxDate]}
+                    onChange={handleDateChange}
+                    renderInput={(startProps, endProps) => (
+                      <>
+                        <TextField
+                          {...startProps}
+                          size="small"
+                          variant="outlined"
+                        />
+                        <TextField
+                          {...endProps}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </>
+                    )}
+                    inputFormat="YYYY-MM-DD"
+                  />
+                </LocalizationProvider>
+                {/* Custom button or icon */}
+                <Tooltip title="You need to select both start and end dates to filter. Selecting only one will not work.">
+                  <IconButton>
+                    <DateRangeIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
+        </Container>
         <Box
           sx={{
             display: "flex",
@@ -754,11 +751,7 @@ export default function Articles() {
             lg={5.5}
             sx={{ display: "flex", alignItems: "center" }}
           >
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="start"
-            >
+            <Box display="flex" alignItems="center" justifyContent="start">
               {/* Date pickers */}
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DateRangePicker
@@ -804,7 +797,7 @@ export default function Articles() {
                     variant="h5"
                     sx={{ textAlign: "center", marginTop: 8, color: "#ff469e" }}
                   >
-                    There's no item matching your search.
+                    There are no matching items.
                   </Typography>
                 </Grid>
               ) : (

@@ -39,7 +39,7 @@ export const regisStoreApi = (
   description,
   phone,
   userId,
-  license // Thêm tham số licenseUrl vào hàm
+  license
 ) => {
   const formData = new FormData();
   formData.append("nameStore", storename);
@@ -47,7 +47,7 @@ export const regisStoreApi = (
   formData.append("description", description);
   formData.append("phone", phone);
   formData.append("userId", userId);
-  formData.append("license", license); // Thêm giá trị licenseUrl vào FormData
+  formData.append("license", license);
 
   return axiosJWT.post(URL_STORE, formData, {
     headers: {
@@ -101,4 +101,3 @@ export const updateStoreApi = (
     user_id: userId,
   });
 };
-

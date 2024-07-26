@@ -293,7 +293,6 @@ export default function StaffHome() {
     CANCELLED: [],
     // RETURNED: [],
   });
-  console.log(ordersByStatus.PENDING);
 
   const countPreOrder = (productId) => {
     let count = 0;
