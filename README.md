@@ -1,70 +1,56 @@
-# Getting Started with Create React App
+# Welcome to Mama-Baby
+===========================================================================
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+Mama-Baby is an online shopping website that caters to the needs of parents for convenient, diverse, and safe shopping, was launched to expand its market and reach more potential customers. It achieves this by enhancing the shopping experience, making it easy for customers to browse products, compare prices, shop anytime, anywhere, and pay online quickly.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+* **Milk Market**: A system that allows customers to choose and order milk for various stores.
+* **Register Store**: A user can register to become a staff and open a store to sell products.
+* **Order Tracking**: Tracking order from buying to delivering through real-time tracking.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Accounts for Roles
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Here are accounts of 2 roles available:
 
-### `npm test`
+| Role            | Username             | Password    |
+|-----------------|----------------------|-------------|
+| **Member**      | member1              | 12345678    | 
+| **Staff**       | staff1               | 12345678    |
+| **Admin**       | admin1               | 12345678    |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Demonstrations
+1. **Login Screen:**  
+![Screenshot 2025-02-11 172253](https://github.com/user-attachments/assets/1744b8be-3337-439f-a942-c37fcf908a54)
 
-### `npm run build`
+2. **Home Screen:**  
+![Screenshot 2025-02-11 172204](https://github.com/user-attachments/assets/9f11efca-5921-4926-afe7-1f7ec9384c80)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **Milk Shopping:**  
+![z5503537606032_8d3e83d7a0e77a3768fefa168b15254e](https://github.com/user-attachments/assets/ff90ac88-a512-42d7-9c70-fc6579551933)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. **Register Store:**  
+![z5536564397672_3d4188a57d9b3dbef741688c83eabc77](https://github.com/user-attachments/assets/4ff1d982-0bd4-4e16-82e9-775a09d1fe36)
+![z5556952424989_656c3cf494c3d83db7877dfa49b64fbc](https://github.com/user-attachments/assets/ae4c3131-da80-4876-a40e-2c254d509c3e)
+![z5539861086234_2a6a7f9caed13b5b6e49ed80977102b2](https://github.com/user-attachments/assets/8e709d2f-4712-4cab-983e-33d0a5c33cd6)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+5. **Staff Screen:**  
+![z5617781621834_403f9b313ad02fd4e43e7c1086fd619f](https://github.com/user-attachments/assets/82e98600-3dd2-43d1-9684-36f68fb4ad2c)
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Installation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/khanhnguyen27/Mama-Baby-fe.git
+   cd Mama-Baby-fe
+2. **Install dependencies:**
+   Make sure you have Node.js and npm installed. Then, install the necessary packages by running:
+   ```sh
+   npm i
+   
+## Running the Application
+   ```sh
+   npm run start
